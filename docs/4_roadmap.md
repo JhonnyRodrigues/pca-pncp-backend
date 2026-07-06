@@ -1,0 +1,148 @@
+Esse roadmap define uma progressão lógica, evita que a infraestrutura contamine o domínio e incentiva a implementação incremental seguindo TDD.
+
+# FASE 0 — Preparação do projeto
+# FASE 1 — Modelagem do Domínio
+# FASE 2 — Portas
+# FASE 3 — Caso de Uso
+# FASE 4 — Infraestrutura
+# FASE 5 — Apresentação
+# FASE 6 — Integração
+
+# FASE 0 — Preparação do projeto - Objetivo: deixar o ambiente pronto.
+
+Sprint 0.1
+□ Estrutura do projeto
+
+Sprint 0.2
+□ Git
+
+Sprint 0.3
+□ README
+
+Sprint 0.4
+□ AGENTS
+
+Sprint 0.5
+□ arquitetura.md
+
+Sprint 0.6
+□ modelo_dominio.md
+
+Sprint 0.7
+□ fluxo_implementacao.md
+
+Sprint 0.8
+□ roadmap.md
+
+Sprint 0.9
+□ Autoload PSR-4
+
+Sprint 0.10
+□ PHPUnit
+
+Sprint 0.11
+□ Primeiro teste vazio
+
+# FASE 1 — Modelagem do Domínio - Objetivo: construir o domínio rico antes de qualquer infraestrutura.
+
+Sprint 1.1 - Introdução ao DDD
+
+□ Criar Value Object Cnpj
+□ CnpjTest
+
+Sprint 1.2
+□ Criar Value Object AnoExecucao
+□ AnoExecucaoTest
+
+Sprint 1.3
+□ Criar Value Object UnidadeOrcamentaria
+□ UnidadeOrcamentariaTest
+
+Sprint 1.4
+□ Criar Entity Demanda
+□ DemandaTest
+
+Sprint 1.5
+□ Criar Entity Procedimento
+□ ProcedimentoTest
+
+Sprint 1.6
+□ Criar Aggregate Root Plano
+□ PlanoTest
+
+Aqui o Plano já nasce contendo Demanda e Procedimento.
+
+# FASE 2 — Portas - Agora definimos as interfaces.
+
+Sprint 2.1
+□ PlanoRepository
+
+Sprint 2.2
+□ DemandaRepository
+
+Sprint 2.3
+□ ProcedimentoRepository
+
+# FASE 3 — Casos de Uso - Agora começamos a Application.
+
+Sprint 3.1
+□ PublicarPcaRequest
+□ PublicarPcaRequestTest
+
+Sprint 3.2
+□ PublicarPcaValidator
+□ PublicarPcaValidatorTest
+
+Sprint 3.3
+□ PublicarPcaResponse
+□ ResultadoPublicacao (representa apenas o retorno do caso de uso, então ele pertence à camada Application como um DTO/Response Model, não ao domínio.)
+
+Sprint 3.4
+□ PublicarPcaPresenter
+□ PublicarPcaPresenterTest
+
+Sprint 3.5
+□ PublicarPcaUseCase
+□ PublicarPcaUseCaseTest
+
+# FASE 4 — Infraestrutura - Agora implementamos.
+
+Sprint 4.1
+□ OracleConnection
+
+Sprint 4.2
+□ OraclePlanoRepository
+
+Sprint 4.3
+□ OracleDemandaRepository
+
+Sprint 4.4
+□ OracleProcedimentoRepository
+
+Sprint 4.5
+□ PncpAuthenticator
+
+Sprint 4.6
+□ PncpPayloadBuilder
+□ PncpPayloadBuilderTest (transforma entidades do domínio em JSON)
+
+Sprint 4.7
+□ PncpClient
+□ PncpClientTest (Usando mocks para as respostas HTTP.)
+
+# FASE 5 — Apresentação
+
+Sprint 5.1
+□ PcaController
+□ PcaControllerTest
+
+# FASE 6 — Integração
+
+Sprint 6.1
+□ Teste OracleRepository
+
+Sprint 6.2
+□ Teste PNCP
+
+Sprint 6.3
+□ Teste fluxo completo

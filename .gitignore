@@ -1,0 +1,5 @@
+*.env
+
+phpunit-10.phar
+phpunit.xml
+.phpunit.result.cache
