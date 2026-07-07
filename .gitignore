@@ -1,5 +1,8 @@
 *.env
 
-phpunit-10.phar
-phpunit.xml
+# phpunit-10.phar
+# phpunit.xml
+# .phpunit.result.cache
+
+/vendor/
 .phpunit.result.cache

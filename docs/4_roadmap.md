@@ -17,10 +17,10 @@ Sprint 0.2
 □ Git
 
 Sprint 0.3
-□ README
+□ README.md
 
 Sprint 0.4
-□ AGENTS
+□ AGENTS.md
 
 Sprint 0.5
 □ arquitetura.md
@@ -35,13 +35,15 @@ Sprint 0.8
 □ roadmap.md
 
 Sprint 0.9
-□ Autoload PSR-4
+□ iniciar Composer para obter Autoload PSR-4, gerenciar pacotes e o Intelephense reconhecer corretamente as classes
 
 Sprint 0.10
-□ PHPUnit
+□ instalar biblioteca de testes PHPUnit
+□ criar phpunit.xml para configurar bootstrap="vendor/autoload.php"
 
 Sprint 0.11
-□ Primeiro teste vazio
+□ Criar tests/PrimeiroTeste.php aplicando corretamente o namespace
+□ execute vendor/bin/phpunit e verifique o resultado
 
 # FASE 1 — Modelagem do Domínio - Objetivo: construir o domínio rico antes de qualquer infraestrutura.
 
