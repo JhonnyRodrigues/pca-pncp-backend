@@ -59,16 +59,53 @@ Após publicação no sistema externo PNCP:
 
 ---
 
-# Unidade Orçamentária
+# AnoExecucao
 
-Representa uma UASG responsável pela publicação de um plano.
+Representa o ano exercício da execução (compra ou contratação) do item presente no Plano de Contratações Anual.
 
-Cada unidade possui:
+Regras:
+- deve aceitar apenas o ano atual ou o próximo ano;
+- anos anteriores ao ano atual são inválidos;
+- anos posteriores ao próximo ano são inválidos;
+- quando inválido, deve lançar exceção de domínio apropriada.
 
+
+---
+
+# UnidadeOrcamentaria
+
+
+Representa uma Unidade Orçamentária responsável pela publicação do
+Plano de Contratações Anual junto ao PNCP.
+
+Possui:
 - código
 - nome
 
-Cada unidade possui seu próprio histórico de versões.
+Regras:
+
+- código é obrigatório;
+- código deve ser um número inteiro positivo;
+- código não pode ser zero;
+- código identifica unicamente uma Unidade Orçamentária;
+- nome é obrigatório;
+- nome deve possuir ao menos 3 caracteres;
+- espaços em branco nas extremidades devem ser removidos;
+- nome pode conter acentos;
+- nome pode conter números;
+- o objeto é imutável após sua criação.
+
+Observações:
+
+- Toda Demanda pertence a uma Unidade Orçamentária.
+- Todo Plano pertence a exatamente uma Unidade Orçamentária.
+- O código utilizado pela publicação corresponde ao código da unidade
+  orçamentária cadastrada para integração com o PNCP.
+- Cada unidade possui seu próprio histórico de versões homologadas / publicadas.
+- O código da UnidadeOrcamentaria representa o identificador utilizado
+dentro do domínio. Eventuais conversões entre códigos do PCA, SGI, Oracle, RH_LOTACOES,
+PNCP ou outros sistemas externos não pertencem ao domínio e devem ser tratadas fora das entidades de domínio.
+
 
 ---
 

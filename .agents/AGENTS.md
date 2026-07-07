@@ -63,6 +63,11 @@ As regras pertencem ao Domain.
 
 - nunca acessar Oracle diretamente pelo UseCase
 - toda regra de negócio fica no Domain, nunca colocar regras de negócio em Repository;
+- Mapeamentos entre sistemas externos não devem ser implementados
+no domínio.
+- Conversões de identificadores entre SGI, Oracle, PNCP ou outros
+sistemas pertencem à camada Infrastructure.
+
 - escrever teste antes da implementação
 - não criar código que não foi solicitado
 - explicar cada decisão arquitetural

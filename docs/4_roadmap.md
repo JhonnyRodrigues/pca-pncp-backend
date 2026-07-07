@@ -71,7 +71,6 @@ Sprint 1.5
 Sprint 1.6
 □ Criar Aggregate Root Plano
 □ PlanoTest
-
 Aqui o Plano já nasce contendo Demanda e Procedimento.
 
 # FASE 2 — Portas - Agora definimos as interfaces.
