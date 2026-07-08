@@ -1,3 +1,5 @@
+Este documento responde à pergunta: EM QUAL ORDEM devo construir?
+
 Esse roadmap define uma progressão lógica, evita que a infraestrutura contamine o domínio e incentiva a implementação incremental seguindo TDD.
 
 # FASE 0 — Preparação do projeto
@@ -7,6 +9,19 @@ Esse roadmap define uma progressão lógica, evita que a infraestrutura contamin
 # FASE 4 — Infraestrutura
 # FASE 5 — Apresentação
 # FASE 6 — Integração
+
+Essa sequência respeita a Clean Architecture. Principalmente por causa disso:
+
+- Domain: não conhece ninguém
+- Application: conhece Domain
+- Infrastructure: implementa portas
+- Presentation: depende de Application
+
+---
+
+
+
+---
 
 # FASE 0 — Preparação do projeto - Objetivo: deixar o ambiente pronto.
 
@@ -78,11 +93,7 @@ Aqui o Plano já nasce contendo Demanda e Procedimento.
 Sprint 2.1
 □ PlanoRepository
 
-Sprint 2.2
-□ DemandaRepository
-
-Sprint 2.3
-□ ProcedimentoRepository
+Plano é Aggregate Root
 
 # FASE 3 — Casos de Uso - Agora começamos a Application.
 
@@ -96,15 +107,17 @@ Sprint 3.2
 
 Sprint 3.3
 □ PublicarPcaResponse
-□ ResultadoPublicacao (representa apenas o retorno do caso de uso, então ele pertence à camada Application como um DTO/Response Model, não ao domínio.)
+□ ResultadoProcessamentoPlano
 
 Sprint 3.4
-□ PublicarPcaPresenter
-□ PublicarPcaPresenterTest
-
-Sprint 3.5
 □ PublicarPcaUseCase
 □ PublicarPcaUseCaseTest
+
+Sprint 3.5
+□ RetificarPcaUseCase
+□ RetificarPcaUseCaseTest
+
+Usar DTO pois é mais simples que Presenter
 
 # FASE 4 — Infraestrutura - Agora implementamos.
 

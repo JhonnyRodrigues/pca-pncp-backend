@@ -1,3 +1,5 @@
+Este documento responde à pergunta: COMO o negócio funciona?
+
 # Fluxo de Implementação – Publicação de Planos no PNCP
 
 ## Objetivo
@@ -20,7 +22,21 @@ Cada unidade corresponde a uma transação independente no banco de dados.
 
 # Fluxo
 
-## 1. Receber solicitação
+## Fases já implementadas no módulo interno (PCA) do Sistema de Gestão Integrado (SGI)
+1. Registra Demandas
+2. Avalia Demandas
+3. Consolida Demandas em planos
+4. Homologa planos
+5. Gera Plano Versionado
+
+## Fases que faltam implementar
+6. Consulta cadastro histórico de planos gerados
+7. Decide Publicar OU Retificar planos
+8. Envia os dados ao PNCP
+9. Busca numero_sequencial para confirmar nova versão no PNCP
+9. Atualiza os registros no banco de dados do SGI
+
+### 1. Receber solicitação
 
 Entradas:
 
@@ -31,7 +47,7 @@ Entradas:
 
 ---
 
-## 2. Validar entrada
+### 2. Validar entrada
 
 Validar:
 
@@ -44,13 +60,12 @@ Caso inválido, interromper imediatamente.
 
 ---
 
-## 3. Buscar demandas homologadas
+### 3. Buscar demandas homologadas
 
-Recuperar todas as demandas:
-
-- homologadas
-- ainda não publicadas
+- com situação homologada
+- vinculada a um plano ainda não publicado
 - pertencentes ao ano de execução informado
+- para cada Unidade Orçamentária
 
 As demandas já devem ser retornadas agrupadas por Unidade Orçamentária.
 
@@ -60,7 +75,7 @@ Retornar resposta informativa ao usuário.
 
 ---
 
-## 4. Autenticar no PNCP
+### 4. Autenticar no PNCP
 
 Realizar autenticação apenas uma vez.
 
@@ -68,30 +83,36 @@ O token obtido será reutilizado durante toda a execução.
 
 ---
 
-## 5. Processar cada Unidade Orçamentária
+### 5. Processar cada Unidade Orçamentária
 
 Para cada unidade:
 
-### 5.1 Iniciar transação
+#### 5.1 Iniciar transação
 
 Abrir transação Oracle.
 
 ---
 
-### 5.2 Obter o último plano
+#### 5.2 Obter o último plano
 
 Recuperar o plano mais recente da unidade para o exercício informado.
 
-A entidade Plano será responsável por decidir:
+O domínio será responsável por decidir:
 
 - Publicação
 - Retificação
 
-Essa decisão pertence exclusivamente ao domínio.
+A decisão deverá considerar:
+
+- Plano
+- Cadastro histórico de Planos
+
+A regra não pertence ao Controller,
+Repository ou Infrastructure.
 
 ---
 
-### 5.3 Construir o payload
+#### 5.3 Construir o payload
 
 Transformar o Plano em um payload compatível com o PNCP.
 
@@ -99,7 +120,7 @@ Essa responsabilidade pertence ao PncpPayloadBuilder.
 
 ---
 
-### 5.4 Enviar ao PNCP
+#### 5.4 Enviar ao PNCP
 
 Conforme decisão do Plano:
 
@@ -108,7 +129,7 @@ Conforme decisão do Plano:
 
 ---
 
-### 5.5 Obter número sequencial
+#### 5.5 Obter número sequencial
 
 Consultar o endpoint responsável pelo número sequencial do plano publicado.
 
@@ -116,7 +137,7 @@ Esse número identifica a versão publicada no PNCP.
 
 ---
 
-### 5.6 Atualizar banco
+#### 5.6 Atualizar banco
 
 Persistir:
 
@@ -126,13 +147,13 @@ Persistir:
 
 ---
 
-### 5.7 Confirmar transação
+#### 5.7 Confirmar transação
 
 Executar COMMIT.
 
 ---
 
-### 5.8 Tratar falhas
+#### 5.8 Tratar falhas
 
 Caso qualquer etapa falhe:
 
@@ -143,7 +164,7 @@ Caso qualquer etapa falhe:
 
 ---
 
-## 6. Finalizar
+### 6. Finalizar
 
 Após todas as unidades:
 
@@ -207,8 +228,13 @@ PncpClient
 PncpPayloadBuilder
 - construir payload
 
-Presenter
-- preparar resposta ao Scriptcase
+Response DTO
+- preparar resposta ao Scriptcase (módulo PCA do SGI)
 
 Controller
 - adaptar entrada e saída
+
+
+# Observação:
+
+As regras que determinam quando um plano deve ser publicado ou retificado estão descritas em detalhes no documento modelo_dominio.md, na seção "Resumo do Processo de Negócio" e "Regra Central de Decisão".

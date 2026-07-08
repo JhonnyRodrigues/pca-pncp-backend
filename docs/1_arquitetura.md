@@ -1,3 +1,5 @@
+Este documento responde à pergunta: COMO o sistema será construído?
+
 # Arquitetura
 
 ## Objetivo

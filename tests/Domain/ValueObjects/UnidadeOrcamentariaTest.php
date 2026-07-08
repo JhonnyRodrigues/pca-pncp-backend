@@ -65,14 +65,6 @@ class UnidadeOrcamentariaTest extends TestCase
         $this->assertSame('Diretoria 2', $unidade->nome());
     }
 
-    public function testDeveIdentificarMesmaUnidadePeloCodigo(): void
-    {
-        $unidade = new UnidadeOrcamentaria(101, 'Diretoria Administrativa');
-        $mesmaUnidade = new UnidadeOrcamentaria(101, 'Outro Nome Valido');
-
-        $this->assertTrue($unidade->igualA($mesmaUnidade));
-    }
-
     public function testNaoDeveExporMetodosMutadores(): void
     {
         $unidade = new UnidadeOrcamentaria(101, 'Diretoria Administrativa');

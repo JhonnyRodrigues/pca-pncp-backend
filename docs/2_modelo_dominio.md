@@ -1,3 +1,5 @@
+Este documento responde à pergunta: O QUE existe no negócio?
+
 # Modelo de Domínio
 
 ## Objetivo
@@ -6,56 +8,57 @@ Descrever os principais conceitos de negócio utilizados pelo sistema, independe
 
 ---
 
-# Plano
+# Resumo do Processo de Negócio
 
-Representa o Plano de Contratações Anual de uma Unidade Orçamentária.
+O Plano de Contratações Anual (PCA) nasce a partir das demandas de contratação registradas pelos diversos setores da organização.
 
-Um plano pertence a:
+O fluxo ocorre da seguinte forma:
 
-- uma Unidade Orçamentária
-- um exercício
+1. Os setores registram suas demandas de contratação.
+2. As demandas são avaliadas.
+3. As demandas aprovadas são consolidadas.
+4. O Presidente da organização realiza a homologação.
+5. A homologação gera uma nova versão do Plano de Contratações Anual.
 
-Um plano possui:
+Após a homologação:
 
-- versão
-- data de homologação
-- data de publicação
-- demandas
+- a data de homologação é registrada;
+- a versão do plano é definida;
+- o plano torna-se elegível para publicação no PNCP;
+- a data de publicação permanece vazia até que o processo de publicação seja executado.
 
-Responsabilidades:
+A identificação lógica de uma **versão** de plano é composta por:
 
-- decidir se deve publicar
-- decidir se deve retificar
-- conhecer sua versão
-- conhecer a última publicação
+- AnoExecucao
+- UnidadeOrcamentaria
+- SequencialVersao
 
----
+## Primeira Publicação
 
-# Demanda
+Quando não existe publicação anterior para uma determinada combinação de AnoExecucao e UnidadeOrcamentaria, o sistema deverá realizar uma Publicação.
 
-Representa uma necessidade de contratação.
+A publicação corresponde ao primeiro envio do plano homologado ao PNCP.
 
-Uma demanda pertence a:
+## Retificação
 
-- um Plano
-- uma Unidade Requisitante
+Após a publicação, podem surgir novas demandas que precisem ser executadas dentro do mesmo AnoExecucao.
 
-Uma demanda possui:
+Essas novas demandas passam novamente pelo processo de avaliação e homologação individual.
 
-- descrição do objeto material ou da contratação
-- quantidade
-- valor
-- data desejada
-- categoria
-- situação
+Quando a homologação gera uma nova versão do plano para a mesma combinação de AnoExecucao e UnidadeOrcamentaria, o sistema deverá realizar uma Retificação.
 
-Após homologação no sistema interno PCA:
+A retificação consiste no envio da versão mais recente e completa do plano ao PNCP.
 
-- número do plano (foreign key)
+# Regra Central de Decisão
 
-Após publicação no sistema externo PNCP:
+Para cada combinação de AnoExecucao e UnidadeOrcamentaria:
 
-- número sequencial PNCP
+- o sistema deve analisar o cadastro histórico de Planos para decidir qual processo executar.
+- se não existir histórico de Publicação de plano, o sistema deverá executar o Processo de Publicação;
+- se já existir histórico de Publicação de plano, o sistema deverá executar o Processo de Retificação.
+- se a última versão já corresponder à última versão publicada, nenhuma ação será necessária.
+
+Essa decisão faz parte do domínio. Ela não deve ficar em Controller, Repository ou Infrastructure.
 
 ---
 
@@ -69,8 +72,6 @@ Regras:
 - anos posteriores ao próximo ano são inválidos;
 - quando inválido, deve lançar exceção de domínio apropriada.
 
-
----
 
 # UnidadeOrcamentaria
 
@@ -106,45 +107,142 @@ Observações:
 dentro do domínio. Eventuais conversões entre códigos do PCA, SGI, Oracle, RH_LOTACOES,
 PNCP ou outros sistemas externos não pertencem ao domínio e devem ser tratadas fora das entidades de domínio.
 
+---
+
+# Plano
+
+Representa o Plano de Contratações Anual de uma Unidade Orçamentária.
+
+Um plano pertence a:
+
+- uma Unidade Orçamentária
+- um exercício
+
+Um plano possui:
+
+- versão
+- data de homologação
+- data de publicação
+- demandas
+
+Responsabilidades:
+
+- informar sua versão;
+- informar sua situação (homologado vira publicado);
+- decidir se está apto para publicação;
+- decidir se está apto para retificação.
+
+# Demanda
+
+Representa uma necessidade de contratação.
+
+Uma demanda pertence a:
+
+- um Plano
+- uma Unidade Requisitante
+
+Uma demanda possui:
+
+- descrição do objeto material ou da contratação
+- quantidade
+- valor
+- data desejada
+- categoria
+- situação
+- fkPlano (foreign key para vincular cada demanda a um Plano)
+- numeroSequencialPncp (informado após confirmação do processo de publicação/retificação)
+
+Após processo de homologação no sistema interno PCA:
+- número do plano (foreign key)
+
+Após publicação no sistema externo PNCP:
+- número sequencial PNCP
 
 ---
 
-# Publicação
+# Cadastro de Planos
 
-Primeiro envio de um plano homologado ao PNCP.
+Após o plano ser homologado, um novo registro é gerado no cadastro de plano. 
+
+Possui:
+
+- idPlano
+- unidadeOrcamentaria
+- anoExecucao
+- versaoPlano
+- tipoProcedimento
+- dataHomologacao
+- dataPublicacao
+
+Ele influencia decisões de negócio:
+- Existe publicação anterior? NÃO, então PUBLICAR
+- Existe publicação anterior? SIM, então RETIFICAR
+
+# Cadastro historico de Procedimentos
+
+Registra todas as operações relevantes.
+Serve como auditoria.
+
+Possui:
+
+- idHistorico
+- UnidadeOrcamentaria
+- responsavel_pela_acao
+- procedimento (avaliação, revisão, consolidação, homologação, publicação, retificação)
+- data_insercao
+- mensagem
+
+---
+
+# Origem do plano: Homologação
+
+Apenas para contextualizar sobre o funcionamento do sistema PCA responsável por gerar os planos, 
+a ação de homologação, realizada pelo presidente da autarquia, representa a consolidação das demandas aprovadas. (ou das demandas extraordinárias)
+
+Somente após a homologação nasce uma versão oficial do Plano.
+
+Ao homologar:
+
+- é gerada uma nova versão do Plano;
+- a data de homologação é registrada;
+- o Plano torna-se elegível para publicação ou retificação.
+
+# Processo de Publicação
+
+Evento de negócio responsável pelo primeiro envio de um Plano homologado ao PNCP.
+
+Regras:
+
+- o plano deve estar homologado
+- NÃO deve existir histórico de publicação anterior para a mesma combinação de AnoExecucao e UnidadeOrcamentaria
 
 Resultado esperado:
 
-- plano publicado
-- número sequencial obtido
-- banco atualizado
+- O sistema envia o plano completo, de cada UnidadeOrcamentaria.
+- obtenção de novo número sequencial PNCP, confirmando que o plao foi publicado
+- registros atualizados no banco de dados
+
+# Processo de Retificação
+
+Evento de negócio responsável pelo envio de nova versão de um Plano já publicado.
+
+Regras:
+
+- o plano deve estar homologado
+- deve existir histórico de publicação anterior para a mesma combinação de AnoExecucao e UnidadeOrcamentaria
+- o plano deve possuir versão mais recente que a publicada
+
+Resultado esperado:
+
+- O sistema envia novamente o plano completo somente da UnidadeOrcamentaria que teve alterações no plano inicial
+- obtenção de novo número sequencial PNCP, confirmando que o plao foi publicado
+- registros atualizados no banco de dados- 
+
+Publicação e Retificação não são entidades e sim eventos/processos de negócio.
 
 ---
 
-# Retificação
-
-Publicação de uma nova versão de plano homologada.
-
-O sistema envia novamente o plano completo.
-
-O PNCP cria um novo número sequencial.
-
----
-
-# Histórico
-
-Registra todas as operações relevantes.
-
-Exemplos:
-
-- publicação
-- retificação
-- falhas
-- mensagens
-
----
-
-# Resultado da Publicação
+# Resultado dos processos de Publicação/Retificação
 
 Representa o resultado obtido para uma Unidade Orçamentária.
 
@@ -166,21 +264,27 @@ Pode representar:
 
 ## Versionamento
 
-Uma Unidade Orçamentária pode possuir diversas versões de plano.
+ma Unidade Orçamentária pode possuir diversas versões de Plano para um mesmo AnoExecucao.
 
-Sempre será utilizada para publicar a versão homologada mais recente.
+A identificação lógica da versão é composta por:
+
+- AnoExecucao
+- UnidadeOrcamentaria
+- SequencialVersao
+
+Sempre será considerada a versão homologada mais recente.
 
 ---
 
 ## Publicação
 
-Somente planos homologados podem ser publicados.
+Somente planos homologados podem ser publicados, quando não existir, no historico de procedimentos, publicações para o ano exercicio (anoExecucao).
 
 ---
 
 ## Retificação
 
-Sempre envia o plano completo.
+Sempre envia o plano completo. Esse evento/processo somente deverá ser chamado quando já existir, no historico de procedimentos, publicações para o ano exercicio (anoExecucao).
 
 ---
 

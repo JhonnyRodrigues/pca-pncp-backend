@@ -9,7 +9,7 @@ Iniciou com código legado em Scriptcase e precisa ser reconstruido para Clean A
 ### Localização
 - Workspace: `~/Desktop/backend`
 - Linguagem: PHP 8.1
-- Ferramentas: autoloader PSR-4 customizado
+- Ferramentas: Composer com autoloader, PHPUnit para testes
 
 ### Arquitetura Ideal
 \`\`\`
@@ -88,8 +88,9 @@ php phpunit-10.phar --bootstrap autoload.php
 \`\`\`
 
 ## Comando Padrão de Teste
+<!-- php phpunit-10.phar --bootstrap autoload.php tests/<NomeDoTeste>.php -->
 \`\`\`bash
-php phpunit-10.phar --bootstrap autoload.php tests/<NomeDoTeste>.php
+vendor/bin/phpunit
 \`\`\`
 
 ## Informações Técnicas
@@ -104,6 +105,7 @@ php phpunit-10.phar --bootstrap autoload.php tests/<NomeDoTeste>.php
 - Arquivo: autoload.php
 - Padrão: PSR-4 customizado
 - Namespace base: Semae\Pca\
+- chama primeiro o autoloader do Composer
 
 ## Regras de Ouro para Continuação
 

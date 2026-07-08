@@ -1,6 +1,6 @@
 Leia toda a documentação do projeto (/README.md, /.agents/AGENTS.md e os arquivos dentro da pasta docs/).
 Siga rigorosamente a Clean Architecture, DDD e TDD.
-Implemente apenas a próxima tarefa do roadmap.md.
+Implemente apenas a próxima tarefa do roadmap.md
 Antes de escrever código, explique a responsabilidade da classe, sua posição na arquitetura e o objetivo do teste.
 Escreva primeiro o teste, depois a implementação mínima para fazê-lo passar.
 Não implemente funcionalidades futuras nem altere arquivos fora do escopo da tarefa.

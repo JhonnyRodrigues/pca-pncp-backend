@@ -17,7 +17,7 @@ class UnidadeOrcamentaria
             throw new UnidadeOrcamentariaInvalidaException('Codigo da unidade orcamentaria invalido.');
         }
 
-        if ($nome === '' || strlen($nome) < 3) {
+        if ($nome === '' || mb_strlen($nome) < 3) {
             throw new UnidadeOrcamentariaInvalidaException('Nome da unidade orcamentaria invalido.');
         }
 
@@ -33,10 +33,5 @@ class UnidadeOrcamentaria
     public function nome(): string
     {
         return $this->nome;
-    }
-
-    public function igualA(self $outraUnidade): bool
-    {
-        return $this->codigo === $outraUnidade->codigo;
     }
 }

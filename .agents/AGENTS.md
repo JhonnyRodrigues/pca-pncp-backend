@@ -50,6 +50,23 @@ Infrastructure implementa interfaces do domínio.
 
 ---
 
+## Preservação Arquitetural
+
+Em caso de dúvida, priorizar:
+
+1. Correção arquitetural
+2. Regras de negócio
+3. Testabilidade
+4. Simplicidade
+5. Desempenho
+
+Nunca sacrificar a arquitetura para reduzir quantidade de código.
+
+Sempre preferir soluções consistentes com Clean Architecture.
+
+
+---
+
 ## Regras importantes
 
 Nunca coloque regras de negócio em:
@@ -58,42 +75,139 @@ Nunca coloque regras de negócio em:
 - Controller
 - Client
 - PayloadBuilder
+- Infrastructure
 
-As regras pertencem ao Domain.
+As regras pertencem exclusivamente ao Domain.
+
+Também seguir as seguintes regras:
 
 - nunca acessar Oracle diretamente pelo UseCase
-- toda regra de negócio fica no Domain, nunca colocar regras de negócio em Repository;
-- Mapeamentos entre sistemas externos não devem ser implementados
-no domínio.
-- Conversões de identificadores entre SGI, Oracle, PNCP ou outros
-sistemas pertencem à camada Infrastructure.
-
-- escrever teste antes da implementação
+- toda regra de negócio fica no Domain
+- nunca colocar regras de negócio em Repository
+- mapeamentos entre sistemas externos não pertencem ao Domain
+- conversões entre identificadores SGI, Oracle, PNCP ou outros sistemas pertencem à Infrastructure
 - não criar código que não foi solicitado
-- explicar cada decisão arquitetural
-- gerar código comentado apenas quando necessário
+- não antecipar implementações futuras
+- não modificar arquivos fora do escopo da tarefa
+- explicar decisões arquiteturais relevantes
+- gerar comentários apenas quando agregarem valor real
+
+---
+
+
+## Planejamento
+
+Antes de implementar qualquer alteração:
+
+- inspecionar o código relacionado
+- identificar padrões existentes
+- identificar interfaces reutilizáveis
+- verificar testes existentes
+- consultar documentação relevante
+
+Para tarefas complexas, ambíguas, com múltiplos arquivos ou impacto arquitetural:
+
+- elaborar um plano de execução
+- listar premissas assumidas
+- identificar riscos
+- definir estratégia de validação
+
+Evite perguntas desnecessárias quando uma premissa segura permitir o avanço da implementação.
+
+---
+
+## Dependências Permitidas
+
+Antes de criar novas classes:
+
+- verificar se já existe implementação semelhante
+- verificar se já existe interface apropriada
+- reutilizar componentes existentes quando possível
+
+Evitar:
+
+- abstrações prematuras
+- duplicação de responsabilidades
+- proliferação desnecessária de classes
+
+Novas dependências externas só devem ser introduzidas mediante justificativa clara.
 
 ---
 
 ## Ordem de desenvolvimento
 
-Sempre siga o roadmap.
+Sempre seguir o roadmap.
 
-Nunca implemente classes futuras.
+Nunca implementar etapas futuras.
 
-Sempre implemente apenas a próxima tarefa.
+Implementar apenas a próxima tarefa prevista.
+
+Caso identifique dependências não previstas, informar antes de prosseguir.
+
+---
+
+## Escopo das Alterações
+
+Realizar apenas mudanças necessárias para atender a tarefa solicitada.
+
+Evitar:
+
+- refatorações não solicitadas
+- mudanças amplas sem necessidade
+- alterações em APIs públicas sem justificativa
+- alterações em arquivos não relacionados
+
+Preferir alterações pequenas, seguras e coesas.
 
 ---
 
 ## TDD
 
-Para cada classe:
+Para cada funcionalidade:
 
 1. escrever teste
 2. executar teste
-3. implementar código mínimo
-4. executar novamente
-5. refatorar
+3. observar falha esperada
+4. implementar código mínimo
+5. executar novamente
+6. refatorar
+7. garantir que todos os testes permaneçam verdes
+
+Seguir sempre o ciclo Red → Green → Refactor.
+
+---
+
+## Validação
+
+Sempre que possível:
+
+- executar testes afetados
+- executar suíte relacionada
+- verificar conformidade com PSR-12
+- verificar tipagem
+- verificar imports desnecessários
+- verificar contratos de interfaces
+- verificar compatibilidade arquitetural
+
+Se algum teste ou validação não puder ser executado, informar explicitamente o motivo.
+
+---
+
+## Revisão
+
+Antes de concluir uma tarefa, revisar:
+
+- regressões
+- violações arquiteturais
+- dependências desnecessárias
+- código duplicado
+- edge cases
+- tratamento de erros
+- testes ausentes
+- acoplamento excessivo
+- arquivos alterados indevidamente
+
+Garantir que a solução permaneça simples e consistente com os padrões do projeto.
 
 ---
 
@@ -103,20 +217,57 @@ Priorizar:
 
 - simplicidade
 - baixo acoplamento
+- alta coesão
 - nomes claros
 - métodos pequenos
-- alta legibilidade
+- legibilidade
+- testabilidade
+
+Evitar complexidade desnecessária.
 
 ---
 
-## Ao responder
+## Planos de Execução
 
-Explique rapidamente:
+Ao implementar funcionalidades complexas ou realizar refatorações significativas:
 
-- por que aquela classe existe
+- utilizar um Plano de Execução
+- seguir as orientações descritas em `.agent/PLANS.md`
+- manter o plano atualizado durante a implementação
+
+---
+
+## Ao Responder
+
+Antes de gerar código, confirmar mentalmente que a implementação respeita a arquitetura do projeto.
+
+Ao concluir uma tarefa, apresentar:
+
+### Resumo
+
+- o que foi implementado
+
+### Justificativa Arquitetural
+
+- por que a classe existe
 - qual responsabilidade ela possui
-- por que ela pertence àquela camada
+- por que pertence àquela camada
 
-Antes de gerar código, confirme que a implementação está de acordo com a arquitetura do projeto.
+### Validação
 
-Nunca altere arquivos não relacionados à tarefa atual.
+- quais testes foram criados
+- quais testes foram executados
+- resultado das validações realizadas
+
+### Riscos ou Pontos de Atenção
+
+- limitações conhecidas
+- possíveis melhorias futuras
+- dependências para próximas etapas
+
+### Arquivos Alterados
+
+- listar arquivos modificados
+- justificar brevemente cada alteração
+
+Ser conciso, técnico e objetivo.
