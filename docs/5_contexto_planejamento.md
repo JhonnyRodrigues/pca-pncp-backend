@@ -90,7 +90,7 @@ php phpunit-10.phar --bootstrap autoload.php
 ## Comando Padrão de Teste
 <!-- php phpunit-10.phar --bootstrap autoload.php tests/<NomeDoTeste>.php -->
 \`\`\`bash
-vendor/bin/phpunit
+php.exe vendor/bin/phpunit
 \`\`\`
 
 ## Informações Técnicas

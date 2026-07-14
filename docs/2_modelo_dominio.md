@@ -4,7 +4,12 @@ Este documento responde à pergunta: O QUE existe no negócio?
 
 ## Objetivo
 
-Descrever os principais conceitos de negócio utilizados pelo sistema, independentemente da tecnologia utilizada.
+Independentemente da tecnologia utilizada, descrever:
+- os conceitos do negócio;
+- entidades;
+- regras;
+- eventos;
+- a decisão de Publicar vs Retificar;
 
 ---
 
@@ -158,6 +163,38 @@ Após processo de homologação no sistema interno PCA:
 Após publicação no sistema externo PNCP:
 - número sequencial PNCP
 
+# Procedimento
+
+Representa um tipo de ação formal executada durante o ciclo de vida do Planejamento de Compras Anual.
+
+Possui:
+
+- idProcedimento
+- descricao
+
+Características:
+
+- é imutável;
+- representa um catálogo de procedimentos de negócio;
+- seu identificador possui significado de negócio;
+- seu identificador é utilizado pelo sistema em validações e consultas;
+- não representa uma ocorrência realizada;
+- as ocorrências realizadas são registradas no Cadastro Histórico de Procedimentos.
+
+Observação:
+
+Procedimento não representa um evento executado por um usuário. Ele representa apenas o tipo de procedimento disponível no sistema.
+
+Exemplos:
+
+- Consolidação de Plano
+- Desconsolidação de Plano
+- Revisão de Demanda Avaliada
+- Homologação do Planejamento
+- Homologação de Demanda Extraordinária
+- Cancelamento de Demanda Homologada
+- Publicação de Plano
+
 ---
 
 # Cadastro de Planos
@@ -180,17 +217,24 @@ Ele influencia decisões de negócio:
 
 # Cadastro historico de Procedimentos
 
-Registra todas as operações relevantes.
-Serve como auditoria.
+Cada registro histórico representa a execução de um Procedimento por um responsável do sistema.
+O histórico possui finalidade exclusivamente de auditoria e rastreabilidade das ações realizadas no sistema.
 
 Possui:
 
-- idHistorico
-- UnidadeOrcamentaria
-- responsavel_pela_acao
-- procedimento (avaliação, revisão, consolidação, homologação, publicação, retificação)
-- data_insercao
-- mensagem
+- procedimento executado
+- responsável
+- unidade organizacional
+- data da ocorrência
+- demanda relacionada (quando aplicável)
+- mensagem de auditoria
+
+Exemplo:
+
+Procedimento: HOMOLOGAÇÃO DO PLANEJAMENTO
+Mensagem: O Plano de Compras e Contratações da unidade orçamentária Procuradoria Jurídica para o ano 2027 foi publicado.
+
+As regras de Publicação e Retificação não dependem da consulta ao histórico de procedimentos, sendo baseadas no cadastro de Planos e em seus dados de homologação/publicação.
 
 ---
 

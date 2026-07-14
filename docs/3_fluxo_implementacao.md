@@ -107,8 +107,10 @@ A decisão deverá considerar:
 - Plano
 - Cadastro histórico de Planos
 
-A regra não pertence ao Controller,
-Repository ou Infrastructure.
+Observação: Embora o SGI mantenha histórico completo de procedimentos para auditoria, a decisão entre Publicação e Retificação deverá ser realizada a partir do estado dos Planos homologados/publicados.
+O histórico de procedimentos não constitui a principal fonte dessa decisão.
+
+A regra não pertence ao Controller, Repository ou Infrastructure.
 
 ---
 

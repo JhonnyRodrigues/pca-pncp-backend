@@ -1,0 +1,47 @@
+[PHP Modules]
+calendar
+Core
+ctype
+date
+dom
+exif
+FFI
+fileinfo
+filter
+ftp
+gettext
+hash
+iconv
+json
+libxml
+mbstring
+openssl
+pcntl
+pcre
+PDO
+Phar
+posix
+random
+readline
+Reflection
+session
+shmop
+SimpleXML
+sockets
+sodium
+SPL
+standard
+sysvmsg
+sysvsem
+sysvshm
+tokenizer
+xml
+xmlreader
+xmlwriter
+xsl
+Zend OPcache
+zlib
+
+[Zend Modules]
+Zend OPcache
+

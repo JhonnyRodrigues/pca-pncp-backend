@@ -58,7 +58,7 @@ Sprint 0.10
 
 Sprint 0.11
 □ Criar tests/PrimeiroTeste.php aplicando corretamente o namespace
-□ execute vendor/bin/phpunit e verifique o resultado
+□ execute php.exe vendor/bin/phpunit e verifique o resultado
 
 # FASE 1 — Modelagem do Domínio - Objetivo: construir o domínio rico antes de qualquer infraestrutura.
 
@@ -86,7 +86,7 @@ Sprint 1.5
 Sprint 1.6
 □ Criar Aggregate Root Plano
 □ PlanoTest
-Aqui o Plano já nasce contendo Demanda e Procedimento.
+Plano já nasce contendo Demandas, ou seja, a homologação de demandas consolidadas formam um plano
 
 # FASE 2 — Portas - Agora definimos as interfaces.
 
