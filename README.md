@@ -60,6 +60,13 @@ docs/
 
 ## Executando os testes
 
+preferencialmente:
+```bash
+vendor/bin/phpunit
+```
+
+ou a maneira descontinuada:
+
 ```bash
 php phpunit-10.phar --bootstrap autoload.php
 ```

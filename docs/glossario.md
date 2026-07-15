@@ -7,3 +7,5 @@
 | Use Case     | Orquestra o fluxo da aplicação (`PublicarPcaUseCase`).                                                       |
 | Presenter    | Converte a resposta do caso de uso para o formato esperado pelo consumidor (Scriptcase).                     |
 | Controller   | Recebe a chamada do Scriptcase, cria o Request, executa o Use Case e devolve o resultado.                    |
+| Lotacao      | Unidade organizacional utilizada para identificar a origem de ações registradas no sistema.                  |
+| Representante| Pessoa responsável pela execução de uma ação registrada pelo sistema.                                        |

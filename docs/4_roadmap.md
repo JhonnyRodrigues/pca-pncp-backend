@@ -84,16 +84,54 @@ Sprint 1.5
 □ ProcedimentoTest
 
 Sprint 1.6
+□ Criar Value Object Lotacao
+□ LotacaoTest
+
+Sprint 1.7
+□ Criar Value Object Representante
+□ RepresentanteTest
+
+Sprint 1.8
+□ Criar Entity HistoricoProcedimento
+□ HistoricoProcedimentoTest
+
+HistoricoProcedimento
+ ├── Procedimento
+ ├── Representante
+ └── Lotacao
+
+Sprint 1.9
 □ Criar Aggregate Root Plano
 □ PlanoTest
-Plano já nasce contendo Demandas, ou seja, a homologação de demandas consolidadas formam um plano
+O Plano é o Aggregate Root do domínio.
+O Plano nasce a partir da homologação de Demandas
+consolidadas.
+
+A identidade lógica de um Plano é composta por:
+
+- AnoExecucao
+- UnidadeOrcamentaria
+- SequencialVersao
+
+Todo Plano:
+
+- possui uma ou mais Demandas;
+- não pode existir sem Demandas;
+- possui data de homologação;
+- pode possuir data de publicação;
+- representa uma versão específica do planejamento.
+
+Procedimentos e históricos não pertencem ao agregado Plano.
 
 # FASE 2 — Portas - Agora definimos as interfaces.
 
 Sprint 2.1
 □ PlanoRepository
 
-Plano é Aggregate Root
+Plano é Aggregate Root.
+
+Demandas e Históricos devem ser acessados
+através do Aggregate sempre que possível.
 
 # FASE 3 — Casos de Uso - Agora começamos a Application.
 
@@ -107,7 +145,7 @@ Sprint 3.2
 
 Sprint 3.3
 □ PublicarPcaResponse
-□ ResultadoProcessamentoPlano
+□ ResultadoProcessamentoPlano (é um DTO de aplicação e não um conceito de domínio.)
 
 Sprint 3.4
 □ PublicarPcaUseCase
@@ -128,10 +166,13 @@ Sprint 4.2
 □ OraclePlanoRepository
 
 Sprint 4.3
-□ OracleDemandaRepository
+□ OracleDemandaRepository ?
 
 Sprint 4.4
-□ OracleProcedimentoRepository
+□ OracleProcedimentoRepository ?
+
+Sprint 4.4
+□ OracleHistoricoProcedimentoRepository ?
 
 Sprint 4.5
 □ PncpAuthenticator

@@ -13,6 +13,24 @@ Independentemente da tecnologia utilizada, descrever:
 
 ---
 
+# Cenários de Negócio
+
+## Primeira Publicação
+
+Quando não existe publicação anterior para uma combinação de AnoExecucao + UnidadeOrcamentaria, o sistema deverá realizar uma Publicação.
+
+A publicação corresponde ao primeiro envio do plano homologado ao PNCP.
+
+## Retificação
+
+Após a publicação, novas demandas podem ser homologadas.
+
+Quando isso acontece, gera uma nova versão do Plano para a mesma combinação de: AnoExecucao + UnidadeOrcamentaria, então o sistema realiza uma Retificação.
+
+A retificação consiste no envio da versão mais recente e completa do Plano ao PNCP.
+
+---
+
 # Resumo do Processo de Negócio
 
 O Plano de Contratações Anual (PCA) nasce a partir das demandas de contratação registradas pelos diversos setores da organização.
@@ -38,21 +56,7 @@ A identificação lógica de uma **versão** de plano é composta por:
 - UnidadeOrcamentaria
 - SequencialVersao
 
-## Primeira Publicação
-
-Quando não existe publicação anterior para uma determinada combinação de AnoExecucao e UnidadeOrcamentaria, o sistema deverá realizar uma Publicação.
-
-A publicação corresponde ao primeiro envio do plano homologado ao PNCP.
-
-## Retificação
-
-Após a publicação, podem surgir novas demandas que precisem ser executadas dentro do mesmo AnoExecucao.
-
-Essas novas demandas passam novamente pelo processo de avaliação e homologação individual.
-
-Quando a homologação gera uma nova versão do plano para a mesma combinação de AnoExecucao e UnidadeOrcamentaria, o sistema deverá realizar uma Retificação.
-
-A retificação consiste no envio da versão mais recente e completa do plano ao PNCP.
+---
 
 # Regra Central de Decisão
 
@@ -67,7 +71,33 @@ Essa decisão faz parte do domínio. Ela não deve ficar em Controller, Reposito
 
 ---
 
-# AnoExecucao
+# Value Objects
+
+## Cnpj
+
+Representa o Cadastro Nacional da Pessoa Jurídica do órgão responsável pela publicação do Plano de Contratações Anual junto ao PNCP.
+
+Possui:
+
+- numero
+
+Regras:
+
+- é obrigatório;
+- deve conter exatamente 14 dígitos;
+- caracteres não numéricos devem ser removidos antes da validação;
+- deve ser validado pelo algoritmo oficial do CNPJ;
+- quando inválido, deve lançar exceção de domínio apropriada;
+- o objeto é imutável.
+
+Observações:
+
+- o mesmo órgão pode possuir diversas UnidadesOrcamentarias;
+- o CNPJ identifica o órgão responsável pela publicação perante o PNCP;
+- o CNPJ faz parte da entrada do processo de Publicação e Retificação;
+- o objeto representa apenas o conceito de CNPJ dentro do domínio, sem conhecer banco de dados, APIs ou formatos externos.
+
+## AnoExecucao
 
 Representa o ano exercício da execução (compra ou contratação) do item presente no Plano de Contratações Anual.
 
@@ -78,8 +108,7 @@ Regras:
 - quando inválido, deve lançar exceção de domínio apropriada.
 
 
-# UnidadeOrcamentaria
-
+## UnidadeOrcamentaria
 
 Representa uma Unidade Orçamentária responsável pela publicação do
 Plano de Contratações Anual junto ao PNCP.
@@ -112,32 +141,62 @@ Observações:
 dentro do domínio. Eventuais conversões entre códigos do PCA, SGI, Oracle, RH_LOTACOES,
 PNCP ou outros sistemas externos não pertencem ao domínio e devem ser tratadas fora das entidades de domínio.
 
+## Lotacao
+
+Representa uma unidade organizacional da autarquia.
+
+Possui:
+
+- id
+- descricao
+
+Regras:
+
+- id é obrigatório;
+- descrição é obrigatória;
+- o objeto é imutável;
+
+Importante:
+
+Lotação e UnidadeOrcamentaria são conceitos distintos.
+
+Nem toda Lotação é uma UnidadeOrcamentaria.
+
+Exemplos de lotações:
+
+- Presidência
+- Procuradoria Jurídica
+- Diretoria Geral Administrativa e Financeira
+- Coordenadoria de Tecnologia
+
+
+## Representante
+
+Representa a pessoa responsável pela execução de uma ação registrada pelo sistema.
+
+Possui:
+
+- id
+- nome
+
+Regras:
+
+- id é obrigatório;
+- nome é obrigatório;
+- o objeto é imutável.
+
+Observações:
+
+- Representante identifica o responsável por uma ação registrada em um HistoricoProcedimento;
+- pode representar operador, avaliador, consolidador ou presidente;
+- para os procedimentos de Publicação e Retificação, os dados do representante serão obtidos a partir do usuário autenticado no sistema.
+
+
 ---
 
-# Plano
+# Entidades 
 
-Representa o Plano de Contratações Anual de uma Unidade Orçamentária.
-
-Um plano pertence a:
-
-- uma Unidade Orçamentária
-- um exercício
-
-Um plano possui:
-
-- versão
-- data de homologação
-- data de publicação
-- demandas
-
-Responsabilidades:
-
-- informar sua versão;
-- informar sua situação (homologado vira publicado);
-- decidir se está apto para publicação;
-- decidir se está apto para retificação.
-
-# Demanda
+## Demanda
 
 Representa uma necessidade de contratação.
 
@@ -157,13 +216,25 @@ Uma demanda possui:
 - fkPlano (foreign key para vincular cada demanda a um Plano)
 - numeroSequencialPncp (informado após confirmação do processo de publicação/retificação)
 
+Regras:
+
+- quantidade deve ser maior que zero;
+- origem deve ser:
+  - N (Normal)
+  - E (Extraordinária);
+- categoria deve ser:
+  - 1 (Material)
+  - 2 (Serviço).
+
+
 Após processo de homologação no sistema interno PCA:
 - número do plano (foreign key)
 
 Após publicação no sistema externo PNCP:
 - número sequencial PNCP
 
-# Procedimento
+
+## Procedimento
 
 Representa um tipo de ação formal executada durante o ciclo de vida do Planejamento de Compras Anual.
 
@@ -195,170 +266,146 @@ Exemplos:
 - Cancelamento de Demanda Homologada
 - Publicação de Plano
 
----
 
-# Cadastro de Planos
+Importante:
 
-Após o plano ser homologado, um novo registro é gerado no cadastro de plano. 
+Os processos de Publicação e Retificação realizados junto ao PNCP
+são registrados utilizando o procedimento: PUBLICAÇÃO DE PLANO
 
-Possui:
+A distinção entre Publicação inicial e Retificação
+é uma decisão interna do backend. Para fins de auditoria do negócio,
+ambos os eventos representam uma publicação
+de informações ao PNCP.
 
-- idPlano
-- unidadeOrcamentaria
-- anoExecucao
-- versaoPlano
-- tipoProcedimento
-- dataHomologacao
-- dataPublicacao
+## HistoricoProcedimento
 
-Ele influencia decisões de negócio:
-- Existe publicação anterior? NÃO, então PUBLICAR
-- Existe publicação anterior? SIM, então RETIFICAR
-
-# Cadastro historico de Procedimentos
-
-Cada registro histórico representa a execução de um Procedimento por um responsável do sistema.
+Representa o registro da execução de um Procedimento.
 O histórico possui finalidade exclusivamente de auditoria e rastreabilidade das ações realizadas no sistema.
 
 Possui:
 
-- procedimento executado
-- responsável
-- unidade organizacional
-- data da ocorrência
-- demanda relacionada (quando aplicável)
+- procedimento
+- representante
+- lotacao (unidade organizacional)
+- dataInsercao (data da ocorrência)
 - mensagem de auditoria
 
-Exemplo:
+Opcionalmente:
+- idDemanda
 
-Procedimento: HOMOLOGAÇÃO DO PLANEJAMENTO
+Responsabilidades:
+
+- registrar auditoria das ações realizadas;
+- preservar rastreabilidade das operações;
+- associar um Procedimento à sua execução.
+
+Exemplo:
+Procedimento: PUBLICAÇÃO DE PLANO
 Mensagem: O Plano de Compras e Contratações da unidade orçamentária Procuradoria Jurídica para o ano 2027 foi publicado.
+
+Regras:
+
+- a mensagem é obrigatória para o procedimento PUBLICAÇÃO DE PLANO;
+- a obrigatoriedade da mensagem para outros procedimentos depende das regras específicas de cada procedimento.
+
+Observações:
+
+- cada registro representa um evento ocorrido;
+- o histórico não representa o catálogo de procedimentos;
+- o histórico representa a execução de um procedimento.
+
 
 As regras de Publicação e Retificação não dependem da consulta ao histórico de procedimentos, sendo baseadas no cadastro de Planos e em seus dados de homologação/publicação.
 
----
-
-# Origem do plano: Homologação
-
-Apenas para contextualizar sobre o funcionamento do sistema PCA responsável por gerar os planos, 
-a ação de homologação, realizada pelo presidente da autarquia, representa a consolidação das demandas aprovadas. (ou das demandas extraordinárias)
-
-Somente após a homologação nasce uma versão oficial do Plano.
-
-Ao homologar:
-
-- é gerada uma nova versão do Plano;
-- a data de homologação é registrada;
-- o Plano torna-se elegível para publicação ou retificação.
-
-# Processo de Publicação
-
-Evento de negócio responsável pelo primeiro envio de um Plano homologado ao PNCP.
-
-Regras:
-
-- o plano deve estar homologado
-- NÃO deve existir histórico de publicação anterior para a mesma combinação de AnoExecucao e UnidadeOrcamentaria
-
-Resultado esperado:
-
-- O sistema envia o plano completo, de cada UnidadeOrcamentaria.
-- obtenção de novo número sequencial PNCP, confirmando que o plao foi publicado
-- registros atualizados no banco de dados
-
-# Processo de Retificação
-
-Evento de negócio responsável pelo envio de nova versão de um Plano já publicado.
-
-Regras:
-
-- o plano deve estar homologado
-- deve existir histórico de publicação anterior para a mesma combinação de AnoExecucao e UnidadeOrcamentaria
-- o plano deve possuir versão mais recente que a publicada
-
-Resultado esperado:
-
-- O sistema envia novamente o plano completo somente da UnidadeOrcamentaria que teve alterações no plano inicial
-- obtenção de novo número sequencial PNCP, confirmando que o plao foi publicado
-- registros atualizados no banco de dados- 
-
-Publicação e Retificação não são entidades e sim eventos/processos de negócio.
 
 ---
 
-# Resultado dos processos de Publicação/Retificação
+# Aggregate Root
 
-Representa o resultado obtido para uma Unidade Orçamentária.
+## Plano
 
-Possui:
+Representa o Plano de Contratações Anual de uma Unidade Orçamentária.
 
-- código da unidade
-- status
-- mensagem
-
-Pode representar:
-
-- sucesso
-- erro
-- aviso
-
----
-
-# Regras Gerais
-
-## Versionamento
-
-ma Unidade Orçamentária pode possuir diversas versões de Plano para um mesmo AnoExecucao.
-
-A identificação lógica da versão é composta por:
+A identidade lógica de um Plano é composta por:
 
 - AnoExecucao
 - UnidadeOrcamentaria
 - SequencialVersao
 
-Sempre será considerada a versão homologada mais recente.
+Além disso, possui:
+
+- DataHomologacao
+- DataPublicacao
+- Demandas
+
+
+Regras:
+
+- deve possuir ao menos uma Demanda;
+- não pode existir sem Demandas;
+- todas as Demandas do Plano pertencem à mesma UnidadeOrcamentaria;
+- todas as Demandas do Plano pertencem ao mesmo AnoExecucao.
+
+Origem:
+
+- Um Plano não existe antes da homologação.
+- A homologação realizada pela Presidência gera
+uma nova versão do Plano.
+
+Responsabilidades:
+
+- informar sua versão;
+- informar sua situação (homologado vira publicado);
+- decidir se está apto para publicação;
+- decidir se está apto para retificação.
 
 ---
+
+# Processos de Negócio
 
 ## Publicação
 
-Somente planos homologados podem ser publicados, quando não existir, no historico de procedimentos, publicações para o ano exercicio (anoExecucao).
+Primeiro envio de um Plano homologado ao PNCP.
 
----
+Regras:
+
+- deve existir Plano homologado;
+- não deve existir publicação anterior para a combinacao unidadeOrcamentaria + AnoExecucao.
+
+Resultado:
+
+- plano enviado ao PNCP;
+- sequencial PNCP obtido;
+- demandas atualizadas com sequencialPncp;
+- histórico registrado.
 
 ## Retificação
 
-Sempre envia o plano completo. Esse evento/processo somente deverá ser chamado quando já existir, no historico de procedimentos, publicações para o ano exercicio (anoExecucao).
+Envio de nova versão de Plano já publicado.
+
+Regras:
+
+- deve existir publicação anterior para a combinação:UnidadeOrcamentaria + AnoExecucao;
+- o plano deve possuir versão mais recente que a última versão publicada
+
+Resultado:
+
+- plano completo reenviado ao PNCP;
+- novo sequencial PNCP obtido;
+- demandas atualizadas com sequencialPncp;
+- histórico registrado.
+
 
 ---
 
-## Independência
+# Princípios de Negócio
+
+## Independência das Unidades
 
 Cada Unidade Orçamentária é processada independentemente.
-
----
 
 ## Fonte da verdade
 
 O PNCP é a autoridade sobre publicações.
-
 O PCA é o sistema de origem, que armazena os dados em banco Oracle.
-
 Em caso de divergência, prevalece o estado do PNCP.
-
----
-
-# Objetivo Arquitetural
-
-As entidades deste documento representam conceitos do domínio.
-
-Elas não conhecem:
-
-- Oracle
-- SQL
-- HTTP
-- JSON
-- Scriptcase
-- PNCP Client
-
-Essas responsabilidades pertencem às camadas de infraestrutura e aplicação.

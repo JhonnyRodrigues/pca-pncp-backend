@@ -199,30 +199,11 @@ Fluxo:
 
 ## Restrições
 
-Não implementar:
-
-```text
-Plano
-Repository
-Port
-UseCase
-Controller
-DTO
-Service
-Factory
-Infrastructure
-Client
-PayloadBuilder
-Presenter
-```
-
 Não antecipar a Sprint 1.6.
 
 Não criar regras de negócio não documentadas.
 
 Não criar validações arbitrárias.
-
-Não realizar refatorações fora do escopo da sprint.
 
 ---
 

@@ -91,7 +91,6 @@ Para cada unidade:
 
 Abrir transação Oracle.
 
----
 
 #### 5.2 Obter o último plano
 
@@ -112,15 +111,11 @@ O histórico de procedimentos não constitui a principal fonte dessa decisão.
 
 A regra não pertence ao Controller, Repository ou Infrastructure.
 
----
-
 #### 5.3 Construir o payload
 
 Transformar o Plano em um payload compatível com o PNCP.
 
 Essa responsabilidade pertence ao PncpPayloadBuilder.
-
----
 
 #### 5.4 Enviar ao PNCP
 
@@ -129,31 +124,23 @@ Conforme decisão do Plano:
 - publicar
 - ou retificar
 
----
-
 #### 5.5 Obter número sequencial
 
 Consultar o endpoint responsável pelo número sequencial do plano publicado.
 
 Esse número identifica a versão publicada no PNCP.
 
----
-
 #### 5.6 Atualizar banco
 
 Persistir:
 
 - data de publicação do plano
-- número sequencial PNCP das demandas
-- histórico da operação
-
----
+- número sequencial PNCP nas demandas
+- histórico do procedimento PUBLICAÇÃO DE PLANO.
 
 #### 5.7 Confirmar transação
 
 Executar COMMIT.
-
----
 
 #### 5.8 Tratar falhas
 
@@ -175,9 +162,8 @@ Construir uma resposta contendo:
 - unidades publicadas
 - unidades com erro
 - mensagens
-- estatísticas
 
-A resposta será encaminhada ao Presenter.
+A resposta será encaminhada ao DTO / Presenter.
 
 ---
 
