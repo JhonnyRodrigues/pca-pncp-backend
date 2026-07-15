@@ -4,80 +4,177 @@ declare(strict_types=1);
 
 namespace Tests\Domain\Entities;
 
-use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Semae\Pca\Domain\Entities\Demanda;
 use Semae\Pca\Domain\ValueObjects\UnidadeOrcamentaria;
+use DateTimeImmutable;
+use InvalidArgumentException;
+use Semae\Pca\Domain\Exceptions\SequencialPncpException;
+
 
 class DemandaTest extends TestCase
 {
-    public function testDeveRepresentarNecessidadeDeContratacaoComDadosDocumentados(): void
+    public function testDeveRepresentarUmaDemandaHomologadaValida(): void
     {
-        $unidadeOrcamentaria = new UnidadeOrcamentaria(101, 'Diretoria Administrativa');
-        $dataDesejada = new DateTimeImmutable('2027-03-15');
+        $demanda = $this->criarDemanda();
 
-        $demanda = new Demanda(
-            10,
-            $unidadeOrcamentaria,
-            20,
-            30,
-            'Aquisicao de materiais hidraulicos',
-            5,
-            1500.75,
-            $dataDesejada,
-            'Material',
-            'homologada',
-            77
+        $this->assertSame(1001, $demanda->getIdDemanda());
+        $this->assertSame('MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS', $demanda->getDescricao()
         );
-
-        $this->assertSame(10, $demanda->id());
-        $this->assertSame($unidadeOrcamentaria, $demanda->unidadeOrcamentaria());
-        $this->assertSame(20, $demanda->idPlano());
-        $this->assertSame(30, $demanda->idUnidadeRequisitante());
-        $this->assertSame('Aquisicao de materiais hidraulicos', $demanda->descricao());
-        $this->assertSame(5, $demanda->quantidade());
-        $this->assertSame(1500.75, $demanda->valor());
-        $this->assertSame($dataDesejada, $demanda->dataDesejada());
-        $this->assertSame('Material', $demanda->categoria());
-        $this->assertSame('homologada', $demanda->situacao());
-        $this->assertSame(77, $demanda->numeroSequencialPncp());
     }
 
-    public function testNumeroSequencialPncpPermaneceAusenteAntesDaConfirmacaoDaPublicacao(): void
+    public function testDeveCalcularValorUnitarioComBaseNoValorTotalEQuantidade(): void
     {
-        $demanda = new Demanda(
-            10,
-            new UnidadeOrcamentaria(101, 'Diretoria Administrativa'),
-            20,
-            30,
-            'Aquisicao de materiais hidraulicos',
-            5,
-            1500.75,
-            new DateTimeImmutable('2027-03-15'),
-            'Material',
-            'homologada'
-        );
+        $demanda = $this->criarDemanda();
 
-        $this->assertNull($demanda->numeroSequencialPncp());
+        $this->assertEquals(3550.00, $demanda->getValorUnitario());
     }
 
-    public function testDeveInformarNumeroSequencialPncpAposConfirmacaoDaPublicacao(): void
+    public function testDeveIniciarSemSequencialPncp(): void
     {
-        $demanda = new Demanda(
-            10,
-            new UnidadeOrcamentaria(101, 'Diretoria Administrativa'),
-            20,
-            30,
-            'Aquisicao de materiais hidraulicos',
-            5,
-            1500.75,
+        $demanda = $this->criarDemanda();
+
+        $this->assertNull($demanda->getSequencialPncp());
+    }
+
+    public function testDevePermitirInformarSequencialPncpAposPublicacao(): void
+    {
+        $demanda = $this->criarDemanda();
+
+        $demanda->setSequencialPncp(77);
+
+        $this->assertSame(77, $demanda->getSequencialPncp());
+    }
+
+    public function testDeveLancarExcecaoQuandoSequencialPncpForZero(): void
+    {
+        $demanda = $this->criarDemanda();
+
+        $this->expectException(SequencialPncpException::class);
+
+        $demanda->setSequencialPncp(0);
+    }
+
+    public function testDeveLancarExcecaoQuandoCategoriaForInvalida(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new Demanda(
+            1001,
+            2,
+            159,
+            42,
+            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
             new DateTimeImmutable('2027-03-15'),
-            'Material',
-            'homologada'
+            99, // <---
+            'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
+            'UNIDADE',
+            2,
+            7100.00,
+            7100.00,
+            2,
+            '98.004.000004',
+            '98',
+            'INFORMÁTICA',
+            'N'
         );
+    }
 
-        $demanda->informarNumeroSequencialPncp(77);
+    public function testDeveLancarExcecaoQuandoQuantidadeForMenorOuIgualAZero(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
 
-        $this->assertSame(77, $demanda->numeroSequencialPncp());
+        new Demanda(
+            1001,
+            2,
+            159,
+            42,
+            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
+            new DateTimeImmutable('2027-03-15'),
+            1,
+            'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
+            'UNIDADE',
+            0, // <---
+            7100.00,
+            7100.00,
+            2,
+            '98.004.000004',
+            '98',
+            'INFORMÁTICA',
+            'N'
+        );
+    }
+
+    public function testDeveLancarExcecaoQuandoCatalogoForInvalido(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new Demanda(
+            1001,
+            2,
+            159,
+            42,
+            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
+            new DateTimeImmutable('2027-03-15'),
+            1,
+            'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
+            'UNIDADE',
+            2,
+            7100.00,
+            7100.00,
+            99, // <---
+            '98.004.000004',
+            '98',
+            'INFORMÁTICA',
+            'N'
+        );
+    }
+
+    public function testDeveLancarExcecaoQuandoOrigemForInvalida(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new Demanda(
+            1001,
+            2,
+            159,
+            42,
+            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
+            new DateTimeImmutable('2027-03-15'),
+            1,
+            'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
+            'UNIDADE',
+            2,
+            7100.00,
+            7100.00,
+            2,
+            '98.004.000004',
+            '98',
+            'INFORMÁTICA',
+            'X' // <---
+        );
+    }
+
+    private function criarDemanda(): Demanda
+    {
+        return new Demanda(
+            1001,
+            2,
+            159,
+            42,
+            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
+            new DateTimeImmutable('2027-03-15'),
+            1,
+            'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
+            'UNIDADE',
+            2,
+            7100.00,
+            7100.00,
+            2,
+            '98.004.000004',
+            '98',
+            'INFORMÁTICA',
+            'N'
+        );
     }
 }

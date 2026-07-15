@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Semae\Pca\Domain\Entities;
 
-use DateTimeImmutable;
 use Semae\Pca\Domain\ValueObjects\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Exceptions\SequencialPncpException;
+use DateTimeImmutable;
+use InvalidArgumentException;
 
 class Demanda
 {
@@ -30,8 +31,14 @@ class Demanda
         private readonly string $descricaoGrupo, /* MGM.DESCRICAO -> LEFT JOIN CEBISIS.MT_GRUPOS_MATERIAIS@READ_ORCL */
         private readonly string $origem, /* N: normal ou E: extraordinaria*/
         private         ?int $sequencialPncp = null,
-    ) {}
+    ) {
+        $this->validarCategoria();
+        $this->validarQuantidade();
+        $this->validarCatalogo();
+        $this->validarOrigem();
+    }
 
+    # métodos getters e setters
     public function getIdDemanda(): int
     {
         return $this->idDemanda;
@@ -118,7 +125,7 @@ class Demanda
     }
 
     public function getValorUnitario(): float {
-        return ($this->quantidade > 0) ? $this->valorTotal / $this->quantidade : 0.0;
+        return $this->valorTotal / $this->quantidade;
     }
 
     public function getSequencialPncp(): ?int {
@@ -132,5 +139,30 @@ class Demanda
         }
 
         $this->sequencialPncp = $sequencialPncp;
+    }
+
+    # métodos de validação
+
+    private function validarCategoria(): void {
+        if (!in_array($this->categoria, [1, 2], true)) {
+            throw new InvalidArgumentException('A categoria deve ser 1 (Material) ou 2 (Serviço).');
+        }
+    }
+    private function validarQuantidade(): void {
+        if ($this->quantidade <= 0) {
+            throw new InvalidArgumentException("A quantidade deve ser maior que zero.");
+        }
+    }
+
+    private function validarCatalogo(): void {
+        if (!in_array($this->catalogo, [1, 2], true)) {
+            throw new InvalidArgumentException('O catálogo deve ser 1 (Catálogo de bens e serviços do Compras.gov.br) ou 2 (Outros).');
+        }
+    }
+
+    private function validarOrigem(): void {
+        if (!in_array($this->origem, ['N', 'E'], true)) {
+            throw new InvalidArgumentException('A origem deve ser N (normal) ou E (extraordinária).');
+        }
     }
 }
