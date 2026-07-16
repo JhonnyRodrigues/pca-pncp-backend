@@ -147,6 +147,9 @@ Sprint 2.1
 Sprint 2.2
 □ HistoricoProcedimentoRepository
 
+- HistoricoProcedimentoRepository existe apenas
+para registrar auditoria das ações execu
+
 
 # FASE 3 — Casos de Uso - Agora começamos a Application.
 
