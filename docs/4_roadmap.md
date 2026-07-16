@@ -136,16 +136,13 @@ Plano
 Sprint 2.1
 □ PlanoRepository
 
-Plano é o único Aggregate Root do domínio.
-
-O acesso de persistência ao domínio deve ocorrer
-através de PlanoRepository.
-
-Demanda não possui repositório próprio.
-HistoricoProcedimento não possui repositório próprio neste momento.
-
-Demandas e Históricos devem ser acessados através do Aggregate sempre que possível.
-
+- Plano é o único Aggregate Root do domínio.
+- O acesso de persistência ao domínio deve ocorrer através de PlanoRepository.
+- Demanda não possui repositório próprio.
+- HistoricoProcedimento não possui repositório próprio neste momento.
+- Demandas e Históricos devem ser acessados através do Aggregate sempre que possível.
+- PlanoRepository retorna sempre o Aggregate Root
+- Plano já reconstruído com suas Demandas.
 
 Sprint 2.2
 □ HistoricoProcedimentoRepository

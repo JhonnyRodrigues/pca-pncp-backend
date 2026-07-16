@@ -11,12 +11,12 @@ class Lotacao
         private readonly string $descricao
     ) {}
 
-    public function id(): int
+    public function getId(): int
     {
         return $this->idLotacao;
     }
 
-    public function descricao(): string
+    public function getDescricao(): string
     {
         return $this->descricao;
     }
