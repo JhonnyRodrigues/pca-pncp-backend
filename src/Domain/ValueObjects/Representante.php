@@ -11,12 +11,12 @@ class Representante
         private readonly string $nome
     ) {}
 
-    public function id(): int
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function nome(): string
+    public function getNome(): string
     {
         return $this->nome;
     }

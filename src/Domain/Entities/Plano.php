@@ -104,7 +104,7 @@ class Plano
                 throw new PlanoException('Demanda deve pertencer ao Plano informado.');
             }
 
-            if ($demanda->getUnidadeOrcamentaria()->codigo() !== $this->unidadeOrcamentaria->codigo()) {
+            if ($demanda->getUnidadeOrcamentaria()->getId() !== $this->unidadeOrcamentaria->getId()) {
                 throw new PlanoException('Demandas devem pertencer a mesma Unidade Orçamentária do Plano.');
             }
 

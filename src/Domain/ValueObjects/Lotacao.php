@@ -16,7 +16,7 @@ class Lotacao
         return $this->idLotacao;
     }
 
-    public function getDescricao(): string
+    public function getNome(): string
     {
         return $this->descricao;
     }

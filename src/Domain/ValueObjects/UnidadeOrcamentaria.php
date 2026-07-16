@@ -6,31 +6,31 @@ use Semae\Pca\Domain\Exceptions\UnidadeOrcamentariaInvalidaException;
 
 class UnidadeOrcamentaria
 {
-    private readonly int $codigo; /* imutável */
     private readonly string $nome;
 
-    public function __construct(int $codigo, string $nome)
-    {
+    public function __construct(
+        private readonly int $id,
+        string $nome
+    ) {
         $nome = trim($nome);
 
-        if ($codigo <= 0) {
-            throw new UnidadeOrcamentariaInvalidaException('Codigo da unidade orcamentaria invalido.');
+        if ($id <= 0) {
+            throw new UnidadeOrcamentariaInvalidaException('Identificador da unidade orçamentaria inválido.');
         }
 
         if ($nome === '' || mb_strlen($nome) < 3) {
-            throw new UnidadeOrcamentariaInvalidaException('Nome da unidade orcamentaria invalido.');
+            throw new UnidadeOrcamentariaInvalidaException('Nome da unidade orçamentaria inválido.');
         }
 
-        $this->codigo = $codigo;
         $this->nome = $nome;
     }
 
-    public function codigo(): int
+    public function getId(): int
     {
-        return $this->codigo;
+        return $this->id;
     }
 
-    public function nome(): string
+    public function getNome(): string
     {
         return $this->nome;
     }

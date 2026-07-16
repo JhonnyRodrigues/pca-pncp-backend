@@ -16,7 +16,7 @@ class LotacaoTest extends TestCase
         $lotacao = new Lotacao(159, 'Coordenadoria de Tecnologia');
 
         $this->assertSame(159, $lotacao->getId());
-        $this->assertSame('Coordenadoria de Tecnologia', $lotacao->getDescricao());
+        $this->assertSame('Coordenadoria de Tecnologia', $lotacao->getNome());
     }
 
     public function testDeveSerImutavel(): void

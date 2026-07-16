@@ -12,8 +12,8 @@ class UnidadeOrcamentariaTest extends TestCase
     {
         $unidade = new UnidadeOrcamentaria(101, 'Diretoria Administrativa');
 
-        $this->assertSame(101, $unidade->codigo());
-        $this->assertSame('Diretoria Administrativa', $unidade->nome());
+        $this->assertSame(101, $unidade->getId());
+        $this->assertSame('Diretoria Administrativa', $unidade->getNome());
     }
 
     public function testDeveRejeitarCodigoZero(): void
@@ -48,21 +48,21 @@ class UnidadeOrcamentariaTest extends TestCase
     {
         $unidade = new UnidadeOrcamentaria(101, '  Diretoria Administrativa  ');
 
-        $this->assertSame('Diretoria Administrativa', $unidade->nome());
+        $this->assertSame('Diretoria Administrativa', $unidade->getNome());
     }
 
     public function testDeveAceitarNomeComAcentos(): void
     {
         $unidade = new UnidadeOrcamentaria(101, 'Procuradoria Jurídica');
 
-        $this->assertSame('Procuradoria Jurídica', $unidade->nome());
+        $this->assertSame('Procuradoria Jurídica', $unidade->getNome());
     }
 
     public function testDeveAceitarNomeComNumeros(): void
     {
         $unidade = new UnidadeOrcamentaria(101, 'Diretoria 2');
 
-        $this->assertSame('Diretoria 2', $unidade->nome());
+        $this->assertSame('Diretoria 2', $unidade->getNome());
     }
 
     public function testNaoDeveExporMetodosMutadores(): void

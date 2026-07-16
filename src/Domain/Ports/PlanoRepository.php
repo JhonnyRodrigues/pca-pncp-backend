@@ -12,7 +12,7 @@ interface PlanoRepository
     /**
      * @return Plano[]
      */
-    public function recuperarUltimasVersoesPorAnoExecucao(AnoExecucao $anoExecucao): array;
+    public function getUltimasVersoesPorAnoExecucao(AnoExecucao $anoExecucao): array;
 
     public function persistir(Plano $plano): void;
 }

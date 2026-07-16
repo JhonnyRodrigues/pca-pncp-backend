@@ -14,8 +14,8 @@ class RepresentanteTest extends TestCase
     {
         $representante = new Representante(709, 'Maria da Silva');
 
-        $this->assertSame(709, $representante->id());
-        $this->assertSame('Maria da Silva', $representante->nome());
+        $this->assertSame(709, $representante->getId());
+        $this->assertSame('Maria da Silva', $representante->getNome());
     }
 
     public function testDeveSerImutavel(): void

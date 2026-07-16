@@ -10,16 +10,24 @@ class Cnpj
 
     public function __construct(string $valor)
     {
-        $valorLimpo = preg_replace('/\D/', '', $valor);
+        $valorLimpo = preg_replace('/[^A-Za-z0-9]/', '', $valor);
 
-        if ($valorLimpo === null || strlen($valorLimpo) !== 14 || !$this->validarDigitos($valorLimpo)) {
+        if ($valorLimpo !== null) {
+            $valorLimpo = strtoupper($valorLimpo);
+        }
+
+        if (
+            $valorLimpo === null
+            || preg_match('/^[A-Z0-9]{12}[0-9]{2}$/', $valorLimpo) !== 1
+            || !$this->validarDigitos($valorLimpo)
+        ) {
             throw new InvalidArgumentException('CNPJ inválido.');
         }
 
         $this->valor = $valorLimpo;
     }
 
-    public function valor(): string
+    public function getValor(): string
     {
         return $this->valor;
     }
@@ -37,7 +45,7 @@ class Cnpj
         $somatorio1 = 0;
 
         for ($i = 0; $i < 12; $i++) {
-            $somatorio1 += (int) $digitos[$i] * $peso1[$i];
+            $somatorio1 += $this->valorDoCaractere($digitos[$i]) * $peso1[$i];
         }
 
         $resto1 = $somatorio1 % 11;
@@ -45,7 +53,7 @@ class Cnpj
 
         $somatorio2 = 0;
         for ($i = 0; $i < 12; $i++) {
-            $somatorio2 += (int) $digitos[$i] * $peso2[$i];
+            $somatorio2 += $this->valorDoCaractere($digitos[$i]) * $peso2[$i];
         }
         $somatorio2 += $digito1 * $peso2[12];
 
@@ -53,6 +61,11 @@ class Cnpj
         $digito2 = $resto2 < 2 ? 0 : 11 - $resto2;
 
         return $digitos[12] === (string) $digito1 && $digitos[13] === (string) $digito2;
+    }
+
+    private function valorDoCaractere(string $caractere): int
+    {
+        return ord($caractere) - 48;
     }
 }
 
