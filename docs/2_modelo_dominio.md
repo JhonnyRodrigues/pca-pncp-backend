@@ -60,12 +60,16 @@ A identificação lógica de uma **versão** de plano é composta por:
 
 # Regra Central de Decisão
 
-Para cada combinação de AnoExecucao e UnidadeOrcamentaria:
+Analisar histórico de Planos para decidir qual processo executar:
+Para cada UnidadeOrcamentaria:
 
-- o sistema deve analisar o cadastro histórico de Planos para decidir qual processo executar.
-- se não existir histórico de Publicação de plano, o sistema deverá executar o Processo de Publicação;
-- se já existir histórico de Publicação de plano, o sistema deverá executar o Processo de Retificação.
-- se a última versão já corresponder à última versão publicada, nenhuma ação será necessária.
+- obter a última versão homologada do Plano;
+- se SequencialVersao = 1 e DataPublicacao = null, executar Publicação;
+- se SequencialVersao > 1 e DataPublicacao = null, executar Retificação;
+- se DataPublicacao estiver preenchida, nenhuma ação será necessária.
+
+A decisão entre Publicação e Retificação pertence ao domínio,
+mas depende do cadastro de planos e não pode ser determinada apenas pelo estado isolado de um Plano.
 
 Essa decisão faz parte do domínio. Ela não deve ficar em Controller, Repository ou Infrastructure.
 
@@ -210,7 +214,8 @@ Uma demanda possui:
 - descrição do objeto material ou da contratação
 - quantidade
 - valor
-- data desejada
+- dataDesejada
+- AnoExecucao (derivada de dataDesejada)
 - categoria
 - situação
 - fkPlano (foreign key para vincular cada demanda a um Plano)
@@ -334,6 +339,7 @@ A identidade lógica de um Plano é composta por:
 
 Além disso, possui:
 
+- idPlano
 - DataHomologacao
 - DataPublicacao
 - Demandas
@@ -343,8 +349,16 @@ Regras:
 
 - deve possuir ao menos uma Demanda;
 - não pode existir sem Demandas;
-- todas as Demandas do Plano pertencem à mesma UnidadeOrcamentaria;
-- todas as Demandas do Plano pertencem ao mesmo AnoExecucao.
+- SequencialVersao deve ser maior que zero;
+- todas as Demandas do Plano devem referenciar o mesmo idPlano;
+- todas as Demandas do Plano devem pertencer à mesma UnidadeOrcamentaria;
+- todas as Demandas do Plano devem pertencer ao mesmo AnoExecucao;
+- DataHomologacao é obrigatória;
+- DataPublicacao é opcional.
+Observação:
+idPlano é utilizado para estabelecer o vínculo entre Plano e Demanda dentro do domínio.
+Embora a identificação lógica da versão seja composta por AnoExecucao, UnidadeOrcamentaria e SequencialVersao, o identificador idPlano também faz parte do modelo de domínio.
+
 
 Origem:
 

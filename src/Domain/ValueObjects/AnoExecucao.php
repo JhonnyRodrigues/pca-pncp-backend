@@ -20,7 +20,7 @@ class AnoExecucao
         $this->valor = $valor;
     }
 
-    public function valor(): int
+    public function getValor(): int
     {
         return $this->valor;
     }

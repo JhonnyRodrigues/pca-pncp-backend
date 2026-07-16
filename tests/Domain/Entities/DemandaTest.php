@@ -30,6 +30,13 @@ class DemandaTest extends TestCase
         $this->assertEquals(3550.00, $demanda->getValorUnitario());
     }
 
+    public function testDeveObterAnoExecucaoAPartirDaDataDesejada(): void
+    {
+        $demanda = $this->criarDemanda();
+
+        $this->assertSame(2027, $demanda->getAnoExecucao());
+    }
+
     public function testDeveIniciarSemSequencialPncp(): void
     {
         $demanda = $this->criarDemanda();

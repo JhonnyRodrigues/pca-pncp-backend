@@ -14,8 +14,8 @@ class ProcedimentoTest extends TestCase
     {
         $procedimento = new Procedimento(5, 'PUBLICAÇÃO DE PLANO');
 
-        $this->assertSame(5, $procedimento->idProcedimento());
-        $this->assertSame('PUBLICAÇÃO DE PLANO', $procedimento->descricao());
+        $this->assertSame(5, $procedimento->getId());
+        $this->assertSame('PUBLICAÇÃO DE PLANO', $procedimento->getDescricao());
     }
 
     public function testNaoDeveExporMetodosMutadores(): void

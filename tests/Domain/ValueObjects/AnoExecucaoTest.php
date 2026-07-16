@@ -14,7 +14,7 @@ class AnoExecucaoTest extends TestCase
 
         $ano = new AnoExecucao($anoAtual);
 
-        $this->assertSame($anoAtual, $ano->valor());
+        $this->assertSame($anoAtual, $ano->getValor());
     }
 
     public function testDeveAceitarProximoAno(): void
@@ -23,7 +23,7 @@ class AnoExecucaoTest extends TestCase
 
         $ano = new AnoExecucao($proximoAno);
 
-        $this->assertSame($proximoAno, $ano->valor());
+        $this->assertSame($proximoAno, $ano->getValor());
     }
 
     public function testDeveRejeitarAnoAnteriorAoAtual(): void

@@ -78,6 +78,8 @@ Sprint 1.3
 Sprint 1.4
 □ Criar Entity Demanda
 □ DemandaTest
+Demanda
+  └── AnoExecucao
 
 Sprint 1.5
 □ Criar Entity Procedimento
@@ -94,7 +96,6 @@ Sprint 1.7
 Sprint 1.8
 □ Criar Entity HistoricoProcedimento
 □ HistoricoProcedimentoTest
-
 HistoricoProcedimento
  ├── Procedimento
  ├── Representante
@@ -122,16 +123,33 @@ Todo Plano:
 - representa uma versão específica do planejamento.
 
 Procedimentos e históricos não pertencem ao agregado Plano.
+Plano
+  ├── idPlano
+  ├── AnoExecucao
+  ├── UnidadeOrcamentaria
+  ├── SequencialVersao
+  └── Demandas
+
 
 # FASE 2 — Portas - Agora definimos as interfaces.
 
 Sprint 2.1
 □ PlanoRepository
 
-Plano é Aggregate Root.
+Plano é o único Aggregate Root do domínio.
 
-Demandas e Históricos devem ser acessados
-através do Aggregate sempre que possível.
+O acesso de persistência ao domínio deve ocorrer
+através de PlanoRepository.
+
+Demanda não possui repositório próprio.
+HistoricoProcedimento não possui repositório próprio neste momento.
+
+Demandas e Históricos devem ser acessados através do Aggregate sempre que possível.
+
+
+Sprint 2.2
+□ HistoricoProcedimentoRepository
+
 
 # FASE 3 — Casos de Uso - Agora começamos a Application.
 
@@ -148,7 +166,7 @@ Sprint 3.3
 □ ResultadoProcessamentoPlano (é um DTO de aplicação e não um conceito de domínio.)
 
 Sprint 3.4
-□ PublicarPcaUseCase
+□ PublicarPcaUseCase (verificar necessidade de implementar HistoricoPlanos para decisões devePublicar() e deveRetificar())
 □ PublicarPcaUseCaseTest
 
 Sprint 3.5

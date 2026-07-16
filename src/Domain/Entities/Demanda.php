@@ -69,6 +69,11 @@ class Demanda
         return $this->dataDesejada;
     }
 
+    public function getAnoExecucao(): int
+    {
+        return (int) $this->dataDesejada->format('Y');
+    }
+
     public function getCategoria(): int
     {
         return $this->categoria;
