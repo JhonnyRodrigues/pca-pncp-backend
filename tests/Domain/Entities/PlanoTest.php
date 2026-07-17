@@ -8,9 +8,11 @@ use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Semae\Pca\Domain\Entities\Demanda;
 use Semae\Pca\Domain\Entities\Plano;
+use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Exceptions\PlanoException;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
-use Semae\Pca\Domain\ValueObjects\UnidadeOrcamentaria;
+use Semae\Pca\Domain\ValueObjects\Lotacao;
+use Semae\Pca\Domain\ValueObjects\Uasg;
 
 class PlanoTest extends TestCase
 {
@@ -101,7 +103,11 @@ class PlanoTest extends TestCase
 
         $anoExecucao = new AnoExecucao((int) date('Y') + 1);
         $unidadeOrcamentaria = $this->criarUnidadeOrcamentaria();
-        $outraUnidadeOrcamentaria = new UnidadeOrcamentaria(102, 'Procuradoria Juridica');
+        $outraUnidadeOrcamentaria = new UnidadeOrcamentaria(
+            new Lotacao(102, 'Procuradoria Juridica'),
+            new Uasg('928344', 'SEMAE Piracicaba'),
+            'Procuradoria Juridica'
+        );
 
         new Plano(
             42,
@@ -193,6 +199,10 @@ class PlanoTest extends TestCase
     }
 
     private function criarUnidadeOrcamentaria(): UnidadeOrcamentaria {
-        return new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira');
+        return new UnidadeOrcamentaria(
+            new Lotacao(101, 'Diretoria Geral Administrativa e Financeira'),
+            new Uasg('928344', 'SEMAE Piracicaba'),
+            'Diretoria Geral Administrativa e Financeira'
+        );
     }
 }

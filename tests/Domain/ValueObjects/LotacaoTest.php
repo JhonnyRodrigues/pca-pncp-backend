@@ -6,8 +6,8 @@ namespace Tests\Domain\ValueObjects;
 
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
-use Semae\Pca\Domain\ValueObjects\UnidadeOrcamentaria;
 
 class LotacaoTest extends TestCase
 {

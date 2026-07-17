@@ -6,10 +6,12 @@ namespace Tests\Domain\Entities;
 
 use PHPUnit\Framework\TestCase;
 use Semae\Pca\Domain\Entities\Demanda;
-use Semae\Pca\Domain\ValueObjects\UnidadeOrcamentaria;
+use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Semae\Pca\Domain\Exceptions\SequencialPncpException;
+use Semae\Pca\Domain\ValueObjects\Lotacao;
+use Semae\Pca\Domain\ValueObjects\Uasg;
 
 
 class DemandaTest extends TestCase
@@ -71,7 +73,7 @@ class DemandaTest extends TestCase
             2,
             159,
             42,
-            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
+            $this->criarUnidadeOrcamentaria(),
             new DateTimeImmutable('2027-03-15'),
             99, // <---
             'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
@@ -96,7 +98,7 @@ class DemandaTest extends TestCase
             2,
             159,
             42,
-            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
+            $this->criarUnidadeOrcamentaria(),
             new DateTimeImmutable('2027-03-15'),
             1,
             'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
@@ -121,7 +123,7 @@ class DemandaTest extends TestCase
             2,
             159,
             42,
-            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
+            $this->criarUnidadeOrcamentaria(),
             new DateTimeImmutable('2027-03-15'),
             1,
             'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
@@ -146,7 +148,7 @@ class DemandaTest extends TestCase
             2,
             159,
             42,
-            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
+            $this->criarUnidadeOrcamentaria(),
             new DateTimeImmutable('2027-03-15'),
             1,
             'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
@@ -169,7 +171,7 @@ class DemandaTest extends TestCase
             2,
             159,
             42,
-            new UnidadeOrcamentaria(101, 'Diretoria Geral Administrativa e Financeira'),
+            $this->criarUnidadeOrcamentaria(),
             new DateTimeImmutable('2027-03-15'),
             1,
             'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
@@ -182,6 +184,15 @@ class DemandaTest extends TestCase
             '98',
             'INFORMÁTICA',
             'N'
+        );
+    }
+
+    private function criarUnidadeOrcamentaria(): UnidadeOrcamentaria
+    {
+        return new UnidadeOrcamentaria(
+            new Lotacao(101, 'Diretoria Geral Administrativa e Financeira'),
+            new Uasg('928344', 'SEMAE Piracicaba'),
+            'Diretoria Geral Administrativa e Financeira'
         );
     }
 }

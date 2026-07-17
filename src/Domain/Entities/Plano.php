@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Semae\Pca\Domain\Entities;
 
 use DateTimeImmutable;
-use Semae\Pca\Domain\ValueObjects\AnoExecucao;
-use Semae\Pca\Domain\ValueObjects\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Exceptions\PlanoException;
+use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 
 class Plano
 {
@@ -104,7 +103,10 @@ class Plano
                 throw new PlanoException('Demanda deve pertencer ao Plano informado.');
             }
 
-            if ($demanda->getUnidadeOrcamentaria()->getId() !== $this->unidadeOrcamentaria->getId()) {
+            if (
+                $demanda->getUnidadeOrcamentaria()->getLotacao()->getId()
+                !== $this->unidadeOrcamentaria->getLotacao()->getId()
+            ) {
                 throw new PlanoException('Demandas devem pertencer a mesma Unidade Orçamentária do Plano.');
             }
 

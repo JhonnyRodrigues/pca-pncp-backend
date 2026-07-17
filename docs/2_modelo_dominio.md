@@ -112,68 +112,6 @@ Regras:
 - quando inválido, deve lançar exceção de domínio apropriada.
 
 
-## UnidadeOrcamentaria
-
-Representa uma Unidade Orçamentária responsável pela publicação do
-Plano de Contratações Anual junto ao PNCP.
-
-Possui:
-- código
-- nome
-
-Regras:
-
-- código é obrigatório;
-- código deve ser um número inteiro positivo;
-- código não pode ser zero;
-- código identifica unicamente uma Unidade Orçamentária;
-- nome é obrigatório;
-- nome deve possuir ao menos 3 caracteres;
-- espaços em branco nas extremidades devem ser removidos;
-- nome pode conter acentos;
-- nome pode conter números;
-- o objeto é imutável após sua criação.
-
-Observações:
-
-- Toda Demanda pertence a uma Unidade Orçamentária.
-- Todo Plano pertence a exatamente uma Unidade Orçamentária.
-- O código utilizado pela publicação corresponde ao código da unidade
-  orçamentária cadastrada para integração com o PNCP.
-- Cada unidade possui seu próprio histórico de versões homologadas / publicadas.
-- O código da UnidadeOrcamentaria representa o identificador utilizado
-dentro do domínio. Eventuais conversões entre códigos do PCA, SGI, Oracle, RH_LOTACOES,
-PNCP ou outros sistemas externos não pertencem ao domínio e devem ser tratadas fora das entidades de domínio.
-
-## Lotacao
-
-Representa uma unidade organizacional da autarquia.
-
-Possui:
-
-- id
-- descricao
-
-Regras:
-
-- id é obrigatório;
-- descrição é obrigatória;
-- o objeto é imutável;
-
-Importante:
-
-Lotação e UnidadeOrcamentaria são conceitos distintos.
-
-Nem toda Lotação é uma UnidadeOrcamentaria.
-
-Exemplos de lotações:
-
-- Presidência
-- Procuradoria Jurídica
-- Diretoria Geral Administrativa e Financeira
-- Coordenadoria de Tecnologia
-
-
 ## Representante
 
 Representa a pessoa responsável pela execução de uma ação registrada pelo sistema.
@@ -194,6 +132,65 @@ Observações:
 - Representante identifica o responsável por uma ação registrada em um HistoricoProcedimento;
 - pode representar operador, avaliador, consolidador ou presidente;
 - para os procedimentos de Publicação e Retificação, os dados do representante serão obtidos a partir do usuário autenticado no sistema.
+
+
+## Lotacao
+
+Representa uma unidade organizacional da autarquia.
+
+Possui:
+
+- id
+- descricao
+
+Regras:
+
+- id é obrigatório;
+- descrição é obrigatória;
+- lotação deve ser um número inteiro positivo maior que zero;
+- o objeto é imutável;
+
+Importante:
+
+Lotação e UnidadeOrcamentaria são conceitos distintos.
+
+Nem toda Lotação é uma UnidadeOrcamentaria.
+
+Exemplos de lotações:
+
+- Presidência
+- Procuradoria Jurídica
+- Diretoria Geral Administrativa e Financeira
+- Coordenadoria de Tecnologia
+
+
+## UnidadeOrcamentaria
+
+Representa uma Unidade Orçamentária responsável pela publicação do
+Plano de Contratações Anual junto ao PNCP.
+
+Possui:
+- lotacao
+- descricao
+- UASG
+
+Regras:
+
+- lotacao, descricao e UASG são obrigatórios;
+- UASG identifica a unidade compradora perante o Governo Federal;
+- o objeto é imutável após sua criação.
+- descricao deve possuir ao menos 3 caracteres;
+- espaços em branco nas extremidades devem ser removidos;
+- descricao pode conter acentos e números;
+
+Observações:
+
+- Toda Demanda pertence a uma Unidade Orçamentária.
+- Todo Plano pertence a exatamente uma Unidade Orçamentária.
+- Cada unidade possui seu próprio histórico de versões homologadas e publicadas.
+- Toda UnidadeOrcamentaria utilizada no processo de publicação deve possuir uma UASG associada. Não existe unidadeOrcamentaria válida sem UASG
+- UASG é Unidade Administrativa de Serviços Gerais, um código criado pelo Governo Federal para identificar o Óregão ou o Setor exato que está realizando a compra. Utilizado para diferenciar as entidades compradoras
+- A UASG é uma informação de configuração utilizada para integração com o PNCP.
 
 
 ---

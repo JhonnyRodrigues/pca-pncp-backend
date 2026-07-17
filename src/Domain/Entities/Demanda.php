@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Semae\Pca\Domain\Entities;
 
-use Semae\Pca\Domain\ValueObjects\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Exceptions\SequencialPncpException;
 use DateTimeImmutable;
 use InvalidArgumentException;
