@@ -148,7 +148,18 @@ Sprint 2.2
 □ HistoricoProcedimentoRepository
 
 - HistoricoProcedimentoRepository existe apenas
-para registrar auditoria das ações execu
+para registrar auditoria das ações executadas
+
+
+Sprint 2.3
+□ RepresentanteRepository
+- Responsável por localizar um Representante a partir do usuário autenticado
+
+
+Sprint 2.4
+□ LotacaoRepository
+- Responsável por localizar a Lotacao associada a um Representante
+
 
 
 # FASE 3 — Casos de Uso - Agora começamos a Application.
@@ -156,6 +167,7 @@ para registrar auditoria das ações execu
 Sprint 3.1
 □ PublicarPcaRequest
 □ PublicarPcaRequestTest
+- São os Dados necessários para iniciar o caso de uso de publicação.
 
 Sprint 3.2
 □ PublicarPcaValidator
