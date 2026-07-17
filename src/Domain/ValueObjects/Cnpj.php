@@ -70,5 +70,5 @@ class Cnpj
 }
 
 /*
-A responsabilidade desta classe é encapsular um CNPJ do domínio, garantindo que apenas valores válidos sejam representados e mantendo a regra de negócio fora de controllers e repositórios. Ela pertence à camada de domínio porque é um conceito do negócio e não depende de infraestrutura. O teste será voltado a validar exatamente esse comportamento: aceitar um CNPJ corretamente formatado e rejeitar entradas inválidas.
+A responsabilidade desta classe é encapsular um CNPJ do domínio, garantindo que apenas valores válidos sejam representados e mantendo a regra de negócio fora de controllers e repositórios. Ela pertence à camada de domínio porque é um conceito do negócio e não depende de infraestrutura. O teste será voltado a validar exatamente esse comportamento: aceitar um CNPJ alfanumérico corretamente formatado e rejeitar entradas inválidas.
 */
