@@ -167,44 +167,69 @@ Sprint 2.4
 Sprint 3.1
 □ PublicarPcaRequest
 □ PublicarPcaRequestTest
-- representa todos os dados necessários para iniciar o caso de uso. Inclui:
+Representa todos os dados necessários para iniciar o caso de uso. Inclui:
   - Cnpj
   - AnoExecucao
   - usuarioLogado
-  - credenciais (pertencem à Application/Infrastructure)
-
+  - credenciais
+Observações:
+  - Cnpj e AnoExecucao devem utilizar os respectivos Value Objects do domínio.
+  - usuarioLogado representa o usuário autenticado na aplicação.
+  - credenciais são necessárias para a integração com o PNCP, não pertencem ao domínio e devem permanecer na camada Application/Infrastructure.
+  - PublicarPcaRequest é apenas um DTO de entrada.
+  - Não contém validações ou regras de negócio.
+  - Deve ser imutável.
 
 Sprint 3.2
 □ PublicarPcaValidator
 □ PublicarPcaValidatorTest
+Artefatos auxiliares (se necessários):
+□ ValidationResult
+□ ValidationResultTest
+
+Responsabilidades:
+  - validar os dados recebidos em PublicarPcaRequest;
+  - validar usuarioLogado;
+  - validar credenciais;
+  - retornar todos os erros encontrados.
+Não deve validar Cnpj ou AnoExecucao
+Observações:
+  - As invariantes de Cnpj pertencem ao Value Object Cnpj.
+  - As invariantes de AnoExecucao pertencem ao Value Object AnoExecucao.
+  - O Validator não deve duplicar validações já existentes no Domain.
+  - O Validator não deve conter regras de negócio.
+  - O Validator pertence à camada Application.
 
 Sprint 3.3
-□ PublicarPcaResponse
-□ ResultadoProcessamentoPlano (é um DTO de aplicação e não um conceito de domínio.)
-
-Sprint 3.4
-□ Modelar decisão de processamento por UnidadeOrcamentaria
+□ Modelar DECISÃO de processamento por UnidadeOrcamentaria
 □ Criar testes para cenários:
   - primeira publicação
   - retificação
   - nenhuma ação
-Observação:
-Avaliar a necessidade de modelar um serviço de domínio ou objeto de decisão para determinar se uma UnidadeOrcamentaria deve:
+Observação: Avaliar a necessidade de modelar um serviço de domínio ou objeto de decisão para determinar se uma UnidadeOrcamentaria deve:
   - publicar
   - retificar
   - não executar nenhuma ação
 Essa decisão depende do estado dos Planos homologados/publicados e não deve ficar no UseCase, Repository, Controller ou Infrastructure.
 
-Sprint 3.5
+Sprint 3.4
 □ Criar ProcessarPublicacaoPcaUseCase
 □ Criar ProcessarPublicacaoPcaUseCaseTest
-
 Responsabilidade:
 - orquestrar o fluxo de publicação/retificação
 - consultar portas necessárias
 - delegar a decisão ao domínio
 - acionar infraestrutura através de interfaces
 - montar resposta de aplicação
+
+Sprint 3.5
+□ PublicarPcaResponse
+□ ResultadoProcessamentoPlano
+Observações:
+- Ambos são DTOs da camada Application.
+- Não representam conceitos do domínio.- 
+- representam apenas a saída produzida pelo caso de uso
+
 
 Neste momento, utilizar DTOs de resposta na camada Application.
 Presenter poderá ser introduzido futuramente caso surjam múltiplos consumidores ou formatos de saída.
