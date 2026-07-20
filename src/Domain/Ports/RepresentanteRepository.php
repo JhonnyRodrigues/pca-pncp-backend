@@ -8,5 +8,5 @@ use Semae\Pca\Domain\ValueObjects\Representante;
 
 interface RepresentanteRepository
 {
-    public function obterPorNomeUsuario(string $nomeUsuario): ?Representante;
+    public function obterPorUsuarioLogado(string $usuarioLogado): ?Representante;
 }

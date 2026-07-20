@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tests\Application\UseCases\PublicarPca;
 
 use PHPUnit\Framework\TestCase;
-use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaRequest;
-use Semae\Pca\Domain\ValueObjects\Cnpj;
-use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 use ReflectionClass;
+use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaRequest;
+use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\Cnpj;
 
 class PublicarPcaRequestTest extends TestCase
 {
@@ -16,13 +16,20 @@ class PublicarPcaRequestTest extends TestCase
     {
         $anoExecucao = new AnoExecucao((int) date('Y') + 1);
         $cnpj = new Cnpj('12.345.678/0001-95');
-        $nomeUsuario = 'jsilva';
+        $usuarioLogado = 'jsilva';
+        $credenciais = $this->criarCredenciais();
 
-        $request = new PublicarPcaRequest($cnpj, $anoExecucao, $nomeUsuario);
+        $request = new PublicarPcaRequest(
+            $cnpj,
+            $anoExecucao,
+            $usuarioLogado,
+            $credenciais
+        );
 
         $this->assertSame($anoExecucao, $request->getAnoExecucao());
         $this->assertSame($cnpj, $request->getCnpj());
-        $this->assertSame($nomeUsuario, $request->getNomeUsuario());
+        $this->assertSame($usuarioLogado, $request->getUsuarioLogado());
+        $this->assertSame($credenciais, $request->getCredenciais());
     }
 
     public function testDevePermitirConsultarAnoExecucao(): void
@@ -32,7 +39,8 @@ class PublicarPcaRequestTest extends TestCase
         $request = new PublicarPcaRequest(
             new Cnpj('12.345.678/0001-95'),
             $anoExecucao,
-            'jsilva'
+            'jsilva',
+            $this->criarCredenciais()
         );
 
         $this->assertSame($anoExecucao, $request->getAnoExecucao());
@@ -45,21 +53,37 @@ class PublicarPcaRequestTest extends TestCase
         $request = new PublicarPcaRequest(
             $cnpj,
             new AnoExecucao((int) date('Y') + 1),
-            'jsilva'
+            'jsilva',
+            $this->criarCredenciais()
         );
 
         $this->assertSame($cnpj, $request->getCnpj());
     }
 
-    public function testDevePermitirConsultarNomeUsuario(): void
+    public function testDevePermitirConsultarUsuarioLogado(): void
     {
         $request = new PublicarPcaRequest(
             new Cnpj('12.345.678/0001-95'),
             new AnoExecucao((int) date('Y') + 1),
-            'jsilva'
+            'jsilva',
+            $this->criarCredenciais()
         );
 
-        $this->assertSame('jsilva', $request->getNomeUsuario());
+        $this->assertSame('jsilva', $request->getUsuarioLogado());
+    }
+
+    public function testDevePermitirConsultarCredenciais(): void
+    {
+        $credenciais = $this->criarCredenciais();
+
+        $request = new PublicarPcaRequest(
+            new Cnpj('12.345.678/0001-95'),
+            new AnoExecucao((int) date('Y') + 1),
+            'jsilva',
+            $credenciais
+        );
+
+        $this->assertSame($credenciais, $request->getCredenciais());
     }
 
     public function testDeveSerImutavel(): void
@@ -73,5 +97,15 @@ class PublicarPcaRequestTest extends TestCase
         foreach ($reflection->getMethods() as $method) {
             $this->assertStringStartsNotWith('set', $method->getName());
         }
+    }
+
+    private function criarCredenciais(): array
+    {
+        return [
+            'ambiente' => 'homologacao',
+            'baseUrl'  => 'https://treina.pncp.gov.br/api/pncp',
+            'usuario'  => '99c7-440ee-c4130',
+            'senha'	   => 'ea6s84bvg1s81tsI',
+        ];
     }
 }

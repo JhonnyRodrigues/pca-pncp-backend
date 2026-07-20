@@ -1,0 +1,200 @@
+Esta é uma cópia do código escrito na aplicação scriptcase do tipo blank PCA_PUBLICAR_B.
+
+O Objetivo deste arquivo é trazer contexto para implmentação
+
+---
+
+/*Esse arquivo pertence à camada Presentation, é o ponto de entrada (entry point HTTP / endpoint / handler / front controller simplificado).
+O que esse arquivo faz:
+	- constrói interface de apresentação ao usuário
+	- recebe requisição HTTP (POST)
+	- lê JSON da request
+	- valida input básico
+	- resolve dependências (bootstrap/autoload)
+	- instancia controller
+	- formata resposta JSON
+	
+Ou seja, ele já está ocupando o lugar que normalmente seria algo como:
+- index.php
+- routes.php
+- Laravel Controller
+- Symfony Controller
+*/
+
+header('Content-Type: text/html; charset=UTF-8');
+$anoAtual = date('Y');
+$CNPJ = (string) '50853555000154';
+$urlPncp = "https://pncp.gov.br/app/pca/$CNPJ/$anoAtual";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	header('Content-Type: application/json; charset=UTF-8');
+	
+	$usuarioLogado = (string) [usr_login] ?? null;
+	$isAmbienteProducao = ($_SERVER["SERVER_NAME"] == 'sgi.semaepiracicaba.sp.gov.br') ? true : false;
+	$credenciais = getCredenciais($isAmbienteProducao);
+
+	try {
+		# carrega as dependências. O backend é armazenado dentro do diretório da aplicação
+		$libPath = $this->Ini->path_aplicacao . "/backend/autoload.php";
+		if (!file_exists($libPath)) {
+			throw new Exception("Dependências não encontradas.");
+		}
+		require_once $libPath;
+
+		# obtém os dados da requisição
+		$input = json_decode(file_get_contents('php://input'), true);
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			throw new Exception('JSON inválido na requisição.');
+		}
+
+		$anoExecucao = (int) ($input['ano'] ?? 0);
+		$controller = new \Semae\Pca\Controller\PcaController();
+
+		$resultado = $controller->executarPublicacao([
+			'cnpj'			=> $CNPJ,
+			'anoExecucao'	=> $anoExecucao,
+			'usuarioLogado'	=> $usuarioLogado,
+			'credenciais'	=> $credenciais,
+		]);
+
+		exit(json_encode([
+			'status' => $resultado['status'],
+			'html'   => $resultado['html'] ?? null,
+			'message'=> $resultado['message'] ?? null
+		], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		
+	} catch (Throwable $e) {
+		http_response_code(500);
+		sc_log_add("PCA_PNCP", convertToISO88591Recursive(substr($e->getMessage(), 0, 3900)));
+		exit(json_encode([
+			'status' => 'error',
+			'message' => 'Erro ao processar publicação: ' . $e->getMessage()
+		], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+	}	
+}
+
+?>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="UTF-8">
+	<title>Publicação PCA no PNCP</title>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			text-align: center;
+			margin-top: 100px;
+			background: #f9f9f9;
+		}
+		button {
+			padding: 10px 25px;
+			font-size: 1.1em;
+			background-color: #3498db;
+			border: none;
+			color: white;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: 0.3s;
+		}
+		button:hover {
+			background-color: #2980b9;
+		}
+	</style>
+</head>
+<body>
+
+	<h2>Publicação de Planos no PNCP</h2>
+	<p>Ao confirmar, o sistema enviará o Plano de Compras de cada Unidade Orçamentária para o Portal Nacional de Compras Públicas.</p>
+	<button id="btnPublicar">📤 Publicar</button>
+	<p><small>Verifique a lista de planos já publicados no PNCP, a serem executados neste ano (<?= $anoAtual ?>), através <a href="<?= $urlPncp ?>" target="_blank">desse link</a></small></p>
+
+	<script>
+	document.getElementById('btnPublicar').addEventListener('click', () => {
+		const anoAtual = new Date().getFullYear();
+		const proximoAno = anoAtual + 1;
+		Swal.fire({
+			title: 'Selecione o ano de execução',
+			text: 'Qual é o ano da compra/contratação dos itens que serão publicados no PNCP?',
+			icon: 'question',
+			showCancelButton: true,
+			showDenyButton: true,
+			confirmButtonText: 'Ano seguinte (' + proximoAno + ')',
+			denyButtonText: 'Ano atual (' + anoAtual + ')',
+			cancelButtonText: 'Cancelar',
+			confirmButtonColor: '#2ecc71',
+			denyButtonColor: '#f39c12',
+			cancelButtonColor: '#e74c3c'
+		}).then((result) => {
+			if (result.isConfirmed) {
+				executarPublicacao(anoAtual);
+			} else if (result.isDenied) {
+				executarPublicacao(proximoAno);
+			}
+		});
+	});
+
+	function executarPublicacao(ano) {
+		Swal.fire({
+			title: 'Publicando...',
+			text: 'Enviando dados do planejamento a ser executado no ano ' + ano + ' para o PNCP.',
+			allowOutsideClick: false,
+			didOpen: () => Swal.showLoading()
+		});
+
+		fetch('../PCA_PUBLICAR_B/', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ ano: ano })
+		})
+		.then(async resp => {
+			const text = await resp.text();
+			// console.log("Resposta bruta:", text); // abrir console do DevTools
+			try {
+				return JSON.parse(text);
+			} catch (e) {
+				throw new Error('Resposta inválida do servidor:\n\n' + text);
+			}
+		})
+		.then(data => {
+			if (data.status === 'success') {
+				Swal.fire({
+					icon: 'success',
+					title: 'Publicação concluída',
+					html: data.html,
+					width: 600,
+					confirmButtonColor: '#2ecc71'
+				});
+			} else if (data.status === 'info') {
+				Swal.fire({
+					icon: 'info',
+					title: 'Atenção',
+					text: data.message,
+					confirmButtonColor: '#3498db'
+				});
+			} else {
+				Swal.fire({
+					icon: 'error',
+					title: 'Falha na publicação',
+					html: data.html ?? data.message,
+					width: 600,
+					confirmButtonColor: '#e74c3c'
+				});
+			}
+		})
+		.catch(err => {
+			Swal.fire({
+				icon: 'error',
+				title: 'Falha na operação',
+				text: err.message
+			});
+		});
+	}
+	</script>
+
+</body>
+</html>
+
+<?php

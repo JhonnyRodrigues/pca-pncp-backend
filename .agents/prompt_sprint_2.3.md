@@ -27,13 +27,13 @@ O caso de uso de Publicação receberá:
 ```text
 AnoExecucao
 Cnpj
-NomeUsuario
+usuarioLogado
 ```
 
 A partir de:
 
 ```text
-NomeUsuario (usr_login)
+usuarioLogado (usr_login)
 ```
 
 o sistema deverá localizar:
@@ -59,7 +59,7 @@ Não criar métodos genéricos de CRUD.
 Espera-se algo equivalente a:
 
 ```php
-obterPorNomeUsuario(string $nomeUsuario): ?Representante
+obterPorUsuarioLogado(string $usuarioLogado): ?Representante
 ```
 
 Justifique qualquer variação.

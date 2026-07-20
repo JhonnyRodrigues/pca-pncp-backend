@@ -70,6 +70,7 @@ Sprint 1.1 - Introdução ao DDD
 Sprint 1.2
 □ Criar Value Object AnoExecucao
 □ AnoExecucaoTest
+  - A interface do sistema somente permite seleção do ano atual ou do próximo ano, reforçando as restrições definidas pelo Value Object.
 
 Sprint 1.3
 □ Criar Value Object Lotacao
@@ -166,7 +167,12 @@ Sprint 2.4
 Sprint 3.1
 □ PublicarPcaRequest
 □ PublicarPcaRequestTest
-  - São os Dados necessários para iniciar o caso de uso de publicação.
+- representa todos os dados necessários para iniciar o caso de uso. Inclui:
+  - Cnpj
+  - AnoExecucao
+  - usuarioLogado
+  - credenciais (pertencem à Application/Infrastructure)
+
 
 Sprint 3.2
 □ PublicarPcaValidator

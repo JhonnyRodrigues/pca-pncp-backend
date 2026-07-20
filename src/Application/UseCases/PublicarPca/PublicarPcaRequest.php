@@ -12,7 +12,8 @@ class PublicarPcaRequest
     public function __construct(
         private readonly Cnpj $cnpj,
         private readonly AnoExecucao $anoExecucao,
-        private readonly string $nomeUsuario
+        private readonly string $usuarioLogado,
+        private readonly array $credenciais
     ) {}
 
     public function getAnoExecucao(): AnoExecucao
@@ -25,8 +26,14 @@ class PublicarPcaRequest
         return $this->cnpj;
     }
 
-    public function getNomeUsuario(): string
+    public function getUsuarioLogado(): string
     {
-        return $this->nomeUsuario;
+        return $this->usuarioLogado;
     }
+    
+    public function getCredenciais(): array
+    {
+        return $this->credenciais;
+    }
+
 }

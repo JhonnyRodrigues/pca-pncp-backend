@@ -31,7 +31,51 @@ Fases que faltam implementar
 - Linguagem: PHP 8.1
 - Ferramentas: Composer com autoloader, PHPUnit para testes
 
-### Arquitetura Ideal
+### Sugestão inicial de Arquitetura
+Scriptcase (Blank PCA_PUBLICAR_B)
+                │
+                ▼
+        PcaController
+                │
+                ▼
+ProcessarPublicacaoPcaUseCase
+                │
+                ▼
+            Domain
+                │
+                ▼
+         Repositories
+         PncpClient
+
+
+Presentation
+│
+├── PCA_PUBLICAR_B
+└── PcaController
+
+Application
+│
+├── ProcessarPublicacaoPcaUseCase
+├── PublicarPcaRequest
+├── PublicarPcaValidator
+└── PublicarPcaResponse
+
+Domain
+│
+├── Plano
+├── Demanda
+├── AnoExecucao
+├── Cnpj
+└── ...
+
+Infrastructure
+│
+├── OraclePlanoRepository
+├── OracleHistoricoProcedimentoRepository
+├── PncpClient
+└── PncpPayloadBuilder
+
+
 \`\`\`
 src/
   Application/UseCases/PublicarPca/

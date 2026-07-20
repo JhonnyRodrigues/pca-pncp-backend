@@ -58,7 +58,7 @@ O caso de uso recebe:
 ```text
 AnoExecucao
 Cnpj
-NomeUsuario
+usuarioLogado
 ```
 
 ---
@@ -87,7 +87,7 @@ Cnpj
 
 ---
 
-## NomeUsuario
+## usuarioLogado
 
 Representa o usuário autenticado no sistema.
 
@@ -100,7 +100,7 @@ usr_login (Scriptcase)
 Importante:
 
 ```text
-NomeUsuario não é Representante.
+usuarioLogado não é Representante.
 ```
 
 O UseCase utilizará posteriormente:
@@ -214,7 +214,7 @@ Antes de escrever código:
 1. Confirmar conclusão das Fases 1 e 2.
 2. Explicar a responsabilidade de um Request na camada Application.
 3. Explicar por que PublicarPcaRequest não deve validar dados.
-4. Explicar por que NomeUsuario pertence ao Request.
+4. Explicar por que usuarioLogado pertence ao Request.
 5. Explicar por que Representante não pertence ao Request.
 6. Justificar o uso de Value Objects para AnoExecucao e Cnpj.
 
@@ -253,7 +253,7 @@ Exemplos:
 
 ✓ devePermitirConsultarCnpj
 
-✓ devePermitirConsultarNomeUsuario
+✓ devePermitirConsultarUsuarioLogado
 
 ✓ deveSerImutavel
 ```
