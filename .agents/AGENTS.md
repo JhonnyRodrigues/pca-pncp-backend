@@ -35,6 +35,7 @@ Este projeto utiliza:
 - PSR-3
 - Dependency Injection
 - TDD
+- DDD
 
 Nunca viole a direção das dependências.
 
@@ -94,7 +95,6 @@ Também seguir as seguintes regras:
 
 ---
 
-
 ## Planejamento
 
 Antes de implementar qualquer alteração:
@@ -112,7 +112,35 @@ Para tarefas complexas, ambíguas, com múltiplos arquivos ou impacto arquitetur
 - identificar riscos
 - definir estratégia de validação
 
+Para aplicar o DDD, entenda as regras de negócio, me fazendo perguntas quando necessário, para delimitar contextos e estruturar o domínio de forma que o código reflita o que acontece no mundo real.
+
 Evite perguntas desnecessárias quando uma premissa segura permitir o avanço da implementação.
+
+---
+
+## Diretrizes de DDD
+
+O código deve refletir o domínio do negócio e utilizar a linguagem utilizada pelos especialistas do processo de PCA e PNCP.
+
+Antes de introduzir novas entidades, objetos de valor, serviços de domínio ou agregados:
+
+- compreender o significado de negócio dos conceitos envolvidos
+- identificar responsabilidades reais do domínio
+- evitar modelagem baseada apenas na estrutura do banco de dados
+- evitar entidades anêmicas
+- evitar serviços de domínio sem justificativa clara
+- utilizar Value Objects sempre que o conceito possuir identidade apenas pelo valor
+- proteger invariantes dentro do Domain
+
+Ao propor alterações relevantes no domínio, explicar:
+
+- qual conceito do negócio está sendo representado
+- por que foi modelado dessa forma
+- quais invariantes estão sendo protegidas
+- quais regras pertencem ao domínio
+- quais responsabilidades foram mantidas fora do domínio e por quê
+
+Quando houver incerteza sobre regras de negócio, buscar esclarecimento antes de modelar o domínio.
 
 ---
 
@@ -136,7 +164,7 @@ Novas dependências externas só devem ser introduzidas mediante justificativa c
 
 ## Ordem de desenvolvimento
 
-Sempre seguir o roadmap.
+Seguir o roadmap.
 
 Nunca implementar etapas futuras.
 
@@ -218,7 +246,7 @@ Priorizar:
 - simplicidade
 - baixo acoplamento
 - alta coesão
-- nomes claros
+- nomes claros. Exemplos: getValor, setNome, validarOrigem, foiPublicado
 - métodos pequenos
 - legibilidade
 - testabilidade
@@ -231,7 +259,7 @@ Evitar complexidade desnecessária.
 
 Ao implementar funcionalidades complexas ou realizar refatorações significativas:
 
-- utilizar um Plano de Execução
+- utilizar ou criar um Plano de Execução
 - seguir as orientações descritas em `.agent/PLANS.md`
 - manter o plano atualizado durante a implementação
 
@@ -246,6 +274,15 @@ Ao concluir uma tarefa, apresentar:
 ### Resumo
 
 - o que foi implementado
+
+### Justificativa de Domínio (DDD)
+
+- qual regra de negócio está sendo atendida
+- quais conceitos do domínio foram identificados
+- quais entidades, value objects ou serviços de domínio participaram da solução
+- por que a modelagem escolhida representa adequadamente o negócio
+- quais invariantes ou restrições de negócio estão sendo protegidas
+- como a solução preserva a linguagem ubíqua do domínio
 
 ### Justificativa Arquitetural
 

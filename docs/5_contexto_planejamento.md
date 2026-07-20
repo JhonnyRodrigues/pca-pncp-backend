@@ -4,6 +4,26 @@
 Projeto de backend em PHP para publicação e retificação de planos PCA no PNCP.
 Iniciou com código legado em Scriptcase e precisa ser reconstruido para Clean Architecture em camadas (Domínio, Aplicação, Infraestrutura, Apresentação).
 
+---
+
+## Estado do projeto
+
+Fases já implementadas no módulo interno (PCA) do Sistema de Gestão Integrado (SGI)
+1. Registra Demandas
+2. Avalia Demandas
+3. Consolida Demandas em planos
+4. Homologa planos
+5. Gera Plano Versionado
+
+Fases que faltam implementar
+6. Consulta cadastro histórico de planos gerados
+7. Decide Publicar OU Retificar planos
+8. Envia os dados ao PNCP
+9. Busca numero_sequencial para confirmar nova versão no PNCP
+9. Atualiza os registros no banco de dados do SGI
+
+---
+
 ## Estrutura do Projeto
 
 ### Localização
@@ -62,6 +82,8 @@ tests/
   PlanoPayloadTest.php
 \`\`\`
 
+---
+
 ## Princípios para aplicar
 
 1. **Dependência para dentro**: Domínio → Aplicação → Infraestrutura ← Apresentação
@@ -70,6 +92,8 @@ tests/
 4. **Portas**: PcaRepository define contrato, não implementação
 5. **Presenter**: Response passa por presenter antes de JSON
 6. **DTOs**: Request/Response separam fronteiras
+
+---
 
 ## Testes necessários
 
@@ -87,11 +111,13 @@ cd ~/Desktop/backend
 php phpunit-10.phar --bootstrap autoload.php
 \`\`\`
 
-## Comando Padrão de Teste
+### Comando Padrão de Teste
 <!-- php phpunit-10.phar --bootstrap autoload.php tests/<NomeDoTeste>.php -->
 \`\`\`bash
 php.exe vendor/bin/phpunit
 \`\`\`
+
+---
 
 ## Informações Técnicas
 
@@ -107,6 +133,8 @@ php.exe vendor/bin/phpunit
 - Namespace base: Semae\Pca\
 - chama primeiro o autoloader do Composer
 
+---
+
 ## Regras de Ouro para Continuação
 
 1. **Ordem clara**: Nunca implemente infraestrutura antes do domínio
@@ -114,6 +142,8 @@ php.exe vendor/bin/phpunit
 3. **Testes pequenos**: Um conceito por teste
 4. **Sem arrays internos**: Usar entidades de domínio e ou DTO
 5. **Dependências injetadas**: Facilita testes
+
+---
 
 ## Plano de Implementação do Zero (Resumo)
 
@@ -160,6 +190,8 @@ Infraestrutura
     • EnvLoader: leitura de ambiente
 Apresentação
     • PcaController: adaptador HTTP
+
+---
 
 ## Contato com Usuário
 

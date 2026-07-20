@@ -1,5 +1,7 @@
 Este documento responde à pergunta: COMO o sistema será construído?
 
+---
+
 # Arquitetura
 
 ## Objetivo
@@ -7,6 +9,14 @@ Este documento responde à pergunta: COMO o sistema será construído?
 Este projeto implementa o backend responsável pela publicação do Plano de Contratações Anual (PCA) no PNCP.
 
 O projeto foi desenvolvido para servir como biblioteca PHP, sendo consumido inicialmente por uma aplicação Scriptcase.
+
+Priorizar:
+
+- simplicidade
+- baixo acoplamento
+- alta legibilidade
+- facilidade de testes
+- independência entre camadas
 
 ---
 
@@ -40,22 +50,44 @@ Presentation/
 
 A direção das dependências é sempre para dentro.
 
-```
-Presentation
+ ┌──────────────┐
+ │ Presentation │
+ └──────┬───────┘
         │
         ▼
-Application
+ ┌──────────────┐
+ │ Application  │
+ └──────┬───────┘
         │
         ▼
-Domain
+ ┌──────────────┐
+ │   Domain     │
+ └──────────────┘
 
-Infrastructure
-        ▲
-        │
-Application
-```
-
+Infrastructure implementa interfaces definidas pelo Domain/Application.
 O domínio nunca conhece infraestrutura.
+
+---
+
+# Modelagem de Domínio
+
+O Domain deve representar conceitos reais do negócio de PCA e PNCP.
+
+Evitar:
+
+- modelagem baseada apenas no banco de dados
+- entidades anêmicas
+- serviços de domínio sem justificativa
+- uso excessivo de DTOs dentro do Domain
+
+Priorizar:
+
+- linguagem ubíqua
+- encapsulamento de invariantes
+- comportamento próximo dos dados
+- nomes alinhados ao negócio
+
+O objetivo é que o código reflita como o processo funciona no mundo real.
 
 ---
 
@@ -66,8 +98,10 @@ O domínio nunca conhece infraestrutura.
 Contém:
 
 - entidades
-- regras de negócio
+- value objects
 - interfaces (Ports)
+- serviços de domínio
+- regras de negócio
 
 Nunca acessa:
 
@@ -76,7 +110,6 @@ Nunca acessa:
 - JSON
 - Scriptcase
 
----
 
 ## Application
 
@@ -88,7 +121,6 @@ Não conhece Oracle.
 
 Não conhece HTTP.
 
----
 
 ## Infrastructure
 
@@ -101,7 +133,6 @@ Exemplos:
 - Logger
 - Configuração
 
----
 
 ## Presentation
 
@@ -121,15 +152,38 @@ Somente acesso aos dados.
 
 Nenhuma regra de negócio.
 
----
 
 ## Entity
 
-Contém comportamento.
+Representa um conceito de negócio com identidade própria.
+
+Deve:
+
+- proteger invariantes
+- encapsular comportamento
+- evitar setters desnecessários
+- manter estado consistente
 
 Evitar entidades anêmicas.
 
----
+
+## Value Object
+
+Representa conceitos definidos apenas por seus valores.
+
+Características:
+
+- imutável
+- sem identidade própria
+- igualdade por valor
+
+Exemplos possíveis:
+
+- AnoPca
+- CodigoPncp
+- Cnpj
+- SequencialItem
+
 
 ## UseCase
 
@@ -139,19 +193,19 @@ Não monta SQL.
 
 Não monta JSON.
 
----
 
 ## Client
 
 Responsável exclusivamente pela comunicação HTTP.
 
----
 
 ## PayloadBuilder
 
-Converte entidades do domínio para o formato esperado pelo PNCP.
+Converte objetos do domínio para contratos externos.
 
----
+- Não contém regra de negócio.
+- Não valida regras do domínio.
+- Responsável apenas pelo mapeamento técnico.
 
 ## Presenter
 
@@ -166,6 +220,19 @@ Futuramente:
 - REST
 - CLI
 - outro consumidor
+
+
+## Sistemas Externos
+
+Conversões entre identificadores internos e identificadores de sistemas externos não pertencem ao Domain.
+
+Exemplos:
+
+- código Oracle
+- identificador SGI
+- identificador PNCP
+
+Esses mapeamentos pertencem à Infrastructure.
 
 ---
 
@@ -192,15 +259,3 @@ Teste passa
 ↓
 
 Refatoração
-
----
-
-# Objetivo
-
-Priorizar:
-
-- simplicidade
-- baixo acoplamento
-- alta legibilidade
-- facilidade de testes
-- independência entre camadas

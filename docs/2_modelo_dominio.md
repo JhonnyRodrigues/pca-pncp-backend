@@ -1,5 +1,22 @@
 Este documento responde à pergunta: O QUE existe no negócio?
 
+---
+
+# Aprendizado
+
+A leitura de um modelo de domínio normalmente fica mais natural quando segue a sequência:
+1. Vocabulário
+2. Processo de negócio
+3. Regras de negócio
+4. Objetos do domínio
+5. Agregados
+6. Processos importantes
+7. Eventos
+8. Princípios
+9. Contextos
+
+---
+
 # Modelo de Domínio
 
 ## Objetivo
@@ -13,21 +30,15 @@ Independentemente da tecnologia utilizada, descrever:
 
 ---
 
-# Cenários de Negócio
+# Linguagem Ubíqua
 
-## Primeira Publicação
-
-Quando não existe publicação anterior para uma combinação de AnoExecucao + UnidadeOrcamentaria, o sistema deverá realizar uma Publicação.
-
-A publicação corresponde ao primeiro envio do plano homologado ao PNCP.
-
-## Retificação
-
-Após a publicação, novas demandas podem ser homologadas.
-
-Quando isso acontece, gera uma nova versão do Plano para a mesma combinação de: AnoExecucao + UnidadeOrcamentaria, então o sistema realiza uma Retificação.
-
-A retificação consiste no envio da versão mais recente e completa do Plano ao PNCP.
+- Plano: Conjunto homologado de demandas de contratação.
+- Demanda: Necessidade de contratação.
+- Homologação: Aprovação formal realizada pelo Presidente.
+- Publicação: Primeiro envio de um Plano ao PNCP.
+- Retificação: Reenvio de versão posterior do Plano ao PNCP.
+- Procedimento: Tipo de ação de negócio cadastrada.
+- HistoricoProcedimento: Registro de execução de um procedimento.
 
 ---
 
@@ -58,6 +69,24 @@ A identificação lógica de uma **versão** de plano é composta por:
 
 ---
 
+# Cenários de Negócio
+
+## Primeira Publicação
+
+Quando não existe publicação anterior para uma combinação de AnoExecucao + UnidadeOrcamentaria, o sistema deverá realizar uma Publicação.
+
+A publicação corresponde ao primeiro envio do plano homologado ao PNCP.
+
+## Retificação
+
+Após a publicação, novas demandas podem ser homologadas.
+
+Quando isso acontece, gera uma nova versão do Plano para a mesma combinação de: AnoExecucao + UnidadeOrcamentaria, então o sistema realiza uma Retificação.
+
+A retificação consiste no envio da versão mais recente e completa do Plano ao PNCP.
+
+---
+
 # Regra Central de Decisão
 
 Analisar histórico de Planos para decidir qual processo executar:
@@ -68,14 +97,29 @@ Para cada UnidadeOrcamentaria:
 - se SequencialVersao > 1 e DataPublicacao = null, executar Retificação;
 - se DataPublicacao estiver preenchida, nenhuma ação será necessária.
 
-A decisão entre Publicação e Retificação pertence ao domínio,
-mas depende do cadastro de planos e não pode ser determinada apenas pelo estado isolado de um Plano.
+Observação:
 
-Essa decisão faz parte do domínio. Ela não deve ficar em Controller, Repository ou Infrastructure.
+A decisão entre Publicação, Retificação ou Nenhuma Ação constitui uma regra central do domínio.
+Atualmente as regras são simples e estão descritas nesta seção.
+Caso novas modalidades de processamento sejam introduzidas ou a lógica de decisão cresça significativamente, esse conceito poderá evoluir para uma modelagem específica do domínio.
 
 ---
 
-# Value Objects
+# Princípios de Negócio
+
+## Independência das Unidades
+
+Cada Unidade Orçamentária é processada independentemente.
+
+## Fonte da verdade
+
+O PNCP é a autoridade sobre publicações.
+O PCA é o sistema de origem, que armazena os dados em banco Oracle.
+Em caso de divergência, prevalece o estado do PNCP.
+
+---
+
+# Modelagem: Value Objects
 
 ## Cnpj
 
@@ -163,39 +207,31 @@ Exemplos de lotações:
 - Diretoria Geral Administrativa e Financeira
 - Coordenadoria de Tecnologia
 
+## Uasg
 
-## UnidadeOrcamentaria
-
-Representa uma Unidade Orçamentária responsável pela publicação do
-Plano de Contratações Anual junto ao PNCP.
+Representa a Unidade Administrativa de Serviços Gerais utilizada para identificar a unidade compradora perante o Governo Federal.
 
 Possui:
-- lotacao
-- descricao
-- UASG
+
+- codigo
 
 Regras:
 
-- lotacao, descricao e UASG são obrigatórios;
-- UASG identifica a unidade compradora perante o Governo Federal;
-- o objeto é imutável após sua criação.
-- descricao deve possuir ao menos 3 caracteres;
-- espaços em branco nas extremidades devem ser removidos;
-- descricao pode conter acentos e números;
+- código é obrigatório;
+- não pode ser vazio;
+- deve possuir formato válido definido pelo órgão responsável;
+- o objeto é imutável.
 
 Observações:
 
-- Toda Demanda pertence a uma Unidade Orçamentária.
-- Todo Plano pertence a exatamente uma Unidade Orçamentária.
-- Cada unidade possui seu próprio histórico de versões homologadas e publicadas.
-- Toda UnidadeOrcamentaria utilizada no processo de publicação deve possuir uma UASG associada. Não existe unidadeOrcamentaria válida sem UASG
-- UASG é Unidade Administrativa de Serviços Gerais, um código criado pelo Governo Federal para identificar o Óregão ou o Setor exato que está realizando a compra. Utilizado para diferenciar as entidades compradoras
-- A UASG é uma informação de configuração utilizada para integração com o PNCP.
-
+- UASG não identifica uma pessoa ou um representante;
+- UASG identifica a unidade compradora perante os sistemas governamentais;
+- Toda UnidadeOrcamentaria válida deve possuir uma UASG associada;
+- O objeto representa apenas o conceito de UASG dentro do domínio.
 
 ---
 
-# Entidades 
+# Modelagem: Entidades 
 
 ## Demanda
 
@@ -320,6 +356,35 @@ Observações:
 As regras de Publicação e Retificação não dependem da consulta ao histórico de procedimentos, sendo baseadas no cadastro de Planos e em seus dados de homologação/publicação.
 
 
+## UnidadeOrcamentaria
+
+Representa uma Unidade Orçamentária responsável pela publicação do
+Plano de Contratações Anual junto ao PNCP.
+
+Possui:
+- lotacao
+- descricao
+- UASG
+
+Regras:
+
+- lotacao, descricao e UASG são obrigatórios;
+- UASG identifica a unidade compradora perante o Governo Federal;
+- o objeto é imutável após sua criação.
+- descricao deve possuir ao menos 3 caracteres;
+- espaços em branco nas extremidades devem ser removidos;
+- descricao pode conter acentos e números;
+
+Observações:
+
+- Toda Demanda pertence a uma Unidade Orçamentária.
+- Todo Plano pertence a exatamente uma Unidade Orçamentária.
+- Cada unidade possui seu próprio histórico de versões homologadas e publicadas.
+- Toda UnidadeOrcamentaria utilizada no processo de publicação deve possuir uma UASG associada. Não existe unidadeOrcamentaria válida sem UASG
+- UASG é Unidade Administrativa de Serviços Gerais, um código criado pelo Governo Federal para identificar o Óregão ou o Setor exato que está realizando a compra. Utilizado para diferenciar as entidades compradoras
+- A UASG é uma informação de configuração utilizada para integração com o PNCP.
+
+
 ---
 
 # Aggregate Root
@@ -370,9 +435,21 @@ Responsabilidades:
 - decidir se está apto para publicação;
 - decidir se está apto para retificação.
 
+### Invariantes do Aggregate Plano
+
+Um Plano válido:
+
+- possui ao menos uma Demanda
+- todas as Demandas pertencem à mesma UnidadeOrcamentaria
+- todas as Demandas pertencem ao mesmo AnoExecucao
+- possui DataHomologacao
+- possui SequencialVersao positivo
+
+Nenhuma operação do domínio pode violar essas regras.
+
 ---
 
-# Processos de Negócio
+# Operações de Negócio
 
 ## Publicação
 
@@ -406,17 +483,42 @@ Resultado:
 - demandas atualizadas com sequencialPncp;
 - histórico registrado.
 
+---
+
+# Eventos de Domínio
+
+- PlanoHomologado: Ocorre quando uma nova versão do plano é homologada.
+- PlanoPublicado: Ocorre quando o plano é publicado no PNCP.
+- PlanoRetificado: Ocorre quando uma nova versão é reenviada ao PNCP.
+- ProcedimentoRegistrado: Ocorre quando um histórico é criado.
 
 ---
 
-# Princípios de Negócio
+# Contextos de Negócio
 
-## Independência das Unidades
+Planejamento
+├── Demanda
+├── Plano
+├── Homologação
 
-Cada Unidade Orçamentária é processada independentemente.
+Publicação PNCP
+├── Publicação
+├── Retificação
 
-## Fonte da verdade
+Auditoria
+├── Procedimento
+├── HistoricoProcedimento
 
-O PNCP é a autoridade sobre publicações.
-O PCA é o sistema de origem, que armazena os dados em banco Oracle.
-Em caso de divergência, prevalece o estado do PNCP.
+O domínio está organizado nos seguintes contextos:
+
+## Planejamento
+
+Responsável pela geração e homologação de Planos.
+
+## Publicação PNCP
+
+Responsável pela publicação e retificação de Planos junto ao PNCP.
+
+## Auditoria
+
+Responsável pelo registro histórico dos procedimentos realizados.
