@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Semae\Pca\Domain\Entities;
 
-use DateTimeImmutable;
-use Semae\Pca\Domain\Exceptions\PlanoException;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\Enums\DecisaoProcessamentoPlano;
+use Semae\Pca\Domain\Exceptions\PlanoException;
+use DateTimeImmutable;
 
 class Plano
 {
@@ -26,7 +27,24 @@ class Plano
         $this->validarDemandas();
     }
 
-    # métodos getters
+    public function foiPublicado(): bool
+    {
+        return $this->dataPublicacao !== null;
+    }
+
+    public function decidirProcessamento(): DecisaoProcessamentoPlano
+    {
+        if ($this->foiPublicado()) {
+            return DecisaoProcessamentoPlano::NENHUMA_ACAO;
+        }
+
+        if ($this->sequencialVersao === 1) {
+            return DecisaoProcessamentoPlano::PUBLICAR;
+        }
+
+        return DecisaoProcessamentoPlano::RETIFICAR;
+    }
+
     public function getIdPlano(): int
     {
         return $this->idPlano;
@@ -52,22 +70,17 @@ class Plano
         return $this->dataHomologacao;
     }
 
+    public function getDataPublicacao(): ?DateTimeImmutable
+    {
+        return $this->dataPublicacao;
+    }
+
     /**
      * @return Demanda[]
      */
     public function getDemandas(): array
     {
         return $this->demandas;
-    }
-
-    public function getDataPublicacao(): ?DateTimeImmutable
-    {
-        return $this->dataPublicacao;
-    }
-
-    public function foiPublicado(): bool
-    {
-        return $this->dataPublicacao !== null;
     }
 
     public function possuiDemandas(): bool
@@ -80,6 +93,7 @@ class Plano
         return count($this->demandas);
     }
 
+    # métodos de validação
     private function validarSequencialVersao(): void
     {
         if ($this->sequencialVersao <= 0) {
@@ -87,7 +101,6 @@ class Plano
         }
     }
 
-    # metódos validação
     private function validarDemandas(): void
     {
         if ($this->demandas === []) {

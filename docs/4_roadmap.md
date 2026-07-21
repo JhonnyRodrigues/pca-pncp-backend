@@ -26,90 +26,90 @@ Essa sequência respeita a Clean Architecture:
 ## FASE 0 — Preparação do projeto - Objetivo: deixar o ambiente pronto.
 
 Sprint 0.1
-□ Estrutura do projeto
+### Estrutura do projeto
 
 Sprint 0.2
-□ Git
+### Git
 
 Sprint 0.3
-□ README.md
+### README.md
 
 Sprint 0.4
-□ AGENTS.md
+### AGENTS.md
 
 Sprint 0.5
-□ arquitetura.md
+### arquitetura.md
 
 Sprint 0.6
-□ modelo_dominio.md
+### modelo_dominio.md
 
 Sprint 0.7
-□ fluxo_implementacao.md
+### fluxo_implementacao.md
 
 Sprint 0.8
-□ roadmap.md
+### roadmap.md
 
 Sprint 0.9
-□ iniciar Composer para obter Autoload PSR-4, gerenciar pacotes e o Intelephense reconhecer corretamente as classes
+### iniciar Composer para obter Autoload PSR-4, gerenciar pacotes e o Intelephense reconhecer corretamente as classes
 
 Sprint 0.10
-□ instalar biblioteca de testes PHPUnit
-□ criar phpunit.xml para configurar bootstrap="vendor/autoload.php"
+### instalar biblioteca de testes PHPUnit
+### criar phpunit.xml para configurar bootstrap="vendor/autoload.php"
 
 Sprint 0.11
-□ Criar tests/PrimeiroTeste.php aplicando corretamente o namespace
-□ execute php.exe vendor/bin/phpunit e verifique o resultado
+### Criar tests/PrimeiroTeste.php aplicando corretamente o namespace
+### execute php.exe vendor/bin/phpunit e verifique o resultado
 
 ## FASE 1 — Modelagem do Domínio - Objetivo: construir o domínio rico antes de qualquer infraestrutura.
 
 Sprint 1.1 - Introdução ao DDD
 
-□ Criar Value Object Cnpj
-□ CnpjTest
+### Criar Value Object Cnpj
+### CnpjTest
 
 Sprint 1.2
-□ Criar Value Object AnoExecucao
-□ AnoExecucaoTest
+### Criar Value Object AnoExecucao
+### AnoExecucaoTest
   - A interface do sistema somente permite seleção do ano atual ou do próximo ano, reforçando as restrições definidas pelo Value Object.
 
 Sprint 1.3
-□ Criar Value Object Lotacao
-□ LotacaoTest
+### Criar Value Object Lotacao
+### LotacaoTest
 
 Sprint 1.4
-□ Criar Value Object Representante
-□ RepresentanteTest
+### Criar Value Object Representante
+### RepresentanteTest
 
 Sprint 1.5
-□ Criar Entity UnidadeOrcamentaria
-□ UnidadeOrcamentariaTest
+### Criar Entity UnidadeOrcamentaria
+### UnidadeOrcamentariaTest
 UnidadeOrcamentaria
 ├── Lotacao
 └── Uasg
   - Observação: posteriormente foi descoberto que UnidadeOrcamentaria possui identidade própria e não deve ser tratada apenas como Value Object
 
 Sprint 1.6
-□ Criar Entity Demanda
-□ DemandaTest
+### Criar Entity Demanda
+### DemandaTest
 Demanda
   ├── AnoExecucao
   └── UnidadeOrcamentaria
 
 Sprint 1.7
-□ Criar Entity Procedimento
-□ ProcedimentoTest
+### Criar Entity Procedimento
+### ProcedimentoTest
 
 Sprint 1.8
-□ Criar Entity HistoricoProcedimento
-□ HistoricoProcedimentoTest
+### Criar Entity HistoricoProcedimento
+### HistoricoProcedimentoTest
 HistoricoProcedimento
  ├── Procedimento
  ├── Representante
  └── Lotacao
 
 Sprint 1.9
-□ Criar Aggregate Root Plano
-□ PlanoTest
+### Criar Aggregate Root Plano
+### PlanoTest
 O Plano é o Aggregate Root do domínio.
 O Plano nasce a partir da homologação de Demandas
 consolidadas.
@@ -140,7 +140,7 @@ Plano
 Objetivo: definir os contratos (interfaces) necessários para a Application sem implementar infraestrutura.
 
 Sprint 2.1
-□ Criar PlanoRepository
+### Criar PlanoRepository
   Regras:
   - Plano é o Aggregate Root principal do domínio.
   - O acesso de persistência ao Plano deve ocorrer através de PlanoRepository.
@@ -148,25 +148,25 @@ Sprint 2.1
   - PlanoRepository deve retornar o Aggregate Root Plano já reconstruído com suas Demandas.
 
 Sprint 2.2
-□ Criar HistoricoProcedimentoRepository
+### Criar HistoricoProcedimentoRepository
   Regras:
   - HistoricoProcedimento não pertence ao agregado Plano.
   - HistoricoProcedimentoRepository existe para registrar auditoria das ações executadas.
 
 Sprint 2.3
-□ Criar RepresentanteRepository
+### Criar RepresentanteRepository
   - Responsável por localizar um Representante a partir do usuário autenticado.
 
 Sprint 2.4
-□ Criar LotacaoRepository
+### Criar LotacaoRepository
   - Responsável por localizar a Lotacao associada a um Representante.
 
 
 ## FASE 3 — Casos de Uso - Agora começamos a Application.
 
 Sprint 3.1
-□ PublicarPcaRequest
-□ PublicarPcaRequestTest
+### PublicarPcaRequest
+### PublicarPcaRequestTest
 Representa todos os dados necessários para iniciar o caso de uso. Inclui:
   - Cnpj
   - AnoExecucao
@@ -181,11 +181,11 @@ Observações:
   - Deve ser imutável.
 
 Sprint 3.2
-□ PublicarPcaValidator
-□ PublicarPcaValidatorTest
+### PublicarPcaValidator
+### PublicarPcaValidatorTest
 Artefatos auxiliares (se necessários):
-□ ValidationResult
-□ ValidationResultTest
+### ValidationResult
+### ValidationResultTest
 
 Responsabilidades:
   - validar os dados recebidos em PublicarPcaRequest;
@@ -200,31 +200,36 @@ Observações:
   - O Validator não deve conter regras de negócio.
   - O Validator pertence à camada Application.
 
-Sprint 3.3
-□ Modelar DECISÃO de processamento por UnidadeOrcamentaria
-□ Criar testes para cenários:
+Sprint 3.3 - DECISÃO de processamento da publicacao
+### Criar DecisaoProcessamentoPlano
+### Evoluir Aggregate Root Plano para decidir o processamento
+### Criar testes para os cenários:
   - primeira publicação
   - retificação
   - nenhuma ação
-Observação: Avaliar a necessidade de modelar um serviço de domínio ou objeto de decisão para determinar se uma UnidadeOrcamentaria deve:
-  - publicar
-  - retificar
-  - não executar nenhuma ação
-Essa decisão depende do estado dos Planos homologados/publicados e não deve ficar no UseCase, Repository, Controller ou Infrastructure.
+Objetivo: Permitir que o próprio Aggregate Plano determine qual ação deve ser executada.
+Possíveis resultados:
+  - PUBLICAR
+  - RETIFICAR
+  - NENHUMA_ACAO
+Observações:
+  - A decisão pertence ao domínio.
+  - A decisão não pertence ao UseCase, Controller, Repository ou Infrastructure.
+  - O UseCase deverá apenas consumir a decisão retornada pelo Aggregate Root.
 
 Sprint 3.4
-□ Criar ProcessarPublicacaoPcaUseCase
-□ Criar ProcessarPublicacaoPcaUseCaseTest
+### Criar ProcessarPublicacaoPcaUseCase
+### Criar ProcessarPublicacaoPcaUseCaseTest
 Responsabilidade:
-- orquestrar o fluxo de publicação/retificação
+- orquestrar o fluxo de publicação/retificação: obtém Plano -> Pergunta ao Plano o que fazer -> Executa a ação correspondente
 - consultar portas necessárias
 - delegar a decisão ao domínio
 - acionar infraestrutura através de interfaces
 - montar resposta de aplicação
 
 Sprint 3.5
-□ PublicarPcaResponse
-□ ResultadoProcessamentoPlano
+### PublicarPcaResponse
+### ResultadoProcessamentoPlano
 Observações:
 - Ambos são DTOs da camada Application.
 - Não representam conceitos do domínio.- 
@@ -237,30 +242,30 @@ Presenter poderá ser introduzido futuramente caso surjam múltiplos consumidore
 ## FASE 4 — Infraestrutura - Agora implementamos.
 
 Sprint 4.1
-□ OracleConnection
+### OracleConnection
 
 Sprint 4.2
-□ OraclePlanoRepository
+### OraclePlanoRepository
   - Responsável por reconstruir o Aggregate Plano com suas Demandas.
 
 Sprint 4.3
-□ OracleRepresentanteRepository
+### OracleRepresentanteRepository
   - Responsável por localizar o Representante a partir do usuário autenticado.
 
 Sprint 4.4
-□ OracleLotacaoRepository
+### OracleLotacaoRepository
   - Responsável por localizar a Lotacao associada ao Representante.
 
 Sprint 4.5
-□ OracleHistoricoProcedimentoRepository
+### OracleHistoricoProcedimentoRepository
   - Responsável por registrar auditoria do procedimento executado.
 
 Sprint 4.6
-□ PncpAuthenticator
+### PncpAuthenticator
 
 Sprint 4.7
-□ PncpPayloadBuilder
-□ PncpPayloadBuilderTest
+### PncpPayloadBuilder
+### PncpPayloadBuilderTest
   Responsabilidade:
   - transformar objetos do domínio em payload compatível com o PNCP
   - não conter regra de negócio
@@ -268,14 +273,14 @@ Sprint 4.7
 
 
 Sprint 4.8
-□ PncpClient
-□ PncpClientTest (Usando mocks para as respostas HTTP.)
+### PncpClient
+### PncpClientTest (Usando mocks para as respostas HTTP.)
 
 ## FASE 5 — Apresentação
 
 Sprint 5.1
-□ PcaController
-□ PcaControllerTest
+### PcaController
+### PcaControllerTest
 
 
 ## FASE 6 — Integração
@@ -283,19 +288,19 @@ Sprint 5.1
 Objetivo: validar o funcionamento do backend com integrações reais ou simuladas de ponta a ponta.
 
 Sprint 6.1
-□ Testar OraclePlanoRepository com dados reais ou base controlada
+### Testar OraclePlanoRepository com dados reais ou base controlada
 
 Sprint 6.2
-□ Testar autenticação PNCP em ambiente de homologação
+### Testar autenticação PNCP em ambiente de homologação
 
 Sprint 6.3
-□ Testar envio de Publicação ao PNCP em ambiente de homologação
+### Testar envio de Publicação ao PNCP em ambiente de homologação
 
 Sprint 6.4
-□ Testar envio de Retificação ao PNCP em ambiente de homologação
+### Testar envio de Retificação ao PNCP em ambiente de homologação
 
 Sprint 6.5
-□ Testar fluxo completo:
+### Testar fluxo completo:
   - entrada Scriptcase
   - caso de uso
   - Oracle
@@ -304,6 +309,6 @@ Sprint 6.5
   - resposta final
 
 Sprint 6.6
-□ Validar comportamento em falha parcial:
+### Validar comportamento em falha parcial:
   - uma UnidadeOrcamentaria falha
   - demais unidades continuam sendo processadas

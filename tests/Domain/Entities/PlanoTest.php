@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Semae\Pca\Domain\Entities\Demanda;
 use Semae\Pca\Domain\Entities\Plano;
 use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
+use Semae\Pca\Domain\Enums\DecisaoProcessamentoPlano;
 use Semae\Pca\Domain\Exceptions\PlanoException;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
@@ -71,6 +72,55 @@ class PlanoTest extends TestCase
 
         $this->assertSame($dataPublicacao, $plano->getDataPublicacao());
         $this->assertTrue($plano->foiPublicado());
+    }
+
+    public function testDeveDecidirPublicacaoQuandoVersaoForUmENaoEstiverPublicado(): void
+    {
+        $plano = $this->criarPlano(
+            sequencialVersao: 1,
+            dataPublicacao: null
+        );
+
+        $this->assertSame(
+            DecisaoProcessamentoPlano::PUBLICAR,
+            $plano->decidirProcessamento()
+        );
+    }
+
+    public function testDeveDecidirRetificacaoQuandoVersaoForMaiorQueUmENaoEstiverPublicado(): void
+    {
+        $plano = $this->criarPlano(
+            sequencialVersao: 2,
+            dataPublicacao: null
+        );
+
+        $this->assertSame(
+            DecisaoProcessamentoPlano::RETIFICAR,
+            $plano->decidirProcessamento()
+        );
+    }
+
+    public function testDeveDecidirNenhumaAcaoQuandoPlanoJaEstiverPublicado(): void
+    {
+        $plano = $this->criarPlano(
+            sequencialVersao: 2,
+            dataPublicacao: new DateTimeImmutable('2026-07-16')
+        );
+
+        $this->assertSame(
+            DecisaoProcessamentoPlano::NENHUMA_ACAO,
+            $plano->decidirProcessamento()
+        );
+    }
+
+    public function testDeveRetornarDecisaoProcessamentoPlano(): void
+    {
+        $plano = $this->criarPlano();
+
+        $this->assertInstanceOf(
+            DecisaoProcessamentoPlano::class,
+            $plano->decidirProcessamento()
+        );
     }
 
     public function testDeveExigirSequencialVersaoMaiorQueZero(): void
