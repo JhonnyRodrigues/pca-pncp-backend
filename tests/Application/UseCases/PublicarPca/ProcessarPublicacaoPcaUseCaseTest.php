@@ -5,48 +5,50 @@ declare(strict_types=1);
 namespace Tests\Application\UseCases\PublicarPca;
 
 use PHPUnit\Framework\TestCase;
-use Semae\Pca\Application\UseCases\PublicarPca\ProcessarPublicacaoPcaUseCase;
-use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaRequest;
-use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaValidator;
-use Semae\Pca\Application\UseCases\PublicarPca\ValidationResult;
+use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\Cnpj;
 use Semae\Pca\Domain\Entities\Plano;
 use Semae\Pca\Domain\Enums\DecisaoProcessamentoPlano;
 use Semae\Pca\Domain\Ports\PlanoRepository;
-use Semae\Pca\Domain\ValueObjects\AnoExecucao;
-use Semae\Pca\Domain\ValueObjects\Cnpj;
+use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaRequest;
+use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaValidator;
+use Semae\Pca\Application\UseCases\PublicarPca\ValidationResult;
+use Semae\Pca\Application\UseCases\PublicarPca\ProcessarPublicacaoPcaUseCase;
+use Semae\Pca\Application\UseCases\PublicarPca\ResultadoProcessamentoPlano;
+use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaResponse;
 
 class ProcessarPublicacaoPcaUseCaseTest extends TestCase
 {
     public function testDeveProcessarPlanoComDecisaoPublicar(): void
     {
         $plano = $this->criarPlanoComDecisao(DecisaoProcessamentoPlano::PUBLICAR);
-        $resultado = $this->executarComPlanos([$plano]);
+        $resultado = $this->processarComPlanos([$plano]);
 
         $this->assertSame(
             DecisaoProcessamentoPlano::PUBLICAR,
-            $resultado['processamentos'][0]['decisao']
+            $resultado->getResultadoProcessamentoPlano()[0]->getDecisao()
         );
     }
 
     public function testDeveProcessarPlanoComDecisaoRetificar(): void
     {
         $plano = $this->criarPlanoComDecisao(DecisaoProcessamentoPlano::RETIFICAR);
-        $resultado = $this->executarComPlanos([$plano]);
+        $resultado = $this->processarComPlanos([$plano]);
 
         $this->assertSame(
             DecisaoProcessamentoPlano::RETIFICAR,
-            $resultado['processamentos'][0]['decisao']
+            $resultado->getResultadoProcessamentoPlano()[0]->getDecisao()
         );
     }
 
     public function testDeveProcessarPlanoComDecisaoNenhumaAcao(): void
     {
         $plano = $this->criarPlanoComDecisao(DecisaoProcessamentoPlano::NENHUMA_ACAO);
-        $resultado = $this->executarComPlanos([$plano]);
+        $resultado = $this->processarComPlanos([$plano]);
 
         $this->assertSame(
             DecisaoProcessamentoPlano::NENHUMA_ACAO,
-            $resultado['processamentos'][0]['decisao']
+            $resultado->getResultadoProcessamentoPlano()[0]->getDecisao()
         );
     }
 
@@ -57,35 +59,24 @@ class ProcessarPublicacaoPcaUseCaseTest extends TestCase
             $this->criarPlanoComDecisao(DecisaoProcessamentoPlano::RETIFICAR),
             $this->criarPlanoComDecisao(DecisaoProcessamentoPlano::NENHUMA_ACAO),
         ];
-        $resultado = $this->executarComPlanos($planos);
+        $resultado = $this->processarComPlanos($planos);
 
-        $this->assertSame([], $resultado['erros']);
-        $this->assertSame(
-            [
-                [
-                    'plano' => $planos[0],
-                    'decisao' => DecisaoProcessamentoPlano::PUBLICAR,
-                ],
-                [
-                    'plano' => $planos[1],
-                    'decisao' => DecisaoProcessamentoPlano::RETIFICAR,
-                ],
-                [
-                    'plano' => $planos[2],
-                    'decisao' => DecisaoProcessamentoPlano::NENHUMA_ACAO,
-                ],
-            ],
-            $resultado['processamentos']
-        );
+        $resultados = $resultado->getResultadoProcessamentoPlano();
+
+        $this->assertSame([], $resultado->getErros());
+        $this->assertCount(3, $resultados);
+        $this->assertSame($planos[0], $resultados[0]->getPlano());
+        $this->assertSame($planos[1], $resultados[1]->getPlano());
+        $this->assertSame($planos[2], $resultados[2]->getPlano());
     }
 
     public function testDeveRetornarResultadoQuandoNaoExistiremPlanosParaProcessamento(): void
     {
-        $resultado = $this->executarComPlanos([]);
-        $this->assertSame(
-            ['erros' => [], 'processamentos' => []],
-            $resultado
-        );
+        $resultado = $this->processarComPlanos([]);
+
+        $this->assertInstanceOf(PublicarPcaResponse::class, $resultado);
+        $this->assertSame([], $resultado->getErros());
+        $this->assertSame([], $resultado->getResultadoProcessamentoPlano());
     }
 
     public function testDeveAcionarValidatorAntesDoProcessamento(): void
@@ -105,10 +96,10 @@ class ProcessarPublicacaoPcaUseCaseTest extends TestCase
             ->method('obterPlanosHomologadosParaProcessamento');
 
         $resultado = (new ProcessarPublicacaoPcaUseCase($validator, $repository))
-            ->executar($request);
+            ->processar($request);
 
-        $this->assertSame(['Entrada inválida.'], $resultado['erros']);
-        $this->assertSame([], $resultado['processamentos']);
+        $this->assertSame(['Entrada inválida.'], $resultado->getErros());
+        $this->assertSame([], $resultado->getResultadoProcessamentoPlano());
     }
 
     public function testDeveConsultarPlanoRepository(): void
@@ -123,21 +114,28 @@ class ProcessarPublicacaoPcaUseCaseTest extends TestCase
             ->willReturn([]);
 
         $resultado = (new ProcessarPublicacaoPcaUseCase(new PublicarPcaValidator(), $repository))
-            ->executar($request);
+            ->processar($request);
 
-        $this->assertSame([], $resultado['processamentos']);
+        $this->assertSame([], $resultado->getResultadoProcessamentoPlano());
     }
 
     public function testNaoDeveDuplicarRegrasDoDominio(): void
     {
         $plano = $this->criarPlanoComDecisao(DecisaoProcessamentoPlano::RETIFICAR);
-        $resultado = $this->executarComPlanos([$plano]);
+        $resultado = $this->processarComPlanos([$plano]);
 
-        $this->assertSame($plano, $resultado['processamentos'][0]['plano']);
-        $this->assertSame(DecisaoProcessamentoPlano::RETIFICAR, $resultado['processamentos'][0]['decisao']);
+        $this->assertInstanceOf(
+            ResultadoProcessamentoPlano::class,
+            $resultado->getResultadoProcessamentoPlano()[0]
+        );
+        $this->assertSame($plano, $resultado->getResultadoProcessamentoPlano()[0]->getPlano());
+        $this->assertSame(
+            DecisaoProcessamentoPlano::RETIFICAR,
+            $resultado->getResultadoProcessamentoPlano()[0]->getDecisao()
+        );
     }
 
-    private function executarComPlanos(array $planos): array
+    private function processarComPlanos(array $planos): PublicarPcaResponse
     {
         $request = $this->criarRequest();
         $repository = $this->createMock(PlanoRepository::class);
@@ -151,7 +149,7 @@ class ProcessarPublicacaoPcaUseCaseTest extends TestCase
         return (new ProcessarPublicacaoPcaUseCase(
             new PublicarPcaValidator(),
             $repository
-        ))->executar($request);
+        ))->processar($request);
     }
 
     private function criarPlanoComDecisao(DecisaoProcessamentoPlano $decisao): Plano

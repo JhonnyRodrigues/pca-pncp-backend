@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Semae\Pca\Application\UseCases\PublicarPca;
 
-use Semae\Pca\Domain\Entities\Plano;
-use Semae\Pca\Domain\Enums\DecisaoProcessamentoPlano;
 use Semae\Pca\Domain\Ports\PlanoRepository;
 
 class ProcessarPublicacaoPcaUseCase
@@ -15,39 +13,24 @@ class ProcessarPublicacaoPcaUseCase
         private readonly PlanoRepository $planoRepository
     ) {}
 
-    /**
-     * @return array{
-     *     erros: string[],
-     *     processamentos: array<int, array{
-     *         plano: Plano,
-     *         decisao: DecisaoProcessamentoPlano
-     *     }>
-     * }
-     */
-    public function executar(PublicarPcaRequest $request): array
+    public function processar(PublicarPcaRequest $request): PublicarPcaResponse
     {
         $resultadoValidacao = $this->validator->validarRequest($request);
 
         if (!$resultadoValidacao->isValido()) {
-            return [
-                'erros' => $resultadoValidacao->getErros(),
-                'processamentos' => [],
-            ];
+            return new PublicarPcaResponse($resultadoValidacao->getErros(), []);
         }
 
         $planos = $this->planoRepository->obterPlanosHomologadosParaProcessamento($request->getAnoExecucao());
-        $processamentos = [];
+        $resultadosProcessamentosPlano = [];
 
         foreach ($planos as $plano) {
-            $processamentos[] = [
-                'plano' => $plano,
-                'decisao' => $plano->decidirProcessamento(),
-            ];
+            $resultadosProcessamentosPlano[] = new ResultadoProcessamentoPlano(
+                $plano,
+                $plano->decidirProcessamento()
+            );
         }
 
-        return [
-            'erros' => [],
-            'processamentos' => $processamentos,
-        ];
+        return new PublicarPcaResponse([], $resultadosProcessamentosPlano);
     }
 }
