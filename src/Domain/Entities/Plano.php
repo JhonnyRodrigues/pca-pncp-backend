@@ -32,7 +32,7 @@ class Plano
         return $this->dataPublicacao !== null;
     }
 
-    public function decidirProcessamento(): DecisaoProcessamentoPlano
+    public function decidirPfrocessamento(): DecisaoProcessamentoPlano
     {
         if ($this->foiPublicado()) {
             return DecisaoProcessamentoPlano::NENHUMA_ACAO;

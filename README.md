@@ -1,138 +1,179 @@
-# BACKEND
+# Backend PCA/PNCP
 
-Backend em PHP responsável pela publicação e retificação do Plano de Contratações Anual (PCA) junto ao PNCP.
+Backend em PHP para publicação e sincronização do Plano de Contratações Anual
+(PCA) com o Portal Nacional de Contratações Públicas (PNCP).
 
-## Objetivo
+## Papel deste documento
 
-Este projeto está sendo desenvolvido do zero com foco em:
+Este README é a entrada cognitiva do repositório. Ele apresenta:
 
-- PHP 8.1
-- DDD (Domain Driven Design)
-- Clean Architecture
-- SOLID
-- TDD
-- Integração com Oracle 19c
-- Integração com a API do PNCP
+- o que é o projeto;
+- seus objetivos técnicos e didáticos;
+- o estado geral do trabalho;
+- como localizar as fontes especializadas.
 
-O backend será consumido por uma aplicação desenvolvida em Scriptcase.
+Ele é autoritativo sobre a visão geral e a finalidade de aprendizado, mas não
+substitui as fontes específicas:
 
----
+- [`docs/README.md`](docs/README.md) governa classificação, vigência e
+  navegação documental;
+- [`docs/vigentes/autoritativos/regras_de_negocio.md`](docs/vigentes/autoritativos/regras_de_negocio.md)
+  contém as regras de negócio;
+- [`docs/vigentes/autoritativos/modelo_de_dominio.md`](docs/vigentes/autoritativos/modelo_de_dominio.md)
+  contém o modelo conceitual vigente;
+- [`docs/vigentes/autoritativos/decisoes_de_integracao.md`](docs/vigentes/autoritativos/decisoes_de_integracao.md)
+  contém as decisões de integração;
+- [`.agents/AGENTS.md`](.agents/AGENTS.md) define como agentes devem trabalhar
+  no repositório.
 
-## Arquitetura
+## Objetivo do produto
 
-O projeto segue os princípios da Clean Architecture.
+O backend coordena a publicação, a retificação e a exclusão integral de PCA,
+preservando as regras do planejamento interno e a consistência observável com
+o PNCP.
 
-```
-src/
-├── Domain/
-├── Application/
-├── Infrastructure/
-└── Presentation/
-```
+O produto é desenvolvido como backend independente e será consumido
+inicialmente, em processo, por uma aplicação Scriptcase.
 
-### Responsabilidade das camadas
+## Estado atual
 
-- **Domain:** regras de negócio e entidades, value objects, agregados, serviços de domínio e invariantes.
-- **Application:** casos de uso.
-- **Infrastructure:** banco de dados, API PNCP e recursos externos.
-- **Presentation:** controllers e entrada da aplicação.
+O projeto está em desenvolvimento e passa por consolidação documental e
+refatoração arquitetural antes da Infrastructure.
 
----
+As regras de negócio, o modelo de domínio V2 e as decisões de integração estão
+vigentes. O fluxo de implementação V2 e o Roadmap V2 ainda estão planejados e
+não devem ser tratados como documentos existentes.
 
-## Princípios de DDD adotados
-
-O domínio deve representar o processo de negócio relacionado ao PCA e ao PNCP.
-
-Diretrizes:
-
-- utilizar linguagem ubíqua alinhada ao negócio
-- modelar conceitos do domínio e não apenas estruturas de banco
-- proteger invariantes dentro do Domain
-- utilizar Value Objects quando apropriado
-- evitar entidades anêmicas
-- evitar lógica de negócio fora do Domain
-- manter casos de uso focados em orquestração
-- manter integrações externas na Infrastructure
-
-O código deve refletir como o negócio funciona no mundo real.
-
----
-
-## Tecnologias
-
-- PHP 8.1
-- PHPUnit 10.5.64
-- Oracle 19c
-- PSR-4
-- Git
-
----
-
-## Estrutura
-
-```
-src/
-tests/
-docs/
-```
-
----
-
-## Executando os testes
-
-preferencialmente:
-```bash
-vendor/bin/phpunit
-```
-
-ou a maneira descontinuada:
-
-```bash
-php phpunit-10.phar --bootstrap autoload.php
-```
-
----
+O código atual contém resultados de etapas anteriores e pode representar
+premissas que serão refatoradas com TDD. O registro atualizado dos documentos
+vigentes e planejados está em [`docs/README.md`](docs/README.md).
 
 ## Objetivos de aprendizado
 
 Além do desenvolvimento do sistema, este projeto serve como estudo de:
 
-- Domain Driven Design
-- Clean Architecture
-- Design Patterns
-- SOLID
-- TDD
-- Testes unitários
-- Boas práticas de programação em PHP
+- Domain-Driven Design (DDD);
+- Clean Architecture;
+- Design Patterns;
+- SOLID;
+- Test-Driven Development (TDD);
+- testes unitários;
+- boas práticas de programação em PHP;
+- SDD (Spec-Driven Development - Desenvolvimento Orientado por
+  Especificações).
 
----
+O objetivo não é apenas entregar funcionalidades, mas compreender como regras
+de negócio, modelagem, decisões arquiteturais, testes e integração evoluem em
+conjunto.
 
-## Status
+## Arquitetura
 
-🚧 Em desenvolvimento.
+O projeto adota Clean Architecture, DDD, SOLID, injeção de dependências e TDD.
+A direção das dependências aponta para o núcleo:
+
+```text
+Presentation
+      ↓
+Application
+      ↓
+Domain
+
+Infrastructure implementa contratos definidos nas camadas internas.
+```
+
+Responsabilidades conceituais:
+
+- **Domain:** modelo de negócio, invariantes e políticas puras;
+- **Application:** casos de uso, orquestração e contratos necessários ao fluxo;
+- **Infrastructure:** adapters de persistência, transporte e recursos externos;
+- **Presentation:** fronteira de entrada e apresentação do resultado.
+
+Essa é a arquitetura-alvo. O código existente ainda será reconciliado com os
+documentos vigentes por meio de uma sprint própria de refatoração.
+
+## Estrutura principal
+
+```text
+src/
+├── Domain/
+├── Application/
+├── Infrastructure/
+└── Presentation/
+
+tests/
+docs/
+.agents/
+```
+
+## Tecnologias e integrações
+
+### Utilizadas no desenvolvimento
+
+- PHP `^8.1`;
+- Composer;
+- autoload PSR-4;
+- PHPUnit `^10`;
+- Git.
+
+### Integrações-alvo
+
+- Oracle 19c;
+- API do PNCP;
+- aplicação hospedeira Scriptcase.
+
+As integrações-alvo possuem decisões e gates ainda condicionais. Sua presença
+nesta lista não significa que a Infrastructure esteja pronta ou autorizada a
+ser iniciada.
+
+## Preparação e testes
+
+Instale as dependências de desenvolvimento:
+
+```bash
+composer install
+```
+
+Execute a suíte configurada:
+
+```bash
+composer tests
+```
+
+O Composer usa `vendor/autoload.php` como autoloader principal. O arquivo
+`autoload.php` da raiz preserva um autoloader manual apenas para fins de estudo
+e não é o caminho recomendado para os testes.
 
 ## Como trabalhar neste projeto
 
-Antes de implementar qualquer código:
+Antes de implementar:
 
-1. Leia toda a documentação da pasta docs/.
-2. Siga o roadmap antes de implementar qualquer funcionalidade.
-3. Não viole a Clean Architecture.
-4. Aplique TDD (Red → Green → Refactor).
-5. Implemente apenas o escopo solicitado.
-6. Explique a relação da solução com o domínio do negócio.
-7. Explique as decisões de DDD adotadas.
-8. Explique as decisões arquiteturais.
-9. Não altere arquivos não relacionados à tarefa.
+1. leia este README para compreender o projeto e sua finalidade;
+2. se estiver atuando como agente, leia [`.agents/AGENTS.md`](.agents/AGENTS.md)
+   e [`.agents/README.md`](.agents/README.md);
+3. consulte [`docs/README.md`](docs/README.md) e siga sua ordem de leitura,
+   classificação e precedência;
+4. inspecione o estado atual do Git e preserve alterações locais;
+5. use o plano aprovado e os checkpoints aplicáveis enquanto o Roadmap V2 não
+   existir;
+6. aplique TDD quando a tarefa envolver código;
+7. implemente somente o escopo autorizado;
+8. não trate documentos históricos, investigações ou prompts antigos como
+   especificações vigentes.
 
-## Processo de Aprendizado
+Quando o Roadmap V2 for criado e classificado como vigente, ele passará a
+organizar a sequência de implementação sem redefinir regras, domínio ou
+decisões de integração.
 
-Ao propor implementações ou refatorações relevantes, é desejável explicar:
+## Processo de aprendizado
 
-- qual problema de negócio está sendo resolvido
-- por que a modelagem escolhida representa o domínio
-- por que determinada classe pertence à camada atual
-- quais padrões de DDD estão sendo utilizados
-- quais alternativas foram descartadas e por quê
+Ao propor implementações ou refatorações relevantes, explique:
 
-O objetivo não é apenas implementar funcionalidades, mas compreender os conceitos envolvidos.
+- qual problema de negócio está sendo resolvido;
+- quais regras e decisões sustentam a solução;
+- por que a modelagem representa o domínio;
+- por que cada responsabilidade pertence à camada escolhida;
+- quais testes demonstram o comportamento;
+- quais alternativas foram descartadas e por quê.
+
+As explicações devem favorecer o aprendizado sem transformar documentos de
+apoio, histórico ou código existente em fontes normativas concorrentes.

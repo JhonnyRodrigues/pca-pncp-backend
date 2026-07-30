@@ -1,4 +1,5 @@
 *.env
+/config/
 
 # phpunit-10.phar
 # phpunit.xml
@@ -6,3 +7,5 @@
 
 /vendor/
 .phpunit.result.cache
+
+/docs/investigacoes/

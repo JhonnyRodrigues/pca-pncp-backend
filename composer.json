@@ -30,7 +30,12 @@
     "minimum-stability": "stable",
 
     "scripts":{
-        "start server":"php -S localhost:8080 public/index.php",
-        "tests":"vendor/bin/phpunit"
+        "start server":"php -S localhost:8080 -t public",
+        "tests":"vendor/bin/phpunit",
+        "tests:unit":"vendor/bin/phpunit --testsuite unit",
+        "tests:integration":"vendor/bin/phpunit --testsuite integration",
+        "tests:functional":"vendor/bin/phpunit --testsuite functional",
+        "tests:contract":"vendor/bin/phpunit --testsuite contract",
+        "tests:stage":"vendor/bin/phpunit --testsuite stage"
     }
 }
