@@ -21,7 +21,7 @@ A autoridade é distribuída da seguinte forma:
 | Comportamento normativo do negócio | [Regras de negócio](../autoritativos/regras_de_negocio.md) |
 | Conceitos, identidades, relações e invariantes | [Modelo de domínio](../autoritativos/modelo_de_dominio.md) |
 | Portas, integração, composição e operação | [Decisões de integração](../autoritativos/decisoes_de_integracao.md) |
-| Colaboração dinâmica entre componentes | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` — planejado, ainda não criado |
+| Colaboração dinâmica entre componentes | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` |
 | Ordem de construção | `docs/vigentes/autoritativos/roadmap.md` — planejado, ainda não criado |
 | Classificação e precedência documental | [Índice documental](../../README.md) |
 
@@ -93,7 +93,7 @@ uma execução.
   (`DI-010`).
 
 A sequência dinâmica de validação, observação, decisão, escrita, confirmação e
-auditoria pertencerá ao futuro fluxo de implementação, não a este documento.
+auditoria pertence ao fluxo de implementação, não a este documento.
 
 ## 4. Responsabilidade das camadas
 
@@ -289,7 +289,7 @@ a política do catálogo.
 Este documento não é inventário das classes existentes. Ele descreve a
 separação aprovada para orientar:
 
-1. o futuro fluxo de implementação;
+1. o fluxo de implementação;
 2. a refatoração arquitetural com TDD;
 3. a conclusão da Application com mocks;
 4. a implementação posterior da Infrastructure.
@@ -314,7 +314,7 @@ Este documento não define:
 - configuração de ambientes;
 - detalhes de empacotamento.
 
-Esses assuntos pertencem ao futuro fluxo, ao roadmap ou às decisões de
+Esses assuntos pertencem ao fluxo, ao roadmap ou às decisões de
 integração.
 
 ### 11.1 Matriz de referências

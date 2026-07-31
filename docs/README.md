@@ -56,7 +56,7 @@ aparece neste índice sem link até que o documento exista.
 4. [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md)
 5. [Glossário integrado](vigentes/apoio/glossario.md)
 6. [Contexto do sistema PCA](vigentes/apoio/contexto_explicando_o_sistema_PCA.md)
-7. `docs/vigentes/autoritativos/fluxo_de_implementacao.md` — Planejado (ainda não criado)
+7. [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md)
 8. `docs/vigentes/autoritativos/roadmap.md` — Planejado (ainda não criado)
 
 O
@@ -87,7 +87,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 | [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md) | Vigente | Redação normativa das regras de negócio |
 | [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md) | Vigente — V2 | Conceitos, identidades, relações e invariantes do modelo-alvo |
 | [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) | Vigente | DI-001 a DI-010 e seus gates |
-| `docs/vigentes/autoritativos/fluxo_de_implementacao.md` | Planejado (ainda não criado) | Colaboração entre camadas e portas |
+| [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md) | Vigente | Colaboração entre camadas e portas |
 | `docs/vigentes/autoritativos/roadmap.md` | Planejado (ainda não criado) | Ordem futura de implementação |
 
 ### 5.2 Apoio
@@ -127,7 +127,7 @@ devem ser consultados apenas para auditoria, evolução e estudo:
 |---|---|
 | `docs/1_arquitetura.md`, `docs/arquitetura.md`, `arquitetura.md` | `docs/vigentes/apoio/arquitetura.md` |
 | `docs/2_modelo_dominio.md`, `docs/modelo_dominio.md`, `docs/modelo_de_dominio_v2.md` | `docs/vigentes/autoritativos/modelo_de_dominio.md` |
-| `docs/3_fluxo_implementacao.md`, `docs/fluxo_implementacao.md` | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` — planejado |
+| `docs/3_fluxo_implementacao.md`, `docs/fluxo_implementacao.md` | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` |
 | `docs/4_roadmap.md`, `docs/roadmap.md`, `docs/roadmap_v2.md` | `docs/vigentes/autoritativos/roadmap.md` — planejado |
 | `docs/4_roadmap_v1.md` | `docs/historico/roadmap_v1_legado.md` |
 | `docs/5_contexto_planejamento.md` | `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md` |
@@ -155,3 +155,61 @@ referências.
 - Movimentações futuras devem atualizar este índice e todas as referências
   vigentes na mesma alteração.
 - Agentes e colaboradores automatizados devem utilizar preferencialmente os documentos classificados como Autoritativos e considerar documentos de Apoio apenas para contextualização.
+
+## 8. Evolução do glossário e distribuição das explicações
+
+### 8.1 Evolução contínua do glossário
+
+O glossário deve evoluir junto com a documentação vigente. Durante a criação
+ou revisão de RN, modelo de domínio, DI, fluxo, roadmap e demais documentos,
+deve-se avaliar a inclusão de conceitos que sejam:
+
+- específicos do projeto;
+- reutilizados por múltiplos documentos;
+- relevantes para a compreensão do domínio, arquitetura, integração ou
+  operação;
+- candidatos a gerar dúvidas recorrentes entre leitores.
+
+Essa avaliação não implica inclusão automática. O glossário não deve funcionar
+como:
+
+- catálogo de código;
+- dicionário de termos técnicos genéricos;
+- inventário de tabelas, campos, APIs ou classes;
+- catálogo de códigos, números ou parâmetros operacionais;
+- duplicação de RN, DI ou outros documentos autoritativos.
+
+O glossário deve concentrar definições semânticas estáveis e transversais. Cada
+verbete deve indicar suas fontes vigentes e não pode criar regras, decisões,
+valores padrão (`defaults`) ou significados ainda não consolidados. Quando
+faltar uma definição autoritativa necessária, a lacuna deve ser tratada na
+fonte responsável antes de ser resumida no glossário.
+
+### 8.2 Critério de distribuição das explicações
+
+Um documento autoritativo deve permanecer suficientemente compreensível para
+que seu comportamento seja interpretado sem consulta obrigatória ao glossário.
+
+Ao introduzir um termo:
+
+1. Se sua compreensão alterar comportamento, responsabilidade, ordem de
+   execução ou validade da operação, o documento autoritativo deve explicá-lo
+   localmente e indicar as fontes aplicáveis.
+
+2. Se o conceito for transversal e reutilizado em diferentes documentos, o
+   documento deve apresentar a explicação necessária ao contexto, enquanto o
+   glossário concentra sua definição semântica mais estável.
+
+3. Se o conceito já estiver adequadamente definido no glossário e não for
+   essencial para interpretar o comportamento descrito, o documento pode
+   apenas utilizá-lo ou referenciá-lo.
+
+4. Representações técnicas, nomes de campos, códigos, números, protocolos,
+   métodos HTTP, classes concretas, parâmetros operacionais e detalhes de
+   implementação podem aparecer como complemento pedagógico quando agregarem
+   compreensão, preferencialmente depois do conceito correspondente, mas não
+   devem ser promovidos automaticamente a verbetes.
+
+5. Quando uma alteração documental modificar um conceito estável e transversal
+   já registrado, o glossário deve ser revisado na mesma mudança para
+   permanecer coerente com suas fontes.

@@ -14,6 +14,7 @@ As fontes usadas nas referências são:
 - [Regras de negócio](../autoritativos/regras_de_negocio.md) — `RN-*`;
 - [Modelo de domínio](../autoritativos/modelo_de_dominio.md) — Modelo;
 - [Decisões de integração](../autoritativos/decisoes_de_integracao.md) — `DI-*`;
+- [Fluxo de implementação](../autoritativos/fluxo_de_implementacao.md) — Fluxo;
 - [Arquitetura](arquitetura.md) — Arquitetura;
 - [Governança documental](../../README.md) — Docs;
 - [Governança dos agentes](../../../.agents/README.md) — Agentes.
@@ -23,7 +24,7 @@ Quando houver divergência, prevalecem:
 1. regras de negócio;
 2. modelo de domínio;
 3. decisões de integração;
-4. fluxo de implementação, quando existir;
+4. fluxo de implementação;
 5. arquitetura;
 6. glossário.
 
@@ -73,6 +74,7 @@ históricos, investigações e prompts antigos não definem o significado vigent
 | Termo | Definição curta | Fonte |
 |---|---|---|
 | Ausência definitiva | Ausência externa confirmada pelos critérios de observação aprovados, permitindo tratar o PCA conhecido como inexistente. | `DI-002`, `DI-009` |
+| Baseline de conteúdo | Representação local detalhada do último conteúdo externo cuja convergência foi confirmada; não é mantida pela V1 da integração. | `DI-002` |
 | Convergência | Compatibilidade comprovada entre o conjunto desejado e o estado publicado observado. | `RN-PUB-004`; `DI-002`, `DI-004` |
 | Escrita incerta | Escrita externa cujo efeito não pôde ser confirmado nem descartado. | `DI-004`, `DI-009` |
 | Estado externo observado | Fato obtido do PNCP sobre o que está efetivamente publicado. | `DI-002`; Modelo §8.3 |
@@ -85,9 +87,11 @@ históricos, investigações e prompts antigos não definem o significado vigent
 | `NENHUMA_ACAO` | Decisão de não escrever externamente quando já há convergência ou ambos os lados estão inativos. | `RN-PUB-004` |
 | PCA externo sem vínculo local | Publicação encontrada no PNCP sem associação operacional previamente conhecida pelo SGI. | `DI-002` |
 | PCA vinculado | Publicação externa associada ao estado operacional local conhecido. | `DI-002`, `DI-005` |
+| Perfil de implantação | Configuração autorizada para uma instalação, selecionada por critério explícito e usada para determinar ambiente, identidade institucional, credenciais e parâmetros de integração. | `DI-010` |
 | `PUBLICAR` | Decisão de criar um PCA quando há conjunto vigente e não existe publicação ativa conhecida. | `RN-PUB-001` |
 | Publicação inicial | Criação da representação externa do PCA com seu conjunto inicial de itens. | `RN-PUB-001`; `DI-001` |
 | Reconciliação | Processo consciente de observar fatos e buscar convergência após diferença ou resultado incerto. | `DI-002`, `DI-004` |
+| Reconciliação por pertencimento | Estratégia que compara identidades desejadas e observadas sem comparar o conteúdo de cada item. | `RN-PUB-006`; `DI-001`, `DI-002` |
 | Referência externa | Identificador ou valor usado para localizar um recurso fora do domínio. | Modelo §9; `DI-005` |
 | `RESULTADO_INCERTO` | Resultado tipado de uma escrita cuja aceitação ou efeito externo não pôde ser determinado. | `DI-009` |
 | Resultados globais | `SOLICITACAO_INVALIDA`, `CONCLUIDA`, `CONCLUIDA_COM_PENDENCIAS` e `INTERROMPIDA`. | `DI-010` |
@@ -97,6 +101,7 @@ históricos, investigações e prompts antigos não definem o significado vigent
 | Sequencial PCA — `sequencialPca` | Referência operacional do recurso externo, sem participação na identidade do Plano. | `RN-PUB-008`; `DI-005`, `DI-008` |
 | Sincronização | Busca de correspondência entre o conjunto homologado vigente e o conjunto publicado observado. | `RN-PUB-006`; `DI-002` |
 | Unidade externa de publicação | Escopo que possui uma publicação e um resultado: uma UO ou um conjunto consolidado. | `RN-PUB-009`, `RN-PUB-010`; `DI-003` |
+| V1 da integração | Primeira geração operacional da estratégia de publicação, sincronização e reconciliação, distinta do Fluxo de Implementação V2 e da documentação histórica V1. | `DI-001`, `DI-002`, `DI-004`, `DI-009`, `DI-010`; Fluxo §1; Docs §5.4 |
 
 ## 5. Termos de auditoria
 
@@ -145,7 +150,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Autoritativo | Documento que constitui fonte oficial para seu escopo declarado. | Docs |
 | Checkpoint | Registro incremental que preserva continuidade e precedência do planejamento. | Agentes |
 | Decisão de Integração — DI | Escolha registrada sobre contratos externos, arquitetura de integração ou operação. | `DI`; Docs |
-| Fluxo de implementação | Documento que descreve colaboração dinâmica entre camadas e portas; ainda planejado. | Docs; seção 17 dos checkpoints |
+| Fluxo de implementação | Documento vigente que descreve colaboração dinâmica entre camadas e portas. | Docs; seção 17 dos checkpoints |
 | Gate | Condição documental, arquitetural ou contratual exigida antes de avançar. | `DI`; checkpoints |
 | Histórico | Documento substituído preservado para auditoria e aprendizado. | Docs |
 | Investigação | Evidência de pesquisa ou experimentação sem autoridade normativa. | Docs |

@@ -40,9 +40,11 @@ inicialmente, em processo, por uma aplicação Scriptcase.
 O projeto está em desenvolvimento e passa por consolidação documental e
 refatoração arquitetural antes da Infrastructure.
 
-As regras de negócio, o modelo de domínio V2 e as decisões de integração estão
-vigentes. O fluxo de implementação V2 e o Roadmap V2 ainda estão planejados e
-não devem ser tratados como documentos existentes.
+As regras de negócio, o modelo de domínio V2, as decisões de integração e o
+fluxo de implementação V2 estão vigentes.
+
+O Roadmap V2 ainda está planejado e não deve ser tratado como documento
+existente.
 
 O código atual contém resultados de etapas anteriores e pode representar
 premissas que serão refatoradas com TDD. O registro atualizado dos documentos

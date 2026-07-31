@@ -19,9 +19,10 @@ vez de manter redações normativas concorrentes. Em especial:
   decisões e dos contratos de integração;
 - `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` apresenta
   usuários, etapas e contexto;
-- `docs/vigentes/autoritativos/fluxo_de_implementacao.md` e
-  `docs/vigentes/autoritativos/roadmap.md` estão planejados, mas ainda não
-  foram criados;
+- `docs/vigentes/autoritativos/fluxo_de_implementacao.md` descreve a
+  colaboração dinâmica entre camadas e portas;
+- `docs/vigentes/autoritativos/roadmap.md` está planejado, mas ainda não foi
+  criado;
 - os testes constituem evidência executável, mas não substituem este catálogo.
 
 Uma divergência entre este catálogo e outro documento bloqueia a implementação
@@ -1064,9 +1065,12 @@ sobre o estado ou a pendência que ele efetivamente revisa.
 - `docs/diagramas/DER_PUBLICACAO_PCA.png`;
 - `docs/diagramas/fluxograma_PCA.png`.
 
-Destinos planejados, ainda não criados:
+Documento vigente relacionado:
 
 - `docs/vigentes/autoritativos/fluxo_de_implementacao.md`;
+
+Destino planejado, ainda não criado:
+
 - `docs/vigentes/autoritativos/roadmap.md`.
 
 ### Fontes independentes de conferência
