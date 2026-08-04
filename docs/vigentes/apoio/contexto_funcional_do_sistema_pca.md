@@ -1,4 +1,4 @@
-# Contexto Explicando o Sistema PCA
+# Contexto Funcional do Sistema PCA
 
 **Classificação documental:** Apoio  
 **Status:** Vigente  

@@ -1,11 +1,12 @@
 # Exportação de Contexto: Projeto PCA_PUBLICAR_B Backend
 
-**Classificação documental:** Apoio  
-**Status:** Transitório  
-**Autoridade/Escopo:** contexto de planejamento a consolidar; não é fonte normativa
+**Classificação documental:** Histórico  
+**Status:** Histórico  
+**Autoridade/Escopo:** exportação histórica do contexto de planejamento; sem autoridade vigente
 
-Este documento será consolidado no passo 5 da seção 17. Até lá, deve ser
-consultado apenas como apoio e confrontado com as fontes autoritativas.
+Este documento foi consolidado no passo 5 da seção 17. Seu corpo permanece
+preservado como evidência de sua época. Para o estado vigente, consulte o
+[índice documental](../README.md).
 
 ## Resumo Executivo
 Projeto de backend em PHP para publicação e retificação de planos PCA no PNCP.

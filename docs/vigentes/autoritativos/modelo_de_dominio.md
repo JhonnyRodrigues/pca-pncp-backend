@@ -645,7 +645,7 @@ Referências documentais:
 
 - `docs/vigentes/autoritativos/regras_de_negocio.md`;
 - `docs/vigentes/autoritativos/decisoes_de_integracao.md`;
-- `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md`;
+- `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md`;
 - `docs/vigentes/apoio/glossario.md`.
 
 ## 14. Aprendizados arquiteturais

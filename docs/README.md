@@ -55,14 +55,9 @@ aparece neste índice sem link até que o documento exista.
 3. [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md)
 4. [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md)
 5. [Glossário integrado](vigentes/apoio/glossario.md)
-6. [Contexto do sistema PCA](vigentes/apoio/contexto_explicando_o_sistema_PCA.md)
+6. [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md)
 7. [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md)
 8. `docs/vigentes/autoritativos/roadmap.md` — Planejado (ainda não criado)
-
-O
-[contexto do planejamento](vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md)
-é transitório e deve ser consultado apenas quando relevante à sua consolidação
-documental.
 
 ### 4.1 Princípio de autoridade
 
@@ -96,8 +91,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 |---|---|---|
 | [Arquitetura](vigentes/apoio/arquitetura.md) | Vigente | Limites e direção de dependências |
 | [Glossário integrado](vigentes/apoio/glossario.md) | Vigente | Índice semântico da linguagem do projeto |
-| [Contexto do sistema PCA](vigentes/apoio/contexto_explicando_o_sistema_PCA.md) | Vigente | Usuários, etapas e contexto funcional |
-| [Contexto do planejamento](vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md) | Transitório | Exportação a consolidar no passo 5 da seção 17 |
+| [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Vigente | Usuários, etapas e contexto funcional |
 | [DER da publicação](diagramas/DER_PUBLICACAO_PCA.png) | Vigente como apoio visual | Diagrama visual |
 | [Fluxograma do PCA](diagramas/fluxograma_PCA.png) | Vigente como apoio visual | Diagrama visual |
 
@@ -119,6 +113,7 @@ devem ser consultados apenas para auditoria, evolução e estudo:
 - [Índice histórico](historico/README.md);
 - [Modelo de domínio V1 legado](historico/modelo_de_dominio_v1_legado.md);
 - [Fluxo de implementação V1 legado](historico/fluxo_de_implementacao_v1_legado.md);
+- [Contexto histórico do planejamento](historico/contexto_do_planejamento_do_projeto_backend.md);
 - [Roadmap V1 legado](historico/roadmap_v1_legado.md).
 
 ## 6. Mapa de nomes antigos
@@ -130,8 +125,8 @@ devem ser consultados apenas para auditoria, evolução e estudo:
 | `docs/3_fluxo_implementacao.md`, `docs/fluxo_implementacao.md` | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` |
 | `docs/4_roadmap.md`, `docs/roadmap.md`, `docs/roadmap_v2.md` | `docs/vigentes/autoritativos/roadmap.md` — planejado |
 | `docs/4_roadmap_v1.md` | `docs/historico/roadmap_v1_legado.md` |
-| `docs/5_contexto_planejamento.md` | `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md` |
-| `docs/6_explicacao_sistema_PCA.md` | `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` |
+| `docs/5_contexto_planejamento.md`, `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md` | `docs/historico/contexto_do_planejamento_do_projeto_backend.md` — histórico |
+| `docs/6_explicacao_sistema_PCA.md`, `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` |
 | `docs/7_decisoes_integracao.md` | `docs/vigentes/autoritativos/decisoes_de_integracao.md` |
 | `docs/regras_negocio.md` | `docs/vigentes/autoritativos/regras_de_negocio.md` |
 | `docs/glossario.md`, `docs/glossario_tecnico.md`, `docs/vigentes/apoio/glossario_tecnico.md` | `docs/vigentes/apoio/glossario.md` |

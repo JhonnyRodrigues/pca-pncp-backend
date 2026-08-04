@@ -228,19 +228,14 @@ docs/vigentes/autoritativos/decisoes_de_integracao.md
 
 ### 4.8 Documento de contexto antigo
 
-O conteúdo útil de:
+O conteúdo útil do documento agora preservado em:
 
 ```text
-docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md
+docs/historico/contexto_do_planejamento_do_projeto_backend.md
 ```
 
-deve ser incorporado aos documentos apropriados.
-
-Depois disso, o arquivo deve ser movido para:
-
-```text
-docs/historico/
-```
+foi incorporado aos documentos apropriados no passo 5 da seção 17. O arquivo
+foi arquivado sem correções retroativas em seu corpo histórico.
 
 ---
 
@@ -1803,22 +1798,24 @@ seguinte gate de governança, sem renumerar as etapas originais:
   proporcional à tarefa;
 - distinguir instruções, checkpoints, sínteses e prompts históricos.
 
-4. Criar `docs/vigentes/autoritativos/fluxo_de_implementacao.md`
-   (**planejado, ainda não criado**):
+4. Criar
+   `docs/vigentes/autoritativos/fluxo_de_implementacao.md`. **Concluído.**
    - partir do modelo revisado;
    - descrever a colaboração entre Presentation, Application, Domain e portas;
    - referenciar RN para comportamento e DI para contratos externos;
    - não conter cronograma, sprints ou tecnologia concreta.
-5. Consolidar
-   `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md`:
+5. Consolidar o contexto de planejamento, hoje preservado em
+   `docs/historico/contexto_do_planejamento_do_projeto_backend.md`. **Concluído.**
    - distribuir o conteúdo útil entre os documentos apropriados;
    - revisar novamente modelo e fluxo se a consolidação acrescentar contexto;
    - arquivar somente depois de confirmar que nada útil foi perdido;
    - tratar a consolidação como gate de coerência anterior ao roadmap.
-6. Preservar a V1 em `docs/historico/roadmap_v1_legado.md`:
-   - não alterar o roadmap ativo antes deste ponto;
-   - copiar inteAgralmente o estado vigente;
-   - não aplicar correções retroativas à V1 histórica.
+6. Preservar a V1 em
+   `docs/historico/roadmap_v1_legado.md`. **Concluído.**
+   - caminho histórico canônico confirmado;
+   - corpo histórico preservado integralmente, sem alterações semânticas
+     posteriores ao arquivamento;
+   - nenhuma correção retroativa aplicada à V1 histórica.
 7. Criar a V2 ativa em `docs/vigentes/autoritativos/roadmap.md`
    (**planejado, ainda não criado**):
    - usar regras, modelo, DI e fluxo consolidados como entradas;
@@ -1839,7 +1836,7 @@ Antes de congelar a V1 e elaborar a V2:
 - o modelo não contém Oracle, HTTP, Scriptcase ou estrutura física;
 - o fluxo não funciona como roadmap ou cronograma;
 - o conteúdo útil de
-  `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md` foi
+  `docs/historico/contexto_do_planejamento_do_projeto_backend.md` foi
   preservado;
 - conflitos entre catálogo, modelo, DI e fluxo foram resolvidos.
 

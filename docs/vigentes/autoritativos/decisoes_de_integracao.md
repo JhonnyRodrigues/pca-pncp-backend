@@ -1165,7 +1165,7 @@ revisão registrada na DI-007.
 - `docs/vigentes/autoritativos/regras_de_negocio.md`;
 - `docs/vigentes/apoio/arquitetura.md`;
 - `docs/vigentes/autoritativos/modelo_de_dominio.md`;
-- `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md`.
+- `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md`.
 
 Documento vigente relacionado:
 

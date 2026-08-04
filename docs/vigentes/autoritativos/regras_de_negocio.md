@@ -17,7 +17,7 @@ vez de manter redações normativas concorrentes. Em especial:
   relações do modelo;
 - `docs/vigentes/autoritativos/decisoes_de_integracao.md` é a fonte das
   decisões e dos contratos de integração;
-- `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` apresenta
+- `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` apresenta
   usuários, etapas e contexto;
 - `docs/vigentes/autoritativos/fluxo_de_implementacao.md` descreve a
   colaboração dinâmica entre camadas e portas;
@@ -263,7 +263,7 @@ registrada explicitamente e não autoriza inferir comportamento.
   anterior à execução. Suas Demandas DEVEM percorrer registro, avaliação e
   consolidação, e DEVEM ser homologadas em lote pela Presidência.
 - **Origem ou autoridade:** confirmação do usuário consolidada no handoff
-  principal, seção 7, e `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md`.
+  principal, seção 7, e `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md`.
 - **Contexto e justificativa:** o fluxo formaliza o conjunto ordinário que
   comporá o PCA do exercício seguinte.
 - **Exemplo:** Demandas ordinárias para 2027 são planejadas e homologadas em
@@ -273,7 +273,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Elementos afetados:** Demanda ordinária, avaliação, consolidação e
   homologação.
 - **Evidências de teste:** ausentes.
-- **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` e
+- **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
   `docs/diagramas/fluxograma_PCA.png`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
@@ -291,7 +291,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Contraexemplo:** incluir uma DFD-E no Plano vigente sem homologação.
 - **Elementos afetados:** Demanda extraordinária e homologação.
 - **Evidências de teste:** ausentes.
-- **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md`.
+- **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
 ### RN-FLX-003 — Consolidação e desconsolidação
@@ -301,7 +301,7 @@ registrada explicitamente e não autoriza inferir comportamento.
   A consolidação DEVE bloquear novas alterações. Antes da homologação, a
   desconsolidação PODE reabrir as Demandas, que DEVEM percorrer novamente as
   etapas aplicáveis de avaliação e consolidação.
-- **Origem ou autoridade:** `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` e
+- **Origem ou autoridade:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
   `docs/diagramas/fluxograma_PCA.png`.
 - **Contexto e justificativa:** consolidação representa o fechamento da análise
   pela UO antes da aprovação presidencial.
@@ -311,7 +311,7 @@ registrada explicitamente e não autoriza inferir comportamento.
   permanece consolidado.
 - **Elementos afetados:** Demanda, consolidação, desconsolidação e avaliação.
 - **Evidências de teste:** ausentes.
-- **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` e
+- **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
   `docs/diagramas/fluxograma_PCA.png`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
@@ -321,7 +321,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Enunciado normativo:** Quando uma Demanda avaliada for encaminhada para
   revisão, ela DEVE retornar ao operador para correção e DEVE voltar ao fluxo
   de avaliação.
-- **Origem ou autoridade:** `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` e
+- **Origem ou autoridade:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
   `docs/diagramas/fluxograma_PCA.png`.
 - **Contexto e justificativa:** a revisão não equivale a autorização ou
   homologação e preserva o controle do workflow.
@@ -331,7 +331,7 @@ registrada explicitamente e não autoriza inferir comportamento.
   foi preenchida.
 - **Elementos afetados:** Demanda, operador e avaliação.
 - **Evidências de teste:** ausentes.
-- **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` e
+- **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
   `docs/diagramas/fluxograma_PCA.png`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
@@ -395,7 +395,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Enunciado normativo:** O Núcleo de Compras PODE ajustar a data desejada de
   uma Demanda homologada durante a elaboração do calendário, preservando o
   mesmo `ID_DEMANDA`.
-- **Origem ou autoridade:** `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` e refinamento
+- **Origem ou autoridade:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e refinamento
   aprovado na DI-007.
 - **Contexto e justificativa:** o calendário de contratações pode ajustar a
   oportunidade da compra sem substituir a necessidade homologada.
@@ -1059,8 +1059,7 @@ sobre o estado ou a pendência que ele efetivamente revisa.
 
 - `docs/vigentes/apoio/arquitetura.md`;
 - `docs/vigentes/autoritativos/modelo_de_dominio.md`;
-- `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md`;
-- `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md`;
+- `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md`;
 - `docs/vigentes/apoio/glossario.md`;
 - `docs/diagramas/DER_PUBLICACAO_PCA.png`;
 - `docs/diagramas/fluxograma_PCA.png`.
