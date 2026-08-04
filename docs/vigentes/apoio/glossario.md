@@ -151,7 +151,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Checkpoint | Registro incremental que preserva continuidade e precedência do planejamento. | Agentes |
 | Decisão de Integração — DI | Escolha registrada sobre contratos externos, arquitetura de integração ou operação. | `DI`; Docs |
 | Fluxo de implementação | Documento vigente que descreve colaboração dinâmica entre camadas e portas. | Docs; seção 17 dos checkpoints |
-| Gate | Condição documental, arquitetural ou contratual exigida antes de avançar. | `DI`; checkpoints |
+| Gate | Condição de validação baseada em evidências que libera um avanço específico do projeto. Um gate existe quando uma decisão depende de hipóteses ainda não comprovadas. Enquanto permanecer aberto, os avanços que dependem dessa evidência permanecem bloqueados. | `DI`; Roadmap; checkpoints |
 | Histórico | Documento substituído preservado para auditoria e aprendizado. | Docs |
 | Investigação | Evidência de pesquisa ou experimentação sem autoridade normativa. | Docs |
 | Regra de Negócio — RN | Enunciado normativo estável do comportamento exigido pelo negócio. | `RN`; Docs |

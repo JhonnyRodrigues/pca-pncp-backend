@@ -57,7 +57,7 @@ aparece neste índice sem link até que o documento exista.
 5. [Glossário integrado](vigentes/apoio/glossario.md)
 6. [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md)
 7. [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md)
-8. `docs/vigentes/autoritativos/roadmap.md` — Planejado (ainda não criado)
+8. [Roadmap de implementação](vigentes/autoritativos/roadmap.md)
 
 ### 4.1 Princípio de autoridade
 
@@ -83,7 +83,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 | [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md) | Vigente — V2 | Conceitos, identidades, relações e invariantes do modelo-alvo |
 | [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) | Vigente | DI-001 a DI-010 e seus gates |
 | [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md) | Vigente | Colaboração entre camadas e portas |
-| `docs/vigentes/autoritativos/roadmap.md` | Planejado (ainda não criado) | Ordem futura de implementação |
+| [Roadmap de implementação](vigentes/autoritativos/roadmap.md) | Vigente — V2 | Ordem de implementação |
 
 ### 5.2 Apoio
 
@@ -123,7 +123,7 @@ devem ser consultados apenas para auditoria, evolução e estudo:
 | `docs/1_arquitetura.md`, `docs/arquitetura.md`, `arquitetura.md` | `docs/vigentes/apoio/arquitetura.md` |
 | `docs/2_modelo_dominio.md`, `docs/modelo_dominio.md`, `docs/modelo_de_dominio_v2.md` | `docs/vigentes/autoritativos/modelo_de_dominio.md` |
 | `docs/3_fluxo_implementacao.md`, `docs/fluxo_implementacao.md` | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` |
-| `docs/4_roadmap.md`, `docs/roadmap.md`, `docs/roadmap_v2.md` | `docs/vigentes/autoritativos/roadmap.md` — planejado |
+| `docs/4_roadmap.md`, `docs/roadmap.md`, `docs/roadmap_v2.md` | `docs/vigentes/autoritativos/roadmap.md` |
 | `docs/4_roadmap_v1.md` | `docs/historico/roadmap_v1_legado.md` |
 | `docs/5_contexto_planejamento.md`, `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md` | `docs/historico/contexto_do_planejamento_do_projeto_backend.md` — histórico |
 | `docs/6_explicacao_sistema_PCA.md`, `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` |

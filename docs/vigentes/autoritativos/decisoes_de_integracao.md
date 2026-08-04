@@ -1167,13 +1167,8 @@ revisão registrada na DI-007.
 - `docs/vigentes/autoritativos/modelo_de_dominio.md`;
 - `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md`.
 
-Documento vigente relacionado:
-
 - `docs/vigentes/autoritativos/fluxo_de_implementacao.md`;
-
-Destino planejado, ainda não criado:
-
-- `docs/vigentes/autoritativos/roadmap.md`.
+- [Roadmap de implementação](roadmap.md).
 
 ### Fontes oficiais adotadas durante o planejamento
 

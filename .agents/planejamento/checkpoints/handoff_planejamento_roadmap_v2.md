@@ -1816,8 +1816,8 @@ seguinte gate de governança, sem renumerar as etapas originais:
    - corpo histórico preservado integralmente, sem alterações semânticas
      posteriores ao arquivamento;
    - nenhuma correção retroativa aplicada à V1 histórica.
-7. Criar a V2 ativa em `docs/vigentes/autoritativos/roadmap.md`
-   (**planejado, ainda não criado**):
+7. Criar a V2 ativa em
+   `docs/vigentes/autoritativos/roadmap.md`. **Concluído.**
    - usar regras, modelo, DI e fluxo consolidados como entradas;
    - apresentar a sequência prescritiva e didática;
    - manter acompanhamento do PCA, mapeamento V1 -> V2 e apêndice histórico;

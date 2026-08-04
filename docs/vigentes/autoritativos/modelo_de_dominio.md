@@ -26,8 +26,8 @@ A autoridade documental é dividida por assunto:
   autoritativa das decisões de integração e dos fatos operacionais externos;
 - `docs/vigentes/autoritativos/fluxo_de_implementacao.md` descreve a
   colaboração dinâmica entre camadas e portas;
-- `docs/vigentes/autoritativos/roadmap.md` está planejado, mas ainda não foi
-  criado.
+- [`docs/vigentes/autoritativos/roadmap.md`](roadmap.md) organiza a ordem de
+  construção.
 
 Quando uma explicação deste modelo resumir uma regra, o identificador `RN-*`
 apontará para sua redação completa. Quando uma fronteira depender de uma escolha

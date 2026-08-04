@@ -23,6 +23,7 @@ colaboração. A autoridade dos assuntos relacionados permanece distribuída:
 | Regras de negócio | [Regras de negócio](regras_de_negocio.md) |
 | Conceitos, identidades, relações e invariantes | [Modelo de domínio](modelo_de_dominio.md) |
 | Contratos externos, persistência técnica e operação | [Decisões de integração](decisoes_de_integracao.md) |
+| Ordem de construção | [Roadmap de implementação](roadmap.md) |
 | Classificação e precedência documental | [Índice documental](../../README.md) |
 
 A [Arquitetura](../apoio/arquitetura.md) explica os limites estáticos e a

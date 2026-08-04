@@ -23,6 +23,10 @@ substitui as fontes específicas:
   contém o modelo conceitual vigente;
 - [`docs/vigentes/autoritativos/decisoes_de_integracao.md`](docs/vigentes/autoritativos/decisoes_de_integracao.md)
   contém as decisões de integração;
+- [`docs/vigentes/autoritativos/fluxo_de_implementacao.md`](docs/vigentes/autoritativos/fluxo_de_implementacao.md)
+  contém a colaboração dinâmica entre as camadas e portas;
+- [`docs/vigentes/autoritativos/roadmap.md`](docs/vigentes/autoritativos/roadmap.md)
+  contém a ordem de construção vigente;
 - [`.agents/AGENTS.md`](.agents/AGENTS.md) define como agentes devem trabalhar
   no repositório.
 
@@ -40,11 +44,8 @@ inicialmente, em processo, por uma aplicação Scriptcase.
 O projeto está em desenvolvimento e passa por consolidação documental e
 refatoração arquitetural antes da Infrastructure.
 
-As regras de negócio, o modelo de domínio V2, as decisões de integração e o
-fluxo de implementação V2 estão vigentes.
-
-O Roadmap V2 ainda está planejado e não deve ser tratado como documento
-existente.
+As regras de negócio, o modelo de domínio V2, as decisões de integração, o
+fluxo de implementação V2 e o Roadmap V2 estão vigentes.
 
 O código atual contém resultados de etapas anteriores e pode representar
 premissas que serão refatoradas com TDD. O registro atualizado dos documentos
@@ -155,16 +156,15 @@ Antes de implementar:
 3. consulte [`docs/README.md`](docs/README.md) e siga sua ordem de leitura,
    classificação e precedência;
 4. inspecione o estado atual do Git e preserve alterações locais;
-5. use o plano aprovado e os checkpoints aplicáveis enquanto o Roadmap V2 não
-   existir;
+5. use o Roadmap V2 para a ordem de construção e os checkpoints aplicáveis
+   para a continuidade do planejamento;
 6. aplique TDD quando a tarefa envolver código;
 7. implemente somente o escopo autorizado;
 8. não trate documentos históricos, investigações ou prompts antigos como
    especificações vigentes.
 
-Quando o Roadmap V2 for criado e classificado como vigente, ele passará a
-organizar a sequência de implementação sem redefinir regras, domínio ou
-decisões de integração.
+O Roadmap V2 organiza a sequência de implementação sem redefinir regras,
+domínio, decisões de integração ou fluxo.
 
 ## Processo de aprendizado
 

@@ -22,7 +22,7 @@ A autoridade é distribuída da seguinte forma:
 | Conceitos, identidades, relações e invariantes | [Modelo de domínio](../autoritativos/modelo_de_dominio.md) |
 | Portas, integração, composição e operação | [Decisões de integração](../autoritativos/decisoes_de_integracao.md) |
 | Colaboração dinâmica entre componentes | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` |
-| Ordem de construção | `docs/vigentes/autoritativos/roadmap.md` — planejado, ainda não criado |
+| Ordem de construção | [Roadmap de implementação](../autoritativos/roadmap.md) |
 | Classificação e precedência documental | [Índice documental](../../README.md) |
 
 Quando uma explicação deste documento divergir de uma fonte autoritativa,

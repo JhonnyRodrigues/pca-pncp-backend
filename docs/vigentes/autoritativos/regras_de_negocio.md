@@ -21,8 +21,8 @@ vez de manter redações normativas concorrentes. Em especial:
   usuários, etapas e contexto;
 - `docs/vigentes/autoritativos/fluxo_de_implementacao.md` descreve a
   colaboração dinâmica entre camadas e portas;
-- `docs/vigentes/autoritativos/roadmap.md` está planejado, mas ainda não foi
-  criado;
+- [`docs/vigentes/autoritativos/roadmap.md`](roadmap.md) organiza a ordem de
+  construção;
 - os testes constituem evidência executável, mas não substituem este catálogo.
 
 Uma divergência entre este catálogo e outro documento bloqueia a implementação
@@ -1055,7 +1055,7 @@ preenchidas por inferência no Domain, na Application ou na Infrastructure:
 Os checkpoints são incrementais. O checkpoint posterior prevalece somente
 sobre o estado ou a pendência que ele efetivamente revisa.
 
-### Documentos temáticos atuais e destinos planejados
+### Documentos temáticos atuais
 
 - `docs/vigentes/apoio/arquitetura.md`;
 - `docs/vigentes/autoritativos/modelo_de_dominio.md`;
@@ -1064,13 +1064,8 @@ sobre o estado ou a pendência que ele efetivamente revisa.
 - `docs/diagramas/DER_PUBLICACAO_PCA.png`;
 - `docs/diagramas/fluxograma_PCA.png`.
 
-Documento vigente relacionado:
-
 - `docs/vigentes/autoritativos/fluxo_de_implementacao.md`;
-
-Destino planejado, ainda não criado:
-
-- `docs/vigentes/autoritativos/roadmap.md`.
+- [Roadmap de implementação](roadmap.md).
 
 ### Fontes independentes de conferência
 
