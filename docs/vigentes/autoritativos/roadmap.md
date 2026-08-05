@@ -49,12 +49,12 @@ exclusivamente histórica e didática.
 
 ## 2. Acompanhamento do projeto PCA — estado real
 
-| Marco real do PCA | Status ao ativar a V2 | Papel no projeto | Relação com o Roadmap V2 |
+| Marco real do PCA | Status atual | Papel no projeto | Relação com o Roadmap V2 |
 |---|---|---|---|
 | Seção 17 — passos 1 a 6 | Concluídos | Consolidaram RN, modelo, DI, fluxo e preservação histórica | São pré-condições documentais; não correspondem a sprints |
 | Seção 17 — passo 7 | Concluído por este documento | Ativa a ordem de construção vigente | É a criação do próprio Roadmap, fora da execução das fases |
-| Seção 17 — passo 8 | Não iniciado | Reconciliar o código existente com as fontes vigentes usando TDD | O trabalho será retomado na Sprint 4.7 |
-| Seção 17 — passo 9 | Bloqueado pelo passo 8 | Completar a Application com mocks | O avanço ocorrerá nas Sprints 4.8 a 4.12 |
+| Seção 17 — passo 8 | Concluído após reauditoria final | Reconciliou Domain e Application existentes com as fontes vigentes usando TDD | A Sprint 4.7 foi aprovada com ressalvas não bloqueantes mantidas fora de seu escopo |
+| Seção 17 — passo 9 | Não iniciado | Completar a Application com mocks | O avanço está previsto para as Sprints 4.8 a 4.12 e ainda depende de autorização |
 | Seção 17 — passo 10 | Bloqueado pelo passo 9 e pelos gates aplicáveis | Autorizar o início da Infrastructure | Corresponde à entrada futura na Fase 5 |
 | Fases 6 a 9 | Não iniciadas | Wiring, Presentation, integração real e operação | Permanecem futuras e dependentes dos gates anteriores |
 
@@ -423,8 +423,13 @@ aceitas condicionalmente e preservam seus gates.
 - substituir testes baseados em premissas históricas;
 - preservar Red → Green → Refactor em incrementos pequenos.
 
-**Decisão do PCA:** este é o próximo ponto de implementação depois da ativação
-do Roadmap V2. Sua posição não transforma o passo 8 da seção 17 em uma sprint.
+**Estado do PCA:** concluída em 04/08/2026 após reauditoria final aprovar as
+correções das desconformidades identificadas na proteção da fotografia vigente,
+nas pré-condições da política e nas invariantes de seus fatos e resultados. As
+ressalvas não bloqueantes sobre licença permanecem transversais, e a
+representação decimal continua destinada à Sprint 5.6. O trabalho permaneceu
+restrito ao passo 8 e à Sprint 4.7. A Sprint 4.8 continua não iniciada e depende
+de autorização explícita.
 
 #### Sprint 4.8 — Ports e contratos tipados da Application
 

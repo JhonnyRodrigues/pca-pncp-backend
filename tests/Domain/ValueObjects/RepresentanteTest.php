@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Domain\ValueObjects;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Semae\Pca\Domain\ValueObjects\Representante;
@@ -12,10 +13,18 @@ class RepresentanteTest extends TestCase
 {
     public function testDeveCriarRepresentanteValido(): void
     {
-        $representante = new Representante(709, 'Maria da Silva');
+        $representante = new Representante(709, '  Maria da Silva  ');
 
         $this->assertSame(709, $representante->getId());
         $this->assertSame('Maria da Silva', $representante->getNome());
+    }
+
+    /** @regra RN-CAD-003 */
+    public function testDeveRejeitarNomeVazio(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new Representante(709, '   ');
     }
 
     public function testDeveSerImutavel(): void

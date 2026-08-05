@@ -6,13 +6,16 @@ namespace Semae\Pca\Domain\Ports;
 
 use Semae\Pca\Domain\Entities\Plano;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\IdentidadePlano;
 
 interface PlanoRepository
 {
     /**
-     * @return Plano[]
+     * @return IdentidadePlano[]
      */
-    public function obterPlanosHomologadosParaProcessamento(AnoExecucao $anoExecucao): array;
+    public function listarIdentidades(AnoExecucao $anoExecucao): array;
 
-    public function persistir(Plano $plano): void;
+    public function reconstruirFotografiaVigente(IdentidadePlano $identidade): Plano;
+
+    public function confirmarSincronizacao(Plano $plano): void;
 }

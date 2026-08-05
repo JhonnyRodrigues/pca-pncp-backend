@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Semae\Pca\Application\UseCases\PublicarPca;
 
-use Semae\Pca\Domain\ValueObjects\Cnpj;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\Cnpj;
 
 class PublicarPcaRequest
 {
     public function __construct(
         private readonly Cnpj $cnpj,
-        private readonly AnoExecucao $anoExecucao,
-        private readonly string $usuarioLogado,
-        private readonly array $credenciais
+        private readonly AnoExecucao $anoExecucao
     ) {}
 
     public function getAnoExecucao(): AnoExecucao
@@ -25,15 +23,4 @@ class PublicarPcaRequest
     {
         return $this->cnpj;
     }
-
-    public function getUsuarioLogado(): string
-    {
-        return $this->usuarioLogado;
-    }
-    
-    public function getCredenciais(): array
-    {
-        return $this->credenciais;
-    }
-
 }

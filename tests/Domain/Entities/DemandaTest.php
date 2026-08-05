@@ -4,192 +4,92 @@ declare(strict_types=1);
 
 namespace Tests\Domain\Entities;
 
+use DateTimeImmutable;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Semae\Pca\Domain\Entities\Demanda;
 use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
-use DateTimeImmutable;
-use InvalidArgumentException;
-use Semae\Pca\Domain\Exceptions\SequencialPncpException;
+use Semae\Pca\Domain\Enums\SituacaoDemanda;
+use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\IdentidadeUnidadeOrcamentaria;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
 use Semae\Pca\Domain\ValueObjects\Uasg;
 
-
 class DemandaTest extends TestCase
 {
-    public function testDeveRepresentarUmaDemandaHomologadaValida(): void
+    /** @regra RN-DEM-001 @regra RN-DEM-002 */
+    public function testDeveRepresentarDemandaComIdentidadeUoEAnoExecucao(): void
     {
-        $demanda = $this->criarDemanda();
+        $unidade = $this->criarUnidadeOrcamentaria();
+        $ano = new AnoExecucao((int) date('Y') + 1);
+
+        $demanda = $this->criarDemanda($unidade, $ano);
 
         $this->assertSame(1001, $demanda->getIdDemanda());
-        $this->assertSame('MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS', $demanda->getDescricao()
-        );
+        $this->assertSame(SituacaoDemanda::HOMOLOGADA, $demanda->getSituacao());
+        $this->assertSame($unidade, $demanda->getUnidadeOrcamentaria());
+        $this->assertSame($ano, $demanda->getAnoExecucao());
+        $this->assertSame(3550.0, $demanda->getValorUnitario());
     }
 
-    public function testDeveCalcularValorUnitarioComBaseNoValorTotalEQuantidade(): void
-    {
-        $demanda = $this->criarDemanda();
-
-        $this->assertEquals(3550.00, $demanda->getValorUnitario());
-    }
-
-    public function testDeveObterAnoExecucaoAPartirDaDataDesejada(): void
-    {
-        $demanda = $this->criarDemanda();
-
-        $this->assertSame(2027, $demanda->getAnoExecucao());
-    }
-
-    public function testDeveIniciarSemSequencialPncp(): void
-    {
-        $demanda = $this->criarDemanda();
-
-        $this->assertNull($demanda->getSequencialPncp());
-    }
-
-    public function testDevePermitirInformarSequencialPncpAposPublicacao(): void
-    {
-        $demanda = $this->criarDemanda();
-
-        $demanda->setSequencialPncp(77);
-
-        $this->assertSame(77, $demanda->getSequencialPncp());
-    }
-
-    public function testDeveLancarExcecaoQuandoSequencialPncpForZero(): void
-    {
-        $demanda = $this->criarDemanda();
-
-        $this->expectException(SequencialPncpException::class);
-
-        $demanda->setSequencialPncp(0);
-    }
-
-    public function testDeveLancarExcecaoQuandoCategoriaForInvalida(): void
+    /** @regra RN-DEM-001 */
+    public function testDeveRejeitarCategoriaInvalida(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        new Demanda(
-            1001,
-            2,
-            159,
-            42,
-            $this->criarUnidadeOrcamentaria(),
-            new DateTimeImmutable('2027-03-15'),
-            99, // <---
-            'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
-            'UNIDADE',
-            2,
-            7100.00,
-            7100.00,
-            2,
-            '98.004.000004',
-            '98',
-            'INFORMÁTICA',
-            'N'
-        );
+        $this->criarDemanda(categoria: 99);
     }
 
-    public function testDeveLancarExcecaoQuandoQuantidadeForMenorOuIgualAZero(): void
+    /** @regra RN-DEM-001 */
+    public function testDeveRejeitarQuantidadeNaoPositiva(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        new Demanda(
-            1001,
-            2,
-            159,
-            42,
-            $this->criarUnidadeOrcamentaria(),
-            new DateTimeImmutable('2027-03-15'),
-            1,
-            'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
-            'UNIDADE',
-            0, // <---
-            7100.00,
-            7100.00,
-            2,
-            '98.004.000004',
-            '98',
-            'INFORMÁTICA',
-            'N'
-        );
+        $this->criarDemanda(quantidade: 0);
     }
 
-    public function testDeveLancarExcecaoQuandoCatalogoForInvalido(): void
+    /** @regra RN-DEM-001 */
+    public function testDeveRejeitarOrigemInvalida(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        new Demanda(
-            1001,
-            2,
-            159,
-            42,
-            $this->criarUnidadeOrcamentaria(),
-            new DateTimeImmutable('2027-03-15'),
-            1,
-            'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
-            'UNIDADE',
-            2,
-            7100.00,
-            7100.00,
-            99, // <---
-            '98.004.000004',
-            '98',
-            'INFORMÁTICA',
-            'N'
-        );
+        $this->criarDemanda(origem: 'X');
     }
 
-    public function testDeveLancarExcecaoQuandoOrigemForInvalida(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
+    private function criarDemanda(
+        ?UnidadeOrcamentaria $unidade = null,
+        ?AnoExecucao $ano = null,
+        int $categoria = 1,
+        int $quantidade = 2,
+        string $origem = 'N'
+    ): Demanda {
+        $ano ??= new AnoExecucao((int) date('Y') + 1);
 
-        new Demanda(
-            1001,
-            2,
-            159,
-            42,
-            $this->criarUnidadeOrcamentaria(),
-            new DateTimeImmutable('2027-03-15'),
-            1,
-            'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
-            'UNIDADE',
-            2,
-            7100.00,
-            7100.00,
-            2,
-            '98.004.000004',
-            '98',
-            'INFORMÁTICA',
-            'X' // <---
-        );
-    }
-
-    private function criarDemanda(): Demanda
-    {
         return new Demanda(
             1001,
-            2,
+            SituacaoDemanda::HOMOLOGADA,
             159,
-            42,
-            $this->criarUnidadeOrcamentaria(),
-            new DateTimeImmutable('2027-03-15'),
-            1,
+            $unidade ?? $this->criarUnidadeOrcamentaria(),
+            $ano,
+            new DateTimeImmutable($ano->getValor() . '-03-15'),
+            $categoria,
             'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
             'UNIDADE',
-            2,
+            $quantidade,
             7100.00,
             7100.00,
             2,
             '98.004.000004',
             '98',
             'INFORMÁTICA',
-            'N'
+            $origem
         );
     }
 
     private function criarUnidadeOrcamentaria(): UnidadeOrcamentaria
     {
         return new UnidadeOrcamentaria(
+            new IdentidadeUnidadeOrcamentaria('uo-101'),
             new Lotacao(101, 'Diretoria Geral Administrativa e Financeira'),
             new Uasg('928344', 'SEMAE Piracicaba'),
             'Diretoria Geral Administrativa e Financeira'

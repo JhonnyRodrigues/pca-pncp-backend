@@ -498,7 +498,9 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Contraexemplo:** excluir uma Demanda do PCA apenas porque passou de
   Homologada para Publicada.
 - **Elementos afetados:** Demanda, situação e fotografia do Plano.
-- **Evidências de teste:** ausentes.
+- **Evidências de teste:** `tests/Domain/Enums/SituacaoDemandaTest.php` e
+  `tests/Domain/Entities/PlanoTest.php`, nos cenários das cinco situações
+  vigentes e de rejeição das não participantes.
 - **Decisões e documentos relacionados:** DI-008 e `RN-PLA-004`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
@@ -518,8 +520,9 @@ registrada explicitamente e não autoriza inferir comportamento.
   lógico.
 - **Contraexemplo:** tratar cada versão como um Plano de negócio independente.
 - **Elementos afetados:** Plano, UnidadeOrcamentaria e AnoExecucao.
-- **Evidências de teste:** ausentes; os testes atuais ainda representam uma
-  versão específica com identificador técnico.
+- **Evidências de teste:** `tests/Domain/ValueObjects/IdentidadePlanoTest.php`,
+  `tests/Domain/ValueObjects/IdentidadeUnidadeOrcamentariaTest.php` e
+  `tests/Domain/Entities/PlanoTest.php`.
 - **Decisões e documentos relacionados:** DI-001 e DI-008.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
@@ -558,7 +561,8 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Contraexemplo:** escolher a versão 2 porque é a última com confirmação
   preenchida.
 - **Elementos afetados:** Plano, versão vigente e confirmação.
-- **Evidências de teste:** ausentes.
+- **Evidências de teste:** ausentes; a seleção da maior versão pertence à
+  reconstrução pelo Repository futuro.
 - **Decisões e documentos relacionados:** DI-008 e `RN-PLA-007`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
@@ -578,7 +582,10 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Contraexemplo:** carregar somente D4 porque ela se originou na versão mais
   recente.
 - **Elementos afetados:** Plano, Demanda e versão de homologação.
-- **Evidências de teste:** ausentes.
+- **Evidências de teste:** evidência parcial em
+  `tests/Domain/Entities/PlanoTest.php`, cobrindo situações participantes,
+  unicidade e uniformidade da fotografia. A reconstrução completa entre
+  versões permanece responsabilidade do Repository futuro.
 - **Decisões e documentos relacionados:** DI-001, DI-008 e `RN-DEM-009`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
@@ -594,8 +601,8 @@ registrada explicitamente e não autoriza inferir comportamento.
   com fotografia vazia.
 - **Contraexemplo:** impedir a reconstrução do Plano por ausência de Demandas.
 - **Elementos afetados:** Plano, Demanda e publicação.
-- **Evidências de teste:** ausentes; `testDeveImpedirPlanoSemDemandas` em
-  `tests/Domain/Entities/PlanoTest.php` representa regra substituída.
+- **Evidências de teste:** `testDeveRepresentarPlanoSemDemandasAtivas` em
+  `tests/Domain/Entities/PlanoTest.php`.
 - **Decisões e documentos relacionados:** DI-001, DI-005, `RN-DEM-008` e
   `RN-PUB-003`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
@@ -656,8 +663,8 @@ registrada explicitamente e não autoriza inferir comportamento.
   Publicação, e não Retificação.
 - **Contraexemplo:** decidir Retificação apenas porque a versão é maior que 1.
 - **Elementos afetados:** Plano, estado da publicação e decisão.
-- **Evidências de teste:** ausentes; os testes atuais decidem pela versão e
-  representam premissa substituída.
+- **Evidências de teste:** `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`,
+  incluindo versão maior que 1 e nova Publicação após exclusão.
 - **Decisões e documentos relacionados:** DI-001, DI-002, DI-005 e
   `RN-PUB-005`. A identificação de PCA externo sem vínculo é decisão de
   integração.
@@ -677,8 +684,8 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Contraexemplo:** reenviar sempre o Plano completo e gerar novo sequencial.
 - **Elementos afetados:** Plano, Demandas vigentes, Retificação e
   sequencialPca.
-- **Evidências de teste:** ausentes; testes atuais baseados apenas na versão
-  não cobrem a regra.
+- **Evidências de teste:** `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`,
+  nos cenários de diferenças por pertencimento e invariantes do resultado.
 - **Decisões e documentos relacionados:** DI-001, DI-002, DI-005 e
   `RN-PUB-006`. Métodos externos e ordem de operações são decisões de
   integração.
@@ -698,7 +705,10 @@ registrada explicitamente e não autoriza inferir comportamento.
   exclusão integral.
 - **Contraexemplo:** manter o PCA ativo vazio ou impedir o cancelamento.
 - **Elementos afetados:** Plano vazio, cancelamento, justificativa e publicação.
-- **Evidências de teste:** ausentes.
+- **Evidências de teste:** evidência parcial em
+  `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`, cobrindo decisão
+  com Plano vazio e rejeição da ausência de Planos. A justificativa do último
+  cancelamento pertence à orquestração futura.
 - **Decisões e documentos relacionados:** DI-001, DI-003, DI-005,
   `RN-DEM-008` e `RN-PLA-005`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
@@ -716,9 +726,8 @@ registrada explicitamente e não autoriza inferir comportamento.
   escrita.
 - **Contraexemplo:** retificar um PCA sem qualquer mudança homologada.
 - **Elementos afetados:** Plano, publicação e decisão.
-- **Evidências de teste:** o cenário genérico de `NENHUMA_ACAO` existe em
-  `tests/Domain/Entities/PlanoTest.php`, mas sua condição atual é baseada em
-  premissa substituída; não há evidência vigente completa.
+- **Evidências de teste:** `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`,
+  nos cenários de PCA ativo convergente e de ambos os lados inativos.
 - **Decisões e documentos relacionados:** DI-002, DI-005 e `RN-AUD-001`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
@@ -736,8 +745,8 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Contraexemplo:** mapear versão 1 para Publicação e toda versão posterior
   para Retificação.
 - **Elementos afetados:** Plano, versão e decisão de processamento.
-- **Evidências de teste:** ausentes; os testes atuais codificam o
-  contraexemplo.
+- **Evidências de teste:** `testVersaoEConfirmacaoNaoDeterminamDecisao` em
+  `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`.
 - **Decisões e documentos relacionados:** DI-001, DI-005 e
   `RN-PUB-001` a `RN-PUB-004`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
@@ -757,7 +766,9 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Contraexemplo:** manter no PCA uma Demanda cancelada ou ignorar uma nova
   Demanda homologada.
 - **Elementos afetados:** Plano, Demanda, Publicação e Retificação.
-- **Evidências de teste:** ausentes.
+- **Evidências de teste:** `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`,
+  cobrindo diferenças por pertencimento, múltiplos Planos e unicidade global
+  das Demandas.
 - **Decisões e documentos relacionados:** DI-001, DI-002 e DI-007. Mapeamento
   de identificadores, algoritmo de comparação, limites de conteúdo e alcance
   da sincronização V1 pertencem às decisões de integração e não a este
@@ -778,7 +789,8 @@ registrada explicitamente e não autoriza inferir comportamento.
   sequencial.
 - **Contraexemplo:** reutilizar como ativo o sequencial do PCA excluído.
 - **Elementos afetados:** Plano, estado da publicação e sequencialPca.
-- **Evidências de teste:** ausentes.
+- **Evidências de teste:** `testDevePublicarNovamenteDepoisDeExclusao` em
+  `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`.
 - **Decisões e documentos relacionados:** DI-001, DI-005, `RN-PUB-001` e
   `RN-PUB-008`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
@@ -799,7 +811,9 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Contraexemplo:** inferir `PUBLICADO` somente porque existe um sequencial
   armazenado.
 - **Elementos afetados:** estado da publicação e sequencialPca.
-- **Evidências de teste:** ausentes.
+- **Evidências de teste:** `tests/Domain/ValueObjects/EstadoOperacionalPublicacaoTest.php`
+  e cenários de coerência em
+  `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`.
 - **Decisões e documentos relacionados:** DI-005, DI-008 e `RN-PUB-007`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
@@ -899,10 +913,8 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Exemplo:** uma Retificação confirmada usa o procedimento 8.
 - **Contraexemplo:** registrar toda operação PNCP como procedimento 5.
 - **Elementos afetados:** Procedimento e auditoria.
-- **Evidências de teste:** evidência parcial em
-  `tests/Domain/Entities/ProcedimentoTest.php` e
-  `tests/Domain/Entities/HistoricoProcedimentoTest.php`; os códigos 8 e 9 e a
-  classificação vigente ainda não estão cobertos.
+- **Evidências de teste:** `tests/Domain/Facts/HistoricoProcedimentoTest.php`,
+  cobrindo as classificações e os códigos 5, 8 e 9.
 - **Decisões e documentos relacionados:** DI-006 e
   `docs/vigentes/autoritativos/modelo_de_dominio.md`, cuja redação anterior é substituída por esta
   regra.
@@ -942,7 +954,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Evidências de teste:** evidência parcial em
   `tests/Domain/ValueObjects/RepresentanteTest.php`,
   `tests/Domain/ValueObjects/LotacaoTest.php` e
-  `tests/Domain/Entities/HistoricoProcedimentoTest.php`; a resolução pelo
+  `tests/Domain/Facts/HistoricoProcedimentoTest.php`; a resolução pelo
   usuário autenticado ainda não está coberta.
 - **Decisões e documentos relacionados:** DI-006, DI-010, `RN-CAD-003` e
   `RN-CAD-004`.
@@ -964,7 +976,7 @@ registrada explicitamente e não autoriza inferir comportamento.
   auditoria.
 - **Elementos afetados:** mensagem de auditoria e fato confirmado.
 - **Evidências de teste:** evidência parcial da obrigatoriedade da mensagem em
-  `tests/Domain/Entities/HistoricoProcedimentoTest.php`; o conteúdo vigente
+  `tests/Domain/Facts/HistoricoProcedimentoTest.php`; o conteúdo vigente
   completo ainda não está coberto.
 - **Decisões e documentos relacionados:** DI-006.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.

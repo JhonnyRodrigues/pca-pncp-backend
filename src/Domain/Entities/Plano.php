@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Semae\Pca\Domain\Entities;
 
-use Semae\Pca\Domain\ValueObjects\AnoExecucao;
-use Semae\Pca\Domain\Enums\DecisaoProcessamentoPlano;
-use Semae\Pca\Domain\Exceptions\PlanoException;
 use DateTimeImmutable;
+use Semae\Pca\Domain\Exceptions\PlanoException;
+use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\IdentidadePlano;
 
 class Plano
 {
@@ -15,49 +15,29 @@ class Plano
      * @param Demanda[] $demandas
      */
     public function __construct(
-        private readonly int $idPlano,
-        private readonly AnoExecucao $anoExecucao,
-        private readonly UnidadeOrcamentaria $unidadeOrcamentaria,
+        private readonly IdentidadePlano $identidade,
         private readonly int $sequencialVersao,
         private readonly DateTimeImmutable $dataHomologacao,
         private readonly array $demandas,
-        private readonly ?DateTimeImmutable $dataPublicacao = null
+        private readonly ?DateTimeImmutable $dataConfirmacaoSincronizacao
     ) {
         $this->validarSequencialVersao();
         $this->validarDemandas();
     }
 
-    public function foiPublicado(): bool
+    public function getIdentidade(): IdentidadePlano
     {
-        return $this->dataPublicacao !== null;
-    }
-
-    public function decidirPfrocessamento(): DecisaoProcessamentoPlano
-    {
-        if ($this->foiPublicado()) {
-            return DecisaoProcessamentoPlano::NENHUMA_ACAO;
-        }
-
-        if ($this->sequencialVersao === 1) {
-            return DecisaoProcessamentoPlano::PUBLICAR;
-        }
-
-        return DecisaoProcessamentoPlano::RETIFICAR;
-    }
-
-    public function getIdPlano(): int
-    {
-        return $this->idPlano;
+        return $this->identidade;
     }
 
     public function getAnoExecucao(): AnoExecucao
     {
-        return $this->anoExecucao;
+        return $this->identidade->getAnoExecucao();
     }
 
     public function getUnidadeOrcamentaria(): UnidadeOrcamentaria
     {
-        return $this->unidadeOrcamentaria;
+        return $this->identidade->getUnidadeOrcamentaria();
     }
 
     public function getSequencialVersao(): int
@@ -70,9 +50,14 @@ class Plano
         return $this->dataHomologacao;
     }
 
-    public function getDataPublicacao(): ?DateTimeImmutable
+    public function getDataConfirmacaoSincronizacao(): ?DateTimeImmutable
     {
-        return $this->dataPublicacao;
+        return $this->dataConfirmacaoSincronizacao;
+    }
+
+    public function possuiSincronizacaoConfirmada(): bool
+    {
+        return $this->dataConfirmacaoSincronizacao !== null;
     }
 
     /**
@@ -93,7 +78,6 @@ class Plano
         return count($this->demandas);
     }
 
-    # métodos de validação
     private function validarSequencialVersao(): void
     {
         if ($this->sequencialVersao <= 0) {
@@ -103,27 +87,28 @@ class Plano
 
     private function validarDemandas(): void
     {
-        if ($this->demandas === []) {
-            throw new PlanoException('Plano deve possuir ao menos uma Demanda.');
-        }
+        $idsDemandas = [];
 
         foreach ($this->demandas as $demanda) {
             if (!$demanda instanceof Demanda) {
                 throw new PlanoException('Plano deve possuir apenas Demandas.');
             }
 
-            if ($demanda->getIdPlano() !== $this->idPlano) {
-                throw new PlanoException('Demanda deve pertencer ao Plano informado.');
+            if (!$demanda->participaDaFotografiaVigente()) {
+                throw new PlanoException('Plano deve possuir apenas Demandas participantes da fotografia vigente.');
             }
 
-            if (
-                $demanda->getUnidadeOrcamentaria()->getLotacao()->getId()
-                !== $this->unidadeOrcamentaria->getLotacao()->getId()
-            ) {
-                throw new PlanoException('Demandas devem pertencer a mesma Unidade Orçamentária do Plano.');
+            if (array_key_exists($demanda->getIdDemanda(), $idsDemandas)) {
+                throw new PlanoException('Plano não pode possuir Demandas duplicadas.');
             }
 
-            if ($demanda->getAnoExecucao() !== $this->anoExecucao->getValor()) {
+            $idsDemandas[$demanda->getIdDemanda()] = true;
+
+            if (!$demanda->getUnidadeOrcamentaria()->possuiMesmaIdentidade($this->getUnidadeOrcamentaria())) {
+                throw new PlanoException('Demandas devem pertencer à mesma Unidade Orçamentária do Plano.');
+            }
+
+            if ($demanda->getAnoExecucao()->getValor() !== $this->getAnoExecucao()->getValor()) {
                 throw new PlanoException('Demandas devem pertencer ao mesmo Ano de Execução do Plano.');
             }
         }

@@ -7,18 +7,40 @@ namespace Tests\Domain\Entities;
 use PHPUnit\Framework\TestCase;
 use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Exceptions\UnidadeOrcamentariaInvalidaException;
+use Semae\Pca\Domain\ValueObjects\IdentidadeUnidadeOrcamentaria;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
 use Semae\Pca\Domain\ValueObjects\Uasg;
 use ReflectionClass;
 
 class UnidadeOrcamentariaTest extends TestCase
 {
+    /** @regra RN-PLA-001 */
+    public function testDeveReconhecerIdentidadeContinuaDaUnidadeOrcamentaria(): void
+    {
+        $identidade = new IdentidadeUnidadeOrcamentaria('uo-101');
+        $unidade = new UnidadeOrcamentaria(
+            $identidade,
+            new Lotacao(101, 'Diretoria Administrativa'),
+            new Uasg('928344', 'SEMAE Piracicaba'),
+            'Diretoria Administrativa'
+        );
+
+        $this->assertSame($identidade, $unidade->getIdentidade());
+        $this->assertTrue($unidade->possuiMesmaIdentidade(new UnidadeOrcamentaria(
+            new IdentidadeUnidadeOrcamentaria('uo-101'),
+            new Lotacao(999, 'Outra Lotação'),
+            new Uasg('000001', 'Outra UASG'),
+            'Outra descrição'
+        )));
+    }
+
     public function testDeveCriarUnidadeOrcamentariaValida(): void
     {
         $lotacao = new Lotacao(101, 'Diretoria Administrativa');
         $uasg = new Uasg('928344', 'SEMAE Piracicaba');
 
         $unidade = new UnidadeOrcamentaria(
+            new IdentidadeUnidadeOrcamentaria('uo-101'),
             $lotacao,
             $uasg,
             'Diretoria Administrativa'
@@ -34,6 +56,7 @@ class UnidadeOrcamentariaTest extends TestCase
         $this->expectException(UnidadeOrcamentariaInvalidaException::class);
 
         new UnidadeOrcamentaria(
+            new IdentidadeUnidadeOrcamentaria('uo-101'),
             new Lotacao(101, 'Diretoria Administrativa'),
             new Uasg('928344', 'SEMAE Piracicaba'),
             '   ' // <---
@@ -45,6 +68,7 @@ class UnidadeOrcamentariaTest extends TestCase
         $this->expectException(UnidadeOrcamentariaInvalidaException::class);
 
         new UnidadeOrcamentaria(
+            new IdentidadeUnidadeOrcamentaria('uo-101'),
             new Lotacao(101, 'Diretoria Administrativa'),
             new Uasg('928344', 'SEMAE Piracicaba'),
             'TI' // <---
@@ -54,6 +78,7 @@ class UnidadeOrcamentariaTest extends TestCase
     public function testDeveRemoverEspacosDasExtremidadesDaDescricao(): void
     {
         $unidade = new UnidadeOrcamentaria(
+            new IdentidadeUnidadeOrcamentaria('uo-101'),
             new Lotacao(101, 'Diretoria Administrativa'),
             new Uasg('928344', 'SEMAE Piracicaba'),
             '  Diretoria Administrativa  '
@@ -65,6 +90,7 @@ class UnidadeOrcamentariaTest extends TestCase
     public function testDeveAceitarDescricaoComAcentos(): void
     {
         $unidade = new UnidadeOrcamentaria(
+            new IdentidadeUnidadeOrcamentaria('uo-102'),
             new Lotacao(102, 'Procuradoria Jurídica'),
             new Uasg('928344', 'SEMAE Piracicaba'),
             'Procuradoria Jurídica'
@@ -76,6 +102,7 @@ class UnidadeOrcamentariaTest extends TestCase
     public function testDeveAceitarDescricaoComNumeros(): void
     {
         $unidade = new UnidadeOrcamentaria(
+            new IdentidadeUnidadeOrcamentaria('uo-103'),
             new Lotacao(103, 'Diretoria 2'),
             new Uasg('928344', 'SEMAE Piracicaba'),
             'Diretoria 2'

@@ -1822,7 +1822,12 @@ seguinte gate de governança, sem renumerar as etapas originais:
    - apresentar a sequência prescritiva e didática;
    - manter acompanhamento do PCA, mapeamento V1 -> V2 e apêndice histórico;
    - representar decisões condicionais como gates, não como fatos comprovados.
-8. Executar a sprint de refatoração arquitetural com TDD.
+8. Executar a sprint de refatoração arquitetural com TDD. **Concluído em 04/08/2026 após reauditoria final.**
+   - as desconformidades encontradas pela auditoria independente foram
+     corrigidas e validadas;
+   - licença permanece como ressalva transversal não bloqueante, e a
+     representação decimal continua destinada à Sprint 5.6;
+   - a conclusão não autoriza nem inicia a Sprint 4.8.
 9. Completar a Application com mocks.
 10. Somente então iniciar Infrastructure.
 
