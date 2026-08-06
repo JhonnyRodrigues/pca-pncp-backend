@@ -552,9 +552,13 @@ As portas e contratos são definidos por capacidades:
     - reconstruir fotografia vigente;
     - reconstruir Plano vazio;
     - registrar confirmação orientada à intenção;
-12. política pura no Domain para decidir ações e IDs envolvidos;
-13. PSR-3 como contrato de observabilidade;
-14. resultados por unidade externa:
+12. porta própria na Application para consultar a evidência do último
+    cancelamento homologado que tornou vazia a unidade externa individual ou
+    consolidada, retornando `DISPONIVEL`, `AUSENTE`, `CONFLITO` ou
+    `FALHA_SISTEMICA`;
+13. política pura no Domain para decidir ações e IDs envolvidos;
+14. PSR-3 como contrato de observabilidade;
+15. resultados por unidade externa:
     - `CONCLUIDO`;
     - `SEM_ALTERACAO`;
     - `FALHA_RECONCILIAVEL`;
@@ -569,12 +573,18 @@ As portas e contratos são definidos por capacidades:
 | Adoção automática de candidato externo | Pode vincular publicação desconhecida |
 | Repositories separados de Representante e Lotação | Fragmenta o contexto da autoria |
 | Metadados cross-Plan no `PlanoRepository` | Mistura Aggregate e projeção externa |
+| Incluir Demandas canceladas na fotografia vigente | Mistura estado ativo com evidência histórica e contraria `RN-DEM-009` |
+| Consultar a justificativa histórica pelo `PlanoRepository` | Acopla ao Aggregate uma projeção distinta da fotografia vigente |
 | Porta proprietária de logging | PSR-3 já atende ao contrato |
 
 ### Consequências e limitações
 
 - Interfaces internas não usam URL, JSON, HTTP, SQL, ADOdb, OCI8 ou macros.
 - Contratos devem ser demonstrados por testes do consumidor com doubles.
+- O Domain possui `EvidenciaCancelamentoHomologado`; a Application possui a
+  porta de consulta; somente um adapter futuro conhecerá a fonte física.
+- Ausência e conflito da evidência são resultados seguros distintos de falha
+  sistêmica, sem texto padrão ou dedução silenciosa.
 - Falhas sistêmicas permanecem no resultado global, não em resultado unitário
   fabricado.
 

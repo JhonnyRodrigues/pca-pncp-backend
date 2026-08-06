@@ -1,108 +1,115 @@
-Vamos iniciar a Sprint 4.9 — Preparação global e unidades externas.
+Vamos iniciar a execução da **Sprint 4.9**, definida em:
 
-Antes de atuar, leia integralmente e nesta ordem:
+`docs/vigentes/autoritativos/roadmap.md`
 
-1. README.md
-2. .agents/AGENTS.md
-3. .agents/README.md
-4. docs/README.md
-5. os três checkpoints do planejamento do Roadmap V2, respeitando sua
-   precedência incremental;
-6. os documentos vigentes na ordem definida por docs/README.md, incluindo
-   docs/vigentes/autoritativos/roadmap.md;
-7. o relatório final da Sprint 4.8 e sua auditoria, se estiverem disponíveis.
+## 1. Leitura obrigatória
 
-Estado confirmado:
+Antes de criar, alterar ou excluir qualquer artefato, leia integralmente a documentação do projeto, respeitando rigorosamente a seguinte ordem:
 
-- o Roadmap V2 está vigente;
-- as Sprints 4.7 e 4.8 foram concluídas e validadas;
-- os Ports e contratos tipados da Application estão disponíveis;
-- o próximo incremento autorizado é exclusivamente a Sprint 4.9;
-- as Sprints 4.10 e posteriores não devem ser antecipadas;
-- Infrastructure não deve ser iniciada;
-- todas as alterações locais existentes devem ser preservadas;
-- código e testes não são fontes normativas.
+1. `README.md`;
+2. `.agents/AGENTS.md`;
+3. `.agents/README.md`;
+4. `docs/README.md`;
+5. os três checkpoints, respeitando sua ordem cronológica e sua precedência incremental;
+6. documento de Arquitetura;
+7. documento de Regras de Negócio;
+8. Modelo de Domínio;
+9. Decisões de Integração;
+10. Glossário;
+11. Contexto Funcional;
+12. Fluxo de Implementação;
+13. Roadmap V2 vigente, em `docs/vigentes/autoritativos/roadmap.md`.
 
-Objetivo da Sprint 4.9:
+Não inicie a implementação antes de concluir essa leitura.
 
-Implementar, com mocks e contratos internos, a preparação global da execução e
-a formação das unidades externas de publicação, conforme RN-CAD-003 a
-RN-CAD-006, RN-PUB-009 a RN-PUB-011, DI-003, DI-007, DI-010, Fluxo e Roadmap.
+## 2. Critério de precedência documental
 
-A Sprint deve tratar:
+Considere os checkpoints como registros históricos de continuidade do planejamento.
 
-- validação do contexto do usuário autenticado;
-- obtenção coesa de Representante e Lotação;
-- descoberta de identidades de Plano para o exercício;
-- descoberta sem reconstrução antecipada das fotografias;
-- validação das Unidades Orçamentárias participantes;
-- validação das UASGs aplicáveis;
-- leitura da estratégia anual corrente;
-- adoção ou conferência da estratégia de publicação;
-- formação de unidades externas no modo individual;
-- formação de uma unidade externa no modo consolidado;
-- aplicação das regras de UASG de cada modo;
-- autenticação uma única vez por execução;
-- reutilização da sessão opaca durante a execução preparada;
-- falhas sistêmicas de preparação sem fabricação de resultados unitários;
-- uso exclusivo dos contratos aprovados na Sprint 4.8.
+Um checkpoint posterior prevalece sobre os anteriores somente nos pontos que ele tenha revisado de forma explícita.
 
-Antes de alterar arquivos:
+Para determinar o estado atual do projeto, prevalecem os documentos classificados como **vigentes e autoritativos**, nos quais as decisões válidas já foram consolidadas.
 
-1. inspecione git status;
-2. preserve todas as alterações locais;
-3. confronte código e contratos da 4.8 com RN, Modelo, DI, Fluxo e Roadmap;
-4. identifique os incrementos mínimos da preparação global;
-5. apresente um plano decision-complete;
-6. descreva individualmente os fluxos individual e consolidado;
-7. defina as pré-condições e falhas de cada etapa;
-8. organize a execução em ciclos pequenos Red → Green → Refactor;
-9. não implemente até minha aprovação explícita do plano.
+Em caso de aparente conflito:
 
-O plano deve esclarecer:
+1. identifique os documentos envolvidos;
+2. aplique a precedência documental definida pelo projeto;
+3. não substitua uma decisão vigente por interpretação própria;
+4. registre a conclusão adotada e sua fundamentação antes de implementar.
 
-- qual componente coordena a preparação global;
-- como o CNPJ e o Ano de Execução entram no fluxo;
-- como o contexto do usuário é resolvido;
-- como identidades são descobertas sem montar fotografias;
-- como UO e UASG são validadas;
-- como a estratégia é lida, adotada ou rejeitada;
-- como unidades individuais são formadas;
-- como a unidade consolidada é formada;
-- como a sessão PNCP é criada uma única vez e reutilizada;
-- quais falhas interrompem toda a execução;
-- quais resultados ainda não podem ser produzidos nesta sprint;
-- quais contratos da Sprint 4.8 são consumidos;
-- quais testes demonstram RN-PUB-009, RN-PUB-010 e RN-PUB-011.
+## 3. Validação inicial de escopo
 
-Fronteiras obrigatórias:
+Após concluir a leitura e antes de alterar o código:
 
-- não solicitar exclusividade por unidade;
-- não reler fotografias dentro de lock;
-- não observar o estado externo completo;
-- não executar a política para processar uma unidade;
-- não enviar comandos de publicação, retificação ou exclusão;
-- não implementar o processamento unitário da Sprint 4.10;
-- não implementar reconciliação adicional;
-- não confirmar versões;
-- não persistir estado operacional;
-- não persistir auditoria coordenada;
-- não implementar resultados globais finais;
-- não criar adapters;
-- não alterar Infrastructure;
-- não aplicar defaults implícitos de estratégia, UASG, unidade ou falha.
+1. sintetize o objetivo da Sprint 4.9;
+2. identifique os contratos, regras, componentes e camadas envolvidos;
+3. informe as dependências com artefatos existentes;
+4. aponte eventuais ambiguidades, conflitos ou lacunas documentais;
+5. proponha a divisão da sprint em microciclos coesos e verificáveis.
 
-Critérios de saída:
+Essa síntese não deve reinterpretar ou ampliar o escopo definido no roadmap.
 
-- preparação global demonstrada por testes com mocks;
-- contexto do usuário validado;
-- identidades descobertas sem fotografia antecipada;
-- UO e UASG validadas;
-- estratégia anual conferida ou adotada explicitamente;
-- unidades individuais e consolidada corretamente representadas;
-- autenticação executada uma única vez;
-- nenhuma atividade da Sprint 4.10 ou posterior antecipada;
-- suíte aplicável verde;
-- diff revisado;
-- resultado apresentado para minha validação;
-- Roadmap atualizado somente após confirmação real da conclusão.
+## 4. Execução em microciclos
+
+Execute a Sprint 4.9 em microciclos pequenos, coesos e validáveis.
+
+Cada microciclo deve seguir, quando aplicável, esta sequência:
+
+1. **Red:** criar ou ajustar os testes que expressem o comportamento esperado;
+2. **Green:** implementar apenas o necessário para satisfazer os testes e os contratos;
+3. **Refactor:** melhorar nomes, responsabilidades, invariantes e dependências sem alterar o comportamento;
+4. executar os testes focados;
+5. executar a regressão pertinente;
+6. revisar aderência à documentação autoritativa;
+7. apresentar o relato do microciclo;
+8. pausar obrigatoriamente para validação.
+
+Não antecipe artefatos pertencentes a microciclos posteriores.
+
+Não inicie a sprint seguinte nem implemente itens fora do escopo da Sprint 4.9.
+
+## 5. Relato obrigatório após cada microciclo
+
+Ao concluir cada microciclo relevante, informe:
+
+* quais arquivos e artefatos foram criados, alterados ou removidos;
+* qual responsabilidade cada artefato passou a exercer;
+* por que cada alteração foi necessária;
+* quais regras de negócio, invariantes ou contratos foram atendidos;
+* quais alternativas foram consideradas e descartadas;
+* por que essas alternativas foram descartadas;
+* quais princípios de DDD, Clean Architecture, SOLID ou orientação a objetos influenciaram as decisões;
+* quais testes foram criados ou modificados;
+* quais comandos de teste foram executados;
+* os resultados obtidos;
+* eventuais riscos, débitos técnicos ou pontos ainda pendentes.
+
+Diferencie claramente:
+
+* decisões exigidas pela documentação;
+* decisões técnicas necessárias para viabilizar a implementação;
+* sugestões opcionais de melhoria.
+
+## 6. Restrições de execução
+
+Durante o trabalho:
+
+* preserve todas as alterações locais já existentes;
+* não reverta arquivos que não pertençam ao escopo do microciclo;
+* não altere contratos públicos sem justificativa documental;
+* não introduza abstrações especulativas;
+* não crie infraestrutura antes de existir uma necessidade definida pelas camadas internas;
+* não mova regras de domínio para controllers, gateways, repositórios ou serviços de infraestrutura;
+* não utilize strings soltas ou valores padrão silenciosos quando o domínio exigir tipos explícitos;
+* mantenha as dependências apontando para as camadas mais internas;
+* respeite os padrões, nomes, namespaces e convenções já adotados pelo projeto;
+* prefira alterações mínimas, explícitas e testáveis;
+* não prossiga diante de falhas nos testes sem antes explicar e corrigir a causa.
+
+## 7. Pausa obrigatória
+
+Após apresentar o relato de cada microciclo, interrompa a execução e aguarde minha validação explícita.
+
+A validação de um microciclo autoriza somente o início do microciclo imediatamente seguinte.
+
+Não prossiga automaticamente para outro grupo de contratos, mesmo que o próximo passo pareça evidente.

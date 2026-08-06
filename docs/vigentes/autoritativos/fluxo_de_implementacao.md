@@ -261,6 +261,11 @@ A fotografia deve:
   Canceladas (`RN-DEM-009`);
 - representar Plano com zero Demandas ativas (`RN-PLA-005`).
 
+A fotografia vigente não transporta a justificativa histórica de uma Demanda
+cancelada. Quando esse fato for necessário para excluir integralmente o PCA, a
+Application usa a capacidade específica definida em `DI-007`, sem ampliar o
+`PlanoRepository`.
+
 No modo consolidado, a releitura ocorre para todas as UOs depois da
 exclusividade da unidade conjunta. A união desejada é calculada pela
 Application, sem criar outro Aggregate (`RN-PUB-010` e `DI-003`).
@@ -375,6 +380,18 @@ da união completa de todas as UOs (`RN-PUB-009` e `RN-PUB-010`).
 A justificativa é a do cancelamento homologado que retirou o último item
 vigente, nos termos de `RN-PUB-003` e `DI-009`. Lacuna que impeça identificar
 essa justificativa não pode ser preenchida por inferência.
+
+Depois da decisão `EXCLUIR_PCA` e antes do comando de escrita, a Application
+consulta pela porta própria a evidência do último cancelamento que tornou
+vazia a unidade externa. A consulta recebe a identidade do Plano no modo
+individual ou todas as identidades participantes no modo consolidado:
+
+- `DISPONIVEL`: usa integralmente a justificativa homologada;
+- `AUSENTE` ou `CONFLITO`: bloqueia a unidade sem executar a exclusão;
+- `FALHA_SISTEMICA`: interrompe a varredura conforme a regra de falha global.
+
+Nenhuma dessas situações autoriza inferência, concatenação, truncamento ou
+texto padrão.
 
 Depois da observação final comprovar a exclusão, a Application ordena:
 

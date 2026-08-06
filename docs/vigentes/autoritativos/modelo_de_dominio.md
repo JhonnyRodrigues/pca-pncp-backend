@@ -285,6 +285,25 @@ A Demanda não contém:
 - vínculo conceitual baseado em chave física;
 - sequencial da publicação externa.
 
+### 6.3 `EvidenciaCancelamentoHomologado`
+
+`EvidenciaCancelamentoHomologado` é um Value Object imutável que representa o
+fato histórico já homologado usado para justificar a exclusão integral de uma
+unidade externa (`RN-PUB-003`). Ele contém:
+
+- a identidade lógica do Plano;
+- o identificador positivo da Demanda cujo cancelamento tornou a unidade
+  vazia;
+- a justificativa obrigatória, normalizada apenas nas bordas por remoção de
+  espaços externos.
+
+Esse valor não integra a entidade `Demanda` vigente nem o Aggregate `Plano`,
+pois a fotografia ativa exclui Demandas Canceladas (`RN-DEM-009`). Também não
+define como o histórico será consultado ou persistido: a Application solicita
+o fato por capacidade própria e um adapter futuro fará o mapeamento da fonte
+real. O texto homologado permanece integral e não pode ser inferido,
+concatenado ou truncado.
+
 ## 7. Aggregate Root `Plano`
 
 ### 7.1 Significado

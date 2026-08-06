@@ -54,7 +54,7 @@ exclusivamente histórica e didática.
 | Seção 17 — passos 1 a 6 | Concluídos | Consolidaram RN, modelo, DI, fluxo e preservação histórica | São pré-condições documentais; não correspondem a sprints |
 | Seção 17 — passo 7 | Concluído por este documento | Ativa a ordem de construção vigente | É a criação do próprio Roadmap, fora da execução das fases |
 | Seção 17 — passo 8 | Concluído após reauditoria final | Reconciliou Domain e Application existentes com as fontes vigentes usando TDD | A Sprint 4.7 foi aprovada com ressalvas não bloqueantes mantidas fora de seu escopo |
-| Seção 17 — passo 9 | Em andamento — Sprint 4.8 concluída | Completar a Application com mocks | As Sprints 4.9 a 4.12 permanecem pendentes e dependem de autorização |
+| Seção 17 — passo 9 | Em andamento — Sprint 4.10 concluída | Completar a Application com mocks | As Sprints 4.11 e 4.12 permanecem pendentes e dependem de autorização |
 | Seção 17 — passo 10 | Bloqueado pelo passo 9 e pelos gates aplicáveis | Autorizar o início da Infrastructure | Corresponde à entrada futura na Fase 5 |
 | Fases 6 a 9 | Não iniciadas | Wiring, Presentation, integração real e operação | Permanecem futuras e dependentes dos gates anteriores |
 
@@ -450,7 +450,7 @@ operacional cross-Plan. A auditoria confirmou a permanência do
 persistência nos contratos internos e a não antecipação de adapters ou
 orquestração. Os gates condicionantes das implementações concretas permanecem
 vigentes. A ressalva transversal sobre licença continua não bloqueante. A
-Sprint 4.9 permanece não iniciada e depende de autorização explícita.
+continuidade ocorreu na Sprint 4.9 após autorização explícita.
 
 #### Sprint 4.9 — Preparação global e unidades externas
 
@@ -464,16 +464,50 @@ Sprint 4.9 permanece não iniciada e depende de autorização explícita.
 Referências: RN-CAD-003 a RN-CAD-006, RN-PUB-009 a RN-PUB-011, DI-003,
 DI-007 e DI-010.
 
+**Estado do PCA:** concluída e validada em 05/08/2026 após implementação em
+cinco microciclos com TDD e pausas de validação. A preparação global passou a
+resolver o contexto do usuário, descobrir somente identidades lógicas, validar
+UO e UASG, adotar ou conferir a estratégia anual em unidade de trabalho curta,
+formar unidades externas individuais ou consolidada e autenticar uma vez após
+a confirmação local. Falhas conhecidas permanecem tipadas e seguras, sem
+reconstrução antecipada de fotografias, adapters concretos ou processamento
+unitário da Sprint 4.10. A regressão final aprovou 192 testes e 502 asserções.
+A continuidade ocorreu na Sprint 4.10 após autorização explícita. As Sprints
+4.11 e 4.12 permanecem não iniciadas e dependem de autorização explícita.
+
 #### Sprint 4.10 — Processamento unitário com mocks
+
+Esta sprint entrega um incremento interno testável e ainda não o conecta ao
+caso de uso público. O despacho de escrita permanece síncrono e encaminha seus
+fatos a um contrato interno de finalização na mesma execução; a implementação
+desse contrato, com observação final e conclusão local, pertence à Sprint 4.11.
+Assim, nenhum caminho público termina com transação aberta ou processamento
+parcialmente conectado, preservando a transação única de `DI-004`.
 
 - solicitar exclusividade;
 - reler fotografias e estado operacional;
 - observar o estado externo completo;
 - fornecer fatos ao Domain;
 - executar os comandos tipados necessários;
+- consultar por capacidade própria a evidência homologada exigida para
+  `EXCLUIR_PCA`, sem alterar a fotografia vigente ou o `PlanoRepository`;
 - continuar unidades independentes somente nos casos aprovados.
 
-Referências: DI-002, DI-003, DI-004, DI-007 e fluxo vigente.
+Referências: RN-PUB-003, DI-002, DI-003, DI-004, DI-007 e fluxo vigente.
+
+**Estado do PCA:** concluída e validada em 05/08/2026 após implementação em
+seis microciclos com TDD e pausas de validação. O incremento interno passou a
+obter a evidência homologada da exclusão integral, proteger os desfechos e o
+contexto da finalização futura, reler a unidade sob exclusividade, observar o
+PNCP, delegar a decisão à política do Domain, despachar comandos tipados e
+coordenar a continuidade entre unidades independentes. Falhas sistêmicas
+interrompem a varredura sem fabricar resultados para unidades não visitadas;
+bloqueios e falhas reconciliáveis preservam a continuidade individual. O modo
+consolidado processa somente sua unidade conjunta. O finalizador permanece
+apenas como contrato mockado, e nenhum adapter, observação final, confirmação,
+auditoria ou conexão ao caso de uso público foi antecipado. A regressão final
+aprovou 276 testes e 827 asserções. A Sprint 4.11 permanece não iniciada e
+depende de autorização explícita.
 
 #### Sprint 4.11 — Reconciliação, confirmação e auditoria
 

@@ -700,16 +700,22 @@ registrada explicitamente e não autoriza inferir comportamento.
   última Demanda ativa.
 - **Origem ou autoridade:** DI-001, DI-003 e DI-005.
 - **Contexto e justificativa:** um PCA externo não deve permanecer ativo sem
-  Demandas homologadas vigentes.
+  Demandas homologadas vigentes. A Application DEVE obter, por capacidade
+  tipada própria, a evidência do cancelamento homologado que tornou vazia a
+  unidade externa. Essa evidência histórica não integra a fotografia vigente
+  do Plano e sua justificativa NÃO PODE ser inferida, concatenada, truncada ou
+  substituída por texto padrão. No modo consolidado, a evidência corresponde
+  ao cancelamento que tornou vazia a união completa da unidade externa.
 - **Exemplo:** cancelar a única Demanda ativa de um PCA publicado leva à
   exclusão integral.
 - **Contraexemplo:** manter o PCA ativo vazio ou impedir o cancelamento.
-- **Elementos afetados:** Plano vazio, cancelamento, justificativa e publicação.
+- **Elementos afetados:** Plano vazio, `EvidenciaCancelamentoHomologado`,
+  capacidade de consulta da Application, justificativa e publicação.
 - **Evidências de teste:** evidência parcial em
   `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`, cobrindo decisão
-  com Plano vazio e rejeição da ausência de Planos. A justificativa do último
-  cancelamento pertence à orquestração futura.
-- **Decisões e documentos relacionados:** DI-001, DI-003, DI-005,
+  com Plano vazio e rejeição da ausência de Planos. A obtenção tipada da
+  justificativa pertence à orquestração da Application.
+- **Decisões e documentos relacionados:** DI-001, DI-003, DI-005, DI-007,
   `RN-DEM-008` e `RN-PLA-005`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
