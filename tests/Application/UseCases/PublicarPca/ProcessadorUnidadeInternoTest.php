@@ -6,20 +6,22 @@ namespace Tests\Application\UseCases\PublicarPca;
 
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
-use Semae\Pca\Application\Contracts\FinalizadorProcessamentoUnidade;
+use Psr\Log\NullLogger;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Ports\EvidenciaCancelamentoHomologadoPort;
 use Semae\Pca\Application\Ports\EscritorPncp;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
 use Semae\Pca\Application\Ports\LeitorPncp;
+use Semae\Pca\Application\Ports\RegistroAuditoriaPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
-use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
 use Semae\Pca\Application\Results\ResultadoBuscaCandidatosPca;
 use Semae\Pca\Application\Results\ResultadoConsultaEstadoOperacional;
+use Semae\Pca\Application\Results\ResultadoFinalizacaoUnidadeTrabalho;
 use Semae\Pca\Application\Results\ResultadoInicioUnidadeTrabalho;
-use Semae\Pca\Application\Results\ResultadoProcessamentoUnidade;
 use Semae\Pca\Application\UseCases\PublicarPca\DecisorUnidadeSobExclusividade;
 use Semae\Pca\Application\UseCases\PublicarPca\DespachadorComandosUnidade;
+use Semae\Pca\Application\UseCases\PublicarPca\ExecutorComandosUnidade;
+use Semae\Pca\Application\UseCases\PublicarPca\FinalizadorProcessamentoUnidadeInterno;
 use Semae\Pca\Application\UseCases\PublicarPca\PreparadorUnidadeSobExclusividade;
 use Semae\Pca\Application\UseCases\PublicarPca\ProcessadorUnidadeInterno;
 use Semae\Pca\Application\ValueObjects\ContextoUsuario;
@@ -39,7 +41,7 @@ use Semae\Pca\Domain\ValueObjects\Uasg;
 
 final class ProcessadorUnidadeInternoTest extends TestCase
 {
-    public function testDeveEncadearPreparacaoDecisaoEDespachoSemEscritaEmNenhumaAcao(): void
+    public function testDeveEncadearAteOFinalizadorConcretoSemEscritaEmNenhumaAcao(): void
     {
         $ano = new AnoExecucao((int) date('Y') + 1);
         $unidadeOrcamentaria = new UnidadeOrcamentaria(
@@ -63,15 +65,14 @@ final class ProcessadorUnidadeInternoTest extends TestCase
         $leitor = $this->createMock(LeitorPncp::class);
         $escritor = $this->createMock(EscritorPncp::class);
         $evidencia = $this->createMock(EvidenciaCancelamentoHomologadoPort::class);
-        $finalizador = $this->createMock(FinalizadorProcessamentoUnidade::class);
-        $desfechoEsperado = DesfechoProcessamentoUnidade::resultadoUnitario(
-            ResultadoProcessamentoUnidade::semAlteracao($unidade)
-        );
+        $auditoria = $this->createMock(RegistroAuditoriaPort::class);
 
         $unidadeTrabalho->expects($this->once())
             ->method('iniciar')
             ->willReturn(ResultadoInicioUnidadeTrabalho::iniciada());
-        $unidadeTrabalho->expects($this->never())->method('confirmar');
+        $unidadeTrabalho->expects($this->once())
+            ->method('confirmar')
+            ->willReturn(ResultadoFinalizacaoUnidadeTrabalho::concluida());
         $unidadeTrabalho->expects($this->never())->method('desfazer');
         $repository->expects($this->once())
             ->method('listarIdentidades')
@@ -81,6 +82,9 @@ final class ProcessadorUnidadeInternoTest extends TestCase
             ->method('reconstruirFotografiaVigente')
             ->with($identidade)
             ->willReturn($plano);
+        $repository->expects($this->once())
+            ->method('confirmarSincronizacao')
+            ->with($plano);
         $estado->expects($this->once())
             ->method('consultar')
             ->with($unidade)
@@ -97,9 +101,23 @@ final class ProcessadorUnidadeInternoTest extends TestCase
         $escritor->expects($this->never())->method('excluirPca');
         $evidencia->expects($this->never())
             ->method('consultarUltimoCancelamentoQueTornouUnidadeVazia');
-        $finalizador->expects($this->once())
-            ->method('finalizar')
-            ->willReturn($desfechoEsperado);
+        $auditoria->expects($this->never())->method('registrar');
+
+        $executor = new ExecutorComandosUnidade(
+            $escritor,
+            $evidencia,
+            $unidadeTrabalho
+        );
+        $finalizador = new FinalizadorProcessamentoUnidadeInterno(
+            $leitor,
+            new PoliticaProcessamentoPlano(),
+            $executor,
+            $repository,
+            $estado,
+            $auditoria,
+            $unidadeTrabalho,
+            new NullLogger()
+        );
 
         $processador = new ProcessadorUnidadeInterno(
             new PreparadorUnidadeSobExclusividade($unidadeTrabalho, $repository, $estado),
@@ -109,8 +127,7 @@ final class ProcessadorUnidadeInternoTest extends TestCase
                 $unidadeTrabalho
             ),
             new DespachadorComandosUnidade(
-                $escritor,
-                $evidencia,
+                $executor,
                 $finalizador,
                 $unidadeTrabalho
             )
@@ -126,7 +143,10 @@ final class ProcessadorUnidadeInternoTest extends TestCase
             $unidade
         );
 
-        $this->assertSame($desfechoEsperado, $resultado);
+        $this->assertSame(
+            'SEM_ALTERACAO',
+            $resultado->getResultadoUnitario()?->getSituacao()->value
+        );
     }
 }
 

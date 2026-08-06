@@ -30,6 +30,7 @@ final class ResultadoVarreduraUnidadesTest extends TestCase
         $this->assertSame([$resultadoUnitario], $resultado->getResultadosUnitarios());
         $this->assertNull($resultado->getFalhaSistemica());
         $this->assertFalse($resultado->foiInterrompida());
+        $this->assertSame(1, $resultado->getQuantidadeVisitadas());
     }
 
     public function testInterrompidaDevePreservarResultadosAnterioresEFalhaGlobal(): void
@@ -41,12 +42,14 @@ final class ResultadoVarreduraUnidadesTest extends TestCase
 
         $resultado = ResultadoVarreduraUnidades::interrompida(
             [$resultadoUnitario],
-            $falha
+            $falha,
+            2
         );
 
         $this->assertSame([$resultadoUnitario], $resultado->getResultadosUnitarios());
         $this->assertSame($falha, $resultado->getFalhaSistemica());
         $this->assertTrue($resultado->foiInterrompida());
+        $this->assertSame(2, $resultado->getQuantidadeVisitadas());
     }
 
     public function testResultadoNaoDeveAceitarUnidadesDuplicadas(): void
@@ -59,6 +62,21 @@ final class ResultadoVarreduraUnidadesTest extends TestCase
         $this->expectExceptionMessage('Varredura não pode possuir resultados duplicados.');
 
         ResultadoVarreduraUnidades::concluida([$primeiro, $segundo]);
+    }
+
+    public function testVisitadasNaoPodeSerMenorQueResultadosConhecidos(): void
+    {
+        $resultadoUnitario = ResultadoProcessamentoUnidade::semAlteracao(
+            $this->criarUnidade('uo-101', '928344')
+        );
+
+        $this->expectException(InvalidArgumentException::class);
+
+        ResultadoVarreduraUnidades::interrompida(
+            [$resultadoUnitario],
+            new FalhaSegura('FALHA', 'Falha sistêmica.'),
+            0
+        );
     }
 
     private function criarUnidade(string $idUo, string $uasg): UnidadeExternaPublicacao

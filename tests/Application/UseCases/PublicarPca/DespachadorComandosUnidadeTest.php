@@ -27,6 +27,7 @@ use Semae\Pca\Application\Results\ResultadoInicioUnidadeTrabalho;
 use Semae\Pca\Application\Results\ResultadoProcessamentoUnidade;
 use Semae\Pca\Application\Results\ResultadoPublicacaoPncp;
 use Semae\Pca\Application\UseCases\PublicarPca\DespachadorComandosUnidade;
+use Semae\Pca\Application\UseCases\PublicarPca\ExecutorComandosUnidade;
 use Semae\Pca\Application\ValueObjects\ChaveUnidadeTrabalho;
 use Semae\Pca\Application\ValueObjects\ContextoFinalizacaoProcessamentoUnidade;
 use Semae\Pca\Application\ValueObjects\ContextoUnidadeComDecisao;
@@ -425,8 +426,7 @@ final class DespachadorComandosUnidadeTest extends TestCase
 
         return new DependenciasDespachadorFake(
             new DespachadorComandosUnidade(
-                $escritor,
-                $evidencia,
+                new ExecutorComandosUnidade($escritor, $evidencia, $unidadeTrabalho),
                 $finalizador,
                 $unidadeTrabalho
             ),

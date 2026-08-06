@@ -55,13 +55,19 @@ final class ResultadoPreparacaoPublicacaoPca
         );
     }
 
-    public static function interrompida(FalhaSegura $falha): self
+    /** @param UnidadeExternaPublicacao[] $unidadesExternas */
+    public static function interrompida(
+        FalhaSegura $falha,
+        array $unidadesExternas = []
+    ): self
     {
+        self::validarUnidades($unidadesExternas);
+
         return new self(
             SituacaoPreparacaoPublicacaoPca::INTERROMPIDA,
             null,
             null,
-            [],
+            array_values($unidadesExternas),
             null,
             $falha
         );
@@ -110,5 +116,15 @@ final class ResultadoPreparacaoPublicacaoPca
     public function getFalha(): ?FalhaSegura
     {
         return $this->falha;
+    }
+
+    /** @param mixed[] $unidadesExternas */
+    private static function validarUnidades(array $unidadesExternas): void
+    {
+        foreach ($unidadesExternas as $unidadeExterna) {
+            if (!$unidadeExterna instanceof UnidadeExternaPublicacao) {
+                throw new InvalidArgumentException('Unidade externa de publicação inválida.');
+            }
+        }
     }
 }

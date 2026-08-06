@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Application\Ports;
 
-use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Semae\Pca\Application\Ports\ContextoUsuarioPort;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
@@ -13,9 +12,9 @@ use Semae\Pca\Application\Results\ResultadoConsultaEstadoOperacional;
 use Semae\Pca\Application\Results\ResultadoPersistenciaLocal;
 use Semae\Pca\Application\Results\ResultadoResolucaoContextoUsuario;
 use Semae\Pca\Application\ValueObjects\ContextoUsuario;
+use Semae\Pca\Application\ValueObjects\IntencaoRegistroHistorico;
 use Semae\Pca\Application\ValueObjects\UnidadeExternaPublicacao;
 use Semae\Pca\Domain\Enums\ProcedimentoPublicacaoPca;
-use Semae\Pca\Domain\Facts\HistoricoProcedimento;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 use Semae\Pca\Domain\ValueObjects\EstadoOperacionalPublicacao;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
@@ -51,11 +50,10 @@ final class ContextoAuditoriaEstadoOperacionalPortsTest extends TestCase
         $this->assertNull($registro->getFalha());
     }
 
-    public function testConsumidorDeveEntregarFatoDeAuditoriaProntoParaRegistro(): void
+    public function testConsumidorDeveEntregarIntencaoSemInstanteParaRegistro(): void
     {
         $contexto = $this->criarContexto();
-        $fato = new HistoricoProcedimento(
-            new DateTimeImmutable('2026-08-05 10:00:00'),
+        $intencao = new IntencaoRegistroHistorico(
             ProcedimentoPublicacaoPca::PUBLICACAO_INICIAL,
             'Publicação inicial confirmada para o exercício 2027 na UASG 986700, sequencial 77.',
             $contexto->getRepresentante(),
@@ -63,9 +61,10 @@ final class ContextoAuditoriaEstadoOperacionalPortsTest extends TestCase
         );
         $port = new RegistroAuditoriaPortFake();
 
-        $resultado = $port->registrar($fato);
+        $resultado = $port->registrar($intencao);
 
-        $this->assertSame($fato, $port->fatoRegistrado);
+        $this->assertSame($intencao, $port->intencaoRegistrada);
+        $this->assertFalse(method_exists($intencao, 'getInstante'));
         $this->assertNull($resultado->getFalha());
     }
 
@@ -125,11 +124,13 @@ final class EstadoOperacionalPublicacaoPortFake implements EstadoOperacionalPubl
 
 final class RegistroAuditoriaPortFake implements RegistroAuditoriaPort
 {
-    public ?HistoricoProcedimento $fatoRegistrado = null;
+    public ?IntencaoRegistroHistorico $intencaoRegistrada = null;
 
-    public function registrar(HistoricoProcedimento $fato): ResultadoPersistenciaLocal
+    public function registrar(
+        IntencaoRegistroHistorico $intencao
+    ): ResultadoPersistenciaLocal
     {
-        $this->fatoRegistrado = $fato;
+        $this->intencaoRegistrada = $intencao;
 
         return ResultadoPersistenciaLocal::concluida();
     }

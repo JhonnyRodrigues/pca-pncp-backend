@@ -89,6 +89,20 @@ final class ResultadoPreparacaoPublicacaoPcaTest extends TestCase
         $this->assertSame($falha, $resultado->getFalha());
     }
 
+    public function testPreparacaoInterrompidaDevePreservarUnidadesJaFormadas(): void
+    {
+        $unidade = $this->criarUnidade();
+        $falha = new FalhaSegura('AUTENTICACAO_FALHOU', 'Autenticação falhou.');
+
+        $resultado = ResultadoPreparacaoPublicacaoPca::interrompida(
+            $falha,
+            [$unidade]
+        );
+
+        $this->assertSame([$unidade], $resultado->getUnidadesExternas());
+        $this->assertSame($falha, $resultado->getFalha());
+    }
+
     public function testAusenciaDeUnidadesDeveSerRepresentadaSemDadosDeExecucao(): void
     {
         $resultado = ResultadoPreparacaoPublicacaoPca::semUnidades();
@@ -102,5 +116,18 @@ final class ResultadoPreparacaoPublicacaoPcaTest extends TestCase
         $this->assertSame([], $resultado->getUnidadesExternas());
         $this->assertNull($resultado->getSessaoPncp());
         $this->assertNull($resultado->getFalha());
+    }
+
+    private function criarUnidade(): UnidadeExternaPublicacao
+    {
+        $ano = new AnoExecucao((int) date('Y') + 1);
+        $uo = new UnidadeOrcamentaria(
+            new IdentidadeUnidadeOrcamentaria('UO-01'),
+            new Lotacao(10, 'Diretoria'),
+            new Uasg('986789', 'UASG da UO'),
+            'Unidade Orçamentária'
+        );
+
+        return UnidadeExternaPublicacao::individual(new IdentidadePlano($uo, $ano));
     }
 }

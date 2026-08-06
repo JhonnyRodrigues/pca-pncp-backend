@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Application\UseCases\PublicarPca;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoPreparacaoPublicacaoPca;
 use Semae\Pca\Application\Ports\AutenticadorPncp;
@@ -351,8 +352,45 @@ final class PreparadorExecucaoPublicacaoPcaTest extends TestCase
         $this->assertSame($falha, $resultado->getFalha());
         $this->assertNull($resultado->getContextoUsuario());
         $this->assertNull($resultado->getEstrategia());
-        $this->assertSame([], $resultado->getUnidadesExternas());
+        $this->assertCount(1, $resultado->getUnidadesExternas());
+        $this->assertSame(
+            'UO-01',
+            $resultado->getUnidadesExternas()[0]
+                ->getIdentidadePlano()
+                ?->getUnidadeOrcamentaria()
+                ->getIdentidade()
+                ->getValor()
+        );
         $this->assertNull($resultado->getSessaoPncp());
+    }
+
+    public function testExcecaoNaAutenticacaoDevePreservarUnidadesJaFormadas(): void
+    {
+        $cenario = $this->criarCenarioBase();
+        $estrategia = EstrategiaPublicacao::individual();
+
+        $this->configurarEstrategiaJaAdotada($cenario['estrategia'], $estrategia);
+        $this->configurarUnidadeDeTrabalhoConcluida($cenario['unidadeDeTrabalho']);
+        $cenario['autenticador']->expects($this->once())
+            ->method('autenticar')
+            ->willThrowException(new RuntimeException('detalhe interno'));
+
+        $resultado = $this->criarPreparador($cenario)->preparar($cenario['request']);
+
+        $this->assertSame(
+            SituacaoPreparacaoPublicacaoPca::INTERROMPIDA,
+            $resultado->getSituacao()
+        );
+        $this->assertSame('AUTENTICACAO_PNCP_FALHOU', $resultado->getFalha()?->getCodigo());
+        $this->assertCount(1, $resultado->getUnidadesExternas());
+        $this->assertSame(
+            'UO-01',
+            $resultado->getUnidadesExternas()[0]
+                ->getIdentidadePlano()
+                ?->getUnidadeOrcamentaria()
+                ->getIdentidade()
+                ->getValor()
+        );
     }
 
     public function testDeveAdotarEstrategiaCorrenteQuandoAindaNaoExisteAdotada(): void

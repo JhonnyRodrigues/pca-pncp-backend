@@ -65,6 +65,7 @@ final class CoordenadorVarreduraUnidadesTest extends TestCase
         );
         $this->assertFalse($resultado->foiInterrompida());
         $this->assertSame([$primeira, $segunda, $terceira], $processador->unidadesVisitadas);
+        $this->assertSame(3, $resultado->getQuantidadeVisitadas());
     }
 
     public function testFalhaSistemicaDeveInterromperSemFabricarUnidadesNaoVisitadas(): void
@@ -93,6 +94,7 @@ final class CoordenadorVarreduraUnidadesTest extends TestCase
         $this->assertSame($falha, $resultado->getFalhaSistemica());
         $this->assertSame([$resultadoPrimeira], $resultado->getResultadosUnitarios());
         $this->assertSame([$primeira, $segunda], $processador->unidadesVisitadas);
+        $this->assertSame(2, $resultado->getQuantidadeVisitadas());
     }
 
     public function testConsolidadoDeveProcessarSomenteAUnidadeConjunta(): void
@@ -115,6 +117,7 @@ final class CoordenadorVarreduraUnidadesTest extends TestCase
 
         $this->assertSame([$resultadoUnitario], $resultado->getResultadosUnitarios());
         $this->assertSame([$unidade], $processador->unidadesVisitadas);
+        $this->assertSame(1, $resultado->getQuantidadeVisitadas());
     }
 
     public function testConsolidadoComMaisDeUmaUnidadeDeveFalharSemVisitar(): void
@@ -144,6 +147,7 @@ final class CoordenadorVarreduraUnidadesTest extends TestCase
         );
         $this->assertSame([], $resultado->getResultadosUnitarios());
         $this->assertSame([], $processador->unidadesVisitadas);
+        $this->assertSame(0, $resultado->getQuantidadeVisitadas());
     }
 
     public function testResultadoDeOutraUnidadeNaoDeveSerAceitoNemFabricado(): void

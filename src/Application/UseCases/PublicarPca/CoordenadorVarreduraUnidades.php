@@ -29,12 +29,15 @@ final class CoordenadorVarreduraUnidades
         $falhaTopologia = $this->validarTopologia($unidades);
 
         if ($falhaTopologia !== null) {
-            return ResultadoVarreduraUnidades::interrompida([], $falhaTopologia);
+            return ResultadoVarreduraUnidades::interrompida([], $falhaTopologia, 0);
         }
 
         $resultados = [];
+        $quantidadeVisitadas = 0;
 
         foreach ($unidades as $unidade) {
+            $quantidadeVisitadas++;
+
             try {
                 $desfecho = $this->processador->processar(
                     $contextoUsuario,
@@ -48,14 +51,16 @@ final class CoordenadorVarreduraUnidades
                     new FalhaSegura(
                         'PROCESSAMENTO_UNIDADE_FALHOU',
                         'Não foi possível processar a unidade externa.'
-                    )
+                    ),
+                    $quantidadeVisitadas
                 );
             }
 
             if ($desfecho->getFalhaSistemica() !== null) {
                 return ResultadoVarreduraUnidades::interrompida(
                     $resultados,
-                    $desfecho->getFalhaSistemica()
+                    $desfecho->getFalhaSistemica(),
+                    $quantidadeVisitadas
                 );
             }
 
@@ -67,7 +72,8 @@ final class CoordenadorVarreduraUnidades
                     new FalhaSegura(
                         'DESFECHO_UNIDADE_INCONSISTENTE',
                         'O processamento não forneceu um resultado unitário válido.'
-                    )
+                    ),
+                    $quantidadeVisitadas
                 );
             }
 
@@ -77,7 +83,8 @@ final class CoordenadorVarreduraUnidades
                     new FalhaSegura(
                         'RESULTADO_UNIDADE_INCOERENTE',
                         'O resultado não pertence à unidade externa visitada.'
-                    )
+                    ),
+                    $quantidadeVisitadas
                 );
             }
 

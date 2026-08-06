@@ -14,23 +14,34 @@ final class ResultadoVarreduraUnidades
      */
     private function __construct(
         private readonly array $resultadosUnitarios,
-        private readonly ?FalhaSegura $falhaSistemica
+        private readonly ?FalhaSegura $falhaSistemica,
+        private readonly int $quantidadeVisitadas
     ) {
         $this->validarResultados($resultadosUnitarios);
+
+        if (
+            $quantidadeVisitadas < 0
+            || $quantidadeVisitadas < count($resultadosUnitarios)
+        ) {
+            throw new InvalidArgumentException(
+                'Unidades visitadas não podem ser menos que os resultados conhecidos.'
+            );
+        }
     }
 
     /** @param ResultadoProcessamentoUnidade[] $resultadosUnitarios */
     public static function concluida(array $resultadosUnitarios): self
     {
-        return new self($resultadosUnitarios, null);
+        return new self($resultadosUnitarios, null, count($resultadosUnitarios));
     }
 
     /** @param ResultadoProcessamentoUnidade[] $resultadosUnitarios */
     public static function interrompida(
         array $resultadosUnitarios,
-        FalhaSegura $falhaSistemica
+        FalhaSegura $falhaSistemica,
+        int $quantidadeVisitadas
     ): self {
-        return new self($resultadosUnitarios, $falhaSistemica);
+        return new self($resultadosUnitarios, $falhaSistemica, $quantidadeVisitadas);
     }
 
     /** @return ResultadoProcessamentoUnidade[] */
@@ -47,6 +58,11 @@ final class ResultadoVarreduraUnidades
     public function foiInterrompida(): bool
     {
         return $this->falhaSistemica !== null;
+    }
+
+    public function getQuantidadeVisitadas(): int
+    {
+        return $this->quantidadeVisitadas;
     }
 
     /** @param mixed[] $resultadosUnitarios */

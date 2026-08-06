@@ -54,8 +54,8 @@ exclusivamente histórica e didática.
 | Seção 17 — passos 1 a 6 | Concluídos | Consolidaram RN, modelo, DI, fluxo e preservação histórica | São pré-condições documentais; não correspondem a sprints |
 | Seção 17 — passo 7 | Concluído por este documento | Ativa a ordem de construção vigente | É a criação do próprio Roadmap, fora da execução das fases |
 | Seção 17 — passo 8 | Concluído após reauditoria final | Reconciliou Domain e Application existentes com as fontes vigentes usando TDD | A Sprint 4.7 foi aprovada com ressalvas não bloqueantes mantidas fora de seu escopo |
-| Seção 17 — passo 9 | Em andamento — Sprint 4.10 concluída | Completar a Application com mocks | As Sprints 4.11 e 4.12 permanecem pendentes e dependem de autorização |
-| Seção 17 — passo 10 | Bloqueado pelo passo 9 e pelos gates aplicáveis | Autorizar o início da Infrastructure | Corresponde à entrada futura na Fase 5 |
+| Seção 17 — passo 9 | Em andamento — Sprints 4.11 e 4.12 implementadas, ainda não aprovadas | Completar a Application com mocks | A auditoria identificou correção crítica e evidências mínimas pendentes antes do gate final |
+| Seção 17 — passo 10 | Bloqueado pelo passo 9, pela correção pendente e pelos gates aplicáveis | Autorizar o início da Infrastructure | A Fase 5 permanece bloqueada até correção, regressão verde e atualização documental |
 | Fases 6 a 9 | Não iniciadas | Wiring, Presentation, integração real e operação | Permanecem futuras e dependentes dos gates anteriores |
 
 > A seção 17 do primeiro checkpoint handoff registra a transição concreta do projeto entre documentação e
@@ -506,8 +506,9 @@ bloqueios e falhas reconciliáveis preservam a continuidade individual. O modo
 consolidado processa somente sua unidade conjunta. O finalizador permanece
 apenas como contrato mockado, e nenhum adapter, observação final, confirmação,
 auditoria ou conexão ao caso de uso público foi antecipado. A regressão final
-aprovou 276 testes e 827 asserções. A Sprint 4.11 permanece não iniciada e
-depende de autorização explícita.
+aprovou 276 testes e 827 asserções. As Sprints 4.11 e 4.12 foram posteriormente
+implementadas, mas permanecem sem aprovação até o encerramento do checkpoint de
+auditoria registrado abaixo.
 
 #### Sprint 4.11 — Reconciliação, confirmação e auditoria
 
@@ -524,6 +525,19 @@ depende de autorização explícita.
 - cobrir os modos individual e consolidado;
 - executar a suíte relacionada e a regressão;
 - confirmar que nenhum adapter concreto foi necessário.
+
+**Checkpoint de auditoria em 06/08/2026:** as Sprints 4.11 e 4.12 estão
+implementadas, porém ainda não aprovadas. A auditoria conjunta foi concluída e
+identificou como defeito crítico o uso do sequencial histórico de um PCA
+`EXCLUIDO` como vínculo ativo depois de uma nova `PUBLICAR` com
+`RESULTADO_INCERTO` sem novo sequencial. Permanecem pendentes as evidências
+mínimas de `NENHUMA_ACAO` com todos os Planos já confirmados, dos resultados
+globais individual e múltiplo sem pendências, de `FALHA_RECONCILIAVEL` na
+Response global e do consumo PSR-3 nos pontos relevantes de escrita,
+reconciliação e falha. A Fase 5 permanece bloqueada até a correção em TDD, a
+regressão completa verde e a atualização deste estado documental. Uma retomada
+deve continuar pela correção do vínculo de observação, sem implementar qualquer
+adapter da Infrastructure.
 
 **Critério de liberação:** somente a conclusão desta sprint autoriza a entrada
 na Fase 5, respeitados os gates contratuais aplicáveis.

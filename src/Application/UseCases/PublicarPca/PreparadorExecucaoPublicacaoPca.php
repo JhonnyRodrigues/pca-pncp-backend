@@ -25,6 +25,7 @@ use Semae\Pca\Application\ValueObjects\UnidadeExternaPublicacao;
 use Semae\Pca\Domain\Ports\PlanoRepository;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 use Semae\Pca\Domain\ValueObjects\IdentidadePlano;
+use Throwable;
 
 final class PreparadorExecucaoPublicacaoPca
 {
@@ -64,10 +65,23 @@ final class PreparadorExecucaoPublicacaoPca
             $identidades,
             $estrategia
         );
-        $sessaoPncp = $this->autenticarNoPncp();
+        try {
+            $sessaoPncp = $this->autenticarNoPncp();
+        } catch (Throwable) {
+            return ResultadoPreparacaoPublicacaoPca::interrompida(
+                new FalhaSegura(
+                    'AUTENTICACAO_PNCP_FALHOU',
+                    'Não foi possível autenticar no PNCP.'
+                ),
+                $unidadesExternas
+            );
+        }
 
         if ($sessaoPncp instanceof FalhaSegura) {
-            return ResultadoPreparacaoPublicacaoPca::interrompida($sessaoPncp);
+            return ResultadoPreparacaoPublicacaoPca::interrompida(
+                $sessaoPncp,
+                $unidadesExternas
+            );
         }
 
         return ResultadoPreparacaoPublicacaoPca::preparada(
