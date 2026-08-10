@@ -41,6 +41,7 @@ use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Enums\SituacaoDemanda;
 use Semae\Pca\Domain\Policies\ResultadoDecisaoProcessamentoPlano;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\DecimalExato;
 use Semae\Pca\Domain\ValueObjects\Cnpj;
 use Semae\Pca\Domain\ValueObjects\EstadoOperacionalPublicacao;
 use Semae\Pca\Domain\ValueObjects\EvidenciaCancelamentoHomologado;
@@ -192,6 +193,57 @@ final class DespachadorComandosUnidadeTest extends TestCase
             )
         );
         $this->assertCount(2, $dependencias->finalizador->contextoRecebido?->getResultadosEscrita());
+    }
+
+    public function testRetificacaoDeMilParaMilDeveExcluirAntesDeInserir(): void
+    {
+        $idsDesejados = range(2, 1001);
+        $contexto = $this->criarContexto(
+            $idsDesejados,
+            ResultadoDecisaoProcessamentoPlano::retificar([1001], [1]),
+            observado: PcaObservado::ativo(new SequencialPca(77), range(1, 1000))
+        );
+        $dependencias = $this->criarDependencias($contexto);
+
+        $dependencias->despachador->despachar($this->criarContextoUsuario(), $contexto);
+
+        $this->assertSame(['excluir_itens', 'inserir_itens'], $dependencias->escritor->chamadas);
+        $this->assertSame([1], $dependencias->escritor->comandoExcluirItens?->getIdsDemandas());
+        $this->assertSame(
+            [1001],
+            array_map(
+                static fn (Demanda $demanda): int => $demanda->getIdDemanda(),
+                $dependencias->escritor->comandoInserirItens?->getDemandas() ?? []
+            )
+        );
+    }
+
+    public function testRetificacaoComEstadoDesejadoAcimaDeMilDeveBloquearAntesDaEscrita(): void
+    {
+        $idsDesejados = range(1, 1001);
+        $contexto = $this->criarContexto(
+            $idsDesejados,
+            ResultadoDecisaoProcessamentoPlano::retificar([1001], []),
+            observado: PcaObservado::ativo(new SequencialPca(77), range(1, 1000))
+        );
+        $dependencias = $this->criarDependencias($contexto);
+
+        $resultado = $dependencias->despachador->despachar(
+            $this->criarContextoUsuario(),
+            $contexto
+        );
+
+        $this->assertSame(
+            SituacaoProcessamentoUnidade::BLOQUEADO,
+            $resultado->getResultadoUnitario()?->getSituacao()
+        );
+        $this->assertSame(
+            'LIMITE_ITENS_PUBLICACAO_EXCEDIDO',
+            $resultado->getResultadoUnitario()?->getFalha()?->getCodigo()
+        );
+        $this->assertSame([], $dependencias->escritor->chamadas);
+        $this->assertSame(0, $dependencias->finalizador->chamadas);
+        $this->assertSame(1, $dependencias->unidadeTrabalho->desfazimentos);
     }
 
     public function testRetificacaoComUmaExclusaoDeveUsarJustificativaSingular(): void
@@ -496,8 +548,8 @@ final class DespachadorComandosUnidadeTest extends TestCase
             'ITEM ' . $id,
             'UNIDADE',
             1,
-            100.00,
-            100.00,
+            new DecimalExato('100.00'),
+            new DecimalExato('100.00'),
             2,
             (string) $id,
             '98',

@@ -11,6 +11,7 @@ use Semae\Pca\Domain\Entities\Demanda;
 use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Enums\SituacaoDemanda;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\DecimalExato;
 use Semae\Pca\Domain\ValueObjects\IdentidadeUnidadeOrcamentaria;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
 use Semae\Pca\Domain\ValueObjects\Uasg;
@@ -29,7 +30,8 @@ class DemandaTest extends TestCase
         $this->assertSame(SituacaoDemanda::HOMOLOGADA, $demanda->getSituacao());
         $this->assertSame($unidade, $demanda->getUnidadeOrcamentaria());
         $this->assertSame($ano, $demanda->getAnoExecucao());
-        $this->assertSame(3550.0, $demanda->getValorUnitario());
+        $this->assertSame('7100.00', $demanda->getValorTotal()->getValor());
+        $this->assertSame('7100.00', $demanda->getValorOrcamentoExercicio()->getValor());
     }
 
     /** @regra RN-DEM-001 */
@@ -76,8 +78,8 @@ class DemandaTest extends TestCase
             'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
             'UNIDADE',
             $quantidade,
-            7100.00,
-            7100.00,
+            new DecimalExato('7100.00'),
+            new DecimalExato('7100.00'),
             2,
             '98.004.000004',
             '98',

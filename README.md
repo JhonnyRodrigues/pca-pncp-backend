@@ -41,15 +41,18 @@ inicialmente, em processo, por uma aplicação Scriptcase.
 
 ## Estado atual
 
-O projeto está em desenvolvimento e passa por consolidação documental e
-refatoração arquitetural antes da Infrastructure.
+O projeto concluiu a estabilização da Fase 4 — Application. O próximo passo
+autorizado é somente a Sprint 5.1, dedicada aos gates reais de Scriptcase,
+Oracle e PNCP antes de qualquer adapter concreto.
 
 As regras de negócio, o modelo de domínio V2, as decisões de integração, o
 fluxo de implementação V2 e o Roadmap V2 estão vigentes.
 
-O código atual contém resultados de etapas anteriores e pode representar
-premissas que serão refatoradas com TDD. O registro atualizado dos documentos
-vigentes e planejados está em [`docs/README.md`](docs/README.md).
+Para começar pelo fluxo em vez de abrir classes isoladas, consulte o
+[guia de leitura do código](docs/vigentes/apoio/guia_de_leitura_do_codigo.md) e
+o [catálogo navegável](docs/vigentes/apoio/catalogo_de_arquivos.md). O registro
+atualizado dos documentos vigentes e planejados está em
+[`docs/README.md`](docs/README.md).
 
 ## Objetivos de aprendizado
 
@@ -91,8 +94,8 @@ Responsabilidades conceituais:
 - **Infrastructure:** adapters de persistência, transporte e recursos externos;
 - **Presentation:** fronteira de entrada e apresentação do resultado.
 
-Essa é a arquitetura-alvo. O código existente ainda será reconciliado com os
-documentos vigentes por meio de uma sprint própria de refatoração.
+Essa é a arquitetura-alvo. Domain e Application estão implementados; as
+camadas externas permanecem futuras e condicionadas aos gates do Roadmap.
 
 ## Estrutura principal
 
@@ -142,9 +145,9 @@ Execute a suíte configurada:
 composer tests
 ```
 
-O Composer usa `vendor/autoload.php` como autoloader principal. O arquivo
-`autoload.php` da raiz preserva um autoloader manual apenas para fins de estudo
-e não é o caminho recomendado para os testes.
+O Composer usa `vendor/autoload.php` como autoloader. O antigo exemplo manual e
+os exercícios iniciais foram preservados apenas no
+[histórico didático](docs/historico/didatico/README.md).
 
 ## Como trabalhar neste projeto
 

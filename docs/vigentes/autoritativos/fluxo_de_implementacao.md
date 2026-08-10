@@ -142,9 +142,11 @@ fachada (`DI-010`).
 
 ### 4.2 Validação da solicitação e do contexto
 
-A Application valida CNPJ e Ano de Execução antes de iniciar processamento
-externo (`RN-CAD-001`, `RN-CAD-002` e `DI-010`). Entrada inválida encerra a
-execução com resultado global `SOLICITACAO_INVALIDA`.
+A futura fronteira de entrada materializa CNPJ e Ano de Execução pelos Value
+Objects do Domain antes de invocar o UseCase tipado (`RN-CAD-001`,
+`RN-CAD-002` e `DI-010`). Se a entrada bruta for inválida, ela usa o contrato
+`PublicarPcaResponse::solicitacaoInvalida`; o UseCase não recebe um Request
+inválido e nenhum processamento externo é iniciado.
 
 Depois da validação, a Application resolve o usuário autenticado, seu
 Representante e sua Lotação por uma Port coesa de contexto. Identidade ou

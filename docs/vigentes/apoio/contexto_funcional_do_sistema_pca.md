@@ -141,11 +141,14 @@ Efeitos:
 
 ## Cancelamento de Demanda Homologada
 
-Funcionalidade prevista para evolução futura.
+O workflow que produz e homologa o cancelamento pertence ao sistema de
+planejamento. O backend de publicação já contempla seus efeitos quando a
+evidência homologada está disponível.
 
 Objetivo:
 
-- permitir exclusão lógica de demanda já homologada.
+- retirar logicamente a Demanda da fotografia vigente;
+- retificar o PCA ativo ou excluí-lo integralmente quando a unidade ficar vazia.
 
 ## Publicação de Plano
 

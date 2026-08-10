@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use Semae\Pca\Domain\Enums\SituacaoDemanda;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\DecimalExato;
 
 class Demanda
 {
@@ -22,8 +23,8 @@ class Demanda
         private readonly string $descricao,
         private readonly string $unidadeMedida,
         private readonly int $quantidade,
-        private readonly float $valorTotal,
-        private readonly float $valorOrcamentoExercicio,
+        private readonly DecimalExato $valorTotal,
+        private readonly DecimalExato $valorOrcamentoExercicio,
         private readonly int $catalogo,
         private readonly string $codigoItem,
         private readonly string $grupo,
@@ -91,12 +92,12 @@ class Demanda
         return $this->quantidade;
     }
 
-    public function getValorTotal(): float
+    public function getValorTotal(): DecimalExato
     {
         return $this->valorTotal;
     }
 
-    public function getValorOrcamentoExercicio(): float
+    public function getValorOrcamentoExercicio(): DecimalExato
     {
         return $this->valorOrcamentoExercicio;
     }
@@ -124,11 +125,6 @@ class Demanda
     public function getOrigem(): string
     {
         return $this->origem;
-    }
-
-    public function getValorUnitario(): float
-    {
-        return $this->valorTotal / $this->quantidade;
     }
 
     private function validarCategoria(): void

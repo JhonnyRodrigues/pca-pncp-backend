@@ -135,6 +135,23 @@ final class PreparadorExecucaoPublicacaoPca
             );
         }
 
+        try {
+            return $this->prepararEstrategiaIniciada($anoExecucao, $identidades);
+        } catch (Throwable) {
+            return $this->desfazerPreservandoFalha(new FalhaSegura(
+                'PREPARACAO_ESTRATEGIA_FALHOU',
+                'Não foi possível preparar a estratégia anual.'
+            ));
+        }
+    }
+
+    /**
+     * @param IdentidadePlano[] $identidades
+     */
+    private function prepararEstrategiaIniciada(
+        AnoExecucao $anoExecucao,
+        array $identidades
+    ): EstrategiaPublicacao|FalhaSegura {
         $resultadoCorrente = $this->estrategiaPublicacao->consultarCorrente($anoExecucao);
 
         if ($resultadoCorrente->getSituacao() !== SituacaoConsultaEstrategia::DISPONIVEL) {
@@ -229,7 +246,14 @@ final class PreparadorExecucaoPublicacaoPca
 
     private function desfazerPreservandoFalha(FalhaSegura $falhaOriginal): FalhaSegura
     {
-        $resultadoDesfazimento = $this->unidadeDeTrabalho->desfazer();
+        try {
+            $resultadoDesfazimento = $this->unidadeDeTrabalho->desfazer();
+        } catch (Throwable) {
+            return new FalhaSegura(
+                'DESFAZIMENTO_ESTRATEGIA_FALHOU',
+                'Não foi possível desfazer a unidade da estratégia anual.'
+            );
+        }
 
         if (
             $resultadoDesfazimento->getSituacao()

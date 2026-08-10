@@ -54,8 +54,8 @@ exclusivamente histórica e didática.
 | Seção 17 — passos 1 a 6 | Concluídos | Consolidaram RN, modelo, DI, fluxo e preservação histórica | São pré-condições documentais; não correspondem a sprints |
 | Seção 17 — passo 7 | Concluído por este documento | Ativa a ordem de construção vigente | É a criação do próprio Roadmap, fora da execução das fases |
 | Seção 17 — passo 8 | Concluído após reauditoria final | Reconciliou Domain e Application existentes com as fontes vigentes usando TDD | A Sprint 4.7 foi aprovada com ressalvas não bloqueantes mantidas fora de seu escopo |
-| Seção 17 — passo 9 | Em andamento — Sprints 4.11 e 4.12 implementadas, ainda não aprovadas | Completar a Application com mocks | A auditoria identificou correção crítica e evidências mínimas pendentes antes do gate final |
-| Seção 17 — passo 10 | Bloqueado pelo passo 9, pela correção pendente e pelos gates aplicáveis | Autorizar o início da Infrastructure | A Fase 5 permanece bloqueada até correção, regressão verde e atualização documental |
+| Seção 17 — passo 9 | Concluído após reabertura e Sprint 4.13 | Completar e estabilizar a Application com mocks | A regressão final aprovou 339 testes e 1139 asserções |
+| Seção 17 — passo 10 | Liberado somente para a Sprint 5.1 | Executar os gates anteriores aos adapters | Adapters concretos continuam condicionados às DI-008, DI-009 e DI-010 |
 | Fases 6 a 9 | Não iniciadas | Wiring, Presentation, integração real e operação | Permanecem futuras e dependentes dos gates anteriores |
 
 > A seção 17 do primeiro checkpoint handoff registra a transição concreta do projeto entre documentação e
@@ -426,8 +426,9 @@ aceitas condicionalmente e preservam seus gates.
 **Estado do PCA:** concluída em 04/08/2026 após reauditoria final aprovar as
 correções das desconformidades identificadas na proteção da fotografia vigente,
 nas pré-condições da política e nas invariantes de seus fatos e resultados. As
-ressalvas não bloqueantes sobre licença permanecem transversais, e a
-representação decimal continua destinada à Sprint 5.6. O trabalho permaneceu
+ressalvas não bloqueantes sobre licença permanecem transversais. A representação
+decimal interna exata foi corrigida na Sprint 4.13; serialização, escala externa
+e arredondamento continuam destinados à Sprint 5.6. O trabalho permaneceu
 restrito ao passo 8 e à Sprint 4.7, sem antecipar a Sprint 4.8 naquele
 encerramento.
 
@@ -472,8 +473,8 @@ formar unidades externas individuais ou consolidada e autenticar uma vez após
 a confirmação local. Falhas conhecidas permanecem tipadas e seguras, sem
 reconstrução antecipada de fotografias, adapters concretos ou processamento
 unitário da Sprint 4.10. A regressão final aprovou 192 testes e 502 asserções.
-A continuidade ocorreu na Sprint 4.10 após autorização explícita. As Sprints
-4.11 e 4.12 permanecem não iniciadas e dependem de autorização explícita.
+A continuidade ocorreu nas Sprints 4.10 a 4.12, encerrando a Fase 4 após seus
+respectivos gates e validações.
 
 #### Sprint 4.10 — Processamento unitário com mocks
 
@@ -507,8 +508,7 @@ consolidado processa somente sua unidade conjunta. O finalizador permanece
 apenas como contrato mockado, e nenhum adapter, observação final, confirmação,
 auditoria ou conexão ao caso de uso público foi antecipado. A regressão final
 aprovou 276 testes e 827 asserções. As Sprints 4.11 e 4.12 foram posteriormente
-implementadas, mas permanecem sem aprovação até o encerramento do checkpoint de
-auditoria registrado abaixo.
+implementadas e submetidas ao checkpoint de auditoria encerrado abaixo.
 
 #### Sprint 4.11 — Reconciliação, confirmação e auditoria
 
@@ -518,6 +518,14 @@ auditoria registrado abaixo.
 - confirmar versões, estado operacional e auditoria na mesma unidade local;
 - preservar RN-PLA-007 e RN-AUD-001 a RN-AUD-005.
 
+**Estado do PCA:** concluída e validada em 10/08/2026 após a correção em TDD do
+defeito crítico identificado pela auditoria. Em nova `PUBLICAR` depois de um
+estado `EXCLUIDO`, uma escrita com `RESULTADO_INCERTO` sem novo sequencial passa
+a ignorar o vínculo histórico, consultar candidatos sem adoção automática e
+observar antes da única reconciliação adicional permitida. A validação também
+comprovou `NENHUMA_ACAO` quando todos os Planos já estavam confirmados e o uso
+de PSR-3 nos pontos relevantes de escrita, reconciliação e falha.
+
 #### Sprint 4.12 — Resultados e gate da Application completa
 
 - demonstrar todos os resultados unitários e globais;
@@ -526,23 +534,61 @@ auditoria registrado abaixo.
 - executar a suíte relacionada e a regressão;
 - confirmar que nenhum adapter concreto foi necessário.
 
-**Checkpoint de auditoria em 06/08/2026:** as Sprints 4.11 e 4.12 estão
-implementadas, porém ainda não aprovadas. A auditoria conjunta foi concluída e
-identificou como defeito crítico o uso do sequencial histórico de um PCA
-`EXCLUIDO` como vínculo ativo depois de uma nova `PUBLICAR` com
-`RESULTADO_INCERTO` sem novo sequencial. Permanecem pendentes as evidências
+**Checkpoint intermediário de auditoria em 06/08/2026:** as Sprints 4.11 e 4.12
+estavam implementadas, porém ainda não aprovadas. A auditoria conjunta foi
+concluída e identificou como defeito crítico o uso do sequencial histórico de
+um PCA `EXCLUIDO` como vínculo ativo depois de uma nova `PUBLICAR` com
+`RESULTADO_INCERTO` sem novo sequencial. Ficaram então pendentes as evidências
 mínimas de `NENHUMA_ACAO` com todos os Planos já confirmados, dos resultados
 globais individual e múltiplo sem pendências, de `FALHA_RECONCILIAVEL` na
-Response global e do consumo PSR-3 nos pontos relevantes de escrita,
-reconciliação e falha. A Fase 5 permanece bloqueada até a correção em TDD, a
-regressão completa verde e a atualização deste estado documental. Uma retomada
-deve continuar pela correção do vínculo de observação, sem implementar qualquer
-adapter da Infrastructure.
+Response global e do consumo PSR-3. Naquele checkpoint, a Fase 5 permaneceu
+bloqueada até a correção em TDD, a regressão verde e a atualização documental.
 
-**Critério de liberação:** somente a conclusão desta sprint autoriza a entrada
-na Fase 5, respeitados os gates contratuais aplicáveis.
+**Estado do PCA:** concluída e validada em 10/08/2026 após a auditoria, a
+correção da Sprint 4.11 e a complementação exclusiva das evidências pendentes.
+O UseCase global demonstrou uma unidade concluída, várias unidades sem
+pendências produzindo `CONCLUIDA` e `FALHA_RECONCILIAVEL` produzindo
+`CONCLUIDA_COM_PENDENCIAS`. Os testes focados aprovaram 45 testes e 235
+asserções; a regressão completa aprovou 321 testes e 1068 asserções. O autoload
+PSR-4 estrito, a direção das dependências e a ausência de detalhes de
+Infrastructure em Domain e Application também foram validados.
+
+**Reabertura da Fase 4 em 10/08/2026:** uma nova auditoria comprovou que a
+conclusão anterior não cobria rollback após exceção na estratégia anual,
+limite de 1000 no estado desejado de Retificação, decimais sem `float` e os
+caminhos concretos de escrita pelo grafo completo da Application. A Fase 5 foi
+novamente bloqueada até uma correção conservadora.
+
+#### Sprint 4.13 — Estabilização e compreensão da Application
+
+- garantir rollback de toda transação anual iniciada diante de exceção;
+- validar o limite de 1000 pela fotografia desejada, preservando a ordem
+  excluir, incluir e observar;
+- substituir valores monetários em `float` por representação decimal interna
+  mínima e exata;
+- demonstrar Publicação, Retificação, Exclusão integral e modo consolidado com
+  colaboradores concretos e doubles somente nas Ports;
+- retirar ruído ativo, reconciliar documentos e produzir mapas de leitura;
+- não redesenhar a Application, consolidar seus tipos ou fragmentar o
+  finalizador.
+
+**Estado da Sprint 4.13:** concluída e validada em 10/08/2026. Os testes focados
+e a regressão completa aprovaram 339 testes e 1139 asserções. Lint PHP, parser
+direcionado ao PHP 8.1, autoload PSR-4 estrito, direção de dependências e
+ausência de detalhes tecnológicos ou `float` em Domain/Application foram
+validados.
+
+**Estado final da Fase 4:** concluída após reabertura e correção. O fluxo
+unitário e global está demonstrado sem adapter concreto.
+
+**Critério de liberação:** somente a Sprint 5.1 pode iniciar. Ela deve produzir
+as evidências contratuais reais antes de qualquer adapter das sprints seguintes.
 
 ### Fase 5 — Infrastructure concreta
+
+**Estado de entrada:** somente a Sprint 5.1 está liberada pela conclusão da Fase
+4. A implementação de adapters permanece bloqueada pelos gates das DI-008,
+DI-009 e DI-010.
 
 **Objetivo:** implementar adapters para contratos internos já demonstrados.
 
@@ -615,7 +661,8 @@ Referência: DI-009.
 #### Sprint 5.6 — Serialização e payloads exatos
 
 - serializar datas de calendário no formato contratual;
-- representar decimais sem float;
+- converter a representação decimal interna exata para o contrato de transporte
+  sem usar `float`;
 - validar tokens numéricos antes da emissão;
 - construir payloads sem mover regras para o serializer;
 - preservar totais autoritativos.

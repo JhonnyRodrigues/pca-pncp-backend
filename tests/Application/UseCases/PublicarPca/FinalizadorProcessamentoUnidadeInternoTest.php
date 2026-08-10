@@ -39,6 +39,7 @@ use Semae\Pca\Domain\Policies\PoliticaProcessamentoPlano;
 use Semae\Pca\Domain\Policies\ResultadoDecisaoProcessamentoPlano;
 use Semae\Pca\Domain\Ports\PlanoRepository;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\DecimalExato;
 use Semae\Pca\Domain\ValueObjects\Cnpj;
 use Semae\Pca\Domain\ValueObjects\EstadoOperacionalPublicacao;
 use Semae\Pca\Domain\ValueObjects\IdentidadePlano;
@@ -1005,8 +1006,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             'ITEM ' . $id,
             'UNIDADE',
             1,
-            100.00,
-            100.00,
+            new DecimalExato('100.00'),
+            new DecimalExato('100.00'),
             2,
             (string) $id,
             '98',

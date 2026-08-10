@@ -88,6 +88,19 @@ final class ExecutorComandosUnidade
     private function retificar(
         ContextoUnidadeComDecisao $contexto
     ): array|DesfechoProcessamentoUnidade {
+        if (
+            count($this->obterDemandasVigentes($contexto))
+            > self::LIMITE_ITENS_PUBLICACAO
+        ) {
+            return $this->bloquearEDesfazer(
+                $contexto,
+                new FalhaSegura(
+                    'LIMITE_ITENS_PUBLICACAO_EXCEDIDO',
+                    'A unidade excede o limite de 1000 itens para publicação.'
+                )
+            );
+        }
+
         $decisao = $contexto->getResultadoDecisao();
         $demandasAInserir = $this->obterDemandasPorIds(
             $contexto,

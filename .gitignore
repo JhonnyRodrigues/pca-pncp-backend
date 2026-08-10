@@ -8,4 +8,5 @@
 /vendor/
 .phpunit.result.cache
 
-/docs/investigacoes/
+/docs/investigacoes/*
+!/docs/investigacoes/auditoria_fase_4_application_2026-08-10.md

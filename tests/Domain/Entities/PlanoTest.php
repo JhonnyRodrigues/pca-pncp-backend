@@ -13,6 +13,7 @@ use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Enums\SituacaoDemanda;
 use Semae\Pca\Domain\Exceptions\PlanoException;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\DecimalExato;
 use Semae\Pca\Domain\ValueObjects\IdentidadePlano;
 use Semae\Pca\Domain\ValueObjects\IdentidadeUnidadeOrcamentaria;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
@@ -211,8 +212,8 @@ class PlanoTest extends TestCase
             'MICROCOMPUTADOR DESKTOP TIPO PC PARA APLICAÇÕES AVANÇADAS',
             'UNIDADE',
             2,
-            7100.00,
-            7100.00,
+            new DecimalExato('7100.00'),
+            new DecimalExato('7100.00'),
             2,
             '98.004.000004',
             '98',

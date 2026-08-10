@@ -254,6 +254,8 @@ Ela reúne conceitualmente:
 - Unidade Orçamentária e Ano de Execução;
 - dados que caracterizam a necessidade;
 - quantidade;
+- valor total e orçamento do exercício preservados como `DecimalExato`, sem
+  conversão para ponto flutuante;
 - categoria Material ou Serviço;
 - origem Normal ou Extraordinária;
 - data desejada;
@@ -261,6 +263,11 @@ Ela reúne conceitualmente:
 
 Quantidade, categoria e origem obedecem a `RN-DEM-001`. Os demais atributos não
 ganham neste documento regras que não estejam registradas no catálogo.
+
+`DecimalExato` é a representação interna mínima exigida pelas DI-008 e DI-009:
+ele apenas valida e preserva a forma decimal recebida. Divisão para valor
+unitário, escala de payload, `HALF_UP` e emissão JSON não pertencem ao Domain e
+continuam reservados à borda PNCP da Sprint 5.6.
 
 #### Ciclo após homologação
 

@@ -603,6 +603,104 @@ final class PreparadorExecucaoPublicacaoPcaTest extends TestCase
         $this->assertSame($falhaRollback, $resultado->getFalha());
     }
 
+    public function testExcecaoNaConsultaCorrenteDeveDesfazerEInterromper(): void
+    {
+        $cenario = $this->criarCenarioBase();
+
+        $cenario['estrategia']->expects($this->once())
+            ->method('consultarCorrente')
+            ->willThrowException(new RuntimeException('detalhe interno'));
+        $cenario['estrategia']->expects($this->never())->method('consultarAdotada');
+        $this->configurarUnidadeDeTrabalhoDesfeita($cenario['unidadeDeTrabalho']);
+        $cenario['autenticador']->expects($this->never())->method('autenticar');
+
+        $resultado = $this->criarPreparador($cenario)->preparar($cenario['request']);
+
+        $this->assertSame(SituacaoPreparacaoPublicacaoPca::INTERROMPIDA, $resultado->getSituacao());
+        $this->assertSame('PREPARACAO_ESTRATEGIA_FALHOU', $resultado->getFalha()?->getCodigo());
+    }
+
+    public function testExcecaoNaConsultaAdotadaDeveDesfazerEInterromper(): void
+    {
+        $cenario = $this->criarCenarioBase();
+        $estrategia = EstrategiaPublicacao::individual();
+
+        $cenario['estrategia']->expects($this->once())
+            ->method('consultarCorrente')
+            ->willReturn(ResultadoConsultaEstrategia::disponivel($estrategia));
+        $cenario['estrategia']->expects($this->once())
+            ->method('consultarAdotada')
+            ->willThrowException(new RuntimeException('detalhe interno'));
+        $this->configurarUnidadeDeTrabalhoDesfeita($cenario['unidadeDeTrabalho']);
+        $cenario['autenticador']->expects($this->never())->method('autenticar');
+
+        $resultado = $this->criarPreparador($cenario)->preparar($cenario['request']);
+
+        $this->assertSame('PREPARACAO_ESTRATEGIA_FALHOU', $resultado->getFalha()?->getCodigo());
+    }
+
+    public function testExcecaoNaAdocaoDeveDesfazerEInterromper(): void
+    {
+        $cenario = $this->criarCenarioBase();
+        $estrategia = EstrategiaPublicacao::individual();
+
+        $cenario['estrategia']->method('consultarCorrente')
+            ->willReturn(ResultadoConsultaEstrategia::disponivel($estrategia));
+        $cenario['estrategia']->method('consultarAdotada')
+            ->willReturn(ResultadoConsultaEstrategia::ausente());
+        $cenario['estrategia']->expects($this->once())
+            ->method('adotar')
+            ->willThrowException(new RuntimeException('detalhe interno'));
+        $this->configurarUnidadeDeTrabalhoDesfeita($cenario['unidadeDeTrabalho']);
+        $cenario['autenticador']->expects($this->never())->method('autenticar');
+
+        $resultado = $this->criarPreparador($cenario)->preparar($cenario['request']);
+
+        $this->assertSame('PREPARACAO_ESTRATEGIA_FALHOU', $resultado->getFalha()?->getCodigo());
+    }
+
+    public function testExcecaoNaConfirmacaoDeveDesfazerEInterromper(): void
+    {
+        $cenario = $this->criarCenarioBase();
+        $estrategia = EstrategiaPublicacao::individual();
+
+        $this->configurarEstrategiaJaAdotada($cenario['estrategia'], $estrategia);
+        $cenario['unidadeDeTrabalho']->expects($this->once())
+            ->method('iniciar')
+            ->willReturn(ResultadoInicioUnidadeTrabalho::iniciada());
+        $cenario['unidadeDeTrabalho']->expects($this->once())
+            ->method('confirmar')
+            ->willThrowException(new RuntimeException('detalhe interno'));
+        $cenario['unidadeDeTrabalho']->expects($this->once())
+            ->method('desfazer')
+            ->willReturn(ResultadoFinalizacaoUnidadeTrabalho::concluida());
+        $cenario['autenticador']->expects($this->never())->method('autenticar');
+
+        $resultado = $this->criarPreparador($cenario)->preparar($cenario['request']);
+
+        $this->assertSame('PREPARACAO_ESTRATEGIA_FALHOU', $resultado->getFalha()?->getCodigo());
+    }
+
+    public function testExcecaoNoDesfazimentoDaEstrategiaDevePrevalecer(): void
+    {
+        $cenario = $this->criarCenarioBase();
+
+        $cenario['estrategia']->method('consultarCorrente')
+            ->willThrowException(new RuntimeException('detalhe interno'));
+        $cenario['unidadeDeTrabalho']->expects($this->once())
+            ->method('iniciar')
+            ->willReturn(ResultadoInicioUnidadeTrabalho::iniciada());
+        $cenario['unidadeDeTrabalho']->expects($this->never())->method('confirmar');
+        $cenario['unidadeDeTrabalho']->expects($this->once())
+            ->method('desfazer')
+            ->willThrowException(new RuntimeException('rollback indisponível'));
+        $cenario['autenticador']->expects($this->never())->method('autenticar');
+
+        $resultado = $this->criarPreparador($cenario)->preparar($cenario['request']);
+
+        $this->assertSame('DESFAZIMENTO_ESTRATEGIA_FALHOU', $resultado->getFalha()?->getCodigo());
+    }
+
     /**
      * @return array{
      *     request: PublicarPcaRequest,

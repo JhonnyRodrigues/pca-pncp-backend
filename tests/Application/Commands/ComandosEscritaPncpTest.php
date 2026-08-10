@@ -17,6 +17,7 @@ use Semae\Pca\Domain\Entities\Demanda;
 use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Enums\SituacaoDemanda;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
+use Semae\Pca\Domain\ValueObjects\DecimalExato;
 use Semae\Pca\Domain\ValueObjects\Cnpj;
 use Semae\Pca\Domain\ValueObjects\IdentidadePlano;
 use Semae\Pca\Domain\ValueObjects\IdentidadeUnidadeOrcamentaria;
@@ -231,8 +232,8 @@ final class ComandosEscritaPncpTest extends TestCase
             'ITEM ' . $id,
             'UNIDADE',
             1,
-            100.00,
-            100.00,
+            new DecimalExato('100.00'),
+            new DecimalExato('100.00'),
             2,
             (string) $id,
             '98',

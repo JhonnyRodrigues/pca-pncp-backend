@@ -58,6 +58,8 @@ aparece neste índice sem link até que o documento exista.
 6. [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md)
 7. [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md)
 8. [Roadmap de implementação](vigentes/autoritativos/roadmap.md)
+9. [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md)
+10. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
 
 ### 4.1 Princípio de autoridade
 
@@ -92,6 +94,8 @@ Quando dois documentos parecerem contraditórios, prevalece:
 | [Arquitetura](vigentes/apoio/arquitetura.md) | Vigente | Limites e direção de dependências |
 | [Glossário integrado](vigentes/apoio/glossario.md) | Vigente | Índice semântico da linguagem do projeto |
 | [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Vigente | Usuários, etapas e contexto funcional |
+| [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) | Vigente | Mapas, fluxo, transações e roteiro de estudo |
+| [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md) | Vigente | Função dos arquivos ativos de código e teste |
 | [DER da publicação](diagramas/DER_PUBLICACAO_PCA.png) | Vigente como apoio visual | Diagrama visual |
 | [Fluxograma do PCA](diagramas/fluxograma_PCA.png) | Vigente como apoio visual | Diagrama visual |
 
@@ -104,6 +108,7 @@ Estes arquivos são evidências preservadas e não especificações:
 | [Código-fonte investigado](investigacoes/codigo-fonte_PCA_PUBLICAR_B.php) | Investigação |
 | [Cópia de entry point HTTP](investigacoes/copia_entryPointHTTP.txt) | Investigação |
 | [Estrutura observada de ADORecordSet](investigacoes/object_ADORecordSet_array.txt) | Investigação |
+| [Auditoria da Fase 4 — Application](investigacoes/auditoria_fase_4_application_2026-08-10.md) | Investigação concluída |
 
 ### 5.4 Históricos
 
@@ -115,6 +120,7 @@ devem ser consultados apenas para auditoria, evolução e estudo:
 - [Fluxo de implementação V1 legado](historico/fluxo_de_implementacao_v1_legado.md);
 - [Contexto histórico do planejamento](historico/contexto_do_planejamento_do_projeto_backend.md);
 - [Roadmap V1 legado](historico/roadmap_v1_legado.md).
+- [Exemplos didáticos iniciais](historico/didatico/README.md).
 
 ## 6. Mapa de nomes antigos
 
