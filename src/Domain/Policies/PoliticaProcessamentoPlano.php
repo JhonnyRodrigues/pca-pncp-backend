@@ -85,15 +85,11 @@ final class PoliticaProcessamentoPlano
         }
 
         if (!$estadoOperacional->estaAtivo()) {
-            throw new ConflitoEstadoPublicacaoException(
-                'PCA ativo foi observado sem vínculo operacional ativo conhecido.'
-            );
+            throw new ConflitoEstadoPublicacaoException('PCA ativo foi observado sem vínculo operacional ativo conhecido.');
         }
 
         if (!$estadoOperacional->getSequencialPca()?->equals($pcaObservado->getSequencialPca())) {
-            throw new ConflitoEstadoPublicacaoException(
-                'Sequencial do PCA observado diverge do vínculo operacional conhecido.'
-            );
+            throw new ConflitoEstadoPublicacaoException('Sequencial do PCA observado diverge do vínculo operacional conhecido.');
         }
     }
 }

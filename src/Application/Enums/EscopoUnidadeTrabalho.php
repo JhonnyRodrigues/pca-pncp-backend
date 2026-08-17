@@ -9,3 +9,4 @@ enum EscopoUnidadeTrabalho: string
     case ESTRATEGIA_ANUAL = 'ESTRATEGIA_ANUAL';
     case UNIDADE_EXTERNA = 'UNIDADE_EXTERNA';
 }
+

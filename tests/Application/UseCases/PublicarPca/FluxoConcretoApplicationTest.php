@@ -71,6 +71,9 @@ use Semae\Pca\Domain\ValueObjects\Representante;
 use Semae\Pca\Domain\ValueObjects\SequencialPca;
 use Semae\Pca\Domain\ValueObjects\Uasg;
 
+/**
+ * Objetivo: Demonstrar que o grafo real da Application funciona ponta a ponta.
+ */
 final class FluxoConcretoApplicationTest extends TestCase
 {
     public function testDevePublicarPontaAPontaComGrafoConcreto(): void
@@ -148,6 +151,9 @@ final class FluxoConcretoApplicationTest extends TestCase
         $this->assertCount(2, $cenario->repository->confirmados);
     }
 
+    /**
+     * é praticamente um futuro Composition Root em miniatura para testes
+     */
     private function executar(CenarioFluxoConcreto $cenario): PublicarPcaResponse
     {
         $politica = new PoliticaProcessamentoPlano();
@@ -214,6 +220,9 @@ final class FluxoConcretoApplicationTest extends TestCase
     }
 }
 
+/**
+ * centraliza os dados e doubles. Monta um mundo externo controlado para cada teste, criando planos e demandas.
+ */
 final class CenarioFluxoConcreto
 {
     public readonly AnoExecucao $ano;

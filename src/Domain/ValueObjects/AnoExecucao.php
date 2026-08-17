@@ -13,7 +13,7 @@ class AnoExecucao
         $proximoAno = $anoAtual + 1;
 
         if ($valor < $anoAtual || $valor > $proximoAno) {
-            throw new AnoExecucaoInvalidoException('Ano de execucao invalido.');
+            throw new AnoExecucaoInvalidoException('Ano de execução inválido.');
         }
     }
 

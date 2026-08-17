@@ -42,9 +42,9 @@ documentação histórica e investigações não fazem parte do fluxo executáve
 
 | Arquivo | Função |
 |---|---|
-| `Enums/DecisaoProcessamentoPlano.php` | Nomeia PUBLICAR, RETIFICAR, EXCLUIR_PCA e NENHUMA_ACAO. |
+| `Enums/DecisaoProcessamentoPlano.php` | Nomeia intenção ainda não comprovada: PUBLICAR, RETIFICAR, EXCLUIR_PCA e NENHUMA_ACAO. |
 | `Enums/EstadoPublicacao.php` | Nomeia os estados operacionais da publicação. |
-| `Enums/ProcedimentoPublicacaoPca.php` | Cataloga os procedimentos auditáveis. |
+| `Enums/ProcedimentoPublicacaoPca.php` | Classificação histórica de uma ação comprovada. Cataloga os procedimentos auditáveis. |
 | `Enums/SituacaoDemanda.php` | Define situações e participação na fotografia vigente. |
 | `Exceptions/AnoExecucaoInvalidoException.php` | Falha específica de exercício inválido. |
 | `Exceptions/ConflitoEstadoPublicacaoException.php` | Sinaliza estado de publicação semanticamente conflitante. |
@@ -100,7 +100,7 @@ documentação histórica e investigações não fazem parte do fluxo executáve
 
 | Arquivo | Função |
 |---|---|
-| `ValueObjects/ChaveUnidadeTrabalho.php` | Chaveia locks anuais e de unidades externas. |
+| `ValueObjects/ChaveUnidadeTrabalho.php` | Identifica o alvo da exclusividade transacional: `ESTRATEGIA_ANUAL` para a estratégia de um exercício ou `UNIDADE_EXTERNA` para uma publicação específica. |
 | `ValueObjects/ContextoFinalizacaoProcessamentoUnidade.php` | Reúne fatos necessários à observação e persistência finais. |
 | `ValueObjects/ContextoUnidadeComDecisao.php` | Transporta contexto exclusivo, PCA observado e decisão. |
 | `ValueObjects/ContextoUnidadeSobExclusividade.php` | Transporta Planos e estado relidos sob lock. |

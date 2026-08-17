@@ -56,14 +56,10 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         $this->desfazedor = new DesfazedorUnidadeProcessamento($unidadeDeTrabalho);
     }
 
-    public function finalizar(
-        ContextoFinalizacaoProcessamentoUnidade $contexto
-    ): DesfechoProcessamentoUnidade {
+    public function finalizar(ContextoFinalizacaoProcessamentoUnidade $contexto): DesfechoProcessamentoUnidade
+    {
         try {
-            if (
-                $contexto->getResultadoDecisao()->getDecisao()
-                === DecisaoProcessamentoPlano::NENHUMA_ACAO
-            ) {
+            if ($contexto->getResultadoDecisao()->getDecisao() === DecisaoProcessamentoPlano::NENHUMA_ACAO) {
                 return $this->finalizarSemEscrita($contexto);
             }
 
@@ -84,9 +80,8 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         }
     }
 
-    private function finalizarSemEscrita(
-        ContextoFinalizacaoProcessamentoUnidade $contexto
-    ): DesfechoProcessamentoUnidade {
+    private function finalizarSemEscrita(ContextoFinalizacaoProcessamentoUnidade $contexto): DesfechoProcessamentoUnidade
+    {
         $decisaoComprovada = $this->politica->decidir(
             $contexto->getPlanos(),
             $contexto->getEstadoOperacionalInicial(),
@@ -110,9 +105,8 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         );
     }
 
-    private function finalizarDepoisDeEscrita(
-        ContextoFinalizacaoProcessamentoUnidade $contexto
-    ): DesfechoProcessamentoUnidade {
+    private function finalizarDepoisDeEscrita(ContextoFinalizacaoProcessamentoUnidade $contexto): DesfechoProcessamentoUnidade
+    {
         $resultados = $contexto->getResultadosEscrita();
         $this->registrarLog(
             'info',
@@ -285,7 +279,7 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
             SituacaoObservacaoPca::FALHA_SISTEMICA => $this->interromperEDesfazer($falha),
             SituacaoObservacaoPca::ENCONTRADO,
             SituacaoObservacaoPca::AUSENCIA_DEFINITIVA =>
-                $this->interromperEDesfazer($falha),
+            $this->interromperEDesfazer($falha),
         };
     }
 
@@ -314,10 +308,10 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
 
         return match ($resultado->getSituacao()) {
             SituacaoBuscaCandidatosPca::INCONCLUSIVA =>
-                $this->falhaReconciliavelEDesfazer($contexto, $falha),
+            $this->falhaReconciliavelEDesfazer($contexto, $falha),
             SituacaoBuscaCandidatosPca::CONFLITO => $this->bloquearEDesfazer($contexto, $falha),
             SituacaoBuscaCandidatosPca::FALHA_SISTEMICA =>
-                $this->interromperEDesfazer($falha),
+            $this->interromperEDesfazer($falha),
             SituacaoBuscaCandidatosPca::CONCLUIDA => $this->interromperEDesfazer($falha),
         };
     }
@@ -627,9 +621,9 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         $identificacao = $unidade->getModo() === ModoPublicacao::CONSOLIDADO
             ? 'Consolidado'
             : 'UO: ' . $unidade->getIdentidadePlano()
-                ?->getUnidadeOrcamentaria()
-                ->getIdentidade()
-                ->getValor();
+            ?->getUnidadeOrcamentaria()
+            ->getIdentidade()
+            ->getValor();
         $mensagem = sprintf(
             'Exercício: %d; %s; UASG externa: %s; sequencialPca: %d; ação confirmada: %s.',
             $unidade->getAnoExecucao()->getValor(),
