@@ -109,6 +109,8 @@ Estes arquivos são evidências preservadas e não especificações:
 | [Cópia de entry point HTTP](investigacoes/copia_entryPointHTTP.txt) | Investigação |
 | [Estrutura observada de ADORecordSet](investigacoes/object_ADORecordSet_array.txt) | Investigação |
 | [Auditoria da Fase 4 — Application](investigacoes/auditoria_fase_4_application_2026-08-10.md) | Investigação concluída |
+| [Gui de compreensão do backend](investigacoes/guia_de_compreensao_do_backend.md) | Investigação |
+| [Evidências da Sprint 5.1 — gates Oracle e PNCP](investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md) | Investigação concluída |
 
 ### 5.4 Históricos
 

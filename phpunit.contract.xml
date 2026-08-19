@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    cacheResult="false"
+>
+    <testsuites>
+        <testsuite name="Sprint 5.1 — contratos externos">
+            <directory>tests/Contract/Sprint51</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

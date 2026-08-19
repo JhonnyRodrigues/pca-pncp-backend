@@ -9,8 +9,8 @@ enum SituacaoDemanda: int
     case PLANEJADA = 1;
     case HOMOLOGADA = 2;
     case COMPRADA = 3;
-    case PUBLICADA = 5;
     case CANCELADA = 4;
+    case PUBLICADA = 5;
 
     public function participaDaFotografiaVigente(): bool
     {

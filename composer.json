@@ -32,6 +32,11 @@
 
     "scripts":{
         "start server":"php -S localhost:8080 -t public",
-        "tests":"vendor/bin/phpunit"
+        "tests":"vendor/bin/phpunit",
+        "contract:tests":"vendor/bin/phpunit --configuration phpunit.contract.xml --exclude-group pncp-live",
+        "contract:preflight":"php tests/Contract/Sprint51/run-preflight.php",
+        "contract:preflight:pncp":"php tests/Contract/Sprint51/run-preflight.php pncp",
+        "contract:preflight:oracle":"php tests/Contract/Sprint51/run-preflight.php oracle",
+        "contract:pncp":"vendor/bin/phpunit --configuration phpunit.contract.xml --group pncp-live"
     }
 }
