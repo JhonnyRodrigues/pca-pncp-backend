@@ -49,19 +49,12 @@ exclusivamente histórica e didática.
 
 ## 2. Acompanhamento do projeto PCA — estado real
 
-| Marco real do PCA | Status atual | Papel no projeto | Relação com o Roadmap V2 |
-|---|---|---|---|
-| Seção 17 — passos 1 a 6 | Concluídos | Consolidaram RN, modelo, DI, fluxo e preservação histórica | São pré-condições documentais; não correspondem a sprints |
-| Seção 17 — passo 7 | Concluído por este documento | Ativa a ordem de construção vigente | É a criação do próprio Roadmap, fora da execução das fases |
-| Seção 17 — passo 8 | Concluído após reauditoria final | Reconciliou Domain e Application existentes com as fontes vigentes usando TDD | A Sprint 4.7 foi aprovada com ressalvas não bloqueantes mantidas fora de seu escopo |
-| Seção 17 — passo 9 | Concluído após reabertura e Sprint 4.13 | Completar e estabilizar a Application com mocks | A regressão final aprovou 339 testes e 1139 asserções |
-| Seção 17 — passo 10 | Sprint 5.1 concluída; Sprint 5.2 autorizável | Executar os gates anteriores aos adapters | Evidências Oracle e PNCP foram confirmadas; a Sprint 5.2 permanece não iniciada até autorização explícita |
-| Fases 6 a 9 | Não iniciadas | Wiring, Presentation, integração real e operação | Permanecem futuras e dependentes dos gates anteriores |
+O progresso corrente, a última sprint concluída, a próxima sprint na ordem,
+os gates, as pendências e as restrições são mantidos no
+[estado operacional do projeto](../operacional/estado_atual.md).
 
-> A seção 17 do primeiro checkpoint handoff registra a transição concreta do projeto entre documentação e
-> implementação. As fases e sprints deste Roadmap formam a sequência
-> prescritiva reutilizável. A coluna de relação indica onde o PCA retomará essa
-> sequência; ela não estabelece equivalência conceitual entre passo e sprint.
+As fases e sprints abaixo permanecem a sequência prescritiva vigente. O estado
+operacional não altera essa ordem nem seus critérios de avanço.
 
 ## 3. Como usar este Roadmap
 
@@ -586,11 +579,6 @@ as evidências contratuais reais antes de qualquer adapter das sprints seguintes
 
 ### Fase 5 — Infrastructure concreta
 
-**Estado atual:** a Sprint 5.1 foi concluída em 19/08/2026. Os gates obrigatórios
-Oracle e PNCP foram confirmados, tornando a Sprint 5.2 autorizável. A
-implementação dos adapters permanece não iniciada e depende de autorização
-explícita para a sprint correspondente.
-
 **Objetivo:** implementar adapters para contratos internos já demonstrados.
 
 **Por que existe:** mecanismos externos devem traduzir contratos, não descobrir
@@ -618,19 +606,6 @@ Referências: DI-008 e DI-009.
 
 **Ponto em aberto:** parâmetros da DI-009 que permanecem configuráveis só
 recebem valores depois do respectivo teste contratual.
-
-**Estado final em 19/08/2026:** concluída. A suíte contratual opt-in permaneceu
-isolada da suíte padrão. Os contratos de runtime, ADOdb, bind, sessão,
-transação, lock, schema e agregações foram confirmados no Scriptcase/Oracle
-real. TLS com CA explícita, autenticação, Bearer, escritas, paginação, lacunas,
-decimal exato, exclusões e ausência foram confirmados no PNCP de treinamento.
-A linha de base permaneceu verde com 339 testes e 1139 asserções; a suíte
-estrutural encerrou com 24 testes e 51 asserções. A chamada única com 1001 itens
-e o CNPJ alfanumérico permanecem `AINDA NÃO COMPROVADOS`, de forma não
-bloqueante para esta sprint; o limite operacional continua em 1000 itens por
-chamada, e decisões dependentes de CNPJ alfanumérico continuam bloqueadas.
-Nenhum adapter concreto, contrato interno ou limite da Application foi
-alterado. A Sprint 5.2 está autorizável, mas não foi iniciada.
 
 Relatório não autoritativo de suporte:
 [`Evidências da Sprint 5.1 — gates Oracle e PNCP`](../../investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md).

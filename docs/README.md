@@ -25,6 +25,7 @@ Em caso de dúvida sobre classificação documental, caminhos, status ou vigênc
 | Classificação | Papel |
 |---|---|
 | **Autoritativo** | Fonte oficial da verdade para o escopo declarado |
+| **Operacional** | Estado corrente do trabalho, sem autoridade para alterar fontes prescritivas |
 | **Apoio** | Explica e contextualiza, sem criar norma concorrente |
 | **Investigação** | Preserva pesquisas, experimentações e evidências sem autoridade normativa |
 | **Histórico** | Preserva versões substituídas para auditoria e aprendizado |
@@ -41,7 +42,8 @@ docs/
 ├── investigacoes/
 ├── vigentes/
 │   ├── autoritativos/
-│   └── apoio/
+│   ├── apoio/
+│   └── operacional/
 └── historico/
 ```
 
@@ -58,8 +60,9 @@ aparece neste índice sem link até que o documento exista.
 6. [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md)
 7. [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md)
 8. [Roadmap de implementação](vigentes/autoritativos/roadmap.md)
-9. [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md)
-10. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
+9. [Estado operacional do projeto](vigentes/operacional/estado_atual.md)
+10. [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md)
+11. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
 
 ### 4.1 Princípio de autoridade
 
@@ -70,9 +73,10 @@ Quando dois documentos parecerem contraditórios, prevalece:
 3. Decisões de Integração;
 4. Fluxo de Implementação;
 5. Roadmap;
-6. Documentos de Apoio;
-7. Investigações;
-8. Históricos.
+6. Documentos Operacionais, somente quanto ao estado corrente do trabalho;
+7. Documentos de Apoio;
+8. Investigações;
+9. Históricos.
 
 ## 5. Registro documental
 
@@ -99,7 +103,13 @@ Quando dois documentos parecerem contraditórios, prevalece:
 | [DER da publicação](diagramas/DER_PUBLICACAO_PCA.png) | Vigente como apoio visual | Diagrama visual |
 | [Fluxograma do PCA](diagramas/fluxograma_PCA.png) | Vigente como apoio visual | Diagrama visual |
 
-### 5.3 Investigações
+### 5.3 Operacional
+
+| Documento | Status | Autoridade limitada |
+|---|---|---|
+| [Estado operacional do projeto](vigentes/operacional/estado_atual.md) | Vigente | Progresso, última sprint concluída, próxima sprint na ordem, gates, pendências e restrições; não altera RN, DI, modelo, fluxo, arquitetura ou Roadmap |
+
+### 5.4 Investigações
 
 Estes arquivos são evidências preservadas e não especificações:
 
@@ -112,7 +122,7 @@ Estes arquivos são evidências preservadas e não especificações:
 | [Gui de compreensão do backend](investigacoes/guia_de_compreensao_do_backend.md) | Investigação |
 | [Evidências da Sprint 5.1 — gates Oracle e PNCP](investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md) | Investigação concluída |
 
-### 5.4 Históricos
+### 5.5 Históricos
 
 Os documentos abaixo têm status `Histórico`, não possuem autoridade atual e
 devem ser consultados apenas para auditoria, evolução e estudo:

@@ -4,8 +4,9 @@
 **Status:** Vigente  
 **Autoridade/Escopo:** índice do código ativo; não define comportamento
 
-Este catálogo cobre código de produção, testes e configuração. `vendor/`,
-documentação histórica e investigações não fazem parte do fluxo executável.
+Este catálogo cobre código de produção, testes, configuração e a referência ao
+estado operacional. `vendor/`, documentação histórica e investigações não
+fazem parte do fluxo executável.
 
 ## 1. Domain
 
@@ -156,7 +157,33 @@ documentação histórica e investigações não fazem parte do fluxo executáve
 | `Enums/SituacaoPublicacaoPca.php` | Quatro estados globais da execução. |
 | `Enums/SituacaoResolucaoContextoUsuario.php` | Estados da resolução do usuário. |
 
-## 3. Testes
+## 3. Infrastructure
+
+### Oracle — conexão ADOdb emprestada
+
+| Arquivo | Função |
+|---|---|
+| `Oracle/Adodb/ConexaoAdodbEmprestada.php` | Encapsula a sessão ADOdb fornecida pelo host, prepara binds e controla seu estado transacional sem fechar a conexão. |
+| `Oracle/Adodb/FalhaOracleException.php` | Transporta somente a mensagem segura e o eventual código `ORA-*`. |
+
+### Oracle — unidade de trabalho e locks
+
+| Arquivo | Função |
+|---|---|
+| `Oracle/Transacao/MapeamentoFisicoAncorasOracle.php` | Valida os identificadores físicos e o alvo anual das âncoras permanentes. |
+| `Oracle/Transacao/OracleUnidadeDeTrabalhoAdapter.php` | Implementa transação local, provisionamento DML idempotente e lock `FOR UPDATE NOWAIT`. |
+
+### Oracle — estratégia anual
+
+| Arquivo | Função |
+|---|---|
+| `Oracle/Estrategia/MapeamentoConfiguracaoEstrategiaOracle.php` | Declara tabela, colunas, chaves e literais físicos da configuração corrente. |
+| `Oracle/Estrategia/MapeamentoPlanosEstrategiaOracle.php` | Declara a projeção física da estratégia adotada nas linhas de Plano. |
+| `Oracle/Estrategia/MapeamentoCadastroUasgOracle.php` | Declara a relação com UO e o lookup ativo e único de código e descrição da UASG. |
+| `Oracle/Estrategia/EstrategiaOracleInvalidaException.php` | Sinaliza internamente dados físicos ausentes, parciais ou incoerentes. |
+| `Oracle/Estrategia/OracleEstrategiaPublicacaoAdapter.php` | Consulta e adota a estratégia anual pela Port da Application na transação compartilhada. |
+
+## 4. Testes
 
 ### Domain
 
@@ -225,7 +252,17 @@ documentação histórica e investigações não fazem parte do fluxo executáve
 | `UseCases/PublicarPca/ProcessadorUnidadeInternoTest.php` | Encadeamento concreto no caminho sem escrita. |
 | `UseCases/PublicarPca/FluxoConcretoApplicationTest.php` | Grafo completo para publicação, retificação, exclusão e consolidação. |
 
-## 4. Configuração executável
+### Infrastructure — Oracle
+
+| Arquivo | Demonstração principal |
+|---|---|
+| `Infrastructure/Oracle/Adodb/ConexaoAdodbEmprestadaTest.php` | Binds, leituras, comandos, transação, falhas seguras e ausência de fechamento. |
+| `Infrastructure/Oracle/Transacao/MapeamentoFisicoAncorasOracleTest.php` | Validação allowlisted do plano físico das âncoras. |
+| `Infrastructure/Oracle/Transacao/OracleUnidadeDeTrabalhoAdapterTest.php` | Provisionamento, chaves, contenção, commit, rollback e ausência de DDL. |
+| `Infrastructure/Oracle/Estrategia/MapeamentosFisicosEstrategiaOracleTest.php` | Obrigatoriedade e allowlist dos mapeamentos de configuração, Planos e UASG. |
+| `Infrastructure/Oracle/Estrategia/OracleEstrategiaPublicacaoAdapterTest.php` | Estratégias corrente e adotada, cardinalidade da UASG, adoção e sessão compartilhada. |
+
+## 5. Configuração executável
 
 | Arquivo | Função |
 |---|---|
@@ -233,6 +270,12 @@ documentação histórica e investigações não fazem parte do fluxo executáve
 | `composer.lock` | Versões resolvidas das dependências. |
 | `phpunit.xml` | Bootstrap e descoberta da suíte única atual. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
+
+## 6. Estado operacional
+
+| Arquivo | Função |
+|---|---|
+| `docs/vigentes/operacional/estado_atual.md` | Centraliza progresso, última sprint concluída, próxima sprint na ordem, gates, pendências e restrições, sem criar regra ou decisão. |
 
 Para entender o caminho entre esses arquivos, volte ao
 [guia de leitura](guia_de_leitura_do_codigo.md).

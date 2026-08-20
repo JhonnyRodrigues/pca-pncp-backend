@@ -27,7 +27,9 @@ substitui as fontes específicas:
   contém a colaboração dinâmica entre as camadas e portas;
 - [`docs/vigentes/autoritativos/roadmap.md`](docs/vigentes/autoritativos/roadmap.md)
   contém a ordem de construção vigente;
-- [`.agents/AGENTS.md`](.agents/AGENTS.md) define como agentes devem trabalhar
+- [`docs/vigentes/operacional/estado_atual.md`](docs/vigentes/operacional/estado_atual.md)
+  concentra o progresso corrente, os gates, as pendências e as restrições;
+- [`AGENTS.md`](AGENTS.md) define como agentes devem trabalhar
   no repositório.
 
 ## Objetivo do produto
@@ -41,12 +43,9 @@ inicialmente, em processo, por uma aplicação Scriptcase.
 
 ## Estado atual
 
-O projeto concluiu a estabilização da Fase 4 — Application. O próximo passo
-autorizado é somente a Sprint 5.1, dedicada aos gates reais de Scriptcase,
-Oracle e PNCP antes de qualquer adapter concreto.
-
-As regras de negócio, o modelo de domínio V2, as decisões de integração, o
-fluxo de implementação V2 e o Roadmap V2 estão vigentes.
+O progresso, a última sprint concluída, a próxima sprint na ordem, os gates,
+as pendências e as restrições estão centralizados no
+[estado operacional vigente](docs/vigentes/operacional/estado_atual.md).
 
 Para começar pelo fluxo em vez de abrir classes isoladas, consulte o
 [guia de leitura do código](docs/vigentes/apoio/guia_de_leitura_do_codigo.md) e
@@ -94,8 +93,8 @@ Responsabilidades conceituais:
 - **Infrastructure:** adapters de persistência, transporte e recursos externos;
 - **Presentation:** fronteira de entrada e apresentação do resultado.
 
-Essa é a arquitetura-alvo. Domain e Application estão implementados; as
-camadas externas permanecem futuras e condicionadas aos gates do Roadmap.
+Essa é a arquitetura-alvo. O grau de implementação de cada camada permanece
+registrado no [estado operacional vigente](docs/vigentes/operacional/estado_atual.md).
 
 ## Estrutura principal
 
@@ -127,9 +126,10 @@ docs/
 - API do PNCP;
 - aplicação hospedeira Scriptcase.
 
-As integrações-alvo possuem decisões e gates ainda condicionais. Sua presença
-nesta lista não significa que a Infrastructure esteja pronta ou autorizada a
-ser iniciada.
+O estado dos gates e dos adapters está no
+[estado operacional vigente](docs/vigentes/operacional/estado_atual.md). A
+presença de uma integração nesta lista não constitui autorização irrestrita
+para avançar no Roadmap.
 
 ## Preparação e testes
 
@@ -154,7 +154,7 @@ os exercícios iniciais foram preservados apenas no
 Antes de implementar:
 
 1. leia este README para compreender o projeto e sua finalidade;
-2. se estiver atuando como agente, leia [`.agents/AGENTS.md`](.agents/AGENTS.md)
+2. se estiver atuando como agente, leia [`AGENTS.md`](AGENTS.md)
    e [`.agents/README.md`](.agents/README.md);
 3. consulte [`docs/README.md`](docs/README.md) e siga sua ordem de leitura,
    classificação e precedência;
