@@ -14,6 +14,7 @@ use Psr\Log\InvalidArgumentException as InvalidArgumentExceptionPsr;
 use Semae\Pca\Application\Enums\AcaoProcessamentoUnidade;
 use Semae\Pca\Infrastructure\Observabilidade\AcumuladorEventosTecnicos;
 use Semae\Pca\Infrastructure\Observabilidade\RelogioEventosTecnicos;
+use Semae\Pca\Infrastructure\Pncp\Observabilidade\AcaoTecnicaPncp;
 
 final class AcumuladorEventosTecnicosTest extends TestCase
 {
@@ -226,6 +227,20 @@ final class AcumuladorEventosTecnicosTest extends TestCase
         $logger->warning('Ação desconhecida.', ['action' => 'CODIGO_FALHA_SEGURA']);
 
         $this->assertSame([], $logger->getEventos());
+    }
+
+    public function testDeveAceitarAcaoTecnicaPncpSemAmpliarEnumDaApplication(): void
+    {
+        [$logger] = $this->criarLogger();
+
+        $logger->info('Autenticação PNCP concluída.', [
+            'action' => AcaoTecnicaPncp::AUTENTICAR_PNCP->value,
+        ]);
+
+        $this->assertSame(
+            'AUTENTICAR_PNCP',
+            $logger->getEventos()[0]->paraEnvelope()['action']
+        );
     }
 
     public function testLoteDeveAdicionarDuracaoSomenteACopiaDoUltimoEnvelope(): void

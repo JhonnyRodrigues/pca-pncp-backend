@@ -28,11 +28,41 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.3 — Mapeamento e PlanoRepository está concluída.
 - A Sprint 5.4 — Estado operacional, contexto, auditoria e eventos técnicos
   está concluída.
-- A última sprint concluída é a Sprint 5.4.
-- A próxima sprint na ordem é a Sprint 5.5 — Transporte cURL, TLS e
-  autenticação.
-- A Sprint 5.5 não foi iniciada e este registro não constitui autorização
+- A Sprint 5.5 — Transporte cURL, TLS e autenticação está concluída.
+- A última sprint concluída é a Sprint 5.5.
+- A próxima sprint na ordem é a Sprint 5.6 — Serialização e payloads exatos.
+- A Sprint 5.6 não foi iniciada e este registro não constitui autorização
   implícita para iniciá-la.
+
+## Evidências da Sprint 5.5
+
+- Os ambientes PNCP são fechados em Homologação e Produção, associados somente
+  aos endpoints canônicos HTTPS; Request e usuário não fornecem URL livre.
+- A configuração exige limites positivos de payload e resposta, não admite
+  timeout infinito e aplica os valores iniciais de 5 segundos para conexão,
+  30 para login e leitura e 60 para escrita, com CA bundle opcional.
+- O transporte cURL nativo executa exatamente uma requisição por chamada,
+  verifica certificado e hostname, restringe o protocolo a HTTPS, desabilita
+  redirects e captura status, headers e corpo separadamente.
+- Payload acima do limite é recusado antes da execução; resposta acima do
+  limite é interrompida; falha de transporte permanece distinta de resposta
+  HTTP e não decide retry ou reconciliação.
+- A autenticação envia login e senha somente no corpo interno da requisição,
+  ocorre uma vez por execução e exige `Authorization: Bearer` em resposta 200.
+- O token permanece opaco em sessão sem contrato de serialização, sem leitura
+  de claims, persistência, renovação ou exposição em eventos e falhas.
+- `401`, `403`, falha de transporte e resposta de autenticação inválida geram
+  falha sistêmica sanitizada; a ação técnica `AUTENTICAR_PNCP` não amplia o
+  catálogo de ações da Application.
+- A suíte focada aprovou 48 testes e 185 asserções.
+- A regressão relacionada aprovou 288 testes e 1.171 asserções.
+- A suíte padrão aprovou 509 testes e 1.953 asserções.
+- A suíte contratual não real aprovou 24 testes e 51 asserções.
+- Lint dos 19 arquivos PHP envolvidos, autoload PSR-4 estrito e inspeções de
+  segurança, escopo e direção das dependências foram aprovados.
+
+Nenhum probe real Oracle ou PNCP e nenhuma integração Scriptcase foram
+executados durante a Sprint 5.5.
 
 ## Evidências da Sprint 5.4
 
@@ -112,8 +142,8 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   no código e não devem ser registrados neste documento.
 - A conexão ADOdb fornecida pelo Scriptcase permanece emprestada e nunca pode
   ser fechada pelo backend.
-- O transporte cURL, TLS e autenticação permanece no escopo ainda não iniciado
-  da Sprint 5.5.
+- A serialização e os payloads exatos permanecem no escopo ainda não iniciado
+  da Sprint 5.6.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos

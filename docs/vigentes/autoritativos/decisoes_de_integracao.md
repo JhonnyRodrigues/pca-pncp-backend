@@ -49,7 +49,7 @@ As principais revisões incrementais consolidadas aqui são:
 ## 3. Convenção de status
 
 | Status | Significado |
-|---|---|
+| --- | --- |
 | `Proposta` | Decisão ainda apresentada para análise |
 | `Em análise` | Alternativas e consequências ainda estão sendo avaliadas |
 | `Aceita` | Decisão aprovada e vigente |
@@ -65,7 +65,7 @@ sem serem apresentadas como decisões confirmadas.
 ## 4. Índice
 
 | ID | Título | Status | Gate principal |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `DI-001` | Contrato de publicação e sincronização do PNCP | Aceita | Compatibilidade de `ID_DEMANDA` como `numeroItem` |
 | `DI-002` | Autoridade, reconciliação e vínculo externo | Aceita | Contratos de identidade e ausência definitiva |
 | `DI-003` | Modos de publicação e unidade externa | Aceita | Persistência e validação da estratégia na DI-008 |
@@ -79,7 +79,7 @@ sem serem apresentadas como decisões confirmadas.
 
 ## 5. Decisões detalhadas
 
-## DI-001 — Contrato de publicação e sincronização do PNCP
+### DI-001 — Contrato de publicação e sincronização do PNCP
 
 - **Status:** Aceita.
 - **Contexto e problema:** o backend precisa representar corretamente a
@@ -89,7 +89,7 @@ sem serem apresentadas como decisões confirmadas.
 - **Fontes:** checkpoint principal, seção 10; checkpoint complementar, seção
   4.1; continuação 03, seções 2.4 e 3.15; manual PNCP 2.5 adotado na DI-009.
 
-### Decisão vigente
+#### Decisão vigente
 
 1. A publicação inicial cria o PCA com seu conjunto inicial de itens.
 2. A Retificação sincroniza no PCA ativo:
@@ -114,17 +114,17 @@ sem serem apresentadas como decisões confirmadas.
 14. `numeroControlePNCP` permanece metadado de integração fora do Aggregate
     enquanto não houver necessidade de negócio documentada.
 
-### Alternativas rejeitadas ou substituídas
+#### Alternativas rejeitadas ou substituídas
 
 | Alternativa | Situação | Motivo |
-|---|---|---|
+| --- | --- | --- |
 | Reenviar sempre o Plano completo | Rejeitada | Não representa as capacidades específicas de sincronização |
 | Gerar novo sequencial em toda Retificação | Rejeitada | Mudanças ordinárias preservam o PCA ativo |
 | Usar `PATCH` no fluxo normal | Rejeitada | Demanda homologada não sofre alteração material ordinária |
 | Manter sequencial em Plano e Demandas | Substituída | Fonte dupla possui cardinalidade inadequada e gera incoerência |
 | Criar mapeamento alternativo de item antecipadamente | Rejeitada | O contrato real ainda deve validar o ID existente |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - Nova versão interna não implica novo PCA.
 - Exclusão seguida de nova publicação gera novo sequencial.
@@ -132,31 +132,31 @@ sem serem apresentadas como decisões confirmadas.
 - Rejeição concreta de IDs com lacunas impede a produção até revisão da
   identidade externa.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 - Executar teste contratual de `ID_DEMANDA` como `numeroItem`.
 - Reabrir DI-001 e DI-002 se o PNCP rejeitar IDs únicos com lacunas.
 - Reabrir se o contrato oficial alterar criação, inclusão, exclusão ou limite
   de itens de modo incompatível.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-DEM-002`, `RN-DEM-003`, `RN-DEM-005`, `RN-DEM-006`, `RN-DEM-007`,
 `RN-DEM-008`, `RN-PLA-001`, `RN-PLA-004`, `RN-PLA-005`, `RN-PLA-006`,
 `RN-PUB-001`, `RN-PUB-002`, `RN-PUB-003`, `RN-PUB-005` e `RN-PUB-006`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Exige refatorar a decisão do Domain, o modelo do Plano e da Demanda, o contrato
 do `PlanoRepository` e os testes antes de criar os adapters PNCP e Oracle.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - Aceita originalmente com o conceito de sincronização incremental.
 - Revisada pela DI-008 para eliminar qualquer leitura ou escrita funcional do
   sequencial em Demandas.
 
-## DI-002 — Autoridade, reconciliação e vínculo externo
+### DI-002 — Autoridade, reconciliação e vínculo externo
 
 - **Status:** Aceita.
 - **Contexto e problema:** SGI, Oracle local e PNCP observam fatos diferentes.
@@ -166,7 +166,7 @@ do `PlanoRepository` e os testes antes de criar os adapters PNCP e Oracle.
 - **Fontes:** checkpoint principal, seção 11; checkpoint complementar, seções
   4.2, 4.3 e 7; continuação 03, seção 3.9.
 
-### Decisão vigente
+#### Decisão vigente
 
 1. O SGI governa o PCA com vínculo local conhecido e o conjunto desejado de
    Demandas homologadas vigentes.
@@ -190,10 +190,10 @@ do `PlanoRepository` e os testes antes de criar os adapters PNCP e Oracle.
 13. Não há compensação automática nem adoção automática do recurso externo
     após falha local.
 
-### Alternativas rejeitadas ou substituídas
+#### Alternativas rejeitadas ou substituídas
 
 | Alternativa | Situação | Motivo |
-|---|---|---|
+| --- | --- | --- |
 | Persistir baseline detalhado | Substituída | Pertencimento satisfaz o escopo V1 |
 | Comparar conteúdo automaticamente | Rejeitada na V1 | Não há contrato para conteúdo mutável ou `PATCH` |
 | Bloquear toda ausência de PCA conhecido | Substituída | Ausência definitiva permite recriação consciente |
@@ -201,7 +201,7 @@ do `PlanoRepository` e os testes antes de criar os adapters PNCP e Oracle.
 | Adotar PCA externo desconhecido | Rejeitada | Pode vincular publicação alheia ou legada |
 | Importar PNCP para mudar homologações internas | Rejeitada | Estado observado não cria decisão de negócio no SGI |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - A V1 pode não detectar mudança de conteúdo com identidade preservada.
 - `dataDesejada` alterada após publicação permanece limitação conhecida.
@@ -209,7 +209,7 @@ do `PlanoRepository` e os testes antes de criar os adapters PNCP e Oracle.
   DI-009.
 - Migração inicial de publicações legadas permanece procedimento assistido.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 - Reabrir se conteúdo mutável precisar ser sincronizado.
 - Reabrir se `PATCH` entrar no escopo.
@@ -217,23 +217,23 @@ do `PlanoRepository` e os testes antes de criar os adapters PNCP e Oracle.
 - Reabrir se o contrato real de consulta não permitir comprovar ausência
   definitiva.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-DEM-002`, `RN-DEM-004`, `RN-PUB-001`, `RN-PUB-002`, `RN-PUB-004` e
 `RN-PUB-006`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Remove da V1 a necessidade de baseline detalhado e orienta as portas de leitura
 PNCP, a política pura de reconciliação e os testes do UseCase.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - A versão inicial exigia baseline e bloqueava toda ausência de PCA conhecido.
 - A DI-007 consolidou a substituição por pertencimento e a distinção de
   ausência definitiva.
 
-## DI-003 — Modos de publicação e unidade externa
+### DI-003 — Modos de publicação e unidade externa
 
 - **Status:** Aceita.
 - **Contexto e problema:** o sistema pode publicar um PCA por UO ou consolidar
@@ -242,7 +242,7 @@ PNCP, a política pura de reconciliação e os testes do UseCase.
 - **Fontes:** checkpoint principal, seção 12; checkpoint complementar, seções
   4.4 e 8.5; continuação 03, seção 2.4.
 
-### Decisão vigente
+#### Decisão vigente
 
 1. A configuração corrente vem de:
    - `PUBLICAR_EM_UNICA_UASG`;
@@ -266,44 +266,44 @@ PNCP, a política pura de reconciliação e os testes do UseCase.
 10. Divergência posterior entre configuração corrente e estratégia adotada
     bloqueia e exige migração assistida.
 
-### Alternativas rejeitadas ou substituídas
+#### Alternativas rejeitadas ou substituídas
 
 | Alternativa | Situação | Motivo |
-|---|---|---|
+| --- | --- | --- |
 | Repository escolher o modo | Rejeitada | Estratégia pertence ao fluxo da Application |
 | Domain ler configuração | Rejeitada | Configuração externa não pertence ao Aggregate |
 | Aplicar default silencioso | Rejeitada | Pode alterar a topologia externa |
 | Consolidar apenas Planos alterados | Rejeitada | O PCA consolidado representa a união vigente completa |
 | Congelar após a primeira publicação confirmada | Substituída | Mantinha janela após confirmação externa e falha local |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - Mudar de modo altera a topologia externa e não é operação automática.
 - Exercícios futuros podem adotar estratégia diferente.
 - O modo consolidado não possui sucessos independentes por UO.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 - Validar persistência e coerência da estratégia conforme DI-008.
 - Reabrir se surgir requisito de migração automática entre topologias.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-CAD-005`, `RN-CAD-006`, `RN-PUB-003`, `RN-PUB-009`, `RN-PUB-010` e
 `RN-PUB-011`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Exige porta de estratégia na Application e testes dos dois modos antes da
 Infrastructure.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - Aceita com dois modos de publicação.
 - Momento do congelamento revisado de primeira publicação confirmada para
   primeira execução válida.
 
-## DI-004 — Transações, exclusividade e falhas parciais
+### DI-004 — Transações, exclusividade e falhas parciais
 
 - **Status:** Aceita.
 - **Contexto e problema:** Oracle e PNCP não compartilham transação. O fluxo
@@ -312,7 +312,7 @@ Infrastructure.
 - **Fontes:** checkpoint principal, seção 13; checkpoint complementar, seção
   8.2; continuação 03, seções 3.11 e 3.12.
 
-### Decisão vigente
+#### Decisão vigente
 
 1. Transação Oracle garante apenas atomicidade local.
 2. Uma única execução pode processar a mesma unidade externa por vez.
@@ -340,43 +340,43 @@ Infrastructure.
 16. No modo consolidado, toda falha pertence à unidade conjunta.
 17. Não haverá particionamento acima de 1000 itens na V1.
 
-### Alternativas rejeitadas
+#### Alternativas rejeitadas
 
 | Alternativa | Motivo |
-|---|---|
+| --- | --- |
 | Tratar Oracle e PNCP como transação distribuída | Não existe rollback externo coordenado |
 | Repetir escrita incerta | Pode duplicar ou contradizer efeito já confirmado |
 | Compensar automaticamente | Pode destruir estado válido sem certeza suficiente |
 | Reconciliar em loop | Cria execução sem limite e retém locks indefinidamente |
 | Processar a mesma unidade sem exclusividade | Permite duas escritas concorrentes sobre o mesmo PCA |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - Locks Oracle permanecem durante chamadas HTTP.
 - Falha PNCP confirmada/Oracle falhou exige recuperação consciente.
 - O desenho pressupõe baixo volume e baixa concorrência.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 - Revisar se volume, concorrência ou duração de locks aumentarem.
 - Revisar se surgir infraestrutura durável de coordenação ou idempotência.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-PUB-009` e `RN-PUB-010`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Define a porta de unidade de trabalho, os cenários de falha do UseCase e o
 mecanismo de exclusividade concretizado na DI-008.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - Aceita a permanência da transação Oracle durante HTTP como trade-off da V1.
 - A DI-008 definiu o lock concreto; a DI-009 refinou classificação e ordem das
   escritas.
 
-## DI-005 — Estado operacional e confirmação versionada
+### DI-005 — Estado operacional e confirmação versionada
 
 - **Status:** Aceita.
 - **Contexto e problema:** uma publicação externa pode continuar ativa enquanto
@@ -385,7 +385,7 @@ mecanismo de exclusividade concretizado na DI-008.
 - **Fontes:** checkpoint principal, seção 14; checkpoint complementar, seções
   4.5 e 8.7.
 
-### Decisão vigente
+#### Decisão vigente
 
 1. Existência de PCA externo e confirmação da versão vigente são fatos
    distintos.
@@ -408,44 +408,44 @@ mecanismo de exclusividade concretizado na DI-008.
 14. No consolidado, confirmam-se conjuntamente as versões vigentes pendentes
     participantes.
 
-### Alternativas rejeitadas
+#### Alternativas rejeitadas
 
 | Alternativa | Motivo |
-|---|---|
+| --- | --- |
 | Inferir estado apenas por `DATA_PUBLICACAO` | Mistura existência externa e convergência da versão |
 | Mutar o Aggregate depois da confirmação | O Plano é fotografia do estado carregado |
 | Recriar o Aggregate apenas para persistir | Não agrega comportamento ao fluxo |
 | Usar setter genérico | Não expressa a intenção de confirmação |
 | Sequencial presente significa PCA ativo | Estado `EXCLUIDO` preserva sequencial histórico |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - A projeção operacional precisa representar explicitamente o estado.
 - Confirmação usa instante Oracle na mesma transação da auditoria.
 - `numeroControlePNCP` continua fora do Aggregate na V1.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 - Validar coerência física e constraints da projeção na DI-008.
 - Reabrir se surgir requisito de histórico estruturado de múltiplas instâncias
   externas.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-PLA-005`, `RN-PLA-007`, `RN-PUB-001`, `RN-PUB-002`, `RN-PUB-003`,
 `RN-PUB-004`, `RN-PUB-005`, `RN-PUB-007` e `RN-PUB-008`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Exige refatorar o estado do Domain e o comando de confirmação antes de
 completar o UseCase.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - Aceita a separação entre publicação externa e confirmação versionada.
 - DI-008 definiu sua projeção física corrente em `PAC_PLANOS`.
 
-## DI-006 — Auditoria e procedimentos PNCP
+### DI-006 — Auditoria e procedimentos PNCP
 
 - **Status:** Aceita.
 - **Contexto e problema:** `PAC_HISTORICOS` deve registrar fatos de negócio sem
@@ -453,7 +453,7 @@ completar o UseCase.
   confirmadas.
 - **Fontes:** checkpoint complementar, seção 5.
 
-### Decisão vigente
+#### Decisão vigente
 
 1. `PAC_HISTORICOS` contém somente fatos concluídos, observados e confirmados.
 2. Não geram histórico:
@@ -496,10 +496,10 @@ completar o UseCase.
     observabilidade técnica; a segunda, somente fatos de negócio confirmados.
 18. O logging técnico não cria nem utiliza uma segunda conexão Oracle.
 
-### Alternativas rejeitadas
+#### Alternativas rejeitadas
 
 | Alternativa | Motivo |
-|---|---|
+| --- | --- |
 | Registrar tentativas e falhas no histórico | Mistura fato de negócio e telemetria |
 | Registrar `NENHUMA_ACAO` | Não houve transição de negócio |
 | Um histórico por UO no consolidado | Multiplica artificialmente uma operação externa |
@@ -507,7 +507,7 @@ completar o UseCase.
 | Consultar dinamicamente três códigos conhecidos | Abstração especulativa |
 | Auditar fora da transação da confirmação | Permite estado local contraditório |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - O rollback do negócio não remove os eventos já acumulados em memória.
 - A persistência técnica só poderá ocorrer depois que a futura fachada devolver
@@ -517,29 +517,29 @@ completar o UseCase.
   autoridade.
 - `ID_HISTORICO` permanece chave técnica.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 - Validar insert de auditoria na mesma sessão e transação da confirmação.
 - Reabrir se o catálogo de procedimentos deixar de ser estável ou configurável
   por requisito real.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-CAD-003`, `RN-CAD-004`, `RN-AUD-001`, `RN-AUD-002`, `RN-AUD-003`,
 `RN-AUD-004` e `RN-AUD-005`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Substitui o Repository provisório do Domain por porta da Application e exige
 refatorar o modelo de auditoria antes da Infrastructure.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - Aceita como primeira decisão do checkpoint complementar.
 - Remove a classificação anterior de histórico como Entity apenas por possuir
   ID Oracle.
 
-## DI-007 — Portas necessárias na Application
+### DI-007 — Portas necessárias na Application
 
 - **Status:** Aceita.
 - **Contexto e problema:** o UseCase completo precisa autenticar, observar,
@@ -547,7 +547,7 @@ refatorar o modelo de auditoria antes da Infrastructure.
   tecnologias externas nas camadas internas.
 - **Fontes:** checkpoint complementar, seções 6 e 7.
 
-### Decisão vigente
+#### Decisão vigente
 
 As portas e contratos são definidos por capacidades:
 
@@ -582,10 +582,10 @@ As portas e contratos são definidos por capacidades:
     - `FALHA_RECONCILIAVEL`;
     - `BLOQUEADO`.
 
-### Alternativas rejeitadas
+#### Alternativas rejeitadas
 
 | Alternativa | Motivo |
-|---|---|
+| --- | --- |
 | Gateway genérico com HTTP/JSON/JWT | Vaza tecnologia para a Application |
 | Porta única “sincronizar” | Esconde capacidades e incerteza das escritas |
 | Adoção automática de candidato externo | Pode vincular publicação desconhecida |
@@ -595,7 +595,7 @@ As portas e contratos são definidos por capacidades:
 | Consultar a justificativa histórica pelo `PlanoRepository` | Acopla ao Aggregate uma projeção distinta da fotografia vigente |
 | Porta proprietária de logging | PSR-3 já atende ao contrato |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - Interfaces internas não usam URL, JSON, HTTP, SQL, ADOdb, OCI8 ou macros.
 - Contratos devem ser demonstrados por testes do consumidor com doubles.
@@ -606,26 +606,26 @@ As portas e contratos são definidos por capacidades:
 - Falhas sistêmicas permanecem no resultado global, não em resultado unitário
   fabricado.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 - Demonstrar os contratos pelo UseCase completo com mocks.
 - Reabrir somente se uma capacidade real não puder ser expressa pelos contratos
   aprovados.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-DEM-003`, `RN-DEM-004` e `RN-PUB-006`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Define o gate para completar a Application antes de iniciar adapters concretos.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - Aceita depois da definição de auditoria.
 - Incorporou a revisão da DI-002 para reconciliação sem baseline.
 
-## DI-008 — Mecanismo Oracle
+### DI-008 — Mecanismo Oracle
 
 - **Status:** Aceita condicionalmente.
 - **Contexto e problema:** é necessário compartilhar conexão, transação, lock,
@@ -633,7 +633,7 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
   Domain ou Application com ADOdb, OCI8 ou schema físico.
 - **Fontes:** checkpoint complementar, seção 8; continuação 03, seção 2.
 
-### Decisão vigente
+#### Decisão vigente
 
 #### Conexão e transação
 
@@ -696,10 +696,10 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 7. Plano vazio deve ser reconstruível.
 8. Cada UO participante exige cadastro ativo único e UASG preenchida.
 
-### Alternativas rejeitadas
+#### Alternativas rejeitadas
 
 | Alternativa | Motivo |
-|---|---|
+| --- | --- |
 | OCI8 próprio como primeira escolha | A sessão real do host pode ser reutilizada |
 | PDO_OCI como fallback | Foi escolhido um único fallback explícito |
 | Usar `_connectionID` diretamente | Acopla a detalhe interno do ADOdb |
@@ -712,7 +712,7 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 | Fonte dupla do sequencial | Cria inconsistência e cardinalidade errada |
 | Reconstruir tudo antes do lock | A fotografia pode envelhecer antes da exclusividade |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - `PAC_PLANOS` acumula fisicamente versionamento e projeção, mas os contratos
   internos permanecem separados.
@@ -720,7 +720,7 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
   decisão.
 - A aceitação arquitetural não substitui testes no ambiente real.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 #### Gate ADOdb/OCI8
 
@@ -745,24 +745,24 @@ decisões.
 - coerência da projeção;
 - datas e decimais.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-CAD-005`, `RN-CAD-006`, `RN-DEM-009`, `RN-PLA-001`, `RN-PLA-002`,
 `RN-PLA-003`, `RN-PLA-004`, `RN-PLA-006`, `RN-PLA-007`, `RN-PUB-008` e
 `RN-PUB-011`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Libera a implementação Oracle somente depois do gate da Application e dos
 testes contratuais aplicáveis.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - Iniciada parcialmente no checkpoint complementar.
 - Encerrada condicionalmente na continuação 03 com fotografia, versão vigente,
   UASG, projeção e chave de exclusividade definidas.
 
-## DI-009 — Transporte HTTP
+### DI-009 — Transporte HTTP
 
 - **Status:** Aceita condicionalmente.
 - **Contexto e problema:** o adapter PNCP precisa tratar autenticação, leitura,
@@ -771,7 +771,7 @@ testes contratuais aplicáveis.
 - **Fontes:** continuação 03, seção 3; manual PNCP 2.5 e OpenAPI adotados
   durante a decisão.
 
-### Decisão vigente
+#### Decisão vigente
 
 #### Contrato e transporte
 
@@ -896,10 +896,10 @@ testes contratuais aplicáveis.
 6. Estado externo é observado antes de escrita.
 7. Limpeza final é best-effort, com diagnóstico de resíduos.
 
-### Alternativas rejeitadas
+#### Alternativas rejeitadas
 
 | Alternativa | Motivo |
-|---|---|
+| --- | --- |
 | Biblioteca HTTP adicional | Não há necessidade de nova dependência |
 | URL livre fornecida por Request | Permite destino arbitrário |
 | Desabilitar TLS | Viola segurança do contrato |
@@ -911,7 +911,7 @@ testes contratuais aplicáveis.
 | Usar `float` | Perde exatidão decimal |
 | Fragmento JSON arbitrário | Rompe segurança da serialização |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - Alguns parâmetros permanecem configuráveis sem default aprovado:
   - tamanho máximo de resposta;
@@ -923,7 +923,7 @@ testes contratuais aplicáveis.
 - O manual não documenta claramente todos os formatos de ausência.
 - A decisão permanece condicionada ao ambiente real.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 - validar `ext-curl`, OpenSSL e CA bundle no Scriptcase;
 - corrigir carregamento duplicado de cURL no WSL;
@@ -934,22 +934,22 @@ testes contratuais aplicáveis.
   alfanumérico, IDs com lacunas e decimais exatos;
 - reabrir somente o contrato incompatível com a evidência real.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-CAD-001`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Libera os adapters HTTP e PNCP somente depois da Application completa com mocks
 e da execução dos gates de ambiente e contrato.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - Iniciada e encerrada condicionalmente na continuação 03.
 - Incorpora os refinamentos de escrita incerta e ausência definitiva das
   decisões anteriores.
 
-## DI-010 — Composition Root e Scriptcase
+### DI-010 — Composition Root e Scriptcase
 
 - **Status:** Aceita condicionalmente.
 - **Contexto e problema:** o backend deve ser consumido pelo Scriptcase sem
@@ -957,7 +957,7 @@ e da execução dos gates de ambiente e contrato.
   Blank.
 - **Fontes:** continuação 03, seção 4.
 
-### Decisão vigente
+#### Decisão vigente
 
 #### Fronteira e composição
 
@@ -1061,10 +1061,10 @@ e da execução dos gates de ambiente e contrato.
 3. Perfis e segredos permanecem externos ao artefato.
 4. Scriptcase conhece somente autoloader e fachada pública.
 
-### Alternativas rejeitadas
+#### Alternativas rejeitadas
 
 | Alternativa | Motivo |
-|---|---|
+| --- | --- |
 | Composition Root no Scriptcase | Expõe estrutura interna e wiring ao host |
 | Container ou Service Locator | Desnecessário para o grafo atual |
 | Integração HTTP entre Blank e backend | O consumo aprovado é em processo |
@@ -1077,7 +1077,7 @@ e da execução dos gates de ambiente e contrato.
 | Presenter gerar HTML ou JSON | Mistura ViewModel com renderização |
 | Composer em produção | Release deve ser autocontida |
 
-### Consequências e limitações
+#### Consequências e limitações
 
 - A aplicação Blank aguarda o resultado final.
 - A fronteira pública permanece pequena e estável.
@@ -1086,7 +1086,7 @@ e da execução dos gates de ambiente e contrato.
 - Perfis precisam ser provisionados externamente ao release.
 - A decisão depende de comportamento real do Scriptcase.
 
-### Gates e critérios de reabertura
+#### Gates e critérios de reabertura
 
 - testar a fachada no Scriptcase real;
 - concluir o gate da conexão emprestada;
@@ -1095,16 +1095,16 @@ e da execução dos gates de ambiente e contrato.
 - executar smoke test do pacote autocontido em homologação;
 - reabrir apenas o contrato incompatível com o ambiente real.
 
-### Regras de negócio relacionadas
+#### Regras de negócio relacionadas
 
 `RN-CAD-001`, `RN-CAD-002` e `RN-AUD-004`.
 
-### Impacto no roadmap
+#### Impacto no roadmap
 
 Orienta Presentation, Composition Root final, integração com a Blank e
 distribuição, sem antecipar essas etapas durante a criação deste documento.
 
-### Histórico de evolução
+#### Histórico de evolução
 
 - Iniciada e encerrada condicionalmente na continuação 03.
 - Confirma o Composition Root no backend e remove ambiente, credenciais e
@@ -1116,7 +1116,7 @@ As premissas abaixo são históricas e NÃO DEVEM ser implementadas como decisõ
 vigentes.
 
 | Premissa anterior | Decisão vigente | Referência |
-|---|---|---|
+| --- | --- | --- |
 | Retificação reenvia o Plano completo | Sincroniza inclusões e exclusões no PCA ativo | DI-001 |
 | Baseline detalhado é obrigatório | V1 reconcilia somente pertencimento | DI-002 |
 | PCA conhecido ausente sempre bloqueia | Recriação somente após ausência definitiva | DI-002 |

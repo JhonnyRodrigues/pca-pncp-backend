@@ -9,6 +9,7 @@ use Psr\Log\AbstractLogger;
 use Psr\Log\InvalidArgumentException as InvalidArgumentExceptionPsr;
 use Psr\Log\LogLevel;
 use Semae\Pca\Application\Enums\AcaoProcessamentoUnidade;
+use Semae\Pca\Infrastructure\Pncp\Observabilidade\AcaoTecnicaPncp;
 use Stringable;
 
 final class AcumuladorEventosTecnicos extends AbstractLogger
@@ -147,13 +148,24 @@ final class AcumuladorEventosTecnicos extends AbstractLogger
         };
     }
 
-    private function normalizarAcao(mixed $acao): ?AcaoProcessamentoUnidade
+    private function normalizarAcao(mixed $acao): ?string
     {
         if ($acao instanceof AcaoProcessamentoUnidade) {
-            return $acao;
+            return $acao->value;
         }
 
-        return is_string($acao) ? AcaoProcessamentoUnidade::tryFrom(trim($acao)) : null;
+        if ($acao instanceof AcaoTecnicaPncp) {
+            return $acao->value;
+        }
+
+        if (!is_string($acao)) {
+            return null;
+        }
+
+        $acao = trim($acao);
+
+        return AcaoProcessamentoUnidade::tryFrom($acao)?->value
+            ?? AcaoTecnicaPncp::tryFrom($acao)?->value;
     }
 
     /** @return array<string, mixed> */

@@ -6,7 +6,6 @@ namespace Semae\Pca\Infrastructure\Observabilidade;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Semae\Pca\Application\Enums\AcaoProcessamentoUnidade;
 
 final class EventoTecnico
 {
@@ -23,7 +22,7 @@ final class EventoTecnico
         private readonly string $correlationId,
         private readonly string $environment,
         private readonly string $module,
-        private readonly AcaoProcessamentoUnidade $action,
+        private readonly string $action,
         private readonly string $message,
         private readonly array $error,
         private readonly array $context,
@@ -67,7 +66,7 @@ final class EventoTecnico
             'environment' => $this->environment,
             'system' => self::SISTEMA,
             'module' => $this->module,
-            'action' => $this->action->value,
+            'action' => $this->action,
             'message' => $this->message,
             'error' => $this->error,
             'context' => $this->context,

@@ -34,7 +34,7 @@ históricos, investigações e prompts antigos não definem o significado vigent
 ## 2. Termos de negócio e planejamento
 
 | Termo | Definição curta | Fonte |
-|---|---|---|
+| --- | --- | --- |
 | Ano de Execução | Exercício ao qual o planejamento se aplica. | `RN-CAD-002`; Modelo §5.2 |
 | Cancelamento | Retirada formal de uma Demanda do conjunto vigente. | `RN-DEM-005`, `RN-DEM-006`, `RN-DEM-008` |
 | Consolidação | Ato anterior à homologação que reúne Demandas autorizadas e bloqueia alterações ordinárias. | `RN-FLX-003` |
@@ -57,7 +57,7 @@ históricos, investigações e prompts antigos não definem o significado vigent
 ## 3. Termos de modelagem de domínio
 
 | Termo | Definição curta | Fonte |
-|---|---|---|
+| --- | --- | --- |
 | Aggregate | Fronteira de consistência que protege invariantes relacionadas. | Modelo §7; Arquitetura §8 |
 | Aggregate Root | Entity que controla o acesso e a consistência de um Aggregate; neste projeto, `Plano`. | Modelo §7; Arquitetura §8 |
 | Entity | Conceito reconhecido por identidade contínua, como `Demanda`. | Modelo §6; Arquitetura §8 |
@@ -72,7 +72,7 @@ históricos, investigações e prompts antigos não definem o significado vigent
 ## 4. Termos de publicação e integração
 
 | Termo | Definição curta | Fonte |
-|---|---|---|
+| --- | --- | --- |
 | Ausência definitiva | Ausência externa confirmada pelos critérios de observação aprovados, permitindo tratar o PCA conhecido como inexistente. | `DI-002`, `DI-009` |
 | Baseline de conteúdo | Representação local detalhada do último conteúdo externo cuja convergência foi confirmada; não é mantida pela V1 da integração. | `DI-002` |
 | Convergência | Compatibilidade comprovada entre o conjunto desejado e o estado publicado observado. | `RN-PUB-004`; `DI-002`, `DI-004` |
@@ -106,7 +106,7 @@ históricos, investigações e prompts antigos não definem o significado vigent
 ## 5. Termos de auditoria
 
 | Termo | Definição curta | Fonte |
-|---|---|---|
+| --- | --- | --- |
 | Auditoria de negócio | Registro de uma operação concluída e confirmada, distinto de diagnóstico técnico. | `RN-AUD-001`; `DI-006` |
 | Confirmação de sincronização | Registro versionado de que a convergência daquela versão foi comprovada. | `RN-PLA-007`; `DI-005` |
 | Histórico de procedimento | Fato imutável que registra uma ação auditável concluída e confirmada. | `RN-AUD-001`, `RN-AUD-003`; Modelo §10 |
@@ -120,7 +120,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 ## 6. Termos arquiteturais
 
 | Termo | Definição curta | Fonte |
-|---|---|---|
+| --- | --- | --- |
 | Adapter | Implementação concreta de uma Port para um mecanismo externo. | Arquitetura §§5 e 8 |
 | Application | Camada de casos de uso, orquestração e contratos necessários ao fluxo. | Arquitetura §4.2; `DI-007` |
 | Composition Root | Ponto do backend que cria o grafo e injeta dependências concretas. | Arquitetura §7; `DI-010` |
@@ -144,7 +144,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 ## 7. Termos de documentação e planejamento
 
 | Termo | Definição curta | Fonte |
-|---|---|---|
+| --- | --- | --- |
 | ADR-lite | Registro conciso de contexto, decisão, alternativas, consequências e gates. | `DI`; Docs |
 | Apoio | Documento que explica e contextualiza sem criar norma concorrente. | Docs |
 | Autoritativo | Documento que constitui fonte oficial para seu escopo declarado. | Docs |
@@ -162,7 +162,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 ## 8. Distinções essenciais
 
 | Não confundir | Distinção | Fonte |
-|---|---|---|
+| --- | --- | --- |
 | Plano × versão | Identidade lógica versus marco homologado. | `RN-PLA-001` a `RN-PLA-003`; Modelo §7 |
 | Fotografia vigente × versão de origem | Conjunto atual versus momento em que a Demanda entrou no planejamento. | `RN-PLA-004` |
 | UO × Lotação × UASG | Responsabilidade pelo Plano, autoria organizacional e unidade compradora. | `RN-CAD-004`, `RN-CAD-005` |

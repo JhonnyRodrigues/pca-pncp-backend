@@ -13,7 +13,7 @@ fazem parte do fluxo executável.
 ### Entities, Facts e Policy
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Entities/Demanda.php` | Representa uma necessidade homologada com identidade, situação e dados exatos. |
 | `Entities/Plano.php` | Aggregate Root da fotografia homologada de uma UO e exercício. |
 | `Entities/UnidadeOrcamentaria.php` | Entidade organizacional que relaciona Lotação e UASG. |
@@ -25,7 +25,7 @@ fazem parte do fluxo executável.
 ### Value Objects
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `ValueObjects/AnoExecucao.php` | Valida o exercício corrente ou seguinte. |
 | `ValueObjects/Cnpj.php` | Normaliza e valida CNPJ alfanumérico. |
 | `ValueObjects/DecimalExato.php` | Preserva uma string decimal válida sem `float`. |
@@ -42,7 +42,7 @@ fazem parte do fluxo executável.
 ### Enums e Exceptions
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Enums/DecisaoProcessamentoPlano.php` | Nomeia intenção ainda não comprovada: PUBLICAR, RETIFICAR, EXCLUIR_PCA e NENHUMA_ACAO. |
 | `Enums/EstadoPublicacao.php` | Nomeia os estados operacionais da publicação. |
 | `Enums/ProcedimentoPublicacaoPca.php` | Classificação histórica de uma ação comprovada. Cataloga os procedimentos auditáveis. |
@@ -58,7 +58,7 @@ fazem parte do fluxo executável.
 ### Use case e colaboradores
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `UseCases/PublicarPca/PublicarPcaRequest.php` | Entrada tipada com CNPJ e exercício já válidos. |
 | `UseCases/PublicarPca/PublicarPcaUseCase.php` | Orquestrador global e produtor da Response final. |
 | `UseCases/PublicarPca/PreparadorExecucaoPublicacaoPca.php` | Resolve contexto, estratégia, unidades e sessão PNCP. |
@@ -74,7 +74,7 @@ fazem parte do fluxo executável.
 ### Commands e Contracts
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Commands/ComandoPublicarPca.php` | Ordem de criação do PCA com a fotografia completa. |
 | `Commands/ComandoInserirItensPca.php` | Ordem de inclusão de Demandas no PCA ativo. |
 | `Commands/ComandoExcluirItensPca.php` | Ordem de exclusão de itens com justificativa. |
@@ -86,7 +86,7 @@ fazem parte do fluxo executável.
 ### Ports
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Ports/AutenticadorPncp.php` | Autentica uma vez e devolve sessão opaca. |
 | `Ports/ContextoUsuarioPort.php` | Resolve Representante e Lotação conjuntamente. |
 | `Ports/EscritorPncp.php` | Publica e executa inclusões ou exclusões no PNCP. |
@@ -100,7 +100,7 @@ fazem parte do fluxo executável.
 ### Value Objects de orquestração
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `ValueObjects/ChaveUnidadeTrabalho.php` | Identifica o alvo da exclusividade transacional: `ESTRATEGIA_ANUAL` para a estratégia de um exercício ou `UNIDADE_EXTERNA` para uma publicação específica. |
 | `ValueObjects/ContextoFinalizacaoProcessamentoUnidade.php` | Reúne fatos necessários à observação e persistência finais. |
 | `ValueObjects/ContextoUnidadeComDecisao.php` | Transporta contexto exclusivo, PCA observado e decisão. |
@@ -115,7 +115,7 @@ fazem parte do fluxo executável.
 ### Results
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Results/PublicarPcaResponse.php` | Resultado global, contagens, resultados unitários e correlação. |
 | `Results/DesfechoProcessamentoUnidade.php` | União entre resultado unitário e falha sistêmica. |
 | `Results/ResultadoProcessamentoUnidade.php` | Resultado terminal conhecido de uma unidade. |
@@ -138,7 +138,7 @@ fazem parte do fluxo executável.
 ### Enums da Application
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Enums/AcaoProcessamentoUnidade.php` | Vocabulário operacional estável das ações executadas durante a finalização de uma unidade. |
 | `Enums/EscopoUnidadeTrabalho.php` | Distingue estratégia anual e unidade externa. |
 | `Enums/ModoPublicacao.php` | Distingue individual e consolidado. |
@@ -163,21 +163,21 @@ fazem parte do fluxo executável.
 ### Oracle — conexão ADOdb emprestada
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Oracle/Adodb/ConexaoAdodbEmprestada.php` | Encapsula a sessão ADOdb fornecida pelo host, prepara binds e controla seu estado transacional sem fechar a conexão. |
 | `Oracle/Adodb/FalhaOracleException.php` | Transporta somente a mensagem segura e o eventual código `ORA-*`. |
 
 ### Oracle — unidade de trabalho e locks
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Oracle/Transacao/MapeamentoFisicoAncorasOracle.php` | Valida os identificadores físicos e o alvo anual das âncoras permanentes. |
 | `Oracle/Transacao/OracleUnidadeDeTrabalhoAdapter.php` | Implementa transação local, provisionamento DML idempotente e lock `FOR UPDATE NOWAIT`. |
 
 ### Oracle — estratégia anual
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Oracle/Estrategia/MapeamentoConfiguracaoEstrategiaOracle.php` | Declara tabela, colunas, chaves e literais físicos da configuração corrente. |
 | `Oracle/Estrategia/MapeamentoPlanosEstrategiaOracle.php` | Declara a projeção física da estratégia adotada nas linhas de Plano. |
 | `Oracle/Estrategia/MapeamentoCadastroUasgOracle.php` | Declara a relação com UO e o lookup ativo e único de código e descrição da UASG. |
@@ -187,7 +187,7 @@ fazem parte do fluxo executável.
 ### Oracle — Planos
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Oracle/Plano/MapeamentoPlanosOracle.php` | Declara tabela e colunas físicas necessárias à versão e confirmação dos Planos. |
 | `Oracle/Plano/MapeamentoDemandasOracle.php` | Declara a relação de origem e os campos físicos necessários à reconstrução das Demandas. |
 | `Oracle/Plano/MapeamentoUnidadesOrcamentariasOracle.php` | Declara identidade, Lotação, UASG, vínculo com Plano e condição de cadastro ativo. |
@@ -198,7 +198,7 @@ fazem parte do fluxo executável.
 ### Oracle — estado operacional
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Oracle/EstadoOperacional/MapeamentoEstadoOperacionalOracle.php` | Declara tabela, colunas e literais da projeção operacional em Planos. |
 | `Oracle/EstadoOperacional/EstadoOperacionalOracleInvalidoException.php` | Sinaliza internamente projeções físicas ausentes, parciais ou divergentes. |
 | `Oracle/EstadoOperacional/OracleEstadoOperacionalPublicacaoAdapter.php` | Consulta, propaga e relê o estado operacional na transação compartilhada. |
@@ -206,7 +206,7 @@ fazem parte do fluxo executável.
 ### Oracle — contexto do usuário
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Oracle/Contexto/MapeamentoRepresentantesOracle.php` | Declara o cadastro físico usado para resolver o Representante ativo pelo login. |
 | `Oracle/Contexto/MapeamentoLotacoesUsuarioOracle.php` | Declara vínculos e cadastro usados para resolver a Lotação vigente e ativa. |
 | `Oracle/Contexto/DadosContextoUsuarioOracleInvalidosException.php` | Sinaliza internamente dados físicos de identidade ou Lotação inválidos. |
@@ -215,27 +215,50 @@ fazem parte do fluxo executável.
 ### Oracle — auditoria
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Oracle/Auditoria/MapeamentoHistoricosOracle.php` | Declara tabela e colunas físicas dos fatos em `PAC_HISTORICOS`. |
 | `Oracle/Auditoria/OracleRegistroAuditoriaAdapter.php` | Insere fatos append-only com instante Oracle na transação compartilhada. |
+
+### PNCP — transporte HTTP
+
+| Arquivo | Função |
+| --- | --- |
+| `Pncp/Http/AmbientePncp.php` | Restringe o destino aos ambientes oficiais de Homologação e Produção. |
+| `Pncp/Http/ConfiguracaoTransportePncp.php` | Valida limites, timeouts e o caminho opcional do CA bundle. |
+| `Pncp/Http/RequisicaoHttpPncp.php` | Representa método, caminho relativo, headers, corpo e timeout de uma requisição interna. |
+| `Pncp/Http/RespostaHttpPncp.php` | Mantém status, headers e corpo da resposta separados e validados. |
+| `Pncp/Http/TransporteHttpPncp.php` | Define a fronteira interna usada pelos adapters PNCP para enviar uma requisição. |
+| `Pncp/Http/TransporteCurlPncp.php` | Aplica HTTPS, TLS, hostname, limites e timeouts e executa uma única chamada pelo executor cURL. |
+| `Pncp/Http/ExecutorCurlPncp.php` | Isola a execução cURL para permitir testes determinísticos sem rede. |
+| `Pncp/Http/ExecutorCurlNativoPncp.php` | Executa a chamada com a extensão cURL nativa e captura seu resultado técnico. |
+| `Pncp/Http/ResultadoExecucaoCurlPncp.php` | Transporta sucesso técnico, errno, status HTTP e resultado da verificação TLS. |
+| `Pncp/Http/FalhaTransportePncpException.php` | Representa falhas técnicas do transporte com códigos e mensagens sanitizados. |
+
+### PNCP — autenticação e observabilidade
+
+| Arquivo | Função |
+| --- | --- |
+| `Pncp/Autenticacao/AutenticadorPncpAdapter.php` | Implementa autenticação única, extrai o Bearer da resposta e traduz falhas para o resultado da Application. |
+| `Pncp/Autenticacao/SessaoPncpAutenticada.php` | Mantém o token opaco em uma implementação concreta do contrato de sessão. |
+| `Pncp/Observabilidade/AcaoTecnicaPncp.php` | Cataloga a ação técnica de autenticação sem ampliar o enum operacional da Application. |
 
 ### Observabilidade em memória
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `Observabilidade/NivelEventoTecnico.php` | Normaliza os níveis PSR-3 para o vocabulário técnico exportável. |
 | `Observabilidade/RelogioEventosTecnicos.php` | Contrato mínimo de relógio para timestamp e duração da execução. |
 | `Observabilidade/RelogioSistemaEventosTecnicos.php` | Implementação do relógio baseada no tempo do sistema. |
-| `Observabilidade/EventoTecnico.php` | Evento técnico imutável com envelope estruturado e sanitizado. |
+| `Observabilidade/EventoTecnico.php` | Evento técnico imutável com ação normalizada e envelope estruturado e sanitizado. |
 | `Observabilidade/LoteEventosTecnicos.php` | Cópia exportável dos envelopes com duração somente no último metadata. |
-| `Observabilidade/AcumuladorEventosTecnicos.php` | Logger PSR-3 que produz, sanitiza e acumula eventos ordenados sem I/O. |
+| `Observabilidade/AcumuladorEventosTecnicos.php` | Logger PSR-3 que valida ações tipadas, sanitiza e acumula eventos ordenados sem I/O. |
 
 ## 4. Testes
 
 ### Domain
 
 | Arquivo | Demonstração principal |
-|---|---|
+| --- | --- |
 | `Entities/DemandaTest.php` | Invariantes e valores exatos da Demanda. |
 | `Entities/PlanoTest.php` | Identidade, fotografia, versão e confirmação do Aggregate. |
 | `Entities/UnidadeOrcamentariaTest.php` | Invariantes da UO. |
@@ -257,7 +280,7 @@ fazem parte do fluxo executável.
 ### Application — contratos e dados
 
 | Arquivo | Demonstração principal |
-|---|---|
+| --- | --- |
 | `Commands/ComandosEscritaPncpTest.php` | Invariantes de todos os comandos externos. |
 | `Contracts/FinalizadorProcessamentoUnidadeTest.php` | Consumo do contrato de finalização. |
 | `Ports/ContextoAuditoriaEstadoOperacionalPortsTest.php` | Contratos de contexto, estado e auditoria. |
@@ -287,7 +310,7 @@ fazem parte do fluxo executável.
 ### Application — fluxo
 
 | Arquivo | Demonstração principal |
-|---|---|
+| --- | --- |
 | `UseCases/PublicarPca/PublicarPcaRequestTest.php` | Entrada mínima e imutável. |
 | `UseCases/PublicarPca/PublicarPcaUseCaseTest.php` | Agregação e estados globais. |
 | `UseCases/PublicarPca/PreparadorExecucaoPublicacaoPcaTest.php` | Contexto, estratégia, transação anual e autenticação. |
@@ -302,7 +325,7 @@ fazem parte do fluxo executável.
 ### Infrastructure — Oracle
 
 | Arquivo | Demonstração principal |
-|---|---|
+| --- | --- |
 | `Infrastructure/Oracle/Adodb/ConexaoAdodbEmprestadaTest.php` | Binds, leituras, comandos, transação, falhas seguras e ausência de fechamento. |
 | `Infrastructure/Oracle/Transacao/MapeamentoFisicoAncorasOracleTest.php` | Validação allowlisted do plano físico das âncoras. |
 | `Infrastructure/Oracle/Transacao/OracleUnidadeDeTrabalhoAdapterTest.php` | Provisionamento, chaves, contenção, commit, rollback e ausência de DDL. |
@@ -318,16 +341,24 @@ fazem parte do fluxo executável.
 | `Infrastructure/Oracle/Auditoria/MapeamentoHistoricosOracleTest.php` | Obrigatoriedade e allowlist do histórico de procedimentos. |
 | `Infrastructure/Oracle/Auditoria/OracleRegistroAuditoriaAdapterTest.php` | Append-only, procedimentos, autoria, transação e sessão compartilhada. |
 
+### Infrastructure — PNCP
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Infrastructure/Pncp/Http/ContratosHttpPncpTest.php` | Ambientes fechados, configuração, requisição, resposta e falhas sanitizadas. |
+| `Infrastructure/Pncp/Http/TransporteCurlPncpTest.php` | TLS, hostname, limites, callbacks, uma execução por chamada e ausência de rede nos testes. |
+| `Infrastructure/Pncp/Autenticacao/AutenticadorPncpAdapterTest.php` | Autenticação única, sessão opaca, falhas sistêmicas e ausência de segredos nos eventos. |
+
 ### Infrastructure — Observabilidade
 
 | Arquivo | Demonstração principal |
-|---|---|
-| `Infrastructure/Observabilidade/AcumuladorEventosTecnicosTest.php` | Envelope, ações, sanitização, ordem, imutabilidade e lote com duração. |
+| --- | --- |
+| `Infrastructure/Observabilidade/AcumuladorEventosTecnicosTest.php` | Envelope, catálogos de ações, sanitização, ordem, imutabilidade e lote com duração. |
 
 ## 5. Configuração executável
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `composer.json` | Dependências, PSR-4 e comandos ativos. |
 | `composer.lock` | Versões resolvidas das dependências. |
 | `phpunit.xml` | Bootstrap e descoberta da suíte única atual. |
@@ -336,7 +367,7 @@ fazem parte do fluxo executável.
 ## 6. Estado operacional
 
 | Arquivo | Função |
-|---|---|
+| --- | --- |
 | `docs/vigentes/operacional/estado_atual.md` | Centraliza progresso, última sprint concluída, próxima sprint na ordem, gates, pendências e restrições, sem criar regra ou decisão. |
 
 Para entender o caminho entre esses arquivos, volte ao
