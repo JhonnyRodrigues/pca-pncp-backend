@@ -183,6 +183,17 @@ fazem parte do fluxo executável.
 | `Oracle/Estrategia/EstrategiaOracleInvalidaException.php` | Sinaliza internamente dados físicos ausentes, parciais ou incoerentes. |
 | `Oracle/Estrategia/OracleEstrategiaPublicacaoAdapter.php` | Consulta e adota a estratégia anual pela Port da Application na transação compartilhada. |
 
+### Oracle — Planos
+
+| Arquivo | Função |
+|---|---|
+| `Oracle/Plano/MapeamentoPlanosOracle.php` | Declara tabela e colunas físicas necessárias à versão e confirmação dos Planos. |
+| `Oracle/Plano/MapeamentoDemandasOracle.php` | Declara a relação de origem e os campos físicos necessários à reconstrução das Demandas. |
+| `Oracle/Plano/MapeamentoUnidadesOrcamentariasOracle.php` | Declara identidade, Lotação, UASG, vínculo com Plano e condição de cadastro ativo. |
+| `Oracle/Plano/MapeadorDadosPlanoOracle.php` | Traduz aliases Oracle estritos para tipos de Unidade Orçamentária, Demanda e Plano. |
+| `Oracle/Plano/DadosPlanoOracleInvalidosException.php` | Sinaliza internamente dados físicos ausentes, duplicados ou incoerentes. |
+| `Oracle/Plano/OraclePlanoRepository.php` | Descobre identidades, reconstrói a fotografia vigente e confirma a versão pendente na transação compartilhada. |
+
 ## 4. Testes
 
 ### Domain
@@ -261,6 +272,9 @@ fazem parte do fluxo executável.
 | `Infrastructure/Oracle/Transacao/OracleUnidadeDeTrabalhoAdapterTest.php` | Provisionamento, chaves, contenção, commit, rollback e ausência de DDL. |
 | `Infrastructure/Oracle/Estrategia/MapeamentosFisicosEstrategiaOracleTest.php` | Obrigatoriedade e allowlist dos mapeamentos de configuração, Planos e UASG. |
 | `Infrastructure/Oracle/Estrategia/OracleEstrategiaPublicacaoAdapterTest.php` | Estratégias corrente e adotada, cardinalidade da UASG, adoção e sessão compartilhada. |
+| `Infrastructure/Oracle/Plano/MapeamentosPlanoOracleTest.php` | Obrigatoriedade e allowlist dos mapeamentos físicos de Planos, Demandas e UOs. |
+| `Infrastructure/Oracle/Plano/MapeadorDadosPlanoOracleTest.php` | Tradução estrita de aliases, datas, situações e decimais para o Domain. |
+| `Infrastructure/Oracle/Plano/OraclePlanoRepositoryTest.php` | Descoberta, reconstrução entre versões, Plano vazio e confirmação orientada à intenção. |
 
 ## 5. Configuração executável
 

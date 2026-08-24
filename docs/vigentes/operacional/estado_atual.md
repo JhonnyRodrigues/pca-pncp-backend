@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 20/08/2026
+**Atualizado em:** 24/08/2026
 
 ## Limites de autoridade
 
@@ -25,33 +25,36 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.1 — Gates contratuais Oracle e PNCP está concluída.
 - A Sprint 5.2 — Sessão Oracle, unidade de trabalho, estratégia e locks está
   concluída.
-- A última sprint concluída é a Sprint 5.2.
-- A próxima sprint na ordem é a Sprint 5.3 — Mapeamento e PlanoRepository.
-- A Sprint 5.3 não foi iniciada e este registro não constitui autorização
+- A Sprint 5.3 — Mapeamento e PlanoRepository está concluída.
+- A última sprint concluída é a Sprint 5.3.
+- A próxima sprint na ordem é a Sprint 5.4 — Estado operacional, contexto,
+  auditoria e observabilidade.
+- A Sprint 5.4 não foi iniciada e este registro não constitui autorização
   implícita para iniciá-la.
 
-## Evidências da Sprint 5.2
+## Evidências da Sprint 5.3
 
-- A conexão ADOdb emprestada está encapsulada na Infrastructure Oracle, usa
-  binds produzidos por `Param()` e nunca é fechada pelo backend.
-- A unidade de trabalho e o adapter de estratégia compartilham a mesma sessão.
-- A transação local cobre início, confirmação e desfazimento, sem início
-  aninhado.
-- As âncoras permanentes são provisionadas somente por DML idempotente e o
-  lock usa `SELECT ... FOR UPDATE NOWAIT`.
-- `ORA-00001`, `ORA-00054` e `ORA-00942` recebem tratamento seguro e tipado no
-  contexto aplicável.
-- A estratégia anual corrente e adotada é lida sem default; a adoção exige
-  transação ativa, grava apenas campos ainda nulos e é confirmada por
-  releitura.
-- Tabela, colunas, relações, filtros e literais Oracle são obrigatoriamente
-  injetados por mapeamentos físicos validados.
-- A suíte padrão aprovou 388 testes e 1.330 asserções.
+- Os mapeamentos de Planos, Demandas e Unidades Orçamentárias validam os
+  identificadores Oracle e não possuem nomes físicos implícitos.
+- A tradução física usa aliases canônicos, datas com máscaras explícitas,
+  fuso operacional injetado e decimais exatos sem `float`.
+- A descoberta retorna identidades distintas e ordenadas, exige cadastro ativo
+  único de UO e rejeita ausência ou incoerência de Lotação e UASG.
+- A reconstrução exige transação ativa, seleciona a maior versão sem usar a
+  confirmação e reúne Demandas Homologadas, Compradas e Publicadas de todas as
+  versões de origem.
+- Plano vazio permanece reconstruível; cardinalidade, duplicidade e conteúdo
+  físico inválido são rejeitados antes de atravessar a Infrastructure.
+- A confirmação confere a identidade e versão exatas, atualiza somente a linha
+  pendente com `SYSDATE` e relê a intenção, sem mutar o Plano carregado.
+- O Repository reutiliza a conexão e a transação emprestadas, sem `Close()`,
+  commit ou rollback autônomo.
+- A suíte padrão aprovou 428 testes e 1.511 asserções.
 - A suíte contratual não real aprovou 24 testes e 51 asserções.
-- A suíte focada da Infrastructure Oracle aprovou 49 testes e 191 asserções.
+- A suíte focada da Infrastructure Oracle aprovou 89 testes e 372 asserções.
 
 Nenhum probe real Oracle ou PNCP e nenhum DDL foram executados durante a
-Sprint 5.2.
+Sprint 5.3.
 
 ## Gates confirmados
 
@@ -80,5 +83,5 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   no código e não devem ser registrados neste documento.
 - A conexão ADOdb fornecida pelo Scriptcase permanece emprestada e nunca pode
   ser fechada pelo backend.
-- PlanoRepository, reconstrução de Planos e qualquer outro item da Sprint 5.3
-  permanecem fora do escopo concluído.
+- Estado operacional da publicação, contexto do usuário, auditoria e adaptação
+  de observabilidade permanecem no escopo ainda não iniciado da Sprint 5.4.

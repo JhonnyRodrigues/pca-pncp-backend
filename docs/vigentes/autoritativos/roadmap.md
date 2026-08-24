@@ -25,7 +25,7 @@ colaboração dinâmica já aprovada.
 A autoridade permanece distribuída:
 
 | Assunto | Fonte |
-|---|---|
+| --- | --- |
 | Regras de negócio | [Regras de negócio](regras_de_negocio.md) |
 | Conceitos, identidades, relações e invariantes | [Modelo de domínio](modelo_de_dominio.md) |
 | Contratos externos, persistência técnica e operação | [Decisões de integração](decisoes_de_integracao.md) |
@@ -88,7 +88,7 @@ afetada, conforme o registro das DI.
 ## 4. Visão geral da sequência
 
 | Fase | Resultado principal |
-|---|---|
+| --- | --- |
 | 0 — Preparação do projeto | Ambiente, governança, estrutura e testes básicos disponíveis |
 | 1 — Descoberta e documentação do negócio | Vocabulário, RN, cenários e modelo conceitual coerentes |
 | 2 — Modelagem e implementação do Domain | Conceitos e políticas do negócio demonstrados por TDD |
@@ -217,7 +217,7 @@ código afetados.
 - delimitar Aggregates e fatos externos;
 - revisar os limites arquiteturais sem escolher adapters.
 
-Referências principais: RN-CAD-*, RN-DEM-*, RN-PLA-* e RN-AUD-*.
+Referências principais: RN-CAD-*, RN-DEM-*, RN-PLA-* e *RN-AUD-*.
 
 #### Sprint 1.5 — Fluxo do negócio e gate documental
 
@@ -870,7 +870,7 @@ O contexto, as alternativas e as consequências completas permanecem no
 [registro de decisões de integração](decisoes_de_integracao.md).
 
 | ID | Título | Resumo | Status | Gate |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | DI-001 | Contrato de publicação e sincronização do PNCP | Distingue criação, sincronização e exclusão do PCA | Aceita | Compatibilidade de ID_DEMANDA como numeroItem |
 | DI-002 | Autoridade, reconciliação e vínculo externo | Separa conjunto desejado, observação externa e vínculo conhecido | Aceita | Contratos de identidade e ausência definitiva |
 | DI-003 | Modos de publicação e unidade externa | Define unidades individual e consolidada e estratégia anual | Aceita | Persistência e validação da estratégia na DI-008 |
@@ -888,7 +888,7 @@ Esta matriz orienta a navegação. Ela não substitui o catálogo nem exige que 
 42 regras sejam reescritas no Roadmap.
 
 | Grupo | Assunto | Incidência principal |
-|---|---|---|
+| --- | --- | --- |
 | RN-CAD-* | Cadastros, identidades e referências | Fases 1, 2, 4 e 5 |
 | RN-FLX-* | Fluxo de planejamento | Fase 1 |
 | RN-DEM-* | Identidade e ciclo das Demandas | Fases 2, 4 e 5 |
@@ -905,7 +905,7 @@ O mapeamento serve somente à rastreabilidade. Nomes e números da V1 não volta
 à sequência ativa.
 
 | Estrutura da V1 | Destino na V2 | Tratamento |
-|---|---|---|
+| --- | --- | --- |
 | Fase 0 e Sprints 0.1 a 0.11 | Fase 0, Sprints 0.1 a 0.4 | Preparação agrupada por resultados, sem tutorial excessivo |
 | Descoberta citada no resumo e Domain detalhado como Fase 1 | Fases 1 e 2 | Descoberta separada da implementação do Domain |
 | Fase 1, Sprints 1.1 a 1.9 | Fase 2, Sprints 2.1 a 2.7 | Conceitos reorganizados pela modelagem vigente |
