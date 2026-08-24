@@ -381,6 +381,22 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
                 'A única reconciliação adicional não comprovou a convergência da unidade.'
             )
         );
+        $this->assertSame(
+            'PROCESSAR_RESULTADO_ESCRITA',
+            $logger->contextoDe('Resultado de escrita externa recebido.')['action'] ?? null
+        );
+        $this->assertSame(
+            'EXECUTAR_RECONCILIACAO',
+            $logger->contextoDe('Reconciliação adicional iniciada.')['action'] ?? null
+        );
+        $contextoFalha = $logger->contextoDe(
+            'A única reconciliação adicional não comprovou a convergência da unidade.'
+        );
+        $this->assertSame('VALIDAR_CONVERGENCIA', $contextoFalha['action'] ?? null);
+        $this->assertSame(
+            'RECONCILIACAO_NAO_CONVERGIU',
+            $contextoFalha['error']['code'] ?? null
+        );
     }
 
     public function testEscritaRejeitadaDeveSerObservadaMasNaoRepetida(): void
@@ -606,7 +622,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             ResultadoDecisaoProcessamentoPlano::publicar([1001]),
             [ResultadoPublicacaoPncp::aceita($sequencial)]
         );
-        $dependencias = $this->criarDependencias();
+        $logger = new LoggerMemoriaFinalizador();
+        $dependencias = $this->criarDependencias($logger);
         $dependencias->leitor->method('observarPcaConhecido')
             ->willReturn(ResultadoObservacaoPca::encontrado(PcaObservado::ativo($sequencial, [1001])));
         $falha = new FalhaSegura('ESTADO_FALHOU', 'Estado falhou.');
@@ -623,6 +640,9 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $resultado = $dependencias->finalizador->finalizar($contexto);
 
         $this->assertSame($falha, $resultado->getFalhaSistemica());
+        $contextoLog = $logger->contextoDe('Estado falhou.');
+        $this->assertSame('DESFAZER_UNIDADE', $contextoLog['action'] ?? null);
+        $this->assertSame('ESTADO_FALHOU', $contextoLog['error']['code'] ?? null);
     }
 
     public function testFalhaNoCommitDeveDesfazerENaoProduzirSucesso(): void
@@ -1057,5 +1077,17 @@ final class LoggerMemoriaFinalizador extends AbstractLogger
         }
 
         return false;
+    }
+
+    /** @return array<string, mixed> */
+    public function contextoDe(string $mensagem): array
+    {
+        foreach ($this->registros as $registro) {
+            if ($registro['mensagem'] === $mensagem) {
+                return $registro['contexto'];
+            }
+        }
+
+        return [];
     }
 }

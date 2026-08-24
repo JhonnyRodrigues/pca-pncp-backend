@@ -479,7 +479,22 @@ completar o UseCase.
 10. A porta de persistência pertence à Application.
 11. Confirmação, estado operacional e auditoria participam da mesma transação.
 12. O instante de confirmação e auditoria vem do Oracle.
-13. PSR-3 atende à observabilidade técnica.
+13. PSR-3 atende à observabilidade técnica. O backend produz eventos
+    estruturados e imutáveis e os acumula somente em memória durante a
+    execução.
+14. A ação detalhada do evento identifica uma operação estável da Application.
+    Em falhas, o código seguro permanece separado em `error.code` ou nos
+    metadados; ele não substitui a ação.
+15. Os eventos técnicos não integram `PublicarPcaResponse` nesta etapa. Uma
+    futura fachada os devolverá separadamente ao hospedeiro, e a aplicação
+    Blank os persistirá com `sc_log_add` depois do encerramento da transação do
+    backend.
+16. O JSON detalhado será mapeado futuramente para `DESCRIPTION`. O valor
+    genérico de `SEGURANCA_LOG.ACTION` pertence ao adaptador da Blank e não é
+    fixado pelo backend nesta etapa.
+17. `SEGURANCA_LOG` permanece separada de `PAC_HISTORICOS`: a primeira recebe
+    observabilidade técnica; a segunda, somente fatos de negócio confirmados.
+18. O logging técnico não cria nem utiliza uma segunda conexão Oracle.
 
 ### Alternativas rejeitadas
 
@@ -494,7 +509,10 @@ completar o UseCase.
 
 ### Consequências e limitações
 
-- Logs técnicos precisam sobreviver ao rollback do negócio.
+- O rollback do negócio não remove os eventos já acumulados em memória.
+- A persistência técnica só poderá ocorrer depois que a futura fachada devolver
+  os eventos à Blank; uma falha fatal anterior a esse retorno pode perdê-los.
+  Essa limitação é aceita conscientemente na V1.
 - Mensagens não contêm payload completo, segredos ou texto externo como
   autoridade.
 - `ID_HISTORICO` permanece chave técnica.
@@ -1019,6 +1037,23 @@ e da execução dos gates de ambiente e contrato.
 9. ViewModel não expõe stack trace, payload, SQL, credenciais, JWT ou detalhes
    de cURL, ADOdb e OCI8.
 
+#### Eventos técnicos na fronteira hospedeira
+
+1. O backend acumula eventos técnicos estruturados somente em memória por meio
+   do logger PSR-3.
+2. Os eventos não integram `PublicarPcaResponse`.
+3. Em etapa futura, a fachada obterá o lote do grafo da execução e o devolverá
+   separadamente ao hospedeiro.
+4. A aplicação Blank `PCA_PUBLICAR_B` adaptará então os eventos ao formato de
+   `sc_log_add` e os persistirá depois do encerramento da transação do backend.
+5. A ação operacional detalhada será gravada no JSON de `DESCRIPTION`. A ação
+   genérica da coluna física `SEGURANCA_LOG.ACTION` será escolhida pela Blank e
+   não é definida pelo backend.
+6. Essa persistência não reutiliza `PAC_HISTORICOS`, não cria uma segunda
+   conexão Oracle no backend e não foi implementada ou demonstrada nesta etapa.
+7. Uma falha fatal antes do retorno à Blank pode impedir a persistência dos
+   eventos acumulados; essa limitação é aceita conscientemente.
+
 #### Distribuição
 
 1. A release é autocontida com código e `vendor/`.
@@ -1046,6 +1081,8 @@ e da execução dos gates de ambiente e contrato.
 
 - A aplicação Blank aguarda o resultado final.
 - A fronteira pública permanece pequena e estável.
+- A futura devolução dos eventos técnicos permanece separada da Response de
+  negócio.
 - Perfis precisam ser provisionados externamente ao release.
 - A decisão depende de comportamento real do Scriptcase.
 

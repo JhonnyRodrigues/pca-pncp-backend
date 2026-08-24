@@ -7,6 +7,7 @@ namespace Semae\Pca\Application\UseCases\PublicarPca;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Semae\Pca\Application\Contracts\FinalizadorProcessamentoUnidade;
+use Semae\Pca\Application\Enums\AcaoProcessamentoUnidade;
 use Semae\Pca\Application\Enums\ModoPublicacao;
 use Semae\Pca\Application\Enums\SituacaoBuscaCandidatosPca;
 use Semae\Pca\Application\Enums\SituacaoEscritaPncp;
@@ -110,6 +111,7 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         $resultados = $contexto->getResultadosEscrita();
         $this->registrarLog(
             'info',
+            AcaoProcessamentoUnidade::PROCESSAR_RESULTADO_ESCRITA,
             'Resultado de escrita externa recebido.',
             $contexto
         );
@@ -153,6 +155,7 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         );
         $this->registrarLog(
             'info',
+            AcaoProcessamentoUnidade::EXECUTAR_RECONCILIACAO,
             'Reconciliação adicional iniciada.',
             $contexto
         );
@@ -437,7 +440,12 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
             ));
         }
 
-        $this->registrarLog('info', 'Unidade finalizada com convergência comprovada.', $contexto);
+        $this->registrarLog(
+            'info',
+            AcaoProcessamentoUnidade::PERSISTIR_CONVERGENCIA,
+            'Unidade finalizada com convergência comprovada.',
+            $contexto
+        );
 
         return $this->criarResultadoSucesso($contexto, $estadoFinal);
     }
@@ -671,7 +679,13 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         ContextoFinalizacaoProcessamentoUnidade $contexto,
         FalhaSegura $falha
     ): DesfechoProcessamentoUnidade {
-        $this->registrarLog('warning', $falha->getMensagem(), $contexto);
+        $this->registrarLog(
+            'warning',
+            AcaoProcessamentoUnidade::VALIDAR_CONVERGENCIA,
+            $falha->getMensagem(),
+            $contexto,
+            $falha
+        );
         $decisao = $contexto->getResultadoDecisao();
 
         return $this->desfazedor->desfazerPreservando(
@@ -692,7 +706,13 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         ContextoFinalizacaoProcessamentoUnidade $contexto,
         FalhaSegura $falha
     ): DesfechoProcessamentoUnidade {
-        $this->registrarLog('warning', $falha->getMensagem(), $contexto);
+        $this->registrarLog(
+            'warning',
+            AcaoProcessamentoUnidade::VALIDAR_CONVERGENCIA,
+            $falha->getMensagem(),
+            $contexto,
+            $falha
+        );
         $decisao = $contexto->getResultadoDecisao();
         $decisaoResultado = $decisao->getDecisao() === DecisaoProcessamentoPlano::NENHUMA_ACAO
             ? null
@@ -738,7 +758,12 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
     private function interromperEDesfazer(
         FalhaSegura $falha
     ): DesfechoProcessamentoUnidade {
-        $this->registrarLogSemContexto('error', $falha->getMensagem());
+        $this->registrarLogSemContexto(
+            'error',
+            AcaoProcessamentoUnidade::DESFAZER_UNIDADE,
+            $falha->getMensagem(),
+            $falha
+        );
 
         return $this->desfazedor->desfazerPreservando(
             DesfechoProcessamentoUnidade::falhaSistemica($falha)
@@ -747,26 +772,52 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
 
     private function registrarLog(
         string $nivel,
+        AcaoProcessamentoUnidade $acao,
         string $mensagem,
-        ContextoFinalizacaoProcessamentoUnidade $contexto
+        ContextoFinalizacaoProcessamentoUnidade $contexto,
+        ?FalhaSegura $falha = null
     ): void {
         try {
             $this->logger->log($nivel, $mensagem, [
-                'anoExecucao' => $contexto->getUnidadeExterna()->getAnoExecucao()->getValor(),
-                'uasg' => $contexto->getUnidadeExterna()->getUasgExterna()->getCodigo(),
-                'modo' => $contexto->getUnidadeExterna()->getModo()->value,
+                'action' => $acao->value,
+                'error' => $this->mapearFalhaParaLog($falha),
+                'context' => [
+                    'anoExecucao' => $contexto->getUnidadeExterna()->getAnoExecucao()->getValor(),
+                    'uasg' => $contexto->getUnidadeExterna()->getUasgExterna()->getCodigo(),
+                    'modo' => $contexto->getUnidadeExterna()->getModo()->value,
+                ],
             ]);
         } catch (Throwable) {
             // Observabilidade nunca altera o desfecho da transação de negócio.
         }
     }
 
-    private function registrarLogSemContexto(string $nivel, string $mensagem): void
-    {
+    private function registrarLogSemContexto(
+        string $nivel,
+        AcaoProcessamentoUnidade $acao,
+        string $mensagem,
+        ?FalhaSegura $falha = null
+    ): void {
         try {
-            $this->logger->log($nivel, $mensagem);
+            $this->logger->log($nivel, $mensagem, [
+                'action' => $acao->value,
+                'error' => $this->mapearFalhaParaLog($falha),
+            ]);
         } catch (Throwable) {
             // Observabilidade nunca altera o desfecho da transação de negócio.
         }
+    }
+
+    /** @return array<string, string> */
+    private function mapearFalhaParaLog(?FalhaSegura $falha): array
+    {
+        if ($falha === null) {
+            return [];
+        }
+
+        return [
+            'code' => $falha->getCodigo(),
+            'message' => $falha->getMensagem(),
+        ];
     }
 }

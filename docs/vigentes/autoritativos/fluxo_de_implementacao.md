@@ -538,9 +538,28 @@ corpo completo de requisição (`payload`), resposta completa ou detalhes
 internos sensíveis
 (`DI-006`, `DI-009` e `DI-010`).
 
+O backend produz eventos técnicos imutáveis pelo logger PSR-3 e os mantém
+ordenados somente em memória. A ação de cada evento nomeia a operação da
+Application; em erro, o código seguro permanece em `error.code` ou nos
+metadados. O lote preparado para exportação acrescenta o tempo total apenas à
+cópia exportada do último envelope, sem modificar o evento original.
+
+Nesta etapa, os eventos não integram `PublicarPcaResponse`, e sua exposição
+pela fachada ou persistência pelo Scriptcase não estão implementadas. Em etapa
+futura, a fachada os devolverá separadamente ao hospedeiro; depois do
+encerramento da transação do backend, a Blank `PCA_PUBLICAR_B` os adaptará para
+`sc_log_add`. O JSON detalhado, inclusive sua ação operacional, será destinado
+a `DESCRIPTION`; o valor genérico de `SEGURANCA_LOG.ACTION` será decidido pela
+Blank nessa fronteira.
+
 Auditoria e observabilidade não são intercambiáveis: a primeira afirma fatos
 de negócio confirmados; a segunda registra o funcionamento e os problemas da
 execução (`RN-AUD-001` e `DI-006`).
+
+Por isso, `SEGURANCA_LOG` permanece separada de `PAC_HISTORICOS`, e o backend
+não abre uma segunda conexão Oracle para logging. Como a persistência futura só
+ocorrerá após o retorno à Blank, uma falha fatal anterior pode causar a perda
+dos eventos acumulados. Essa limitação é aceita conscientemente.
 
 ## 11. Gates e limitações vigentes
 

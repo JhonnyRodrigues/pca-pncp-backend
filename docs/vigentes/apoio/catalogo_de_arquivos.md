@@ -68,7 +68,7 @@ fazem parte do fluxo executável.
 | `UseCases/PublicarPca/DecisorUnidadeSobExclusividade.php` | Observa o PNCP e consulta a política do Domain. |
 | `UseCases/PublicarPca/DespachadorComandosUnidade.php` | Liga executor e finalizador, protegendo exceções e rollback. |
 | `UseCases/PublicarPca/ExecutorComandosUnidade.php` | Executa os comandos externos correspondentes à decisão. |
-| `UseCases/PublicarPca/FinalizadorProcessamentoUnidadeInterno.php` | Observa, reconcilia, persiste, audita e encerra a unidade. |
+| `UseCases/PublicarPca/FinalizadorProcessamentoUnidadeInterno.php` | Observa, reconcilia, persiste, audita, registra operações pelo logger PSR-3 e encerra a unidade. |
 | `UseCases/PublicarPca/DesfazedorUnidadeProcessamento.php` | Centraliza rollback e prevalência de sua falha. |
 
 ### Commands e Contracts
@@ -139,6 +139,7 @@ fazem parte do fluxo executável.
 
 | Arquivo | Função |
 |---|---|
+| `Enums/AcaoProcessamentoUnidade.php` | Vocabulário operacional estável das ações executadas durante a finalização de uma unidade. |
 | `Enums/EscopoUnidadeTrabalho.php` | Distingue estratégia anual e unidade externa. |
 | `Enums/ModoPublicacao.php` | Distingue individual e consolidado. |
 | `Enums/SituacaoAutenticacaoPncp.php` | Estados da autenticação. |
@@ -193,6 +194,41 @@ fazem parte do fluxo executável.
 | `Oracle/Plano/MapeadorDadosPlanoOracle.php` | Traduz aliases Oracle estritos para tipos de Unidade Orçamentária, Demanda e Plano. |
 | `Oracle/Plano/DadosPlanoOracleInvalidosException.php` | Sinaliza internamente dados físicos ausentes, duplicados ou incoerentes. |
 | `Oracle/Plano/OraclePlanoRepository.php` | Descobre identidades, reconstrói a fotografia vigente e confirma a versão pendente na transação compartilhada. |
+
+### Oracle — estado operacional
+
+| Arquivo | Função |
+|---|---|
+| `Oracle/EstadoOperacional/MapeamentoEstadoOperacionalOracle.php` | Declara tabela, colunas e literais da projeção operacional em Planos. |
+| `Oracle/EstadoOperacional/EstadoOperacionalOracleInvalidoException.php` | Sinaliza internamente projeções físicas ausentes, parciais ou divergentes. |
+| `Oracle/EstadoOperacional/OracleEstadoOperacionalPublicacaoAdapter.php` | Consulta, propaga e relê o estado operacional na transação compartilhada. |
+
+### Oracle — contexto do usuário
+
+| Arquivo | Função |
+|---|---|
+| `Oracle/Contexto/MapeamentoRepresentantesOracle.php` | Declara o cadastro físico usado para resolver o Representante ativo pelo login. |
+| `Oracle/Contexto/MapeamentoLotacoesUsuarioOracle.php` | Declara vínculos e cadastro usados para resolver a Lotação vigente e ativa. |
+| `Oracle/Contexto/DadosContextoUsuarioOracleInvalidosException.php` | Sinaliza internamente dados físicos de identidade ou Lotação inválidos. |
+| `Oracle/Contexto/OracleContextoUsuarioAdapter.php` | Resolve um único Representante e uma única Lotação pelo login confiável da execução. |
+
+### Oracle — auditoria
+
+| Arquivo | Função |
+|---|---|
+| `Oracle/Auditoria/MapeamentoHistoricosOracle.php` | Declara tabela e colunas físicas dos fatos em `PAC_HISTORICOS`. |
+| `Oracle/Auditoria/OracleRegistroAuditoriaAdapter.php` | Insere fatos append-only com instante Oracle na transação compartilhada. |
+
+### Observabilidade em memória
+
+| Arquivo | Função |
+|---|---|
+| `Observabilidade/NivelEventoTecnico.php` | Normaliza os níveis PSR-3 para o vocabulário técnico exportável. |
+| `Observabilidade/RelogioEventosTecnicos.php` | Contrato mínimo de relógio para timestamp e duração da execução. |
+| `Observabilidade/RelogioSistemaEventosTecnicos.php` | Implementação do relógio baseada no tempo do sistema. |
+| `Observabilidade/EventoTecnico.php` | Evento técnico imutável com envelope estruturado e sanitizado. |
+| `Observabilidade/LoteEventosTecnicos.php` | Cópia exportável dos envelopes com duração somente no último metadata. |
+| `Observabilidade/AcumuladorEventosTecnicos.php` | Logger PSR-3 que produz, sanitiza e acumula eventos ordenados sem I/O. |
 
 ## 4. Testes
 
@@ -275,6 +311,18 @@ fazem parte do fluxo executável.
 | `Infrastructure/Oracle/Plano/MapeamentosPlanoOracleTest.php` | Obrigatoriedade e allowlist dos mapeamentos físicos de Planos, Demandas e UOs. |
 | `Infrastructure/Oracle/Plano/MapeadorDadosPlanoOracleTest.php` | Tradução estrita de aliases, datas, situações e decimais para o Domain. |
 | `Infrastructure/Oracle/Plano/OraclePlanoRepositoryTest.php` | Descoberta, reconstrução entre versões, Plano vazio e confirmação orientada à intenção. |
+| `Infrastructure/Oracle/EstadoOperacional/MapeamentoEstadoOperacionalOracleTest.php` | Obrigatoriedade e allowlist da projeção operacional em Planos. |
+| `Infrastructure/Oracle/EstadoOperacional/OracleEstadoOperacionalPublicacaoAdapterTest.php` | Escopos, versões, conflitos, propagação e releitura na mesma transação. |
+| `Infrastructure/Oracle/Contexto/MapeamentosContextoUsuarioOracleTest.php` | Obrigatoriedade e allowlist dos cadastros de Representantes e Lotações. |
+| `Infrastructure/Oracle/Contexto/OracleContextoUsuarioAdapterTest.php` | Login, cardinalidade, vigência, dados inválidos e falhas sistêmicas. |
+| `Infrastructure/Oracle/Auditoria/MapeamentoHistoricosOracleTest.php` | Obrigatoriedade e allowlist do histórico de procedimentos. |
+| `Infrastructure/Oracle/Auditoria/OracleRegistroAuditoriaAdapterTest.php` | Append-only, procedimentos, autoria, transação e sessão compartilhada. |
+
+### Infrastructure — Observabilidade
+
+| Arquivo | Demonstração principal |
+|---|---|
+| `Infrastructure/Observabilidade/AcumuladorEventosTecnicosTest.php` | Envelope, ações, sanitização, ordem, imutabilidade e lote com duração. |
 
 ## 5. Configuração executável
 
