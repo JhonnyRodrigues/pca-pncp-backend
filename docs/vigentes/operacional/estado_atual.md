@@ -30,11 +30,56 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   está concluída.
 - A Sprint 5.5 — Transporte cURL, TLS e autenticação está concluída.
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
-- A última sprint concluída é a Sprint 5.6.
-- A próxima sprint na ordem é a Sprint 5.7 — Observação, paginação e ausência
-  definitiva.
-- A Sprint 5.7 não foi iniciada e este registro não constitui autorização
+- A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
+- A última sprint concluída é a Sprint 5.7.
+- A próxima sprint na ordem é a Sprint 5.8 — Escritas e resultados incertos.
+- A Sprint 5.8 não foi iniciada e este registro não constitui autorização
   implícita para iniciá-la.
+
+## Evidências da Sprint 5.7
+
+- `LeitorPncpAdapter` implementa os dois métodos existentes de `LeitorPncp`,
+  usando a sessão autenticada opaca somente para compor o Bearer interno e sem
+  alterar Domain, Application, Ports, Commands ou APIs públicas.
+- A observação do PCA conhecido consulta o consolidado e percorre integralmente
+  os itens com páginas iniciadas em 1 e parâmetros explícitos. A fotografia só
+  é produzida depois de encerramento comprovado por página curta ou `204`.
+- A paginação valida identidade e coerência entre páginas, detecta páginas e
+  itens repetidos, rejeita mais de 1.000 itens e termina como inconclusiva
+  quando o limite defensivo de páginas impede comprovar o encerramento.
+- A busca por órgão e ano percorre toda a listagem antes de filtrar a UASG.
+  Zero candidatos não consulta itens; múltiplos candidatos conflitam; somente
+  o candidato único tem seus itens carregados para satisfazer o contrato de
+  `PcaObservado`. Nenhum vínculo é criado, selecionado ou adotado.
+- Ausência definitiva exige duas evidências coerentes: `204` no consolidado do
+  sequencial conhecido e listagem completa por órgão e ano sem PCA da mesma
+  UASG. A mesma UASG com sequencial igual ou diferente produz conflito; leitura
+  parcial, inválida ou interrompida não fabrica ausência.
+- O significado de `204` permanece contextual: após consolidado encontrado,
+  `204` nos itens representa PCA ativo sem itens; na listagem, encerra somente
+  aquela sequência paginada.
+- GET elegível realiza no máximo duas tentativas. Somente `408`, `429`, `502`,
+  `503`, `504` e errno cURL `28` permitem uma segunda tentativa; duas falhas
+  transitórias produzem resultado inconclusivo, sem terceira chamada.
+- `Retry-After` aceita segundos ou data HTTP, usa relógio e espera injetáveis,
+  limita a espera ao teto configurado e usa a espera configurada quando o
+  header está ausente, duplicado ou inválido.
+- Eventos registram somente ação técnica, tentativa, página, quantidade,
+  status HTTP e códigos seguros. Token, credenciais, headers, corpos, caminhos
+  e identidades observadas permanecem fora de eventos e falhas.
+- A suíte focada de leitura aprovou 71 testes e 187 asserções.
+- A regressão de `Infrastructure/Pncp` aprovou 195 testes e 484 asserções.
+- A suíte padrão aprovou 668 testes e 2.290 asserções.
+- A suíte contratual não real aprovou 24 testes e 51 asserções.
+- A regressão de serialização PNCP aprovou 88 testes e 149 asserções.
+- Lint dos 11 arquivos PHP envolvidos, autoload otimizado com PSR-4 estrito
+  contendo 1.722 classes, sanitização e `git diff --check` foram aprovados.
+- As execuções usaram PHP 8.4.7. A implementação foi inspecionada para manter
+  sintaxe e APIs compatíveis com PHP 8.1, mas não havia runtime PHP 8.1
+  disponível para execução.
+
+Nenhum teste `pncp-live`, probe Oracle/PNCP, acesso real à rede, escrita
+externa ou integração Scriptcase foi executado durante a Sprint 5.7.
 
 ## Evidências da Sprint 5.6
 
@@ -180,8 +225,8 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   no código e não devem ser registrados neste documento.
 - A conexão ADOdb fornecida pelo Scriptcase permanece emprestada e nunca pode
   ser fechada pelo backend.
-- A observação, paginação e ausência definitiva permanecem no escopo ainda não
-  iniciado da Sprint 5.7.
+- As escritas PNCP, os endpoints de mutação e a classificação de resultados
+  incertos permanecem no escopo ainda não iniciado da Sprint 5.8.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos

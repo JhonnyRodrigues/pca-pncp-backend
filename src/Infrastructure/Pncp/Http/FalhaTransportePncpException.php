@@ -10,7 +10,8 @@ final class FalhaTransportePncpException extends RuntimeException
 {
     private function __construct(
         private readonly string $codigoSeguro,
-        string $mensagem
+        string $mensagem,
+        private readonly ?int $errnoCurlSeguro = null
     ) {
         parent::__construct($mensagem);
     }
@@ -35,7 +36,8 @@ final class FalhaTransportePncpException extends RuntimeException
     {
         return new self(
             'PNCP_TRANSPORTE_EXECUCAO_FALHOU',
-            "Falha de transporte PNCP (cURL {$errno})."
+            "Falha de transporte PNCP (cURL {$errno}).",
+            $errno
         );
     }
 
@@ -82,5 +84,10 @@ final class FalhaTransportePncpException extends RuntimeException
     public function getCodigoSeguro(): string
     {
         return $this->codigoSeguro;
+    }
+
+    public function getErrnoCurlSeguro(): ?int
+    {
+        return $this->errnoCurlSeguro;
     }
 }

@@ -31,6 +31,7 @@
     "minimum-stability": "stable",
 
     "scripts":{
+        "check-psr4": "composer dump-autoload --optimize --strict-psr",
         "start server":"php -S localhost:8080 -t public",
         "tests":"vendor/bin/phpunit",
         "contract:tests":"vendor/bin/phpunit --configuration phpunit.contract.xml --exclude-group pncp-live",

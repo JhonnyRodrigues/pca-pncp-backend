@@ -232,7 +232,16 @@ fazem parte do fluxo executável.
 | `Pncp/Http/ExecutorCurlPncp.php` | Isola a execução cURL para permitir testes determinísticos sem rede. |
 | `Pncp/Http/ExecutorCurlNativoPncp.php` | Executa a chamada com a extensão cURL nativa e captura seu resultado técnico. |
 | `Pncp/Http/ResultadoExecucaoCurlPncp.php` | Transporta sucesso técnico, errno, status HTTP e resultado da verificação TLS. |
-| `Pncp/Http/FalhaTransportePncpException.php` | Representa falhas técnicas do transporte com códigos e mensagens sanitizados. |
+| `Pncp/Http/FalhaTransportePncpException.php` | Representa falhas técnicas do transporte com códigos e mensagens sanitizados e preserva internamente o errno cURL seguro. |
+
+### PNCP — leitura, paginação e retry
+
+| Arquivo | Função |
+| --- | --- |
+| `Pncp/Leitura/ConfiguracaoLeituraPncp.php` | Exige tamanho de página, profundidade JSON, limite defensivo, espera padrão e teto de `Retry-After`. |
+| `Pncp/Leitura/LeitorPncpAdapter.php` | Implementa observação e busca completas, valida coerência, comprova ausência por duas leituras e classifica conflitos e respostas inconclusivas. |
+| `Pncp/Leitura/TemporizadorPncp.php` | Define relógio UTC e espera injetáveis para retry determinístico. |
+| `Pncp/Leitura/TemporizadorSistemaPncp.php` | Implementa relógio e espera com recursos internos do sistema. |
 
 ### PNCP — serialização exata
 
@@ -250,7 +259,7 @@ fazem parte do fluxo executável.
 | --- | --- |
 | `Pncp/Autenticacao/AutenticadorPncpAdapter.php` | Implementa autenticação única, extrai o Bearer da resposta e traduz falhas para o resultado da Application. |
 | `Pncp/Autenticacao/SessaoPncpAutenticada.php` | Mantém o token opaco em uma implementação concreta do contrato de sessão. |
-| `Pncp/Observabilidade/AcaoTecnicaPncp.php` | Cataloga a ação técnica de autenticação sem ampliar o enum operacional da Application. |
+| `Pncp/Observabilidade/AcaoTecnicaPncp.php` | Cataloga autenticação, observação e busca de candidatos sem ampliar o enum operacional da Application. |
 
 ### Observabilidade em memória
 
@@ -363,6 +372,11 @@ fazem parte do fluxo executável.
 | `Infrastructure/Pncp/Serializacao/ConversorDecimalPncpTest.php` | Escala, `HALF_UP`, divisão textual, limites, negativos e overflow. |
 | `Infrastructure/Pncp/Serializacao/SerializadorPayloadPncpTest.php` | Projeção integral de itens, ordenação, datas, omissões e limites textuais. |
 | `Infrastructure/Pncp/Serializacao/CorposPayloadPncpTest.php` | Corpos integrais dos quatro Commands e ownership do limite operacional. |
+| `Infrastructure/Pncp/Leitura/LeitorPncpAdapterTest.php` | Sessão opaca, caminhos, respostas de uma página, identidade e sanitização básica. |
+| `Infrastructure/Pncp/Leitura/PaginacaoItensPncpTest.php` | Paginação completa de itens, coerência, duplicidades, limites e ausência de fotografia parcial. |
+| `Infrastructure/Pncp/Leitura/PaginacaoCandidatosPncpTest.php` | Listagem completa, filtro por UASG, candidato único com itens e proibição de adoção automática. |
+| `Infrastructure/Pncp/Leitura/AusenciaDefinitivaPncpTest.php` | Prova em duas consultas, conflitos de vínculo e falhas que impedem concluir ausência. |
+| `Infrastructure/Pncp/Leitura/RetryLeituraPncpTest.php` | Duas tentativas máximas, `Retry-After`, tempo determinístico, classificação e eventos sanitizados. |
 
 ### Infrastructure — Observabilidade
 

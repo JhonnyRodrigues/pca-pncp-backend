@@ -161,6 +161,7 @@ final class ContratosHttpPncpTest extends TestCase
 
         $this->assertInstanceOf(RuntimeException::class, $falha);
         $this->assertSame('PNCP_TRANSPORTE_EXECUCAO_FALHOU', $falha->getCodigoSeguro());
+        $this->assertSame(28, $falha->getErrnoCurlSeguro());
         $this->assertSame('Falha de transporte PNCP (cURL 28).', $falha->getMessage());
         $this->assertStringNotContainsString('https://', $falha->getMessage());
         $this->assertStringNotContainsString('Bearer', $falha->getMessage());
