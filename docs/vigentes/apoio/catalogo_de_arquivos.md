@@ -234,6 +234,16 @@ fazem parte do fluxo executável.
 | `Pncp/Http/ResultadoExecucaoCurlPncp.php` | Transporta sucesso técnico, errno, status HTTP e resultado da verificação TLS. |
 | `Pncp/Http/FalhaTransportePncpException.php` | Representa falhas técnicas do transporte com códigos e mensagens sanitizados. |
 
+### PNCP — serialização exata
+
+| Arquivo | Função |
+| --- | --- |
+| `Pncp/Serializacao/FalhaSerializacaoPncp.php` | Expõe uma falha fixa e segura sem incluir valores ou payloads. |
+| `Pncp/Serializacao/NumeroJsonExato.php` | Preserva um lexema numérico JSON previamente validado para emissão sem aspas. |
+| `Pncp/Serializacao/CodificadorJsonExato.php` | Codifica recursivamente tipos permitidos e rejeita `float`, recursos, objetos desconhecidos e UTF-8 inválido. |
+| `Pncp/Serializacao/ConversorDecimalPncp.php` | Converte e divide decimais textualmente com escala quatro, `HALF_UP` e limites de `DECIMAL(17,4)`. |
+| `Pncp/Serializacao/SerializadorPayloadPncp.php` | Projeta os quatro Commands de escrita nos corpos JSON exatos do PNCP. |
+
 ### PNCP — autenticação e observabilidade
 
 | Arquivo | Função |
@@ -348,6 +358,11 @@ fazem parte do fluxo executável.
 | `Infrastructure/Pncp/Http/ContratosHttpPncpTest.php` | Ambientes fechados, configuração, requisição, resposta e falhas sanitizadas. |
 | `Infrastructure/Pncp/Http/TransporteCurlPncpTest.php` | TLS, hostname, limites, callbacks, uma execução por chamada e ausência de rede nos testes. |
 | `Infrastructure/Pncp/Autenticacao/AutenticadorPncpAdapterTest.php` | Autenticação única, sessão opaca, falhas sistêmicas e ausência de segredos nos eventos. |
+| `Infrastructure/Pncp/Serializacao/NumeroJsonExatoTest.php` | Gramática e preservação de lexemas numéricos JSON exatos. |
+| `Infrastructure/Pncp/Serializacao/CodificadorJsonExatoTest.php` | Emissão determinística, escapes, Unicode e rejeição segura de tipos proibidos. |
+| `Infrastructure/Pncp/Serializacao/ConversorDecimalPncpTest.php` | Escala, `HALF_UP`, divisão textual, limites, negativos e overflow. |
+| `Infrastructure/Pncp/Serializacao/SerializadorPayloadPncpTest.php` | Projeção integral de itens, ordenação, datas, omissões e limites textuais. |
+| `Infrastructure/Pncp/Serializacao/CorposPayloadPncpTest.php` | Corpos integrais dos quatro Commands e ownership do limite operacional. |
 
 ### Infrastructure — Observabilidade
 

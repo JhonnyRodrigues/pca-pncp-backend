@@ -653,8 +653,7 @@ Referência: DI-009.
 #### Sprint 5.6 — Serialização e payloads exatos
 
 - serializar datas de calendário no formato contratual;
-- converter a representação decimal interna exata para o contrato de transporte
-  sem usar `float`;
+- converter a representação decimal interna exata para o contrato de transporte sem usar `float`;
 - validar tokens numéricos antes da emissão;
 - construir payloads sem mover regras para o serializer;
 - preservar totais autoritativos.

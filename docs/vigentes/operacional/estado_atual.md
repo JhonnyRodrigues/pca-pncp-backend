@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 24/08/2026
+**Atualizado em:** 25/08/2026
 
 ## Limites de autoridade
 
@@ -29,10 +29,48 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.4 — Estado operacional, contexto, auditoria e eventos técnicos
   está concluída.
 - A Sprint 5.5 — Transporte cURL, TLS e autenticação está concluída.
-- A última sprint concluída é a Sprint 5.5.
-- A próxima sprint na ordem é a Sprint 5.6 — Serialização e payloads exatos.
-- A Sprint 5.6 não foi iniciada e este registro não constitui autorização
+- A Sprint 5.6 — Serialização e payloads exatos está concluída.
+- A última sprint concluída é a Sprint 5.6.
+- A próxima sprint na ordem é a Sprint 5.7 — Observação, paginação e ausência
+  definitiva.
+- A Sprint 5.7 não foi iniciada e este registro não constitui autorização
   implícita para iniciá-la.
+
+## Evidências da Sprint 5.6
+
+- O marcador numérico valida a gramática JSON e preserva o lexema exato; o
+  codificador recursivo aceita somente arrays, strings, inteiros, booleanos,
+  `null` e números exatos, sem converter números para `float`.
+- `float`, recursos, objetos desconhecidos, lexemas inválidos e UTF-8 inválido
+  são recusados com uma única mensagem segura, sem valores ou payloads.
+- Quantidade, totais e valor unitário são produzidos por operações textuais com
+  quatro casas e `HALF_UP`; negativos, divisor zero e resultados fora de
+  `DECIMAL(17,4)` são rejeitados, inclusive carry que provoca overflow.
+- O valor unitário usa o valor total interno original dividido pela quantidade;
+  valor total e orçamento do exercício são convertidos independentemente e não
+  são recalculados pelo unitário arredondado.
+- Os quatro corpos preservam e ordenam numericamente `ID_DEMANDA` como
+  `numeroItem`, sem renumeração, e emitem categoria do PCA inteira,
+  classificação Material/Serviço textual, catálogo independente, datas
+  `YYYY-MM-DD` e números JSON exatos.
+- Textos são validados por caracteres Unicode e nunca truncados. Campos sem
+  fonte semanticamente compatível são omitidos, sem envio de `null`.
+- O serializer não redefine o limite operacional de 1.000 itens protegido pela
+  Application; um teste direto confirmou a ausência dessa duplicação com 1.001
+  itens.
+- A suíte focada de serialização aprovou 88 testes e 149 asserções.
+- A regressão de `Infrastructure/Pncp` aprovou 124 testes e 296 asserções.
+- A suíte padrão aprovou 597 testes e 2.102 asserções.
+- A suíte contratual não real aprovou 24 testes e 51 asserções.
+- Lint dos 10 arquivos PHP envolvidos, autoload otimizado com PSR-4 estrito,
+  direção das dependências, ausência de HTTP na serialização, ausência de
+  `float` e divisão nativa no conversor e `git diff --check` foram aprovados.
+- As execuções usaram PHP 8.4.7. A implementação foi inspecionada para manter
+  sintaxe e APIs compatíveis com PHP 8.1, mas não havia runtime PHP 8.1
+  disponível para execução.
+
+Nenhum teste `pncp-live`, probe Oracle/PNCP, endpoint, paginação, escrita externa
+ou integração Scriptcase foi executado durante a Sprint 5.6.
 
 ## Evidências da Sprint 5.5
 
@@ -142,8 +180,8 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   no código e não devem ser registrados neste documento.
 - A conexão ADOdb fornecida pelo Scriptcase permanece emprestada e nunca pode
   ser fechada pelo backend.
-- A serialização e os payloads exatos permanecem no escopo ainda não iniciado
-  da Sprint 5.6.
+- A observação, paginação e ausência definitiva permanecem no escopo ainda não
+  iniciado da Sprint 5.7.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos
