@@ -532,17 +532,13 @@ exposição do mecanismo externo:
 - resultado incerto de escrita.
 
 A observabilidade técnica acompanha preparação, autenticação, unidades,
-decisões, escritas, reconciliação, contenção e falhas. Ela deve preservar
-correlação suficiente para diagnóstico sem registrar credenciais, sessão,
-corpo completo de requisição (`payload`), resposta completa ou detalhes
-internos sensíveis
+decisões, escritas, reconciliação, contenção e falhas. Seu envelope,
+dicionário de campos, erro seguro, sanitização e imutabilidade obedecem à
+[Especificação de logs estruturados](especificacao_de_logs_estruturados.md)
 (`DI-006`, `DI-009` e `DI-010`).
 
-O backend produz eventos técnicos imutáveis pelo logger PSR-3 e os mantém
-ordenados somente em memória. A ação de cada evento nomeia a operação da
-Application; em erro, o código seguro permanece em `error.code` ou nos
-metadados. O lote preparado para exportação acrescenta o tempo total apenas à
-cópia exportada do último envelope, sem modificar o evento original.
+O backend produz os eventos por PSR-3 e os mantém ordenados somente em memória.
+O lote para exportação é preparado sem modificar os eventos originais.
 
 Nesta etapa, os eventos não integram `PublicarPcaResponse`, e sua exposição
 pela fachada ou persistência pelo Scriptcase não estão implementadas. Em etapa

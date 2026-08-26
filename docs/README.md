@@ -56,13 +56,14 @@ aparece neste índice sem link até que o documento exista.
 2. [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md)
 3. [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md)
 4. [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md)
-5. [Glossário integrado](vigentes/apoio/glossario.md)
-6. [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md)
-7. [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md)
-8. [Roadmap de implementação](vigentes/autoritativos/roadmap.md)
-9. [Estado operacional do projeto](vigentes/operacional/estado_atual.md)
-10. [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md)
-11. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
+5. [Especificação de logs estruturados](vigentes/autoritativos/especificacao_de_logs_estruturados.md)
+6. [Glossário integrado](vigentes/apoio/glossario.md)
+7. [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md)
+8. [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md)
+9. [Roadmap de implementação](vigentes/autoritativos/roadmap.md)
+10. [Estado operacional do projeto](vigentes/operacional/estado_atual.md)
+11. [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md)
+12. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
 
 ### 4.1 Princípio de autoridade
 
@@ -71,12 +72,13 @@ Quando dois documentos parecerem contraditórios, prevalece:
 1. Regras de Negócio;
 2. Modelo de Domínio;
 3. Decisões de Integração;
-4. Fluxo de Implementação;
-5. Roadmap;
-6. Documentos Operacionais, somente quanto ao estado corrente do trabalho;
-7. Documentos de Apoio;
-8. Investigações;
-9. Históricos.
+4. Especificações autoritativas vinculadas às Decisões de Integração;
+5. Fluxo de Implementação;
+6. Roadmap;
+7. Documentos Operacionais, somente quanto ao estado corrente do trabalho;
+8. Documentos de Apoio;
+9. Investigações;
+10. Históricos.
 
 ## 5. Registro documental
 
@@ -88,6 +90,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 | [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md) | Vigente | Redação normativa das regras de negócio |
 | [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md) | Vigente — V2 | Conceitos, identidades, relações e invariantes do modelo-alvo |
 | [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) | Vigente | DI-001 a DI-010 e seus gates |
+| [Especificação de logs estruturados](vigentes/autoritativos/especificacao_de_logs_estruturados.md) | Vigente | Envelope institucional, dicionário de campos e proteção de dados dos eventos técnicos |
 | [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md) | Vigente | Colaboração entre camadas e portas |
 | [Roadmap de implementação](vigentes/autoritativos/roadmap.md) | Vigente — V2 | Ordem de implementação |
 

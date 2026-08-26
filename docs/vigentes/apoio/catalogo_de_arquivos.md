@@ -253,13 +253,19 @@ fazem parte do fluxo executável.
 | `Pncp/Serializacao/ConversorDecimalPncp.php` | Converte e divide decimais textualmente com escala quatro, `HALF_UP` e limites de `DECIMAL(17,4)`. |
 | `Pncp/Serializacao/SerializadorPayloadPncp.php` | Projeta os quatro Commands de escrita nos corpos JSON exatos do PNCP. |
 
+### PNCP — escritas e resultados incertos
+
+| Arquivo | Função |
+| --- | --- |
+| `Pncp/Escrita/EscritorPncpAdapter.php` | Executa publicação, inclusão e exclusões em chamada única, classifica o resultado e registra eventos seguros. |
+
 ### PNCP — autenticação e observabilidade
 
 | Arquivo | Função |
 | --- | --- |
 | `Pncp/Autenticacao/AutenticadorPncpAdapter.php` | Implementa autenticação única, extrai o Bearer da resposta e traduz falhas para o resultado da Application. |
 | `Pncp/Autenticacao/SessaoPncpAutenticada.php` | Mantém o token opaco em uma implementação concreta do contrato de sessão. |
-| `Pncp/Observabilidade/AcaoTecnicaPncp.php` | Cataloga autenticação, observação e busca de candidatos sem ampliar o enum operacional da Application. |
+| `Pncp/Observabilidade/AcaoTecnicaPncp.php` | Cataloga autenticação, leituras e as quatro escritas sem ampliar o enum operacional da Application. |
 
 ### Observabilidade em memória
 
@@ -377,6 +383,10 @@ fazem parte do fluxo executável.
 | `Infrastructure/Pncp/Leitura/PaginacaoCandidatosPncpTest.php` | Listagem completa, filtro por UASG, candidato único com itens e proibição de adoção automática. |
 | `Infrastructure/Pncp/Leitura/AusenciaDefinitivaPncpTest.php` | Prova em duas consultas, conflitos de vínculo e falhas que impedem concluir ausência. |
 | `Infrastructure/Pncp/Leitura/RetryLeituraPncpTest.php` | Duas tentativas máximas, `Retry-After`, tempo determinístico, classificação e eventos sanitizados. |
+| `Infrastructure/Pncp/Escrita/PublicacaoPncpTest.php` | Requisição de publicação e extração estrita do sequencial pelo `Location`. |
+| `Infrastructure/Pncp/Escrita/EscritaItensPncpTest.php` | Inclusão e exclusão de itens em coleção integral, sem particionamento ou retry. |
+| `Infrastructure/Pncp/Escrita/ExclusaoPcaPncpTest.php` | Exclusão integral, justificativa preservada e status aceito exato. |
+| `Infrastructure/Pncp/Escrita/MatrizFalhasEscritaPncpTest.php` | Matriz das quatro escritas, falhas antes e depois do despacho e envelope sanitizado. |
 
 ### Infrastructure — Observabilidade
 
@@ -393,10 +403,11 @@ fazem parte do fluxo executável.
 | `phpunit.xml` | Bootstrap e descoberta da suíte única atual. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
 
-## 6. Estado operacional
+## 6. Documentação vigente
 
 | Arquivo | Função |
 | --- | --- |
+| `docs/vigentes/autoritativos/especificacao_de_logs_estruturados.md` | Consolida o envelope institucional, o significado dos campos e a proteção de dados dos eventos técnicos. |
 | `docs/vigentes/operacional/estado_atual.md` | Centraliza progresso, última sprint concluída, próxima sprint na ordem, gates, pendências e restrições, sem criar regra ou decisão. |
 
 Para entender o caminho entre esses arquivos, volte ao

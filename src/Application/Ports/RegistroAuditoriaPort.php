@@ -9,7 +9,5 @@ use Semae\Pca\Application\ValueObjects\IntencaoRegistroHistorico;
 
 interface RegistroAuditoriaPort
 {
-    public function registrar(
-        IntencaoRegistroHistorico $intencao
-    ): ResultadoPersistenciaLocal;
+    public function registrar(IntencaoRegistroHistorico $intencao): ResultadoPersistenciaLocal;
 }

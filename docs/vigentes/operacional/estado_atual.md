@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 25/08/2026
+**Atualizado em:** 26/08/2026
 
 ## Limites de autoridade
 
@@ -31,10 +31,52 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.5 — Transporte cURL, TLS e autenticação está concluída.
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
-- A última sprint concluída é a Sprint 5.7.
-- A próxima sprint na ordem é a Sprint 5.8 — Escritas e resultados incertos.
-- A Sprint 5.8 não foi iniciada e este registro não constitui autorização
+- A Sprint 5.8 — Escritas e resultados incertos está concluída.
+- A última sprint concluída é a Sprint 5.8.
+- A próxima sprint na ordem é a Sprint 5.9 — Suíte de contratos dos adapters.
+- A Sprint 5.9 não foi iniciada e este registro não constitui autorização
   implícita para iniciá-la.
+
+## Evidências da Sprint 5.8
+
+- `EscritorPncpAdapter` implementa as quatro operações da Port existente sem
+  alterar Domain, Application, Ports, Commands, Results ou APIs públicas.
+- Publicação e inclusão enviam `POST`; exclusão de itens e exclusão integral
+  enviam `DELETE`. Cada método usa o Bearer da sessão opaca, JSON UTF-8,
+  timeout de escrita e exatamente uma execução do transporte.
+- Publicação aceita somente `200` ou `201` e exige um único `Location`
+  canônico, coerente com ambiente, CNPJ e ano e com sequencial positivo, sem
+  fallback pelo corpo. Inclusão aceita somente `200` ou `201`; exclusões,
+  somente `200`.
+- Respostas `400` e `422` são rejeitadas; `401` e `403` são falhas sistêmicas;
+  status transitórios, `5xx` e qualquer status não aprovado produzem resultado
+  incerto.
+- Falhas locais de preparação, sessão, payload ou TLS são sistêmicas. Timeout,
+  interrupção de execução, resposta excessiva ou inválida e falha inesperada
+  depois do despacho produzem resultado incerto, sem retry.
+- Inclusões e exclusões enviam a coleção integral em uma única requisição, sem
+  particionamento. A Application continua responsável pelo limite de 1.000
+  itens e pela ordem excluir antes de incluir.
+- Eventos usam ações técnicas próprias, preservam `FalhaSegura` em
+  `error.code` e `error.message` e registram somente metadados técnicos seguros.
+  Token, Authorization, headers, corpos, URLs, CNPJ, UASG, sequencial e IDs não
+  são registrados.
+- O contrato institucional do envelope foi consolidado na
+  [Especificação de logs estruturados](../autoritativos/especificacao_de_logs_estruturados.md),
+  com referências enxutas na DI-006 e no Fluxo de Implementação.
+- A suíte focada de escrita aprovou 131 testes e 575 asserções.
+- A regressão de `Infrastructure/Pncp` aprovou 326 testes e 1.059 asserções.
+- A regressão de serialização PNCP aprovou 88 testes e 149 asserções.
+- A suíte contratual não real aprovou 24 testes e 51 asserções.
+- A suíte padrão aprovou 799 testes e 2.865 asserções.
+- Lint dos 6 arquivos PHP envolvidos, autoload otimizado com PSR-4 estrito
+  contendo 1.727 classes e `git diff --check` foram aprovados.
+- As execuções usaram PHP 8.4.7. A implementação foi inspecionada para manter
+  sintaxe e APIs compatíveis com PHP 8.1, mas não havia runtime PHP 8.1
+  disponível para execução.
+
+Nenhum teste `pncp-live`, probe Oracle/PNCP, acesso real à rede, escrita
+externa ou integração Scriptcase foi executado durante a Sprint 5.8.
 
 ## Evidências da Sprint 5.7
 
@@ -225,8 +267,8 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   no código e não devem ser registrados neste documento.
 - A conexão ADOdb fornecida pelo Scriptcase permanece emprestada e nunca pode
   ser fechada pelo backend.
-- As escritas PNCP, os endpoints de mutação e a classificação de resultados
-  incertos permanecem no escopo ainda não iniciado da Sprint 5.8.
+- Os contratos autorizados dos adapters e as evidências em ambientes reais
+  permanecem no escopo ainda não iniciado da Sprint 5.9.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos

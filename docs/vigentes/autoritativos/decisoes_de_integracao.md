@@ -456,10 +456,11 @@ completar o UseCase.
 10. A porta de persistência pertence à Application.
 11. Confirmação, estado operacional e auditoria participam da mesma transação.
 12. O instante de confirmação e auditoria vem do Oracle.
-13. PSR-3 atende à observabilidade técnica. O backend produz eventos estruturados e imutáveis e os acumula somente em memória durante a
-    execução.
-14. A ação detalhada do evento identifica uma operação estável da Application.
-    Em falhas, o código seguro permanece separado em `error.code` ou nos metadados; ele não substitui a ação.
+13. O envelope, o significado dos campos e a proteção de dados da
+    observabilidade técnica obedecem à
+    [Especificação de logs estruturados](especificacao_de_logs_estruturados.md).
+14. PSR-3 atende à observabilidade técnica. O backend produz eventos imutáveis
+    e os acumula somente em memória durante a execução.
 15. Os eventos técnicos não integram `PublicarPcaResponse` nesta etapa. Uma futura fachada os devolverá separadamente ao hospedeiro, e a aplicação Blank os persistirá com `sc_log_add` depois do encerramento da transação do backend.
 16. O JSON detalhado será mapeado futuramente para `DESCRIPTION`. O valor genérico de `SEGURANCA_LOG.ACTION` pertence ao adaptador da Blank e não é fixado pelo backend nesta etapa.
 17. `SEGURANCA_LOG` permanece separada de `PAC_HISTORICOS`: a primeira recebe observabilidade técnica; a segunda, somente fatos de negócio confirmados.
