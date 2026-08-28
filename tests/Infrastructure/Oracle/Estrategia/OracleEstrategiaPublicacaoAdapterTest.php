@@ -13,11 +13,11 @@ use Semae\Pca\Application\ValueObjects\EstrategiaPublicacao;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 use Semae\Pca\Domain\ValueObjects\Uasg;
 use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
-use Semae\Pca\Infrastructure\Oracle\Estrategia\MapeamentoCadastroUasgOracle;
 use Semae\Pca\Infrastructure\Oracle\Estrategia\MapeamentoConfiguracaoEstrategiaOracle;
 use Semae\Pca\Infrastructure\Oracle\Estrategia\MapeamentoPlanosEstrategiaOracle;
 use Semae\Pca\Infrastructure\Oracle\Estrategia\OracleEstrategiaPublicacaoAdapter;
-use Semae\Pca\Infrastructure\Oracle\Transacao\MapeamentoFisicoAncorasOracle;
+use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoUnidadesOrcamentariasOracle;
+use Semae\Pca\Infrastructure\Oracle\Transacao\MapeamentoControlesConcorrenciaOracle;
 use Semae\Pca\Infrastructure\Oracle\Transacao\OracleUnidadeDeTrabalhoAdapter;
 
 final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
@@ -26,7 +26,11 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
     {
         [$adapter, , $adodb] = $this->criarContexto();
         $adodb->resultadosGetAll = [[
-            ['CHAVE_CONFIGURACAO' => 'PUBLICAR_EM_UNICA_UASG', 'VALOR_CONFIGURACAO' => 'N'],
+            [
+                'CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS',
+                'VALOR_CONFIGURACAO' => 'INDIVIDUAL',
+                'DESCRICAO_CONFIGURACAO' => null,
+            ],
         ]];
 
         $resultado = $adapter->consultarCorrente($this->ano());
@@ -34,22 +38,28 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         $this->assertSame(SituacaoConsultaEstrategia::DISPONIVEL, $resultado->getSituacao());
         $this->assertSame(ModoPublicacao::INDIVIDUAL, $resultado->getEstrategia()?->getModo());
         $this->assertCount(1, $adodb->consultas);
+        $this->assertStringContainsString('DESCRICAO_CONFIGURACAO', $adodb->consultas[0]['sql']);
         $this->assertSame(
-            ['PUBLICAR_EM_UNICA_UASG', 'UASG_CONSOLIDADORA'],
+            ['ESTRATEGIA_PUBLICACAO_PLANOS', 'UASG_CONSOLIDADORA'],
             array_values($adodb->consultas[0]['parametros'])
         );
     }
 
-    public function testDeveConsultarEstrategiaCorrenteConsolidadaComUasgAtivaUnica(): void
+    public function testDeveConsultarEstrategiaCorrenteConsolidadaDaMesmaLinhaDeConfiguracao(): void
     {
         [$adapter, , $adodb] = $this->criarContexto();
-        $adodb->resultadosGetAll = [
+        $adodb->resultadosGetAll = [[
             [
-                ['CHAVE_CONFIGURACAO' => 'PUBLICAR_EM_UNICA_UASG', 'VALOR_CONFIGURACAO' => 'S'],
-                ['CHAVE_CONFIGURACAO' => 'UASG_CONSOLIDADORA', 'VALOR_CONFIGURACAO' => '986700'],
+                'CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS',
+                'VALOR_CONFIGURACAO' => 'CONSOLIDADO',
+                'DESCRICAO_CONFIGURACAO' => null,
             ],
-            [['CODIGO_UASG' => '986700', 'DESCRICAO_UASG' => ' UASG Central ']],
-        ];
+            [
+                'CHAVE_CONFIGURACAO' => 'UASG_CONSOLIDADORA',
+                'VALOR_CONFIGURACAO' => '986700',
+                'DESCRICAO_CONFIGURACAO' => ' UASG Central ',
+            ],
+        ]];
 
         $resultado = $adapter->consultarCorrente($this->ano());
 
@@ -59,10 +69,11 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
             'UASG Central',
             $resultado->getEstrategia()?->getUasgConsolidadora()?->getDescricao()
         );
-        $this->assertStringContainsString('APP.PAC_UO', $adodb->consultas[1]['sql']);
-        $this->assertStringContainsString('CODIGO_UASG =', $adodb->consultas[1]['sql']);
-        $this->assertStringContainsString('ATIVA =', $adodb->consultas[1]['sql']);
-        $this->assertSame(['986700', 'S'], array_values($adodb->consultas[1]['parametros']));
+        $this->assertCount(1, $adodb->consultas);
+        $this->assertStringNotContainsString(
+            'PAC_UNIDADES_ORCAMENTARIAS',
+            $adodb->consultas[0]['sql']
+        );
     }
 
     public function testDeveDistinguirConfiguracaoAusenteDeConfiguracaoInvalida(): void
@@ -77,14 +88,21 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         foreach (
             [
                 [
-                    ['CHAVE_CONFIGURACAO' => 'PUBLICAR_EM_UNICA_UASG', 'VALOR_CONFIGURACAO' => 'X'],
+                    ['CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS', 'VALOR_CONFIGURACAO' => 'X'],
                 ],
                 [
-                    ['CHAVE_CONFIGURACAO' => 'PUBLICAR_EM_UNICA_UASG', 'VALOR_CONFIGURACAO' => 'N'],
-                    ['CHAVE_CONFIGURACAO' => 'PUBLICAR_EM_UNICA_UASG', 'VALOR_CONFIGURACAO' => 'N'],
+                    ['CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS', 'VALOR_CONFIGURACAO' => null],
                 ],
                 [
-                    ['CHAVE_CONFIGURACAO' => 'PUBLICAR_EM_UNICA_UASG', 'VALOR_CONFIGURACAO' => 'S'],
+                    ['CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS', 'VALOR_CONFIGURACAO' => 'INDIVIDUAL'],
+                    ['CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS', 'VALOR_CONFIGURACAO' => 'INDIVIDUAL'],
+                ],
+                [
+                    ['CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS', 'VALOR_CONFIGURACAO' => 'CONSOLIDADO'],
+                ],
+                [
+                    ['CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS', 'VALOR_CONFIGURACAO' => 'SIM'],
+                    ['CHAVE_CONFIGURACAO' => 'UASG_CONSOLIDADORA', 'VALOR_CONFIGURACAO' => '986700', 'DESCRICAO_CONFIGURACAO' => 'Central'],
                 ],
             ] as $linhas
         ) {
@@ -104,25 +122,28 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
             [
                 [],
                 [
-                    ['CODIGO_UASG' => '986700', 'DESCRICAO_UASG' => 'Central'],
-                    ['CODIGO_UASG' => '986700', 'DESCRICAO_UASG' => 'Duplicada'],
+                    ['CHAVE_CONFIGURACAO' => 'UASG_CONSOLIDADORA', 'VALOR_CONFIGURACAO' => '986700', 'DESCRICAO_CONFIGURACAO' => 'Central'],
+                    ['CHAVE_CONFIGURACAO' => 'UASG_CONSOLIDADORA', 'VALOR_CONFIGURACAO' => '986700', 'DESCRICAO_CONFIGURACAO' => 'Duplicada'],
                 ],
-                [['CODIGO_UASG' => '986700', 'DESCRICAO_UASG' => ' ']],
-            ] as $lookup
+                [['CHAVE_CONFIGURACAO' => 'UASG_CONSOLIDADORA', 'VALOR_CONFIGURACAO' => '986700', 'DESCRICAO_CONFIGURACAO' => ' ']],
+            ] as $linhasUasg
         ) {
             [$adapter, , $adodb] = $this->criarContexto();
-            $adodb->resultadosGetAll = [
+            $adodb->resultadosGetAll = [[
                 [
-                    ['CHAVE_CONFIGURACAO' => 'PUBLICAR_EM_UNICA_UASG', 'VALOR_CONFIGURACAO' => 'S'],
-                    ['CHAVE_CONFIGURACAO' => 'UASG_CONSOLIDADORA', 'VALOR_CONFIGURACAO' => '986700'],
+                    'CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS',
+                    'VALOR_CONFIGURACAO' => 'CONSOLIDADO',
                 ],
-                $lookup,
-            ];
+                ...$linhasUasg,
+            ]];
 
             $resultado = $adapter->consultarCorrente($this->ano());
 
             $this->assertSame(SituacaoConsultaEstrategia::INVALIDA, $resultado->getSituacao());
-            $this->assertSame('UASG_CONSOLIDADORA_INVALIDA', $resultado->getFalha()?->getCodigo());
+            $this->assertContains(
+                $resultado->getFalha()?->getCodigo(),
+                ['ESTRATEGIA_CORRENTE_INVALIDA', 'UASG_CONSOLIDADORA_INVALIDA']
+            );
         }
     }
 
@@ -142,15 +163,19 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
     {
         [$adapter, , $adodb] = $this->criarContexto();
         $adodb->resultadosGetAll = [[
-            ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986701'],
-            ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986701'],
-            ['UNIDADE_ORCAMENTARIA' => '20', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986702'],
+            ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+            ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+            ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986702'],
         ]];
 
         $resultado = $adapter->consultarAdotada($this->ano());
 
         $this->assertSame(SituacaoConsultaEstrategia::DISPONIVEL, $resultado->getSituacao());
         $this->assertSame(ModoPublicacao::INDIVIDUAL, $resultado->getEstrategia()?->getModo());
+        $this->assertStringContainsString(
+            'ESTRATEGIA_ADOTADA_PUBLICACAO AS ESTRATEGIA_ADOTADA',
+            $adodb->consultas[0]['sql']
+        );
     }
 
     public function testDeveConsultarEstrategiaAdotadaConsolidadaEResolverDescricao(): void
@@ -158,10 +183,13 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         [$adapter, , $adodb] = $this->criarContexto();
         $adodb->resultadosGetAll = [
             [
-                ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'C', 'UASG_ADOTADA' => '986700'],
-                ['UNIDADE_ORCAMENTARIA' => '20', 'MODO_ADOTADO' => 'C', 'UASG_ADOTADA' => '986700'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'CONSOLIDADO', 'UASG_ADOTADA' => '986700'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'CONSOLIDADO', 'UASG_ADOTADA' => '986700'],
             ],
-            [['CODIGO_UASG' => '986700', 'DESCRICAO_UASG' => 'Central']],
+            [
+                ['CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS', 'VALOR_CONFIGURACAO' => 'CONSOLIDADO'],
+                ['CHAVE_CONFIGURACAO' => 'UASG_CONSOLIDADORA', 'VALOR_CONFIGURACAO' => '986700', 'DESCRICAO_CONFIGURACAO' => 'Central'],
+            ],
         ];
 
         $resultado = $adapter->consultarAdotada($this->ano());
@@ -174,7 +202,7 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
     {
         [$adapterAusente, , $adodbAusente] = $this->criarContexto();
         $adodbAusente->resultadosGetAll = [[
-            ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => null, 'UASG_ADOTADA' => null],
+            ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
         ]];
 
         $this->assertSame(
@@ -184,19 +212,22 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
 
         $cenariosInvalidos = [
             [
-                ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => null, 'UASG_ADOTADA' => null],
-                ['UNIDADE_ORCAMENTARIA' => '20', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986702'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986702'],
             ],
             [
-                ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => null],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => null],
             ],
             [
-                ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986701'],
-                ['UNIDADE_ORCAMENTARIA' => '20', 'MODO_ADOTADO' => 'C', 'UASG_ADOTADA' => '986700'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'CONSOLIDADO', 'UASG_ADOTADA' => '986700'],
             ],
             [
-                ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986701'],
-                ['UNIDADE_ORCAMENTARIA' => '20', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986701'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+            ],
+            [
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'I', 'UASG_ADOTADA' => '986701'],
             ],
         ];
 
@@ -229,16 +260,16 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [
             [
-                ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => null, 'UASG_ADOTADA' => null],
-                ['UNIDADE_ORCAMENTARIA' => '20', 'MODO_ADOTADO' => null, 'UASG_ADOTADA' => null],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
             ],
             [
                 ['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => '986701', 'DESCRICAO_UASG' => 'UASG A'],
                 ['UNIDADE_ORCAMENTARIA' => '20', 'CODIGO_UASG' => '986702', 'DESCRICAO_UASG' => 'UASG B'],
             ],
             [
-                ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986701'],
-                ['UNIDADE_ORCAMENTARIA' => '20', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986702'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986702'],
             ],
         ];
 
@@ -247,20 +278,66 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         $this->assertTrue($resultado->foiAdotada());
         $this->assertTrue($conexao->estaEmTransacao());
         $this->assertCount(2, $adodb->execucoes);
+        $this->assertStringContainsString(
+            'SGI.PAC_UNIDADES_ORCAMENTARIAS',
+            $adodb->consultas[1]['sql']
+        );
+        $this->assertStringContainsString(
+            'u.ID_UNIDADE_ORCAMENTARIA = p.FK_UNIDADE_ORCAMENTARIA',
+            $adodb->consultas[1]['sql']
+        );
+        $this->assertSame(
+            [$this->ano()->getValor(), 'S'],
+            array_values($adodb->consultas[1]['parametros'])
+        );
         foreach ($adodb->execucoes as $execucao) {
-            $this->assertStringContainsString('MODO_PUBLICACAO IS NULL', $execucao['sql']);
-            $this->assertStringContainsString('UASG_PUBLICACAO IS NULL', $execucao['sql']);
+            $this->assertStringContainsString('ESTRATEGIA_ADOTADA_PUBLICACAO IS NULL', $execucao['sql']);
+            $this->assertStringContainsString('UASG_ADOTADA IS NULL', $execucao['sql']);
         }
         $this->assertSame(
-            ['I', '986701', $this->ano()->getValor(), '10'],
+            ['INDIVIDUAL', '986701', $this->ano()->getValor(), '10'],
             array_values($adodb->execucoes[0]['parametros'])
         );
         $this->assertSame(
-            ['I', '986702', $this->ano()->getValor(), '20'],
+            ['INDIVIDUAL', '986702', $this->ano()->getValor(), '20'],
             array_values($adodb->execucoes[1]['parametros'])
         );
         $this->assertSame(0, $adodb->commits);
         $conexao->desfazerTransacao();
+    }
+
+    public function testDeveRejeitarCadastroIndividualAusenteDuplicadoOuCompartilhado(): void
+    {
+        $cenarios = [
+            [['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => null, 'DESCRICAO_UASG' => null]],
+            [
+                ['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => '986701', 'DESCRICAO_UASG' => 'UASG A'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => '986702', 'DESCRICAO_UASG' => 'UASG B'],
+            ],
+            [
+                ['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => '986701', 'DESCRICAO_UASG' => 'UASG A'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'CODIGO_UASG' => '986701', 'DESCRICAO_UASG' => 'UASG A'],
+            ],
+        ];
+
+        foreach ($cenarios as $cadastros) {
+            [$adapter, $conexao, $adodb] = $this->criarContexto();
+            $conexao->iniciarTransacao();
+            $adodb->resultadosGetAll = [
+                [['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null]],
+                $cadastros,
+            ];
+
+            $resultado = $adapter->adotar($this->ano(), EstrategiaPublicacao::individual());
+
+            $this->assertFalse($resultado->foiAdotada());
+            $this->assertSame(
+                'DADOS_PARA_ADOCAO_ESTRATEGIA_INVALIDOS',
+                $resultado->getFalha()?->getCodigo()
+            );
+            $this->assertSame([], $adodb->execucoes);
+            $conexao->desfazerTransacao();
+        }
     }
 
     public function testDeveAdotarModoConsolidadoComUmaUasgParaTodasAsLinhas(): void
@@ -268,10 +345,8 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [
-            [['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => null, 'UASG_ADOTADA' => null]],
-            [['CODIGO_UASG' => '986700', 'DESCRICAO_UASG' => 'Central']],
-            [['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'C', 'UASG_ADOTADA' => '986700']],
-            [['CODIGO_UASG' => '986700', 'DESCRICAO_UASG' => 'Central']],
+            [['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null]],
+            [['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'CONSOLIDADO', 'UASG_ADOTADA' => '986700']],
         ];
 
         $resultado = $adapter->adotar(
@@ -282,7 +357,7 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         $this->assertTrue($resultado->foiAdotada());
         $this->assertCount(1, $adodb->execucoes);
         $this->assertSame(
-            ['C', '986700', $this->ano()->getValor()],
+            ['CONSOLIDADO', '986700', $this->ano()->getValor()],
             array_values($adodb->execucoes[0]['parametros'])
         );
         $this->assertTrue($conexao->estaEmTransacao());
@@ -294,7 +369,7 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
-            ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986701'],
+            ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
         ]];
 
         $resultado = $adapter->adotar($this->ano(), EstrategiaPublicacao::individual());
@@ -310,7 +385,7 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
-            ['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986701'],
+            ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
         ]];
 
         $resultado = $adapter->adotar(
@@ -329,9 +404,9 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [
-            [['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => null, 'UASG_ADOTADA' => null]],
+            [['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null]],
             [['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => '986701', 'DESCRICAO_UASG' => 'UASG A']],
-            [['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => null, 'UASG_ADOTADA' => null]],
+            [['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null]],
         ];
 
         $resultado = $adapter->adotar($this->ano(), EstrategiaPublicacao::individual());
@@ -347,7 +422,7 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [
-            [['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => null, 'UASG_ADOTADA' => null]],
+            [['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null]],
             [['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => '986701', 'DESCRICAO_UASG' => 'UASG A']],
         ];
         $adodb->errosExecute[0] = 3113;
@@ -367,15 +442,16 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         [$estrategia, $conexao, $adodb] = $this->criarContexto();
         $unidadeTrabalho = new OracleUnidadeDeTrabalhoAdapter(
             $conexao,
-            new MapeamentoFisicoAncorasOracle(
-                'APP', 'PAC_ANCORAS', 'ESCOPO', 'ANO', 'ALVO', 'ESTRATEGIA_GLOBAL'
+            new MapeamentoControlesConcorrenciaOracle(
+                'SGI', 'PAC_CONTROLES_CONCORRENCIA',
+                'ESCOPO', 'ANO_EXECUCAO', 'IDENTIFICADOR_ALVO', 'ESTRATEGIA_ANUAL'
             )
         );
         $adodb->resultadosGetAll = [
             [['ESCOPO' => 'LOCK']],
-            [['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => null, 'UASG_ADOTADA' => null]],
+            [['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null]],
             [['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => '986701', 'DESCRICAO_UASG' => 'UASG A']],
-            [['UNIDADE_ORCAMENTARIA' => '10', 'MODO_ADOTADO' => 'I', 'UASG_ADOTADA' => '986701']],
+            [['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701']],
         ];
         $ano = $this->ano();
 
@@ -399,15 +475,19 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         $adapter = new OracleEstrategiaPublicacaoAdapter(
             $conexao,
             new MapeamentoConfiguracaoEstrategiaOracle(
-                'APP', 'PAC_CONFIG', 'CHAVE', 'VALOR',
-                'PUBLICAR_EM_UNICA_UASG', 'UASG_CONSOLIDADORA', 'N', 'S'
+                'SGI', 'PAC_CONFIGURACOES', 'CHAVE', 'VALOR', 'DESCRICAO',
+                'ESTRATEGIA_PUBLICACAO_PLANOS', 'UASG_CONSOLIDADORA',
+                'INDIVIDUAL', 'CONSOLIDADO'
             ),
             new MapeamentoPlanosEstrategiaOracle(
-                'APP', 'PAC_PLANOS', 'ANO', 'UO', 'MODO_PUBLICACAO',
-                'UASG_PUBLICACAO', 'I', 'C'
+                'SGI', 'PAC_PLANOS', 'ANO_EXERCICIO', 'FK_UNIDADE_ORCAMENTARIA',
+                'ESTRATEGIA_ADOTADA_PUBLICACAO', 'UASG_ADOTADA',
+                'INDIVIDUAL', 'CONSOLIDADO'
             ),
-            new MapeamentoCadastroUasgOracle(
-                'APP', 'PAC_UO', 'ID_UO', 'CODIGO_UASG', 'DESCRICAO', 'ATIVA', 'S'
+            new MapeamentoUnidadesOrcamentariasOracle(
+                'SGI', 'PAC_UNIDADES_ORCAMENTARIAS',
+                'ID_UNIDADE_ORCAMENTARIA', 'ID_UNIDADE_ORCAMENTARIA',
+                'CODIGO_UASG', 'DESCRICAO_UASG', 'ATIVA', 'S'
             )
         );
 

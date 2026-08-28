@@ -404,8 +404,8 @@ Referências: RN-PUB-001 a RN-PUB-008, DI-001, DI-002 e DI-005.
 - criar ou atualizar o fluxo de implementação;
 - bloquear código afetado enquanto houver conflito documental.
 
-**Decisão do PCA:** DI-001 a DI-007 estão aceitas; DI-008 a DI-010 estão
-aceitas condicionalmente e preservam seus gates.
+**Decisão do PCA:** DI-001 a DI-007 e DI-009 estão aceitas; DI-008 e DI-010
+estão aceitas condicionalmente e preservam seus gates.
 
 #### Sprint 4.7 — Refatoração de convergência arquitetural com TDD
 
@@ -614,7 +614,7 @@ Relatório não autoritativo de suporte:
 
 - encapsular a conexão emprestada ou ativar o fallback aprovado;
 - compartilhar a mesma sessão entre os adapters;
-- implementar transação local e locks por âncoras permanentes;
+- implementar transação local e locks por controles de concorrência permanentes;
 - implementar leitura e adoção da estratégia;
 - nunca fechar conexão emprestada.
 
@@ -682,6 +682,23 @@ Referências: DI-001, DI-004 e DI-009.
 - executar contratos Oracle e PNCP autorizados;
 - validar sessão compartilhada, rollback, segurança e tradução de erros;
 - documentar limitações e evidências efetivamente observadas.
+
+#### Sprint 5.10 — Evidência de cancelamento e encerramento da Infrastructure
+
+- inventariar os critérios restantes da Fase 5 e investigar, com o DBA, a
+  fonte Oracle do cancelamento homologado que tornou a unidade vazia;
+- comprovar a fonte com massa dedicada criada pelo fluxo oficial do SGI e probe
+  opt-in exclusivamente de leitura;
+- pausar obrigatoriamente depois da investigação para aprovar o plano TDD do
+  mapeamento, do adapter e do gate real;
+- encerrar a Fase 5 somente depois de implementar a Port restante, aprovar seu
+  contrato Oracle e reconciliar o estado final da DI-008.
+
+Referências: RN-PUB-003, DI-007 e DI-008.
+
+**Ponto em aberto:** fonte física, autoridade do evento homologado, justificativa
+integral, vínculos e ordenação total devem ser comprovados antes de qualquer
+adapter. A Sprint 6.1 permanece bloqueada.
 
 ### Fase 6 — Wiring controlado do núcleo
 
@@ -878,7 +895,7 @@ O contexto, as alternativas e as consequências completas permanecem no
 | DI-006 | Auditoria e procedimentos PNCP | Registra somente fatos concluídos e confirmados | Aceita | Contratos Oracle de auditoria e contexto |
 | DI-007 | Portas necessárias na Application | Define capacidades internas sem vazamento tecnológico | Aceita | UseCase completo demonstrado com mocks |
 | DI-008 | Mecanismo Oracle | Define conexão, transação, lock, reconstrução e projeção | Aceita condicionalmente | ADOdb/OCI8, schema, sessão, datas e decimais |
-| DI-009 | Transporte HTTP | Define cURL, TLS, autenticação, leitura e escrita segura | Aceita condicionalmente | Runtime cURL/TLS e suíte no PNCP de treinamento |
+| DI-009 | Transporte HTTP | Define cURL, TLS, autenticação, leitura e escrita segura | Aceita | Reabrir somente diante de incompatibilidade externa concreta |
 | DI-010 | Composition Root e Scriptcase | Define fachada, composição, perfil e ciclo da execução | Aceita condicionalmente | Fachada, identidade, conexão e pacote em homologação |
 
 ## 7. Rastreabilidade por grupos de regras

@@ -18,6 +18,7 @@ use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
 use Semae\Pca\Infrastructure\Oracle\Adodb\FalhaOracleException;
 use Semae\Pca\Infrastructure\Oracle\Plano\DadosPlanoOracleInvalidosException;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoDemandasOracle;
+use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoLotacoesOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoPlanosOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoUnidadesOrcamentariasOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\OraclePlanoRepository;
@@ -28,8 +29,8 @@ final class OraclePlanoRepositoryTest extends TestCase
     {
         $adodb = new AdodbDescobertaPlanosFake();
         $adodb->resultadoGetAll = [
-            $this->linhaUnidade('202', 'UO-202', '928345'),
-            $this->linhaUnidade('101', 'UO-101', '928344'),
+            $this->linhaUnidade('202', '202', '928345'),
+            $this->linhaUnidade('101', '101', '928344'),
         ];
         $repository = $this->criarRepository($adodb);
 
@@ -37,7 +38,7 @@ final class OraclePlanoRepositoryTest extends TestCase
 
         $this->assertCount(2, $identidades);
         $this->assertSame(
-            ['UO-101', 'UO-202'],
+            ['101', '202'],
             array_map(
                 static fn ($identidade): string => $identidade
                     ->getUnidadeOrcamentaria()
@@ -51,19 +52,49 @@ final class OraclePlanoRepositoryTest extends TestCase
 
         $consulta = $adodb->consultas[0];
         $this->assertStringContainsString(
-            'SELECT DISTINCT p.FK_UO AS CHAVE_UO_PLANO',
+            'SELECT DISTINCT P.FK_UO AS CHAVE_UO_PLANO',
             $consulta['sql']
         );
         $this->assertStringContainsString(
-            'LEFT JOIN APP.PAC_UO u ON u.FK_LOTACAO = base.CHAVE_UO_PLANO',
+            'U.ID_UNIDADE_ORCAMENTARIA AS IDENTIDADE_UO',
             $consulta['sql']
         );
         $this->assertStringContainsString(
-            'AND u.ATIVA = :param_1',
+            'L.COD_LOTACAO AS ID_LOTACAO',
             $consulta['sql']
         );
         $this->assertStringContainsString(
-            'ORDER BY base.CHAVE_UO_PLANO, u.CODIGO_UO',
+            'L.NOME_LOTACAO AS DESCRICAO_LOTACAO',
+            $consulta['sql']
+        );
+        $this->assertStringContainsString(
+            'L.NOME_LOTACAO AS DESCRICAO_UO',
+            $consulta['sql']
+        );
+        $this->assertStringContainsString(
+            'U.CODIGO_UASG AS CODIGO_UASG',
+            $consulta['sql']
+        );
+        $this->assertStringContainsString(
+            'U.DESCRICAO_UASG AS DESCRICAO_UASG',
+            $consulta['sql']
+        );
+        $this->assertStringContainsString(
+            'LEFT JOIN APP.PAC_UO U '
+                . 'ON U.ID_UNIDADE_ORCAMENTARIA = BASE.CHAVE_UO_PLANO',
+            $consulta['sql']
+        );
+        $this->assertStringContainsString(
+            'LEFT JOIN APP.RH_LOTACOES L '
+                . 'ON L.COD_LOTACAO = U.ID_UNIDADE_ORCAMENTARIA',
+            $consulta['sql']
+        );
+        $this->assertStringContainsString(
+            'AND U.ATIVA = :param_1',
+            $consulta['sql']
+        );
+        $this->assertStringContainsString(
+            'ORDER BY BASE.CHAVE_UO_PLANO, U.ID_UNIDADE_ORCAMENTARIA',
             $consulta['sql']
         );
         $this->assertSame(
@@ -84,7 +115,7 @@ final class OraclePlanoRepositoryTest extends TestCase
     public function testDevePermitirDescobertaAntesEDuranteATransacaoCompartilhada(): void
     {
         $adodb = new AdodbDescobertaPlanosFake();
-        $adodb->resultadoGetAll = [$this->linhaUnidade('101', 'UO-101', '928344')];
+        $adodb->resultadoGetAll = [$this->linhaUnidade('101', '101', '928344')];
         $conexao = new ConexaoAdodbEmprestada($adodb);
         $repository = $this->criarRepository($adodb, $conexao);
 
@@ -212,18 +243,34 @@ final class OraclePlanoRepositoryTest extends TestCase
 
         $consultaDemandas = $adodb->consultas[1];
         $this->assertStringContainsString(
-            'JOIN APP.PAC_PLANOS origem ON origem.ID_PLANO = d.FK_PLANO',
+            'JOIN APP.PAC_PLANOS origem ON origem.ID_PLANO = D.FK_PLANO',
             $consultaDemandas['sql']
         );
+        $this->assertStringContainsString(
+            'LEFT JOIN CEBISIS.MT_GRUPOS_MATERIAIS@READ_ORCL MGM '
+                . 'ON MGM.CODIGO = D.GRUPO_CODIGO',
+            $consultaDemandas['sql']
+        );
+        $this->assertStringContainsString(
+            'MGM.DESCRICAO AS DESCRICAO_GRUPO',
+            $consultaDemandas['sql']
+        );
+        $this->assertStringNotContainsString(
+            'D.DESCRICAO_GRUPO AS DESCRICAO_GRUPO',
+            $consultaDemandas['sql']
+        );
+        $this->assertStringNotContainsString('TO_CHAR(D.GRUPO_CODIGO', $consultaDemandas['sql']);
+        $this->assertStringNotContainsString('TO_NUMBER(MGM.CODIGO', $consultaDemandas['sql']);
+        $this->assertStringNotContainsString('WHERE MGM.', $consultaDemandas['sql']);
         $this->assertStringNotContainsString('origem.VERSAO =', $consultaDemandas['sql']);
         $this->assertStringContainsString(
-            'd.SITUACAO IN (:param_2, :param_3, :param_4)',
+            'D.SITUACAO IN (:param_2, :param_3, :param_4)',
             $consultaDemandas['sql']
         );
-        $this->assertStringContainsString('ORDER BY d.ID_DEMANDA', $consultaDemandas['sql']);
+        $this->assertStringContainsString('ORDER BY D.ID_DEMANDA', $consultaDemandas['sql']);
         $this->assertStringNotContainsString('SEQUENCIAL', strtoupper($consultaDemandas['sql']));
         $this->assertStringContainsString(
-            "TO_CHAR(d.VALOR_TOTAL, 'FM9999999999990D0000', "
+            "TO_CHAR(D.VALOR_TOTAL, 'FM9999999999990D0000', "
                 . "'NLS_NUMERIC_CHARACTERS=''.,''') AS VALOR_TOTAL",
             $consultaDemandas['sql']
         );
@@ -620,22 +667,31 @@ final class OraclePlanoRepositoryTest extends TestCase
                 'VALOR_ORCAMENTO_EXERCICIO',
                 'CATALOGO',
                 'CODIGO_ITEM',
-                'GRUPO',
-                'DESCRICAO_GRUPO',
+                'GRUPO_CODIGO',
+                [
+                    'schema' => 'CEBISIS',
+                    'tabela' => 'MT_GRUPOS_MATERIAIS',
+                    'dblink' => 'READ_ORCL',
+                    'colunaCodigo' => 'CODIGO',
+                    'colunaDescricao' => 'DESCRICAO',
+                ],
                 'ORIGEM'
             ),
             new MapeamentoUnidadesOrcamentariasOracle(
                 'APP',
                 'PAC_UO',
-                'FK_LOTACAO',
-                'CODIGO_UO',
-                'ID_LOTACAO',
-                'DESCRICAO_LOTACAO',
-                'DESCRICAO_UO',
-                'UASG',
+                'ID_UNIDADE_ORCAMENTARIA',
+                'ID_UNIDADE_ORCAMENTARIA',
+                'CODIGO_UASG',
                 'DESCRICAO_UASG',
                 'ATIVA',
                 'S'
+            ),
+            new MapeamentoLotacoesOracle(
+                'APP',
+                'RH_LOTACOES',
+                'COD_LOTACAO',
+                'NOME_LOTACAO'
             ),
             new DateTimeZone('America/Sao_Paulo')
         );
@@ -649,7 +705,7 @@ final class OraclePlanoRepositoryTest extends TestCase
             'IDENTIDADE_UO' => $identidade,
             'ID_LOTACAO' => $chave,
             'DESCRICAO_LOTACAO' => 'Lotação ' . $chave,
-            'DESCRICAO_UO' => 'Unidade Orçamentária ' . $chave,
+            'DESCRICAO_UO' => 'Lotação ' . $chave,
             'CODIGO_UASG' => $uasg,
             'DESCRICAO_UASG' => 'UASG ' . $uasg,
         ];

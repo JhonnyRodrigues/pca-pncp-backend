@@ -12,9 +12,6 @@ final class MapeamentoUnidadesOrcamentariasOracle
     private readonly string $tabela;
     private readonly string $colunaRelacaoPlano;
     private readonly string $colunaIdentidade;
-    private readonly string $colunaLotacao;
-    private readonly string $colunaDescricaoLotacao;
-    private readonly string $colunaDescricao;
     private readonly string $colunaCodigoUasg;
     private readonly string $colunaDescricaoUasg;
     private readonly string $colunaAtivo;
@@ -25,9 +22,6 @@ final class MapeamentoUnidadesOrcamentariasOracle
         string $tabela,
         string $colunaRelacaoPlano,
         string $colunaIdentidade,
-        string $colunaLotacao,
-        string $colunaDescricaoLotacao,
-        string $colunaDescricao,
         string $colunaCodigoUasg,
         string $colunaDescricaoUasg,
         string $colunaAtivo,
@@ -45,18 +39,6 @@ final class MapeamentoUnidadesOrcamentariasOracle
         $this->colunaIdentidade = self::normalizarIdentificador(
             $colunaIdentidade,
             'coluna de identidade da UO'
-        );
-        $this->colunaLotacao = self::normalizarIdentificador(
-            $colunaLotacao,
-            'coluna da Lotação'
-        );
-        $this->colunaDescricaoLotacao = self::normalizarIdentificador(
-            $colunaDescricaoLotacao,
-            'coluna da descrição da Lotação'
-        );
-        $this->colunaDescricao = self::normalizarIdentificador(
-            $colunaDescricao,
-            'coluna da descrição da UO'
         );
         $this->colunaCodigoUasg = self::normalizarIdentificador(
             $colunaCodigoUasg,
@@ -92,21 +74,6 @@ final class MapeamentoUnidadesOrcamentariasOracle
     public function getColunaIdentidade(): string
     {
         return $this->colunaIdentidade;
-    }
-
-    public function getColunaLotacao(): string
-    {
-        return $this->colunaLotacao;
-    }
-
-    public function getColunaDescricaoLotacao(): string
-    {
-        return $this->colunaDescricaoLotacao;
-    }
-
-    public function getColunaDescricao(): string
-    {
-        return $this->colunaDescricao;
     }
 
     public function getColunaCodigoUasg(): string

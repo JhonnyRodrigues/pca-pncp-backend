@@ -26,7 +26,7 @@ conexão, SQL de negócio, linha de negócio ou payload/resposta integral.
 ## 2. Matriz final dos gates
 
 | Gate | Ambiente/prova | Estado final | Resultado e efeito |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Linha de base | PHPUnit padrão no workspace | **CONFIRMADO** | 339 testes e 1139 asserções |
 | Isolamento da suíte externa | PHPUnit/Composer | **CONFIRMADO** | `composer tests` não alcança Oracle nem PNCP |
 | Fail-closed e configuração externa | preflight estrutural | **CONFIRMADO** | configuração ausente ou insegura é recusada antes de I/O externo |
@@ -200,7 +200,7 @@ semanticamente equivalentes, desconsiderando exemplos dinâmicos e ordem de
 chaves:
 
 | Ambiente | SHA-256 bruto |
-|---|---|
+| --- | --- |
 | Produção | `2280edf0855ffc3b808f133a51dd5ac335ff92dd8bdc788d8140ac3260efd5fd` |
 | Treinamento | `3b92f43dfa9486affae6a5238219eb6006a062dce80ec170155511dda1d4f759` |
 

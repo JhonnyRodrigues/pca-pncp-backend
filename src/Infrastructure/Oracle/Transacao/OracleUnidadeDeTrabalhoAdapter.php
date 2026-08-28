@@ -19,7 +19,7 @@ final class OracleUnidadeDeTrabalhoAdapter implements UnidadeDeTrabalhoPort
 {
     public function __construct(
         private readonly ConexaoAdodbEmprestada $conexao,
-        private readonly MapeamentoFisicoAncorasOracle $mapeamento
+        private readonly MapeamentoControlesConcorrenciaOracle $mapeamento
     ) {}
 
     public function iniciar(ChaveUnidadeTrabalho $chave): ResultadoInicioUnidadeTrabalho
@@ -33,7 +33,11 @@ final class OracleUnidadeDeTrabalhoAdapter implements UnidadeDeTrabalhoPort
 
         try {
             [$escopo, $anoExecucao, $identificadorAlvo] = $this->traduzirChave($chave);
-            $this->provisionarAncora($escopo, $anoExecucao, $identificadorAlvo);
+            $this->provisionarControleConcorrencia(
+                $escopo,
+                $anoExecucao,
+                $identificadorAlvo
+            );
             $this->conexao->iniciarTransacao();
 
             $linhas = $this->conexao->buscarTodos(
@@ -43,7 +47,7 @@ final class OracleUnidadeDeTrabalhoAdapter implements UnidadeDeTrabalhoPort
 
             if (count($linhas) !== 1) {
                 throw new LogicException(
-                    'A âncora Oracle não possui cardinalidade única.'
+                    'A linha de controle de concorrência Oracle não possui cardinalidade única.'
                 );
             }
 
@@ -63,7 +67,7 @@ final class OracleUnidadeDeTrabalhoAdapter implements UnidadeDeTrabalhoPort
                 'ORA-00942' => ResultadoInicioUnidadeTrabalho::falhaSistemica(
                     new FalhaSegura(
                         'TABELA_ANCORAS_INDISPONIVEL',
-                        'A tabela técnica de âncoras Oracle não está disponível.'
+                        'A tabela técnica de controles de concorrência Oracle não está disponível.'
                     )
                 ),
                 default => $this->falhaInicio(),
@@ -137,7 +141,7 @@ final class OracleUnidadeDeTrabalhoAdapter implements UnidadeDeTrabalhoPort
         ];
     }
 
-    private function provisionarAncora(
+    private function provisionarControleConcorrencia(
         string $escopo,
         int $anoExecucao,
         string $identificadorAlvo

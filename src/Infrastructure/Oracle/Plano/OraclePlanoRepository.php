@@ -23,6 +23,7 @@ final class OraclePlanoRepository implements PlanoRepository
         private readonly MapeamentoPlanosOracle $planos,
         private readonly MapeamentoDemandasOracle $demandas,
         private readonly MapeamentoUnidadesOrcamentariasOracle $unidadesOrcamentarias,
+        private readonly MapeamentoLotacoesOracle $lotacoes,
         DateTimeZone $fusoOperacional
     ) {
         $this->mapeador = new MapeadorDadosPlanoOracle($fusoOperacional);
@@ -160,24 +161,27 @@ final class OraclePlanoRepository implements PlanoRepository
         $tabelaUo = $this->unidadesOrcamentarias->getTabelaQualificada();
         $colunaRelacao = $this->unidadesOrcamentarias->getColunaRelacaoPlano();
         $colunaIdentidade = $this->unidadesOrcamentarias->getColunaIdentidade();
-        $colunaLotacao = $this->unidadesOrcamentarias->getColunaLotacao();
-        $colunaDescricaoLotacao = $this->unidadesOrcamentarias->getColunaDescricaoLotacao();
-        $colunaDescricao = $this->unidadesOrcamentarias->getColunaDescricao();
         $colunaCodigoUasg = $this->unidadesOrcamentarias->getColunaCodigoUasg();
         $colunaDescricaoUasg = $this->unidadesOrcamentarias->getColunaDescricaoUasg();
         $colunaAtivo = $this->unidadesOrcamentarias->getColunaAtivo();
+        $tabelaLotacoes = $this->lotacoes->getTabelaQualificada();
+        $colunaIdLotacao = $this->lotacoes->getColunaId();
+        $colunaDescricaoLotacao = $this->lotacoes->getColunaDescricao();
 
-        return "SELECT base.CHAVE_UO_PLANO, u.{$colunaIdentidade} AS IDENTIDADE_UO, "
-            . "u.{$colunaLotacao} AS ID_LOTACAO, "
-            . "u.{$colunaDescricaoLotacao} AS DESCRICAO_LOTACAO, "
-            . "u.{$colunaDescricao} AS DESCRICAO_UO, "
-            . "u.{$colunaCodigoUasg} AS CODIGO_UASG, "
-            . "u.{$colunaDescricaoUasg} AS DESCRICAO_UASG "
-            . "FROM (SELECT DISTINCT p.{$colunaUoPlano} AS CHAVE_UO_PLANO "
-            . "FROM {$tabelaPlanos} p WHERE p.{$colunaAno} = ?) base "
-            . "LEFT JOIN {$tabelaUo} u ON u.{$colunaRelacao} = base.CHAVE_UO_PLANO "
-            . "AND u.{$colunaAtivo} = ? "
-            . "ORDER BY base.CHAVE_UO_PLANO, u.{$colunaIdentidade}";
+        return "SELECT BASE.CHAVE_UO_PLANO, U.{$colunaIdentidade} AS IDENTIDADE_UO, "
+            . "L.{$colunaIdLotacao} AS ID_LOTACAO, "
+            . "L.{$colunaDescricaoLotacao} AS DESCRICAO_LOTACAO, "
+            . "L.{$colunaDescricaoLotacao} AS DESCRICAO_UO, "
+            . "U.{$colunaCodigoUasg} AS CODIGO_UASG, "
+            . "U.{$colunaDescricaoUasg} AS DESCRICAO_UASG "
+            . "FROM (SELECT DISTINCT P.{$colunaUoPlano} AS CHAVE_UO_PLANO "
+            . "FROM {$tabelaPlanos} P WHERE P.{$colunaAno} = ?) BASE "
+            . "LEFT JOIN {$tabelaUo} U "
+            . "ON U.{$colunaRelacao} = BASE.CHAVE_UO_PLANO "
+            . "AND U.{$colunaAtivo} = ? "
+            . "LEFT JOIN {$tabelaLotacoes} L "
+            . "ON L.{$colunaIdLotacao} = U.{$colunaIdentidade} "
+            . "ORDER BY BASE.CHAVE_UO_PLANO, U.{$colunaIdentidade}";
     }
 
     private function sqlBuscarVersaoVigente(): string
@@ -218,7 +222,9 @@ final class OraclePlanoRepository implements PlanoRepository
         $colunaCatalogo = $this->demandas->getColunaCatalogo();
         $colunaCodigoItem = $this->demandas->getColunaCodigoItem();
         $colunaGrupo = $this->demandas->getColunaGrupo();
-        $colunaDescricaoGrupo = $this->demandas->getColunaDescricaoGrupo();
+        $tabelaGrupoRemoto = $this->demandas->getTabelaGrupoRemotoQualificada();
+        $colunaCodigoGrupoRemoto = $this->demandas->getColunaCodigoGrupoRemoto();
+        $colunaDescricaoGrupoRemoto = $this->demandas->getColunaDescricaoGrupoRemoto();
         $colunaOrigem = $this->demandas->getColunaOrigem();
         $colunaIdPlano = $this->planos->getColunaId();
         $colunaUoPlano = $this->planos->getColunaUnidadeOrcamentaria();
@@ -226,28 +232,30 @@ final class OraclePlanoRepository implements PlanoRepository
         $mascaraDecimal = 'FM9999999999990D0000';
         $configuracaoDecimal = "NLS_NUMERIC_CHARACTERS=''.,''";
 
-        return "SELECT d.{$colunaIdDemanda} AS ID_DEMANDA, "
-            . "d.{$colunaSituacao} AS SITUACAO, "
-            . "d.{$colunaUnidadeRequisitante} AS ID_UNIDADE_REQUISITANTE, "
-            . "TO_CHAR(d.{$colunaDataDesejada}, 'YYYY-MM-DD') AS DATA_DESEJADA, "
-            . "d.{$colunaCategoria} AS CATEGORIA, "
-            . "d.{$colunaDescricao} AS DESCRICAO_DEMANDA, "
-            . "d.{$colunaUnidadeMedida} AS UNIDADE_MEDIDA, "
-            . "d.{$colunaQuantidade} AS QUANTIDADE, "
-            . "TO_CHAR(d.{$colunaValorTotal}, '{$mascaraDecimal}', "
+        return "SELECT D.{$colunaIdDemanda} AS ID_DEMANDA, "
+            . "D.{$colunaSituacao} AS SITUACAO, "
+            . "D.{$colunaUnidadeRequisitante} AS ID_UNIDADE_REQUISITANTE, "
+            . "TO_CHAR(D.{$colunaDataDesejada}, 'YYYY-MM-DD') AS DATA_DESEJADA, "
+            . "D.{$colunaCategoria} AS CATEGORIA, "
+            . "D.{$colunaDescricao} AS DESCRICAO_DEMANDA, "
+            . "D.{$colunaUnidadeMedida} AS UNIDADE_MEDIDA, "
+            . "D.{$colunaQuantidade} AS QUANTIDADE, "
+            . "TO_CHAR(D.{$colunaValorTotal}, '{$mascaraDecimal}', "
             . "'{$configuracaoDecimal}') AS VALOR_TOTAL, "
-            . "TO_CHAR(d.{$colunaValorOrcamento}, '{$mascaraDecimal}', "
+            . "TO_CHAR(D.{$colunaValorOrcamento}, '{$mascaraDecimal}', "
             . "'{$configuracaoDecimal}') AS VALOR_ORCAMENTO_EXERCICIO, "
-            . "d.{$colunaCatalogo} AS CATALOGO, "
-            . "d.{$colunaCodigoItem} AS CODIGO_ITEM, "
-            . "d.{$colunaGrupo} AS GRUPO, "
-            . "d.{$colunaDescricaoGrupo} AS DESCRICAO_GRUPO, "
-            . "d.{$colunaOrigem} AS ORIGEM "
-            . "FROM {$tabelaDemandas} d "
-            . "JOIN {$tabelaPlanos} origem ON origem.{$colunaIdPlano} = d.{$colunaPlanoOrigem} "
+            . "D.{$colunaCatalogo} AS CATALOGO, "
+            . "D.{$colunaCodigoItem} AS CODIGO_ITEM, "
+            . "D.{$colunaGrupo} AS GRUPO, "
+            . "MGM.{$colunaDescricaoGrupoRemoto} AS DESCRICAO_GRUPO, "
+            . "D.{$colunaOrigem} AS ORIGEM "
+            . "FROM {$tabelaDemandas} D "
+            . "JOIN {$tabelaPlanos} origem ON origem.{$colunaIdPlano} = D.{$colunaPlanoOrigem} "
+            . "LEFT JOIN {$tabelaGrupoRemoto} MGM "
+            . "ON MGM.{$colunaCodigoGrupoRemoto} = D.{$colunaGrupo} "
             . "WHERE origem.{$colunaUoPlano} = ? AND origem.{$colunaAnoPlano} = ? "
-            . "AND d.{$colunaSituacao} IN (?, ?, ?) "
-            . "ORDER BY d.{$colunaIdDemanda}";
+            . "AND D.{$colunaSituacao} IN (?, ?, ?) "
+            . "ORDER BY D.{$colunaIdDemanda}";
     }
 
     private function sqlLerConfirmacaoExata(): string

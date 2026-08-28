@@ -12,20 +12,20 @@ final class MapeamentoPlanosEstrategiaOracle
     private readonly string $tabela;
     private readonly string $colunaAnoExecucao;
     private readonly string $colunaUnidadeOrcamentaria;
-    private readonly string $colunaModoAdotado;
+    private readonly string $colunaEstrategiaAdotada;
     private readonly string $colunaUasgAdotada;
-    private readonly string $literalModoIndividual;
-    private readonly string $literalModoConsolidado;
+    private readonly string $literalEstrategiaIndividual;
+    private readonly string $literalEstrategiaConsolidada;
 
     public function __construct(
         string $schema,
         string $tabela,
         string $colunaAnoExecucao,
         string $colunaUnidadeOrcamentaria,
-        string $colunaModoAdotado,
+        string $colunaEstrategiaAdotada,
         string $colunaUasgAdotada,
-        string $literalModoIndividual,
-        string $literalModoConsolidado
+        string $literalEstrategiaIndividual,
+        string $literalEstrategiaConsolidada
     ) {
         $this->schema = self::normalizarIdentificador($schema, 'schema');
         $this->tabela = self::normalizarIdentificador($tabela, 'tabela de Planos');
@@ -37,26 +37,26 @@ final class MapeamentoPlanosEstrategiaOracle
             $colunaUnidadeOrcamentaria,
             'coluna de UO dos Planos'
         );
-        $this->colunaModoAdotado = self::normalizarIdentificador(
-            $colunaModoAdotado,
-            'coluna do modo adotado'
+        $this->colunaEstrategiaAdotada = self::normalizarIdentificador(
+            $colunaEstrategiaAdotada,
+            'coluna da estratégia adotada'
         );
         $this->colunaUasgAdotada = self::normalizarIdentificador(
             $colunaUasgAdotada,
             'coluna da UASG adotada'
         );
-        $this->literalModoIndividual = self::normalizarLiteral(
-            $literalModoIndividual,
-            'literal persistido do modo individual'
+        $this->literalEstrategiaIndividual = self::normalizarLiteral(
+            $literalEstrategiaIndividual,
+            'literal persistido da estratégia individual'
         );
-        $this->literalModoConsolidado = self::normalizarLiteral(
-            $literalModoConsolidado,
-            'literal persistido do modo consolidado'
+        $this->literalEstrategiaConsolidada = self::normalizarLiteral(
+            $literalEstrategiaConsolidada,
+            'literal persistido da estratégia consolidada'
         );
 
-        if ($this->literalModoIndividual === $this->literalModoConsolidado) {
+        if ($this->literalEstrategiaIndividual === $this->literalEstrategiaConsolidada) {
             throw new InvalidArgumentException(
-                'Os literais persistidos dos modos devem ser distintos.'
+                'Os literais persistidos das estratégias devem ser distintos.'
             );
         }
     }
@@ -76,9 +76,9 @@ final class MapeamentoPlanosEstrategiaOracle
         return $this->colunaUnidadeOrcamentaria;
     }
 
-    public function getColunaModoAdotado(): string
+    public function getColunaEstrategiaAdotada(): string
     {
-        return $this->colunaModoAdotado;
+        return $this->colunaEstrategiaAdotada;
     }
 
     public function getColunaUasgAdotada(): string
@@ -86,14 +86,14 @@ final class MapeamentoPlanosEstrategiaOracle
         return $this->colunaUasgAdotada;
     }
 
-    public function getLiteralModoIndividual(): string
+    public function getLiteralEstrategiaIndividual(): string
     {
-        return $this->literalModoIndividual;
+        return $this->literalEstrategiaIndividual;
     }
 
-    public function getLiteralModoConsolidado(): string
+    public function getLiteralEstrategiaConsolidada(): string
     {
-        return $this->literalModoConsolidado;
+        return $this->literalEstrategiaConsolidada;
     }
 
     private static function normalizarIdentificador(string $valor, string $campo): string

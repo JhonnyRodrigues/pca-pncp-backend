@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 26/08/2026
+**Atualizado em:** 28/08/2026
 
 ## Limites de autoridade
 
@@ -32,10 +32,78 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 5.8.
-- A próxima sprint na ordem é a Sprint 5.9 — Suíte de contratos dos adapters.
-- A Sprint 5.9 não foi iniciada e este registro não constitui autorização
-  implícita para iniciá-la.
+- A última sprint concluída é a Sprint 5.9.
+- A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
+- A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
+  aprovado no treinamento, incluindo publicação, operações de itens, exclusão
+  integral, ausência definitiva, TLS e eventos sanitizados. O gate Oracle foi
+  aprovado no Scriptcase real nos modos `adapters`, `lock_holder`,
+  `lock_expect_blocked` e `lock_expect_available`.
+- A Fase 5 não está encerrada. `EvidenciaCancelamentoHomologadoPort` ainda não
+  possui adapter concreto.
+- A Sprint 5.10 — Evidência de cancelamento e encerramento da Infrastructure
+  está em andamento no incremento investigativo. A suíte read-only controlada
+  foi implementada; a confirmação da fonte pelo DBA, a preparação da massa no
+  SGI e a execução Oracle real permanecem pendentes.
+- A suíte controlada da Sprint 5.10 aprovou 17 testes e 46 asserções. As suítes
+  dos adapters, dos contratos controlados 5.9, dos contratos legados e padrão
+  permaneceram verdes, respectivamente com 476/1.804, 54/149, 24/51 e
+  815/2.949 testes/asserções em PHP 8.4.7.
+- A Fase 6 permanece bloqueada até o encerramento explícito da Fase 5 e
+  planejamento e autorização próprios; a Sprint 6.1 não está autorizada.
+
+## Evidências da Sprint 5.9
+
+- `tests/Contract/Sprint59/` contém uma suíte separada e opt-in. Ela não é
+  descoberta por `phpunit.xml` e não altera os contratos legados da Sprint 5.1.
+- `PCA_SPRINT59_CONFIG_FILE` aponta para configuração externa ao repositório.
+  O preflight falha fechado sem autorização explícita de escrita, recusa URL
+  PNCP configurável, valida o ambiente canônico de homologação e instancia os
+  mapeamentos Oracle de produção antes de qualquer I/O externo.
+- O runner PNCP monta `TransporteCurlPncp`, serializer, autenticador, leitor,
+  escritor e acumulador de eventos concretos. Seu fluxo recusa candidato
+  desconhecido, publica IDs lacunados e decimais exatos, observa, inclui,
+  exclui item, exclui o PCA e só confirma após ausência definitiva. Resíduo
+  explicitamente autorizado agora é tratado por limpeza isolada; enquanto a
+  configuração o indicar, o fluxo normal recusa nova publicação.
+- A base de transporte permanece `https://treina.pncp.gov.br/api/pncp`. O
+  parser de `Location` reconhece também o prefixo `/pncp-api` comprovadamente
+  emitido pelo mesmo host HTTPS de homologação, sem generalizá-lo para produção
+  ou aceitar URL externa configurável.
+- O entrypoint exclusivo da suíte
+  `executar_contratos_adapters_oracle_sprint_59($db, $login, $mode)` possui os
+  modos `adapters`, `lock_holder`, `lock_expect_blocked` e
+  `lock_expect_available`. Ele usa uma única `ConexaoAdodbEmprestada` e os
+  adapters concretos de unidade de trabalho, estratégia, Plano, estado,
+  contexto e auditoria.
+- O modo Oracle principal verifica binds, mesma sessão, leituras tipadas,
+  visibilidade transacional, confirmação/estado/auditoria atômicos, restauração
+  por rollback e reutilização posterior da conexão. Uma guarda impede e detecta
+  tentativa de `Close()` antes que alcance a conexão emprestada.
+- O estado operacional usa exclusivamente `SGI.PAC_PLANOS`. A estratégia
+  (`ESTRATEGIA_ADOTADA_PUBLICACAO` e `UASG_ADOTADA`) é apenas verificada pela
+  leitura; a gravação altera somente `ESTADO_PUBLICACAO` e
+  `SEQUENCIAL_PUBLICACAO_PNCP`. O sequencial externo positivo é preservado no
+  estado `EXCLUIDO`, e `SGI.PAC_CONTROLES_CONCORRENCIA` permanece restrita à
+  exclusividade técnica. As duas colunas de estado foram exercitadas no gate
+  Oracle/Scriptcase real; seu provisionamento por DDL permanece uma
+  responsabilidade operacional externa ao backend.
+- A suíte controlada aprovou 54 testes e 149 asserções; a suíte dos adapters
+  aprovou 468 testes e 1.779 asserções; os 24 contratos legados e suas 51
+  asserções e a suíte padrão com 807 testes e 2.924 asserções permaneceram
+  verdes. O autoload PSR-4 estrito gerou 1.734 classes, lint dos arquivos PHP
+  afetados e `git diff --check` foram aprovados. As execuções usaram PHP 8.4.7.
+- O relatório investigativo sanitizado está em
+  [Evidências da Sprint 5.9](../../investigacoes/evidencias_parciais_sprint_5_9_contratos_adapters_2026-08-26.md).
+
+O resíduo PCA 24 teve ausência definitiva confirmada sem nova publicação. Em
+seguida, o gate PNCP executou o ciclo real completo e aprovou limpeza e eventos
+sanitizados. O relatório externo produziu o hash SHA-256
+`a2043402655b87762b2c3b7677cdee333e948961c3993bca2f28a3ccb30e7344`.
+O gate Oracle foi aprovado nos quatro modos contratuais. O arquivo externo
+agregado produziu o hash SHA-256
+`6a5f63d50fbd2af121700027dc5a00735bc264cff4dfbe54bbf1cb1fa5c87648` e não
+expôs credenciais, CNPJ, URL, token ou `Authorization`.
 
 ## Evidências da Sprint 5.8
 
@@ -245,30 +313,38 @@ Sprint 5.3.
   `FOR UPDATE NOWAIT` e contenção traduzível a partir de `ORA-00054`.
 - O gate PNCP confirmou os contratos autorizados de runtime, TLS, autenticação,
   leitura e escrita no ambiente de treinamento.
-- Os contratos não reais confirmaram os mapeamentos de contexto, estado e
-  auditoria; a validação no Oracle e no Scriptcase reais permanece futura.
+- O gate dos adapters confirmou contexto, estado operacional e auditoria sobre
+  a mesma sessão Oracle real, com restauração integral por rollback.
 
 As evidências não autoritativas da Sprint 5.1 permanecem em
 [Evidências dos gates Oracle e PNCP](../../investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md).
 
 ## Pendências não bloqueantes
 
-- A compatibilidade externa do PNCP com CNPJ alfanumérico permanece **AINDA
-  NÃO COMPROVADA**.
+- A compatibilidade com CNPJ alfanumérico integra o contrato aceito da DI-009.
+  Eventual incompatibilidade externa concreta reabrirá somente essa decisão.
 - Uma chamada única com 1.001 itens permanece **AINDA NÃO COMPROVADA**.
 - O limite operacional continua em 1.000 itens por chamada.
 
 ## Restrições para o próximo avanço
 
-- O provisionamento de âncoras depende de tabela e colunas preexistentes,
+- O provisionamento de controles de concorrência depende de tabela e colunas preexistentes,
   fornecidas pelo mapeamento físico; o backend não cria DDL nem aplica
   fallback se a tabela estiver ausente.
 - Nomes físicos, credenciais, tokens e strings de conexão não possuem default
   no código e não devem ser registrados neste documento.
 - A conexão ADOdb fornecida pelo Scriptcase permanece emprestada e nunca pode
   ser fechada pelo backend.
-- Os contratos autorizados dos adapters e as evidências em ambientes reais
-  permanecem no escopo ainda não iniciado da Sprint 5.9.
+- Os contratos autorizados dos adapters e os gates reais Oracle/Scriptcase e
+  PNCP de treinamento da Sprint 5.9 estão aprovados.
+- A ausência de adapter concreto para `EvidenciaCancelamentoHomologadoPort`
+  impede encerrar a Fase 5. O inventário da Sprint 5.10 confirmou essa como a
+  única Port sem implementação concreta.
+- A fonte física, a autoridade do cancelamento homologado, a justificativa
+  integral, os vínculos e a ordenação total ainda devem ser comprovados pelo
+  DBA e pelo probe read-only antes do planejamento do adapter.
+- A Fase 6 e a Sprint 6.1 permanecem bloqueadas até planejamento e autorização
+  próprios para tratar essa lacuna.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos

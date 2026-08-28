@@ -15,15 +15,19 @@ use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 use Semae\Pca\Domain\ValueObjects\Uasg;
 use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
 use Semae\Pca\Infrastructure\Oracle\Adodb\FalhaOracleException;
+use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoUnidadesOrcamentariasOracle;
 use Throwable;
 
 final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPort
 {
+    /** @var array<string, string> */
+    private array $descricoesUasgConfiguradas = [];
+
     public function __construct(
         private readonly ConexaoAdodbEmprestada $conexao,
         private readonly MapeamentoConfiguracaoEstrategiaOracle $configuracao,
         private readonly MapeamentoPlanosEstrategiaOracle $planos,
-        private readonly MapeamentoCadastroUasgOracle $cadastroUasg
+        private readonly MapeamentoUnidadesOrcamentariasOracle $unidadesOrcamentarias
     ) {}
 
     public function consultarCorrente(AnoExecucao $anoExecucao): ResultadoConsultaEstrategia
@@ -32,7 +36,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
             $linhas = $this->conexao->buscarTodos(
                 $this->sqlConfiguracaoCorrente(),
                 [
-                    $this->configuracao->getChaveModo(),
+                    $this->configuracao->getChaveEstrategia(),
                     $this->configuracao->getChaveUasgConsolidadora(),
                 ]
             );
@@ -42,21 +46,21 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
             }
 
             $valores = $this->indexarConfiguracao($linhas);
-            $chaveModo = $this->configuracao->getChaveModo();
+            $chaveEstrategia = $this->configuracao->getChaveEstrategia();
 
-            if (!array_key_exists($chaveModo, $valores)) {
+            if (!array_key_exists($chaveEstrategia, $valores)) {
                 throw new EstrategiaOracleInvalidaException();
             }
 
-            $modo = $valores[$chaveModo];
+            $estrategia = $valores[$chaveEstrategia]['valor'];
 
-            if ($modo === $this->configuracao->getLiteralModoIndividual()) {
+            if ($estrategia === $this->configuracao->getLiteralEstrategiaIndividual()) {
                 return ResultadoConsultaEstrategia::disponivel(
                     EstrategiaPublicacao::individual()
                 );
             }
 
-            if ($modo !== $this->configuracao->getLiteralModoConsolidado()) {
+            if ($estrategia !== $this->configuracao->getLiteralEstrategiaConsolidada()) {
                 throw new EstrategiaOracleInvalidaException();
             }
 
@@ -66,12 +70,17 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
                 throw new EstrategiaOracleInvalidaException();
             }
 
+            $dadosUasg = $valores[$chaveUasg];
+
             try {
-                $uasg = $this->resolverUasgAtiva($valores[$chaveUasg]);
-            } catch (EstrategiaOracleInvalidaException) {
+                $codigoUasg = $this->textoObrigatorio($dadosUasg['valor']);
+                $descricaoUasg = $this->textoObrigatorio($dadosUasg['descricao']);
+                $uasg = new Uasg($codigoUasg, $descricaoUasg);
+                $this->descricoesUasgConfiguradas[$codigoUasg] = $descricaoUasg;
+            } catch (Throwable) {
                 return ResultadoConsultaEstrategia::invalida(new FalhaSegura(
                     'UASG_CONSOLIDADORA_INVALIDA',
-                    'A UASG consolidadora não possui um cadastro ativo único e válido.'
+                    'A configuração da UASG consolidadora não possui código e descrição válidos.'
                 ));
             }
 
@@ -186,7 +195,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
 
     /**
      * @param array<int, array<string, mixed>> $linhas
-     * @return array<string, string>
+     * @return array<string, array{valor: string, descricao: ?string}>
      */
     private function indexarConfiguracao(array $linhas): array
     {
@@ -195,12 +204,13 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         foreach ($linhas as $linha) {
             $chave = $this->textoObrigatorio($linha['CHAVE_CONFIGURACAO'] ?? null);
             $valor = $this->textoObrigatorio($linha['VALOR_CONFIGURACAO'] ?? null);
+            $descricao = $this->textoOpcional($linha['DESCRICAO_CONFIGURACAO'] ?? null);
 
             if (array_key_exists($chave, $valores)) {
                 throw new EstrategiaOracleInvalidaException();
             }
 
-            $valores[$chave] = $valor;
+            $valores[$chave] = ['valor' => $valor, 'descricao' => $descricao];
         }
 
         return $valores;
@@ -218,7 +228,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
 
         foreach ($linhas as $linha) {
             $uo = $this->textoObrigatorio($linha['UNIDADE_ORCAMENTARIA'] ?? null);
-            $modo = $this->textoOpcional($linha['MODO_ADOTADO'] ?? null);
+            $modo = $this->textoOpcional($linha['ESTRATEGIA_ADOTADA'] ?? null);
             $uasg = $this->textoOpcional($linha['UASG_ADOTADA'] ?? null);
 
             if ($modo === null && $uasg === null) {
@@ -236,7 +246,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
 
             $modoUnico = $modo;
 
-            if ($modo === $this->planos->getLiteralModoIndividual()) {
+            if ($modo === $this->planos->getLiteralEstrategiaIndividual()) {
                 if (isset($porUo[$uo]) && $porUo[$uo] !== $uasg) {
                     throw new EstrategiaOracleInvalidaException();
                 }
@@ -245,7 +255,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
                 continue;
             }
 
-            if ($modo !== $this->planos->getLiteralModoConsolidado()) {
+            if ($modo !== $this->planos->getLiteralEstrategiaConsolidada()) {
                 throw new EstrategiaOracleInvalidaException();
             }
 
@@ -264,7 +274,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
             throw new EstrategiaOracleInvalidaException();
         }
 
-        if ($modoUnico === $this->planos->getLiteralModoIndividual()) {
+        if ($modoUnico === $this->planos->getLiteralEstrategiaIndividual()) {
             if (count(array_unique(array_values($porUo), SORT_STRING)) !== count($porUo)) {
                 throw new EstrategiaOracleInvalidaException();
             }
@@ -280,7 +290,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
 
         return ResultadoConsultaEstrategia::disponivel(
             EstrategiaPublicacao::consolidada(
-                $this->resolverUasgAtiva($uasgConsolidada)
+                $this->resolverUasgAdotada($uasgConsolidada)
             )
         );
     }
@@ -293,7 +303,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
             $this->conexao->executar(
                 $this->sqlAdocaoIndividual(),
                 [
-                    $this->planos->getLiteralModoIndividual(),
+                    $this->planos->getLiteralEstrategiaIndividual(),
                     $vinculo['uasg'],
                     $anoExecucao->getValor(),
                     $vinculo['uo'],
@@ -312,13 +322,14 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
             throw new EstrategiaOracleInvalidaException();
         }
 
-        $uasgAtiva = $this->resolverUasgAtiva($uasgInformada->getCodigo());
+        $this->descricoesUasgConfiguradas[$uasgInformada->getCodigo()] =
+            $uasgInformada->getDescricao();
 
         $this->conexao->executar(
             $this->sqlAdocaoConsolidada(),
             [
-                $this->planos->getLiteralModoConsolidado(),
-                $uasgAtiva->getCodigo(),
+                $this->planos->getLiteralEstrategiaConsolidada(),
+                $uasgInformada->getCodigo(),
                 $anoExecucao->getValor(),
             ]
         );
@@ -329,7 +340,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
     {
         $linhas = $this->conexao->buscarTodos(
             $this->sqlUasgsIndividuais(),
-            [$anoExecucao->getValor(), $this->cadastroUasg->getValorAtivo()]
+            [$anoExecucao->getValor(), $this->unidadesOrcamentarias->getValorAtivo()]
         );
 
         if ($linhas === []) {
@@ -361,26 +372,35 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         return $uasgsPorUo;
     }
 
-    private function resolverUasgAtiva(string $codigo): Uasg
+    private function resolverUasgAdotada(string $codigo): Uasg
     {
         $codigo = $this->textoObrigatorio($codigo);
+
+        if (isset($this->descricoesUasgConfiguradas[$codigo])) {
+            return new Uasg($codigo, $this->descricoesUasgConfiguradas[$codigo]);
+        }
+
         $linhas = $this->conexao->buscarTodos(
-            $this->sqlLookupUasg(),
-            [$codigo, $this->cadastroUasg->getValorAtivo()]
+            $this->sqlConfiguracaoCorrente(),
+            [
+                $this->configuracao->getChaveEstrategia(),
+                $this->configuracao->getChaveUasgConsolidadora(),
+            ]
         );
+        $valores = $this->indexarConfiguracao($linhas);
+        $dadosUasg = $valores[$this->configuracao->getChaveUasgConsolidadora()] ?? null;
 
-        if (count($linhas) !== $this->cadastroUasg->getCardinalidadeExataDoLookup()) {
+        if (
+            $dadosUasg === null
+            || $this->textoObrigatorio($dadosUasg['valor']) !== $codigo
+        ) {
             throw new EstrategiaOracleInvalidaException();
         }
 
-        $codigoEncontrado = $this->textoObrigatorio($linhas[0]['CODIGO_UASG'] ?? null);
-        $descricao = $this->textoObrigatorio($linhas[0]['DESCRICAO_UASG'] ?? null);
+        $descricao = $this->textoObrigatorio($dadosUasg['descricao']);
+        $this->descricoesUasgConfiguradas[$codigo] = $descricao;
 
-        if ($codigoEncontrado !== $codigo) {
-            throw new EstrategiaOracleInvalidaException();
-        }
-
-        return new Uasg($codigoEncontrado, $descricao);
+        return new Uasg($codigo, $descricao);
     }
 
     private function sqlConfiguracaoCorrente(): string
@@ -388,9 +408,11 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         $tabela = $this->configuracao->getTabelaQualificada();
         $chave = $this->configuracao->getColunaChave();
         $valor = $this->configuracao->getColunaValor();
+        $descricao = $this->configuracao->getColunaDescricao();
 
         return "SELECT c.{$chave} AS CHAVE_CONFIGURACAO, "
-            . "c.{$valor} AS VALOR_CONFIGURACAO FROM {$tabela} c "
+            . "c.{$valor} AS VALOR_CONFIGURACAO, "
+            . "c.{$descricao} AS DESCRICAO_CONFIGURACAO FROM {$tabela} c "
             . "WHERE c.{$chave} IN (?, ?)";
     }
 
@@ -399,23 +421,12 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         $tabela = $this->planos->getTabelaQualificada();
         $ano = $this->planos->getColunaAnoExecucao();
         $uo = $this->planos->getColunaUnidadeOrcamentaria();
-        $modo = $this->planos->getColunaModoAdotado();
+        $estrategia = $this->planos->getColunaEstrategiaAdotada();
         $uasg = $this->planos->getColunaUasgAdotada();
 
         return "SELECT p.{$uo} AS UNIDADE_ORCAMENTARIA, "
-            . "p.{$modo} AS MODO_ADOTADO, p.{$uasg} AS UASG_ADOTADA "
+            . "p.{$estrategia} AS ESTRATEGIA_ADOTADA, p.{$uasg} AS UASG_ADOTADA "
             . "FROM {$tabela} p WHERE p.{$ano} = ?";
-    }
-
-    private function sqlLookupUasg(): string
-    {
-        $tabela = $this->cadastroUasg->getTabelaQualificada();
-        $codigo = $this->cadastroUasg->getColunaCodigo();
-        $descricao = $this->cadastroUasg->getColunaDescricao();
-        $ativo = $this->cadastroUasg->getColunaAtivo();
-
-        return "SELECT u.{$codigo} AS CODIGO_UASG, u.{$descricao} AS DESCRICAO_UASG "
-            . "FROM {$tabela} u WHERE u.{$codigo} = ? AND u.{$ativo} = ?";
     }
 
     private function sqlUasgsIndividuais(): string
@@ -423,11 +434,11 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         $tabelaPlanos = $this->planos->getTabelaQualificada();
         $ano = $this->planos->getColunaAnoExecucao();
         $uoPlano = $this->planos->getColunaUnidadeOrcamentaria();
-        $tabelaUasg = $this->cadastroUasg->getTabelaQualificada();
-        $uoCadastro = $this->cadastroUasg->getColunaUnidadeOrcamentaria();
-        $codigo = $this->cadastroUasg->getColunaCodigo();
-        $descricao = $this->cadastroUasg->getColunaDescricao();
-        $ativo = $this->cadastroUasg->getColunaAtivo();
+        $tabelaUasg = $this->unidadesOrcamentarias->getTabelaQualificada();
+        $uoCadastro = $this->unidadesOrcamentarias->getColunaRelacaoPlano();
+        $codigo = $this->unidadesOrcamentarias->getColunaCodigoUasg();
+        $descricao = $this->unidadesOrcamentarias->getColunaDescricaoUasg();
+        $ativo = $this->unidadesOrcamentarias->getColunaAtivo();
 
         return "SELECT p.{$uoPlano} AS UNIDADE_ORCAMENTARIA, "
             . "u.{$codigo} AS CODIGO_UASG, u.{$descricao} AS DESCRICAO_UASG "
@@ -451,7 +462,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         $tabela = $this->planos->getTabelaQualificada();
         $ano = $this->planos->getColunaAnoExecucao();
         $uo = $this->planos->getColunaUnidadeOrcamentaria();
-        $modo = $this->planos->getColunaModoAdotado();
+        $modo = $this->planos->getColunaEstrategiaAdotada();
         $uasg = $this->planos->getColunaUasgAdotada();
         $filtroUo = $porUo ? " AND {$uo} = ?" : '';
 

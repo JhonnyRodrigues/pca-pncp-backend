@@ -105,38 +105,43 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
             throw new EstadoOperacionalOracleInvalidoException();
         }
 
-        $modoEsperado = $this->literalModo($unidade);
+        $estrategiaEsperada = $this->literalEstrategia($unidade);
         $uasgEsperada = $unidade->getUasgExterna()->getCodigo();
-        $modoEncontrado = null;
+        $estrategiaEncontrada = null;
         $uasgEncontrada = null;
         $estadoEncontrado = null;
         $sequencialEncontrado = null;
 
         foreach ($linhas as $linha) {
-            $modo = $this->textoOpcional($linha['MODO_PUBLICACAO'] ?? null);
-            $uasg = $this->textoOpcional($linha['UASG_PUBLICACAO'] ?? null);
+            $estrategia = $this->textoOpcional(
+                $linha['ESTRATEGIA_ADOTADA_PUBLICACAO'] ?? null
+            );
+            $uasg = $this->textoOpcional($linha['UASG_ADOTADA'] ?? null);
 
-            if (($modo === null) !== ($uasg === null)) {
+            if (($estrategia === null) !== ($uasg === null)) {
                 throw new EstadoOperacionalOracleInvalidoException();
             }
 
-            if ($modo !== null) {
+            if ($estrategia !== null) {
                 if (
-                    $modo !== $modoEsperado
+                    $estrategia !== $estrategiaEsperada
                     || $uasg !== $uasgEsperada
-                    || ($modoEncontrado !== null && $modoEncontrado !== $modo)
+                    || (
+                        $estrategiaEncontrada !== null
+                        && $estrategiaEncontrada !== $estrategia
+                    )
                     || ($uasgEncontrada !== null && $uasgEncontrada !== $uasg)
                 ) {
                     throw new EstadoOperacionalOracleInvalidoException();
                 }
 
-                $modoEncontrado = $modo;
+                $estrategiaEncontrada = $estrategia;
                 $uasgEncontrada = $uasg;
             }
 
             [$estado, $sequencial] = $this->interpretarParEstado(
                 $linha['ESTADO_PUBLICACAO'] ?? null,
-                $linha['SEQUENCIAL_PCA'] ?? null
+                $linha['SEQUENCIAL_PUBLICACAO_PNCP'] ?? null
             );
 
             if ($estado === null) {
@@ -154,7 +159,7 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
             $sequencialEncontrado = $sequencial;
         }
 
-        if ($modoEncontrado === null || $uasgEncontrada === null) {
+        if ($estrategiaEncontrada === null || $uasgEncontrada === null) {
             throw new EstadoOperacionalOracleInvalidoException();
         }
 
@@ -210,17 +215,17 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
         $tabela = $this->mapeamento->getTabelaQualificada();
         $ano = $this->mapeamento->getColunaAnoExecucao();
         $uo = $this->mapeamento->getColunaUnidadeOrcamentaria();
-        $modo = $this->mapeamento->getColunaModo();
+        $estrategia = $this->mapeamento->getColunaEstrategia();
         $uasg = $this->mapeamento->getColunaUasg();
-        $estado = $this->mapeamento->getColunaEstado();
-        $sequencial = $this->mapeamento->getColunaSequencial();
+        $estado = $this->mapeamento->getColunaEstadoPublicacao();
+        $sequencial = $this->mapeamento->getColunaSequencialPublicacaoPncp();
         $filtroUo = $unidade->getModo() === ModoPublicacao::INDIVIDUAL
             ? " AND p.{$uo} = ?"
             : '';
 
-        return "SELECT p.{$modo} AS MODO_PUBLICACAO, "
-            . "p.{$uasg} AS UASG_PUBLICACAO, p.{$estado} AS ESTADO_PUBLICACAO, "
-            . "p.{$sequencial} AS SEQUENCIAL_PCA FROM {$tabela} p "
+        return "SELECT p.{$estrategia} AS ESTRATEGIA_ADOTADA_PUBLICACAO, "
+            . "p.{$uasg} AS UASG_ADOTADA, p.{$estado} AS ESTADO_PUBLICACAO, "
+            . "p.{$sequencial} AS SEQUENCIAL_PUBLICACAO_PNCP FROM {$tabela} p "
             . "WHERE p.{$ano} = ?{$filtroUo}";
     }
 
@@ -229,16 +234,14 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
         $tabela = $this->mapeamento->getTabelaQualificada();
         $ano = $this->mapeamento->getColunaAnoExecucao();
         $uo = $this->mapeamento->getColunaUnidadeOrcamentaria();
-        $modo = $this->mapeamento->getColunaModo();
-        $uasg = $this->mapeamento->getColunaUasg();
-        $estado = $this->mapeamento->getColunaEstado();
-        $sequencial = $this->mapeamento->getColunaSequencial();
+        $estado = $this->mapeamento->getColunaEstadoPublicacao();
+        $sequencial = $this->mapeamento->getColunaSequencialPublicacaoPncp();
         $filtroUo = $unidade->getModo() === ModoPublicacao::INDIVIDUAL
             ? " AND {$uo} = ?"
             : '';
 
-        return "UPDATE {$tabela} SET {$modo} = ?, {$uasg} = ?, "
-            . "{$estado} = ?, {$sequencial} = ? WHERE {$ano} = ?{$filtroUo}";
+        return "UPDATE {$tabela} SET {$estado} = ?, {$sequencial} = ? "
+            . "WHERE {$ano} = ?{$filtroUo}";
     }
 
     /** @return array<int, int> */
@@ -265,19 +268,17 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
         EstadoOperacionalPublicacao $estado
     ): array {
         return [
-            $this->literalModo($unidade),
-            $unidade->getUasgExterna()->getCodigo(),
             $this->literalEstado($estado),
             $estado->getSequencialPca()?->getValor(),
             ...$this->parametrosEscopo($unidade),
         ];
     }
 
-    private function literalModo(UnidadeExternaPublicacao $unidade): string
+    private function literalEstrategia(UnidadeExternaPublicacao $unidade): string
     {
         return $unidade->getModo() === ModoPublicacao::INDIVIDUAL
-            ? $this->mapeamento->getLiteralModoIndividual()
-            : $this->mapeamento->getLiteralModoConsolidado();
+            ? $this->mapeamento->getLiteralEstrategiaIndividual()
+            : $this->mapeamento->getLiteralEstrategiaConsolidada();
     }
 
     private function literalEstado(EstadoOperacionalPublicacao $estado): string

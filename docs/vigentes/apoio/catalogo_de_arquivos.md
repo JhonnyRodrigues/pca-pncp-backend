@@ -171,18 +171,17 @@ fazem parte do fluxo executável.
 
 | Arquivo | Função |
 | --- | --- |
-| `Oracle/Transacao/MapeamentoFisicoAncorasOracle.php` | Valida os identificadores físicos e o alvo anual das âncoras permanentes. |
+| `Oracle/Transacao/MapeamentoControlesConcorrenciaOracle.php` | Valida os identificadores físicos e o alvo anual dos controles de concorrência. |
 | `Oracle/Transacao/OracleUnidadeDeTrabalhoAdapter.php` | Implementa transação local, provisionamento DML idempotente e lock `FOR UPDATE NOWAIT`. |
 
 ### Oracle — estratégia anual
 
 | Arquivo | Função |
 | --- | --- |
-| `Oracle/Estrategia/MapeamentoConfiguracaoEstrategiaOracle.php` | Declara tabela, colunas, chaves e literais físicos da configuração corrente. |
+| `Oracle/Estrategia/MapeamentoConfiguracaoEstrategiaOracle.php` | Declara `CHAVE`, `VALOR`, `DESCRICAO`, chaves e literais da configuração corrente. |
 | `Oracle/Estrategia/MapeamentoPlanosEstrategiaOracle.php` | Declara a projeção física da estratégia adotada nas linhas de Plano. |
-| `Oracle/Estrategia/MapeamentoCadastroUasgOracle.php` | Declara a relação com UO e o lookup ativo e único de código e descrição da UASG. |
 | `Oracle/Estrategia/EstrategiaOracleInvalidaException.php` | Sinaliza internamente dados físicos ausentes, parciais ou incoerentes. |
-| `Oracle/Estrategia/OracleEstrategiaPublicacaoAdapter.php` | Consulta e adota a estratégia anual pela Port da Application na transação compartilhada. |
+| `Oracle/Estrategia/OracleEstrategiaPublicacaoAdapter.php` | Consulta a configuração, resolve UASGs individuais no cadastro de UOs e adota a estratégia anual na transação compartilhada. |
 
 ### Oracle — Planos
 
@@ -190,7 +189,8 @@ fazem parte do fluxo executável.
 | --- | --- |
 | `Oracle/Plano/MapeamentoPlanosOracle.php` | Declara tabela e colunas físicas necessárias à versão e confirmação dos Planos. |
 | `Oracle/Plano/MapeamentoDemandasOracle.php` | Declara a relação de origem e os campos físicos necessários à reconstrução das Demandas. |
-| `Oracle/Plano/MapeamentoUnidadesOrcamentariasOracle.php` | Declara identidade, Lotação, UASG, vínculo com Plano e condição de cadastro ativo. |
+| `Oracle/Plano/MapeamentoUnidadesOrcamentariasOracle.php` | Declara identidade, UASG, vínculo com Plano e condição de cadastro ativo da UO. |
+| `Oracle/Plano/MapeamentoLotacoesOracle.php` | Declara a tabela e as colunas de Lotação usadas para compor a UO. |
 | `Oracle/Plano/MapeadorDadosPlanoOracle.php` | Traduz aliases Oracle estritos para tipos de Unidade Orçamentária, Demanda e Plano. |
 | `Oracle/Plano/DadosPlanoOracleInvalidosException.php` | Sinaliza internamente dados físicos ausentes, duplicados ou incoerentes. |
 | `Oracle/Plano/OraclePlanoRepository.php` | Descobre identidades, reconstrói a fotografia vigente e confirma a versão pendente na transação compartilhada. |
@@ -352,10 +352,10 @@ fazem parte do fluxo executável.
 | Arquivo | Demonstração principal |
 | --- | --- |
 | `Infrastructure/Oracle/Adodb/ConexaoAdodbEmprestadaTest.php` | Binds, leituras, comandos, transação, falhas seguras e ausência de fechamento. |
-| `Infrastructure/Oracle/Transacao/MapeamentoFisicoAncorasOracleTest.php` | Validação allowlisted do plano físico das âncoras. |
+| `Infrastructure/Oracle/Transacao/MapeamentoControlesConcorrenciaOracleTest.php` | Validação allowlisted do plano físico dos controles de concorrência. |
 | `Infrastructure/Oracle/Transacao/OracleUnidadeDeTrabalhoAdapterTest.php` | Provisionamento, chaves, contenção, commit, rollback e ausência de DDL. |
-| `Infrastructure/Oracle/Estrategia/MapeamentosFisicosEstrategiaOracleTest.php` | Obrigatoriedade e allowlist dos mapeamentos de configuração, Planos e UASG. |
-| `Infrastructure/Oracle/Estrategia/OracleEstrategiaPublicacaoAdapterTest.php` | Estratégias corrente e adotada, cardinalidade da UASG, adoção e sessão compartilhada. |
+| `Infrastructure/Oracle/Estrategia/MapeamentosFisicosEstrategiaOracleTest.php` | Obrigatoriedade e allowlist dos mapeamentos de configuração e estratégia adotada nos Planos. |
+| `Infrastructure/Oracle/Estrategia/OracleEstrategiaPublicacaoAdapterTest.php` | Configuração corrente, UASGs individuais, estratégia adotada, binds, adoção e sessão compartilhada. |
 | `Infrastructure/Oracle/Plano/MapeamentosPlanoOracleTest.php` | Obrigatoriedade e allowlist dos mapeamentos físicos de Planos, Demandas e UOs. |
 | `Infrastructure/Oracle/Plano/MapeadorDadosPlanoOracleTest.php` | Tradução estrita de aliases, datas, situações e decimais para o Domain. |
 | `Infrastructure/Oracle/Plano/OraclePlanoRepositoryTest.php` | Descoberta, reconstrução entre versões, Plano vazio e confirmação orientada à intenção. |
@@ -394,20 +394,88 @@ fazem parte do fluxo executável.
 | --- | --- |
 | `Infrastructure/Observabilidade/AcumuladorEventosTecnicosTest.php` | Envelope, catálogos de ações, sanitização, ordem, imutabilidade e lote com duração. |
 
+### Contratos opt-in — Sprint 5.1
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Contract/Sprint51/SafetyContractTest.php` | Fail-closed, destino exclusivo de treinamento, JSON exato, opt-in do lote de 1.001 itens, resíduos conhecidos, binds Oracle e ausência de fechamento da conexão. |
+| `Contract/Sprint51/PncpTrainingContractTest.php` | Gate real opt-in do fluxo completo no PNCP de treinamento. |
+| `Contract/Sprint51/Support/ExactJsonEncoder.php` | Codifica os tipos permitidos pelo probe preservando números JSON exatos e recusando `float`. |
+| `Contract/Sprint51/Support/ExactJsonNumber.php` | Mantém o lexema numérico exato usado exclusivamente pelo probe contratual. |
+| `Contract/Sprint51/Support/OracleScriptcaseProbe.php` | Investiga runtime, schema, consultas, transação, binds e contenção em uma conexão ADOdb emprestada. |
+| `Contract/Sprint51/Support/PncpContractRunner.php` | Executa autenticação, publicação, observação, alteração, exclusão e limpeza no PNCP de treinamento. |
+| `Contract/Sprint51/Support/PncpHttpClient.php` | Cliente cURL exclusivo do probe, restrito ao destino de treinamento e às opções TLS aprovadas. |
+| `Contract/Sprint51/Support/PncpHttpResponse.php` | Separa status, headers e corpo e produz resumos sanitizados para o probe. |
+| `Contract/Sprint51/Support/Sprint51Config.php` | Carrega a configuração externa e valida os preflights Oracle e PNCP em modo fail-closed. |
+| `Contract/Sprint51/scriptcase_probe.php` | Expõe somente o entrypoint contratual Oracle da Sprint 5.1 para o Scriptcase. |
+| `Contract/Sprint51/run-preflight.php` | Executa o preflight conjunto ou específico para Oracle e PNCP. |
+| `Contract/Sprint51/config.example.php` | Modelo sem segredos da configuração externa da suíte. |
+
+### Contratos opt-in — Sprint 5.9
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Contract/Sprint59/SafetyContractTest.php` | Fail-closed, destino PNCP canônico, ausência de lote 1.001, mapeamentos Oracle e sanitização de relatórios. |
+| `Contract/Sprint59/OracleAdaptersContractRunnerTest.php` | Compatibilidade da leitura escalar com aliases associativos e índices numéricos duplicados pelo ADOdb. |
+| `Contract/Sprint59/OracleAdaptersFailureReportTest.php` | Diagnóstico opt-in de falhas Oracle por etapa, com mensagem genérica por padrão e causa técnica sanitizada em desenvolvimento. |
+| `Contract/Sprint59/PncpAdaptersContractRunnerTest.php` | Diagnóstico seguro da publicação PNCP, status disponível, encadeamento da falha e resultado da limpeza best-effort. |
+| `Contract/Sprint59/PncpAdaptersTrainingContractTest.php` | Gate real opt-in do ciclo completo no PNCP de treinamento. |
+| `Contract/Sprint59/Support/PncpAdaptersContractRunner.php` | Monta e exercita somente transporte, serializer, autenticação, leitura, escrita e eventos de produção. |
+| `Contract/Sprint59/Support/PncpDiagnosticTransport.php` | Delega ao transporte PNCP real e retém temporariamente requisição, resposta ou falha para diagnóstico contratual. |
+| `Contract/Sprint59/Support/OracleAdaptersContractRunner.php` | Exercita os adapters Oracle reais em uma conexão emprestada e nos quatro modos contratuais. |
+| `Contract/Sprint59/Support/OracleAdaptersContractFailure.php` | Preserva a causa original e identifica a etapa segura em que o fluxo `adapters` falhou. |
+| `Contract/Sprint59/Support/OracleAdaptersFailureReport.php` | Mantém o erro genérico por padrão e sanitiza a causa técnica habilitada por opt-in. |
+| `Contract/Sprint59/Support/BorrowedAdodbGuard.php` | Delega ADOdb e impede que `Close()` alcance a conexão do Scriptcase. |
+| `Contract/Sprint59/Support/Sprint59Config.php` | Carrega configuração externa e valida os dois gates antes de I/O. |
+| `Contract/Sprint59/Support/SafeContractReport.php` | Codifica e verifica relatórios sanitizados e calcula hashes SHA-256. |
+| `Contract/Sprint59/scriptcase_probe.php` | Expõe somente o entrypoint contratual de Scriptcase da Sprint 5.9. |
+| `Contract/Sprint59/run-preflight.php` | Preflight conjunto ou específico para Oracle e PNCP. |
+| `Contract/Sprint59/run-pncp-cleanup.php` | Remove somente o resíduo PNCP explicitamente autorizado e exige ausência definitiva sem publicar. |
+| `Contract/Sprint59/config.example.php` | Modelo sem segredos da configuração externa. |
+
+### Investigação opt-in — Sprint 5.10
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Contract/Sprint510/Sprint510InvestigationTest.php` | Preflight, binds, sessão, cardinalidade, ausência, ambiguidade, sanitização e proibição de escrita ou fechamento. |
+| `Contract/Sprint510/Support/Sprint510Config.php` | Carrega a configuração externa e valida os quatro modos, SELECTs, binds, aliases e massa dedicada. |
+| `Contract/Sprint510/Support/BorrowedAdodbReadOnlyGuard.php` | Delega somente consultas ADOdb e impede transações, comandos e `Close()`. |
+| `Contract/Sprint510/Support/OracleCancellationEvidenceInvestigationRunner.php` | Executa checks read-only na mesma sessão e produz somente resultados sanitizados. |
+| `Contract/Sprint510/Support/SafeInvestigationReport.php` | Recusa campos e valores sensíveis e calcula o hash do relatório. |
+| `Contract/Sprint510/scriptcase_probe.php` | Expõe somente o entrypoint investigativo da Sprint 5.10 para o Scriptcase. |
+| `Contract/Sprint510/run-preflight.php` | Valida a configuração externa antes de qualquer acesso Oracle. |
+| `Contract/Sprint510/config.example.php` | Modelo deliberadamente não executável, sem SQL, nomes físicos ou massa. |
+
 ## 5. Configuração executável
 
 | Arquivo | Função |
 | --- | --- |
 | `composer.json` | Dependências, PSR-4 e comandos ativos. |
 | `composer.lock` | Versões resolvidas das dependências. |
-| `phpunit.xml` | Bootstrap e descoberta da suíte única atual. |
+| `phpunit.xml` | Bootstrap da suíte padrão, com exclusão explícita dos contratos opt-in. |
+| `phpunit.contract.xml` | Suíte contratual legada da Sprint 5.1. |
+| `phpunit.adapters.contract.xml` | Suíte separada dos contratos de adapters da Sprint 5.9. |
+| `phpunit.sprint510.contract.xml` | Suíte separada da investigação read-only da Sprint 5.10. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
 
 ## 6. Documentação vigente
 
 | Arquivo | Função |
 | --- | --- |
+| `docs/README.md` | Governa classificação, status, precedência, navegação e caminhos canônicos da documentação. |
+| `docs/vigentes/autoritativos/regras_de_negocio.md` | Define as regras de negócio vigentes identificadas por `RN-*`. |
+| `docs/vigentes/autoritativos/modelo_de_dominio.md` | Define conceitos, identidades, relações e invariantes do modelo de domínio. |
+| `docs/vigentes/autoritativos/decisoes_de_integracao.md` | Registra as decisões de integração vigentes e seus gates. |
 | `docs/vigentes/autoritativos/especificacao_de_logs_estruturados.md` | Consolida o envelope institucional, o significado dos campos e a proteção de dados dos eventos técnicos. |
+| `docs/vigentes/autoritativos/fluxo_de_implementacao.md` | Descreve a colaboração vigente entre camadas, casos de uso e Ports. |
+| `docs/vigentes/autoritativos/roadmap.md` | Organiza a ordem de implementação, dependências e condições de avanço. |
+| `docs/vigentes/apoio/arquitetura.md` | Explica limites, responsabilidades e direção das dependências arquiteturais. |
+| `docs/vigentes/apoio/glossario.md` | Mantém o índice semântico da linguagem de negócio, integração e arquitetura. |
+| `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
+| `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |
+| `docs/vigentes/apoio/catalogo_de_arquivos.md` | Cataloga a função dos arquivos ativos de código, testes, configuração e documentação vigente. |
+| `docs/diagramas/DER_PUBLICACAO_PCA.png` | Apoia visualmente a compreensão do modelo de dados da publicação do PCA. |
+| `docs/diagramas/fluxograma_PCA.png` | Apoia visualmente a compreensão do fluxo funcional do PCA. |
 | `docs/vigentes/operacional/estado_atual.md` | Centraliza progresso, última sprint concluída, próxima sprint na ordem, gates, pendências e restrições, sem criar regra ou decisão. |
 
 Para entender o caminho entre esses arquivos, volte ao

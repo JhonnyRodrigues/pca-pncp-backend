@@ -39,10 +39,11 @@ final class MapeadorDadosPlanoOracleTest extends TestCase
             [$demanda]
         );
 
-        $this->assertSame('UO-101', $unidade->getIdentidade()->getValor());
+        $this->assertSame('101', $unidade->getIdentidade()->getValor());
         $this->assertSame(101, $unidade->getLotacao()->getId());
         $this->assertSame('Diretoria de Planejamento', $unidade->getLotacao()->getNome());
-        $this->assertSame('Unidade Orçamentária 101', $unidade->getDescricao());
+        $this->assertSame('Diretoria de Planejamento', $unidade->getDescricao());
+        $this->assertSame($unidade->getLotacao()->getNome(), $unidade->getDescricao());
         $this->assertSame('928344', $unidade->getUasg()->getCodigo());
         $this->assertSame('UASG Principal', $unidade->getUasg()->getDescricao());
 
@@ -85,6 +86,31 @@ final class MapeadorDadosPlanoOracleTest extends TestCase
 
         $this->assertNull($plano->getDataConfirmacaoSincronizacao());
         $this->assertFalse($plano->possuiDemandas());
+    }
+
+    /** @return array<string, array{array<string, mixed>}> */
+    public static function unidadesInvalidas(): array
+    {
+        $valida = self::linhaUnidadeValida();
+
+        return [
+            'código UASG ausente' => [array_replace($valida, ['CODIGO_UASG' => null])],
+            'descrição UASG ausente' => [array_replace($valida, ['DESCRICAO_UASG' => null])],
+            'descrição da Lotação ausente' => [
+                array_replace($valida, ['DESCRICAO_LOTACAO' => null]),
+            ],
+            'descrição da UO ausente' => [array_replace($valida, ['DESCRICAO_UO' => null])],
+        ];
+    }
+
+    /** @param array<string, mixed> $linha */
+    #[DataProvider('unidadesInvalidas')]
+    public function testDeveRejeitarDadosInvalidosDaUnidadeOrcamentaria(array $linha): void
+    {
+        $this->expectException(DadosPlanoOracleInvalidosException::class);
+        $this->expectExceptionMessage('Os dados Oracle da Unidade Orçamentária são inválidos.');
+
+        $this->mapeador->mapearUnidadeOrcamentaria($linha);
     }
 
     /** @return array<string, array{array<string, mixed>}> */
@@ -148,11 +174,17 @@ final class MapeadorDadosPlanoOracleTest extends TestCase
     /** @return array<string, mixed> */
     private function linhaUnidade(): array
     {
+        return self::linhaUnidadeValida();
+    }
+
+    /** @return array<string, mixed> */
+    private static function linhaUnidadeValida(): array
+    {
         return [
-            'IDENTIDADE_UO' => ' UO-101 ',
+            'IDENTIDADE_UO' => ' 101 ',
             'ID_LOTACAO' => '101',
             'DESCRICAO_LOTACAO' => ' Diretoria de Planejamento ',
-            'DESCRICAO_UO' => ' Unidade Orçamentária 101 ',
+            'DESCRICAO_UO' => ' Diretoria de Planejamento ',
             'CODIGO_UASG' => '928344',
             'DESCRICAO_UASG' => ' UASG Principal ',
         ];

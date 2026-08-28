@@ -6,7 +6,7 @@ namespace Semae\Pca\Infrastructure\Oracle\Transacao;
 
 use InvalidArgumentException;
 
-final class MapeamentoFisicoAncorasOracle
+final class MapeamentoControlesConcorrenciaOracle
 {
     private readonly string $schema;
     private readonly string $tabela;
@@ -24,7 +24,10 @@ final class MapeamentoFisicoAncorasOracle
         string $identificadorAlvoEstrategiaAnual
     ) {
         $this->schema = self::normalizarIdentificador($schema, 'schema');
-        $this->tabela = self::normalizarIdentificador($tabela, 'tabela de âncoras');
+        $this->tabela = self::normalizarIdentificador(
+            $tabela,
+            'tabela de controles de concorrência'
+        );
         $this->colunaEscopo = self::normalizarIdentificador(
             $colunaEscopo,
             'coluna de escopo'

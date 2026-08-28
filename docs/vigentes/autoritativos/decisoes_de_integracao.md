@@ -44,7 +44,8 @@ As principais revisões incrementais consolidadas aqui são:
 - o baseline detalhado de conteúdo foi retirado da V1;
 - PCA conhecido e definitivamente ausente pode ser recriado;
 - a estratégia anual é congelada na primeira execução válida;
-- DI-008, DI-009 e DI-010 foram encerradas como aceitas condicionalmente.
+- DI-008 e DI-010 foram encerradas como aceitas condicionalmente;
+- a DI-009 foi aceita depois dos gates reais das Sprints 5.1 e 5.9.
 
 ## 3. Convenção de status
 
@@ -74,7 +75,7 @@ sem serem apresentadas como decisões confirmadas.
 | `DI-006` | Auditoria e procedimentos PNCP | Aceita | Contratos Oracle de auditoria e contexto |
 | `DI-007` | Portas necessárias na Application | Aceita | UseCase completo demonstrado com mocks |
 | `DI-008` | Mecanismo Oracle | Aceita condicionalmente | ADOdb/OCI8, schema, sessão, datas e decimais |
-| `DI-009` | Transporte HTTP | Aceita condicionalmente | Runtime cURL/TLS e suíte no PNCP de treinamento |
+| `DI-009` | Transporte HTTP | Aceita | Reabrir somente diante de incompatibilidade externa concreta |
 | `DI-010` | Composition Root e Scriptcase | Aceita condicionalmente | Fachada, identidade, conexão e pacote em homologação |
 
 ## 5. Decisões detalhadas
@@ -221,8 +222,10 @@ PNCP, a política pura de reconciliação e os testes do UseCase.
 #### DI-003 — Decisão vigente
 
 1. A configuração corrente vem de:
-   - `PUBLICAR_EM_UNICA_UASG`;
-   - `UASG_CONSOLIDADORA`, quando aplicável.
+   - `PAC_CONFIGURACOES.CHAVE = 'ESTRATEGIA_PUBLICACAO_PLANOS'`, cujo
+     `VALOR` é `INDIVIDUAL` ou `CONSOLIDADO`;
+   - `PAC_CONFIGURACOES.CHAVE = 'UASG_CONSOLIDADORA'`, quando aplicável,
+     usando `VALOR` como código e `DESCRICAO` como descrição da UASG.
 2. Configuração ausente, inválida ou incoerente bloqueia antes do PNCP.
 3. Não existe default silencioso.
 4. No modo individual:
@@ -608,12 +611,13 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 
 ##### DI-008 — Exclusividade
 
-1. Uma tabela técnica contém âncoras permanentes.
+1. A tabela técnica `PAC_CONTROLES_CONCORRENCIA` contém linhas permanentes de
+   controle de concorrência; elas não representam entidades de negócio.
 2. O lock real pertence à transação Oracle.
 3. Aquisição usa `SELECT ... FOR UPDATE NOWAIT`.
 4. Contenção retorna `BLOQUEADO` imediatamente.
 5. A chave é estruturada por escopo, exercício e identificador-alvo.
-6. Há âncoras distintas para estratégia anual e unidade externa.
+6. Há linhas de controle distintas para estratégia anual e unidade externa.
 7. Linhas são provisionadas idempotentemente em transação técnica curta.
 
 ##### DI-008 — Datas e decimais
@@ -630,7 +634,7 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 
 1. `PAC_PLANOS` é a projeção operacional corrente.
 2. A projeção mínima contém:
-   - modo adotado;
+   - estratégia adotada;
    - UASG externa;
    - estado;
    - `sequencialPca`.
@@ -639,6 +643,12 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 5. `DATA_PUBLICACAO` permanece confirmação versionada.
 6. Valores não nulos divergentes bloqueiam.
 7. Não há autorreparo silencioso.
+8. A estratégia e a UASG efetivamente adotadas são projetadas em
+   `PAC_PLANOS.ESTRATEGIA_ADOTADA_PUBLICACAO` e `PAC_PLANOS.UASG_ADOTADA`;
+   ambas permanecem nulas antes da adoção e são preenchidas em conjunto.
+9. UASGs individuais vêm do cadastro ativo de
+   `PAC_UNIDADES_ORCAMENTARIAS`; a UASG consolidadora não é validada nesse
+   cadastro, pois código e descrição pertencem à configuração corrente.
 
 ##### DI-008 — Reconstrução
 
@@ -721,7 +731,7 @@ testes contratuais aplicáveis.
 
 ### DI-009 — Transporte HTTP
 
-- **Status:** Aceita condicionalmente.
+- **Status:** Aceita.
 - **Contexto e problema:** o adapter PNCP precisa tratar autenticação, leitura, escrita incerta, TLS, paginação e números exatos sem vazar HTTP ou cURL para as camadas internas.
 - **Fontes:** continuação 03, seção 3; manual PNCP 2.5 e OpenAPI adotados durante a decisão.
 
@@ -822,6 +832,22 @@ testes contratuais aplicáveis.
 7. Não há compensação automática.
 8. Operações usam lotes, sem particionamento acima de 1000 na V1.
 
+##### DI-009 — Compatibilidade do `Location` na homologação
+
+1. A base canônica de transporte permanece
+   `https://treina.pncp.gov.br/api/pncp`, conforme o manual vigente; leitura,
+   publicação e exclusão continuam enviando os endpoints relativos `/v1/...`
+   por essa base.
+2. O gate real da Sprint 5.9 comprovou que a homologação pode responder a uma
+   publicação aceita com `Location` absoluto iniciado por
+   `https://treina.pncp.gov.br/pncp-api`.
+3. O parser pode reconhecer esse segundo prefixo somente em `HOMOLOGACAO`,
+   preservando HTTPS, host oficial, caminho do recurso, CNPJ, ano, sequencial
+   positivo e ausência de query string ou fragmento.
+4. Produção não herda esse prefixo alternativo sem evidência própria. URL livre
+   ou prefixo configurável externamente permanece proibido.
+5. O corpo da resposta não é fonte alternativa do sequencial.
+
 ##### DI-009 — Justificativas, decimais e segurança
 
 1. Exclusão em lote com motivos diferentes usa mensagem padronizada e mantém os motivos completos localmente.
@@ -870,16 +896,21 @@ testes contratuais aplicáveis.
   - tamanho da página;
   - profundidade máxima do JSON.
 - O manual não documenta claramente todos os formatos de ausência.
-- A decisão permanece condicionada ao ambiente real.
+- Os gates reais das Sprints 5.1 e 5.9 confirmaram o ambiente de treinamento e
+  os adapters concretos no escopo operacional aprovado.
+- O limite operacional permanece em 1.000 itens por chamada; uma chamada única
+  com 1.001 itens não integra o gate desta decisão.
+- A compatibilidade com CNPJ alfanumérico é aceita conforme o contrato vigente.
+  Eventual incompatibilidade externa concreta reabre somente esta decisão.
 
-#### DI-009 — Gates e critérios de reabertura
+#### DI-009 — Evidências dos gates e critérios de reabertura
 
-- validar `ext-curl`, OpenSSL e CA bundle no Scriptcase;
-- corrigir carregamento duplicado de cURL no WSL;
-- alinhar o runtime PHP efetivo;
-- executar suíte no PNCP de treinamento;
-- registrar versão do manual/OpenAPI, data e resultados;
-- comprovar autenticação, ausência, paginação, `Location`, sequencial, CNPJ alfanumérico, IDs com lacunas e decimais exatos;
+- `ext-curl`, OpenSSL, CA bundle, TLS e runtime efetivo foram comprovados;
+- manual e OpenAPI foram registrados e revalidados;
+- as suítes opt-in executaram no PNCP de treinamento;
+- autenticação, ausência, paginação, `Location`, sequencial, IDs com lacunas,
+  decimais exatos, escrita incerta, exclusão e limpeza foram comprovados;
+- CNPJ alfanumérico permanece parte do contrato aceito, sem novo gate prévio;
 - reabrir somente o contrato incompatível com a evidência real.
 
 #### DI-009 — Regras de negócio relacionadas
@@ -895,6 +926,9 @@ e da execução dos gates de ambiente e contrato.
 
 - Iniciada e encerrada condicionalmente na continuação 03.
 - Incorpora os refinamentos de escrita incerta e ausência definitiva das decisões anteriores.
+- Aceita em 28/08/2026 após os gates reais das Sprints 5.1 e 5.9; CNPJ
+  alfanumérico deixou de ser pendência de avanço e passa a reabrir a decisão
+  somente se houver incompatibilidade externa concreta.
 
 ---
 
@@ -1074,13 +1108,14 @@ vigentes.
 - datas, fusos, decimais e coerência da projeção;
 - mecanismo de lock com contenção observável.
 
-### Gates antes da Infrastructure PNCP definitiva
+### Evidências confirmadas da Infrastructure PNCP
 
 - runtime com cURL, OpenSSL e CA bundle;
 - manual e OpenAPI revalidados;
 - suíte opt-in no PNCP de treinamento;
 - autenticação, paginação, ausência, `Location` e sequencial;
-- CNPJ alfanumérico;
+- CNPJ alfanumérico aceito pelo contrato vigente, sujeito a reabertura somente
+  diante de incompatibilidade externa concreta;
 - `ID_DEMANDA` com lacunas;
 - decimal exato como número JSON;
 - classificação de escrita incerta.
@@ -1158,5 +1193,6 @@ revisão registrada na DI-007.
 - ambiente de produção:
   `https://pncp.gov.br/api/pncp`.
 
-Essas fontes devem ser revalidadas e registradas pelos gates da DI-009 antes da
-implementação definitiva.
+Essas fontes foram revalidadas e registradas pelos gates das Sprints 5.1 e 5.9.
+Mudança futura relevante no contrato externo exige nova validação proporcional
+e pode reabrir somente a DI-009.

@@ -31,6 +31,7 @@ representam o estado atual por si mesmos.
 | [`AGENTS.md`](AGENTS.md) | Instrução operacional vigente e permanente para agentes neste repositório |
 | [`planejamento/checkpoints/`](planejamento/checkpoints/) | Registros históricos incrementais com autoridade de precedência e continuidade sobre o planejamento |
 | [`planejamento/sinteses/`](planejamento/sinteses/) | Fontes históricas independentes de conferência; não substituem os checkpoints |
+| [`sprints/planos/`](sprints/planos/) | Planos explicitamente aprovados para implementação; valem somente para a sprint e o escopo registrados |
 | [`sprints/prompts/`](sprints/prompts/) | Prompts históricos, inclusive o antigo prompt inicial reutilizável; preservados para auditoria e aprendizado |
 | [`arquivado/AGENTS_v1_legado.md`](arquivado/AGENTS_v1_legado.md) | Versão histórica das instruções operacionais, disponível somente para auditoria e aprendizado |
 | [`arquivado/sugestao_enum_fase4.md`](arquivado/sugestao_enum_fase4.md) | Proposta histórica não aprovada, sem autoridade normativa ou operacional |

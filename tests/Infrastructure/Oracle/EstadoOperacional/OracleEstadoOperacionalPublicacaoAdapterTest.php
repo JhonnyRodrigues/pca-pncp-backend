@@ -29,7 +29,7 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
-            $this->linha('I', '928344', 'P', '77'),
+            $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', '77'),
             $this->linha(null, null, null, null),
         ]];
 
@@ -38,9 +38,24 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         $this->assertSame(SituacaoConsultaEstadoOperacional::DISPONIVEL, $resultado->getSituacao());
         $this->assertSame(EstadoPublicacao::PUBLICADO, $resultado->getEstadoOperacional()?->getEstado());
         $this->assertSame(77, $resultado->getEstadoOperacional()?->getSequencialPca()?->getValor());
-        $this->assertStringContainsString('FROM APP.PAC_PLANOS p', $adodb->consultas[0]['sql']);
+        $this->assertStringContainsString('FROM SGI.PAC_PLANOS p', $adodb->consultas[0]['sql']);
         $this->assertStringContainsString('p.ANO_EXERCICIO = :param_0', $adodb->consultas[0]['sql']);
-        $this->assertStringContainsString('p.FK_UO = :param_1', $adodb->consultas[0]['sql']);
+        $this->assertStringContainsString(
+            'p.FK_UNIDADE_ORCAMENTARIA = :param_1',
+            $adodb->consultas[0]['sql']
+        );
+        $this->assertStringContainsString(
+            'p.ESTRATEGIA_ADOTADA_PUBLICACAO AS ESTRATEGIA_ADOTADA_PUBLICACAO',
+            $adodb->consultas[0]['sql']
+        );
+        $this->assertStringContainsString(
+            'p.SEQUENCIAL_PUBLICACAO_PNCP AS SEQUENCIAL_PUBLICACAO_PNCP',
+            $adodb->consultas[0]['sql']
+        );
+        $this->assertStringNotContainsString(
+            'PAC_CONTROLES_CONCORRENCIA',
+            $adodb->consultas[0]['sql']
+        );
         $this->assertSame(['param_0' => 2027, 'param_1' => 101], $adodb->consultas[0]['parametros']);
         $this->assertTrue($conexao->estaEmTransacao());
         $this->assertSame(0, $adodb->commits);
@@ -53,15 +68,18 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
-            $this->linha('C', 986700, 'E', 88),
-            $this->linha('C', '986700', 'E', '88'),
+            $this->linha('CONSOLIDADO', 986700, 'EXCLUIDO', 88),
+            $this->linha('CONSOLIDADO', '986700', 'EXCLUIDO', '88'),
         ]];
 
         $resultado = $adapter->consultar($this->unidadeConsolidada());
 
         $this->assertSame(EstadoPublicacao::EXCLUIDO, $resultado->getEstadoOperacional()?->getEstado());
         $this->assertSame(88, $resultado->getEstadoOperacional()?->getSequencialPca()?->getValor());
-        $this->assertStringNotContainsString('p.FK_UO =', $adodb->consultas[0]['sql']);
+        $this->assertStringNotContainsString(
+            'p.FK_UNIDADE_ORCAMENTARIA =',
+            $adodb->consultas[0]['sql']
+        );
         $this->assertSame(['param_0' => 2027], $adodb->consultas[0]['parametros']);
     }
 
@@ -71,7 +89,7 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
-            $this->linha('I', '928344', null, null),
+            $this->linha('INDIVIDUAL', '928344', null, null),
             $this->linha(null, null, null, null),
         ]];
 
@@ -86,14 +104,14 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
     public function testDeveReconhecerOsTresEstadosTipados(): void
     {
         foreach ([
-            ['N', null, EstadoPublicacao::NAO_PUBLICADO],
-            ['P', '12', EstadoPublicacao::PUBLICADO],
-            ['E', 12, EstadoPublicacao::EXCLUIDO],
+            ['NAO_PUBLICADO', null, EstadoPublicacao::NAO_PUBLICADO],
+            ['PUBLICADO', '12', EstadoPublicacao::PUBLICADO],
+            ['EXCLUIDO', 12, EstadoPublicacao::EXCLUIDO],
         ] as [$literal, $sequencial, $esperado]) {
             [$adapter, $conexao, $adodb] = $this->criarContexto();
             $conexao->iniciarTransacao();
             $adodb->resultadosGetAll = [[
-                $this->linha('I', '928344', $literal, $sequencial),
+                $this->linha('INDIVIDUAL', '928344', $literal, $sequencial),
             ]];
 
             $resultado = $adapter->consultar($this->unidadeIndividual());
@@ -107,15 +125,29 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
     {
         $cenarios = [
             [],
-            [$this->linha('I', '928344', 'P', null)],
-            [$this->linha('I', '928344', 'N', 1)],
-            [$this->linha('I', '928344', 'X', 1)],
-            [$this->linha('I', '928344', 'P', '0')],
-            [$this->linha('I', '928344', 'P', 1.5)],
-            [$this->linha('I', '928344', 'P', '999999999999999999999999999999')],
-            [$this->linha('C', '928344', 'P', 1)],
-            [$this->linha('I', '999999', 'P', 1)],
-            [$this->linha('I', '928344', 'P', 1), $this->linha('I', '928344', 'P', 2)],
+            [$this->linha('INDIVIDUAL', '928344', 'PUBLICADO', null)],
+            [$this->linha('INDIVIDUAL', '928344', 'NAO_PUBLICADO', 1)],
+            [$this->linha('INDIVIDUAL', '928344', 'INVALIDO', 1)],
+            [$this->linha('INDIVIDUAL', '928344', 'PUBLICADO', '0')],
+            [$this->linha('INDIVIDUAL', '928344', 'PUBLICADO', '-1')],
+            [$this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 1.5)],
+            [$this->linha('INDIVIDUAL', '928344', 'PUBLICADO', '999999999999999999999999999999')],
+            [$this->linha('CONSOLIDADO', '928344', 'PUBLICADO', 1)],
+            [$this->linha('INDIVIDUAL', '999999', 'PUBLICADO', 1)],
+            [
+                $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 1),
+                $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 2),
+            ],
+            [
+                $this->linha('INDIVIDUAL', null, 'PUBLICADO', 1),
+            ],
+            [
+                $this->linha(null, '928344', 'PUBLICADO', 1),
+            ],
+            [
+                $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 1),
+                $this->linha('INDIVIDUAL', '928344', 'EXCLUIDO', 1),
+            ],
         ];
 
         foreach ($cenarios as $linhas) {
@@ -154,8 +186,8 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
-            $this->linha('I', '928344', 'P', '77'),
-            $this->linha('I', '928344', 'P', '77'),
+            $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', '77'),
+            $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', '77'),
         ]];
 
         $resultado = $adapter->registrar(
@@ -167,15 +199,20 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         $this->assertCount(1, $adodb->execucoes);
         $execucao = $adodb->execucoes[0];
         $this->assertStringContainsString(
-            'SET MODO_PUBLICACAO = :param_0, UASG_PUBLICACAO = :param_1, '
-                . 'ESTADO_PUBLICACAO = :param_2, SEQUENCIAL_PCA = :param_3',
+            'SET ESTADO_PUBLICACAO = :param_0, '
+                . 'SEQUENCIAL_PUBLICACAO_PNCP = :param_1',
             $execucao['sql']
         );
-        $this->assertStringContainsString('ANO_EXERCICIO = :param_4', $execucao['sql']);
-        $this->assertStringContainsString('FK_UO = :param_5', $execucao['sql']);
+        $this->assertStringNotContainsString('SET ESTRATEGIA_ADOTADA_PUBLICACAO', $execucao['sql']);
+        $this->assertStringNotContainsString('SET UASG_ADOTADA', $execucao['sql']);
+        $this->assertStringContainsString('ANO_EXERCICIO = :param_2', $execucao['sql']);
+        $this->assertStringContainsString(
+            'FK_UNIDADE_ORCAMENTARIA = :param_3',
+            $execucao['sql']
+        );
         $this->assertSame(
-            ['param_0' => 'I', 'param_1' => '928344', 'param_2' => 'P',
-                'param_3' => 77, 'param_4' => 2027, 'param_5' => 101],
+            ['param_0' => 'PUBLICADO', 'param_1' => 77,
+                'param_2' => 2027, 'param_3' => 101],
             $execucao['parametros']
         );
         $this->assertCount(1, $adodb->consultas);
@@ -189,7 +226,7 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
-            $this->linha('C', '986700', 'N', null),
+            $this->linha('CONSOLIDADO', '986700', 'NAO_PUBLICADO', null),
         ]];
 
         $resultado = $adapter->registrar(
@@ -199,10 +236,33 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
 
         $this->assertSame(SituacaoPersistenciaLocal::CONCLUIDA, $resultado->getSituacao());
         $this->assertSame(
-            ['C', '986700', 'N', null, 2027],
+            ['NAO_PUBLICADO', null, 2027],
             array_values($adodb->execucoes[0]['parametros'])
         );
-        $this->assertStringNotContainsString('FK_UO =', $adodb->execucoes[0]['sql']);
+        $this->assertStringNotContainsString(
+            'FK_UNIDADE_ORCAMENTARIA =',
+            $adodb->execucoes[0]['sql']
+        );
+    }
+
+    public function testDevePreservarSequencialAoRegistrarExclusao(): void
+    {
+        [$adapter, $conexao, $adodb] = $this->criarContexto();
+        $conexao->iniciarTransacao();
+        $adodb->resultadosGetAll = [[
+            $this->linha('INDIVIDUAL', '928344', 'EXCLUIDO', 77),
+        ]];
+
+        $resultado = $adapter->registrar(
+            $this->unidadeIndividual(),
+            EstadoOperacionalPublicacao::excluido(new SequencialPca(77))
+        );
+
+        $this->assertSame(SituacaoPersistenciaLocal::CONCLUIDA, $resultado->getSituacao());
+        $this->assertSame(
+            ['EXCLUIDO', 77, 2027, 101],
+            array_values($adodb->execucoes[0]['parametros'])
+        );
     }
 
     public function testDeveFalharQuandoReleituraNaoConfirmarIntencao(): void
@@ -210,7 +270,7 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
-            $this->linha('I', '928344', 'E', 77),
+            $this->linha('INDIVIDUAL', '928344', 'EXCLUIDO', 77),
         ]];
 
         $resultado = $adapter->registrar(
@@ -261,9 +321,11 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         $adapter = new OracleEstadoOperacionalPublicacaoAdapter(
             $conexao,
             new MapeamentoEstadoOperacionalOracle(
-                'APP', 'PAC_PLANOS', 'FK_UO', 'ANO_EXERCICIO',
-                'MODO_PUBLICACAO', 'UASG_PUBLICACAO', 'ESTADO_PUBLICACAO',
-                'SEQUENCIAL_PCA', 'I', 'C', 'N', 'P', 'E'
+                'SGI', 'PAC_PLANOS', 'FK_UNIDADE_ORCAMENTARIA', 'ANO_EXERCICIO',
+                'ESTRATEGIA_ADOTADA_PUBLICACAO', 'UASG_ADOTADA',
+                'ESTADO_PUBLICACAO', 'SEQUENCIAL_PUBLICACAO_PNCP',
+                'INDIVIDUAL', 'CONSOLIDADO',
+                'NAO_PUBLICADO', 'PUBLICADO', 'EXCLUIDO'
             )
         );
 
@@ -292,13 +354,18 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
     }
 
     /** @return array<string, mixed> */
-    private function linha(mixed $modo, mixed $uasg, mixed $estado, mixed $sequencial): array
+    private function linha(
+        mixed $estrategia,
+        mixed $uasg,
+        mixed $estado,
+        mixed $sequencial
+    ): array
     {
         return [
-            'MODO_PUBLICACAO' => $modo,
-            'UASG_PUBLICACAO' => $uasg,
+            'ESTRATEGIA_ADOTADA_PUBLICACAO' => $estrategia,
+            'UASG_ADOTADA' => $uasg,
             'ESTADO_PUBLICACAO' => $estado,
-            'SEQUENCIAL_PCA' => $sequencial,
+            'SEQUENCIAL_PUBLICACAO_PNCP' => $sequencial,
         ];
     }
 }

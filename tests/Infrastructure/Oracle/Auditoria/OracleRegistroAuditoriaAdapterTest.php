@@ -27,6 +27,7 @@ use Semae\Pca\Infrastructure\Oracle\Auditoria\OracleRegistroAuditoriaAdapter;
 use Semae\Pca\Infrastructure\Oracle\EstadoOperacional\MapeamentoEstadoOperacionalOracle;
 use Semae\Pca\Infrastructure\Oracle\EstadoOperacional\OracleEstadoOperacionalPublicacaoAdapter;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoDemandasOracle;
+use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoLotacoesOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoPlanosOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoUnidadesOrcamentariasOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\OraclePlanoRepository;
@@ -155,10 +156,10 @@ final class OracleRegistroAuditoriaAdapterTest extends TestCase
             [['DATA_CONFIRMACAO' => null]],
             [['DATA_CONFIRMACAO' => '2026-08-24 16:45:10']],
             [[
-                'MODO_PUBLICACAO' => 'I',
-                'UASG_PUBLICACAO' => '928344',
-                'ESTADO_PUBLICACAO' => 'P',
-                'SEQUENCIAL_PCA' => '77',
+                'ESTRATEGIA_ADOTADA_PUBLICACAO' => 'INDIVIDUAL',
+                'UASG_ADOTADA' => '928344',
+                'ESTADO_PUBLICACAO' => 'PUBLICADO',
+                'SEQUENCIAL_PUBLICACAO_PNCP' => '77',
             ]],
         ];
         $conexao->iniciarTransacao();
@@ -177,7 +178,12 @@ final class OracleRegistroAuditoriaAdapterTest extends TestCase
         $this->assertCount(3, $adodb->execucoes);
         $this->assertStringContainsString('UPDATE APP.PAC_PLANOS', $adodb->execucoes[0]['sql']);
         $this->assertStringContainsString('DATA_PUBLICACAO = SYSDATE', $adodb->execucoes[0]['sql']);
-        $this->assertStringContainsString('UPDATE APP.PAC_PLANOS', $adodb->execucoes[1]['sql']);
+        $this->assertStringContainsString('UPDATE SGI.PAC_PLANOS', $adodb->execucoes[1]['sql']);
+        $this->assertStringNotContainsString(
+            'ESTRATEGIA_ADOTADA_PUBLICACAO =',
+            $adodb->execucoes[1]['sql']
+        );
+        $this->assertStringNotContainsString('UASG_ADOTADA =', $adodb->execucoes[1]['sql']);
         $this->assertStringContainsString('INSERT INTO APP.PAC_HISTORICOS', $adodb->execucoes[2]['sql']);
         $this->assertTrue($conexao->estaEmTransacao());
         $this->assertSame(1, $adodb->inicios);
@@ -223,9 +229,11 @@ final class OracleRegistroAuditoriaAdapterTest extends TestCase
         return new OracleEstadoOperacionalPublicacaoAdapter(
             $conexao,
             new MapeamentoEstadoOperacionalOracle(
-                'APP', 'PAC_PLANOS', 'FK_UO', 'ANO_EXERCICIO',
-                'MODO_PUBLICACAO', 'UASG_PUBLICACAO', 'ESTADO_PUBLICACAO',
-                'SEQUENCIAL_PCA', 'I', 'C', 'N', 'P', 'E'
+                'SGI', 'PAC_PLANOS', 'FK_UNIDADE_ORCAMENTARIA', 'ANO_EXERCICIO',
+                'ESTRATEGIA_ADOTADA_PUBLICACAO', 'UASG_ADOTADA',
+                'ESTADO_PUBLICACAO', 'SEQUENCIAL_PUBLICACAO_PNCP',
+                'INDIVIDUAL', 'CONSOLIDADO', 'NAO_PUBLICADO', 'PUBLICADO',
+                'EXCLUIDO'
             )
         );
     }
@@ -244,12 +252,22 @@ final class OracleRegistroAuditoriaAdapterTest extends TestCase
                 'FK_UNIDADE_REQUISITANTE', 'DATA_DESEJADA', 'CATEGORIA',
                 'DESCRICAO', 'UNIDADE_MEDIDA', 'QUANTIDADE', 'VALOR_TOTAL',
                 'VALOR_ORCAMENTO_EXERCICIO', 'CATALOGO', 'CODIGO_ITEM', 'GRUPO',
-                'DESCRICAO_GRUPO', 'ORIGEM'
+                [
+                    'schema' => 'CEBISIS',
+                    'tabela' => 'MT_GRUPOS_MATERIAIS',
+                    'dblink' => 'READ_ORCL',
+                    'colunaCodigo' => 'CODIGO',
+                    'colunaDescricao' => 'DESCRICAO',
+                ],
+                'ORIGEM'
             ),
             new MapeamentoUnidadesOrcamentariasOracle(
-                'APP', 'PAC_UO', 'FK_LOTACAO', 'CODIGO_UO', 'ID_LOTACAO',
-                'DESCRICAO_LOTACAO', 'DESCRICAO_UO', 'UASG', 'DESCRICAO_UASG',
+                'APP', 'PAC_UO', 'ID_UNIDADE_ORCAMENTARIA',
+                'ID_UNIDADE_ORCAMENTARIA', 'CODIGO_UASG', 'DESCRICAO_UASG',
                 'ATIVA', 'S'
+            ),
+            new MapeamentoLotacoesOracle(
+                'APP', 'RH_LOTACOES', 'COD_LOTACAO', 'NOME_LOTACAO'
             ),
             new DateTimeZone('America/Sao_Paulo')
         );

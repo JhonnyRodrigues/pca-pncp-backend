@@ -15,7 +15,9 @@ As fontes usadas nas referências são:
 - [Modelo de domínio](../autoritativos/modelo_de_dominio.md) — Modelo;
 - [Decisões de integração](../autoritativos/decisoes_de_integracao.md) — `DI-*`;
 - [Fluxo de implementação](../autoritativos/fluxo_de_implementacao.md) — Fluxo;
+- [Roadmap de implementação](../autoritativos/roadmap.md) — Roadmap;
 - [Arquitetura](arquitetura.md) — Arquitetura;
+- [Especificação de logs estruturados](../autoritativos/especificacao_de_logs_estruturados.md) — Logs;
 - [Governança documental](../../README.md) — Docs;
 - [Governança dos agentes](../../../.agents/README.md) — Agentes.
 
@@ -124,22 +126,43 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Adapter | Implementação concreta de uma Port para um mecanismo externo. | Arquitetura §§5 e 8 |
 | Application | Camada de casos de uso, orquestração e contratos necessários ao fluxo. | Arquitetura §4.2; `DI-007` |
 | Composition Root | Ponto do backend que cria o grafo e injeta dependências concretas. | Arquitetura §7; `DI-010` |
+| Conexão emprestada | Conexão criada e administrada pela aplicação hospedeira, reutilizada pelo backend sem transferência de seu ciclo de vida; o backend não a fecha. | `DI-008`; Roadmap Sprint 5.2 |
 | Controller | Componente que adapta a entrada pública para o caso de uso. | Arquitetura §§4.4 e 8; `DI-010` |
 | Domain | Camada que representa o negócio, protege invariantes e decide por políticas puras. | Modelo; Arquitetura §4.1 |
 | Double de teste | Substituto controlado usado para demonstrar como um consumidor utiliza um contrato. | Arquitetura §9; `DI-007` |
 | Fachada pública | Único ponto do backend consumido pela aplicação hospedeira. | Arquitetura §7; `DI-010` |
 | Infrastructure | Camada dos adapters concretos de persistência, transporte e recursos externos. | Arquitetura §4.3 |
+| Mapeamento físico explícito | Descrição injetada e validada dos nomes físicos e literais usados pelo adapter, sem incorporá-los aos contratos internos nem assumir valores implícitos. | `DI-008`; Arquitetura §4.3 |
 | Port | Contrato interno pertencente à camada que necessita da capacidade. | Arquitetura §5; `DI-007` |
 | Presentation | Camada que protege a entrada pública e apresenta o resultado. | Arquitetura §4.4; `DI-010` |
 | Presenter | Componente que transforma a Response em ViewModel estruturado. | Arquitetura §§4.4 e 8; `DI-010` |
 | Repository | Port especializada em reconstrução e persistência de um Aggregate. | Arquitetura §§5 e 8; `DI-007` |
 | Request | Contrato de entrada de um caso de uso. | Arquitetura §8; `DI-010` |
 | Response | Contrato de saída de um caso de uso. | Arquitetura §8; `DI-010` |
+| Sessão compartilhada | Mesma sessão Oracle e sua transação reutilizadas pelos adapters que participam da unidade, preservando contenção, visibilidade e atomicidade locais. | `DI-004`, `DI-008` |
+| Sessão opaca | Capacidade autenticada do PNCP usada sem interpretar nem expor o token que a representa e descartada ao fim da execução. | `DI-009`, `DI-010` |
 | Teste contratual | Teste que demonstra compatibilidade com um contrato interno ou externo. | Arquitetura §9; `DI-007`, `DI-009` |
+| Tradução de erro externo | Conversão de falhas do mecanismo externo em resultados internos tipados e seguros, sem fazer sua representação física atravessar a Port. | `DI-008`, `DI-009`; Arquitetura §4.3 |
 | Unidade de trabalho | Abstração usada para coordenar atomicidade local e conclusão de uma unidade. | `DI-004`, `DI-007` |
 | UseCase | Componente da Application que orquestra uma intenção usando Domain e Ports. | Arquitetura §§4.2 e 8 |
 | ViewModel | Estrutura de apresentação produzida pelo Presenter e renderizada pelo consumidor. | Arquitetura §7; `DI-010` |
 | Wiring | Composição das implementações concretas no grafo de dependências. | Arquitetura §§3 e 7; `DI-010` |
+
+### 6.1 Termos de validação da Infrastructure
+
+| Termo | Definição curta | Fonte |
+| --- | --- | --- |
+| Controle de concorrência (antes “âncora”) | Linha técnica da tabela PAC_CONTROLES_CONCORRENCIA, sem identidade de negócio, utilizada para serializar execuções por ESCOPO + ANO_EXECUCAO + IDENTIFICADOR_ALVO. Ela funciona como um "ponto de cadeado" persistente: se duas execuções disputarem a mesma publicação, ambas encontrarão essa mesma linha e uma delas será bloqueada via FOR UPDATE NOWAIT. A alteração do termo "âncora" para "controle de concorrência" é apenas semântica e não altera o comportamento do adapter. | `DI-008`; Sprint 5.9 |
+| Ambiente de treinamento | Ambiente oficial protegido, distinto da produção, no qual integrações externas autorizadas podem ser exercitadas com massa dedicada. | `DI-009` |
+| Contrato controlado | Prova contratual executada com condições, fixtures ou doubles controlados; demonstra o comportamento do adapter, mas não substitui a evidência obtida no ambiente externo real. | Arquitetura §9; Roadmap Sprint 5.9 |
+| Fail-closed | Postura que recusa a execução antes da interação externa quando configuração, destino, autorização ou pré-condição não estão comprovados, sem recorrer a valores alternativos silenciosos. | `DI-009`, `DI-010` |
+| Gate real | Condição de avanço comprovada no ambiente efetivo por meio dos adapters concretos; a aprovação em ambiente controlado, isoladamente, não o encerra. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |
+| Limpeza best-effort | Tentativa de remover os artefatos criados pelo teste sem presumir que a remoção sempre será possível; qualquer resíduo possível deve permanecer diagnosticado. | `DI-009` |
+| Massa dedicada | Conjunto de registros expressamente reservado à execução contratual, usado para evitar escritas sobre dados operacionais arbitrários e permitir rastreamento e limpeza. | `DI-009` |
+| Preflight | Verificação anterior à interação externa que confirma configuração, destino, autorização de escrita e demais pré-condições exigidas; sua falha impede a execução. | `DI-009`, `DI-010` |
+| Relatório sanitizado | Evidência de execução limitada a estados, códigos, mensagens seguras e identificadores não sensíveis, sem credenciais, sessões, headers, corpos ou payloads integrais. | Logs; `DI-006`, `DI-009` |
+| Resíduo | Artefato externo que pode ter permanecido após uma execução interrompida, incerta ou cuja limpeza não foi comprovada. | `DI-009` |
+| Suíte opt-in | Conjunto de testes excluído da execução padrão e iniciado apenas por comando e configuração explícitos. Pode realizar interação externa autorizada em ambiente protegido e nunca deve ser acionado implicitamente. | `DI-009`; Fluxo §11; Roadmap Sprint 5.9 |
 
 ## 7. Termos de documentação e planejamento
 
@@ -170,6 +193,9 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Estado desejado × observado × operacional | Planejamento homologado, fato externo e referência local cross-Plan. | `DI-002`, `DI-005` |
 | Sequencial PCA × identidade do Plano | Referência externa versus UO e Ano de Execução. | `RN-PLA-001`; `DI-005` |
 | Port × Adapter × Repository | Contrato, implementação concreta e especialização ligada a Aggregate. | Arquitetura §§5 e 8; `DI-007` |
+| Suíte padrão × suíte opt-in | Execução ordinária, sem interação externa real implícita, versus execução deliberadamente ativada e protegida por configuração e preflight. | `DI-009`; Fluxo §11 |
+| Contrato controlado × gate real | Evidência determinística em condições controladas versus comprovação com os adapters concretos no ambiente externo efetivo. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |
+| Conexão emprestada × conexão própria | Recurso cujo ciclo de vida pertence à aplicação hospedeira versus recurso criado e administrado pelo próprio backend. | `DI-008` |
 | Fachada × Controller × Composition Root | Entrada pública, adaptação da chamada e wiring. | Arquitetura §§7 e 8; `DI-010` |
 | Auditoria × observabilidade | Fato de negócio confirmado versus diagnóstico técnico. | `DI-006` |
 | Regra × decisão × fluxo | Norma de negócio, escolha arquitetural e colaboração dinâmica. | Docs; `RN`; `DI` |

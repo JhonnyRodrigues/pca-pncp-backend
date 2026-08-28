@@ -24,7 +24,7 @@ fontes autoritativas atuais.
 ## Achados
 
 | ID | Severidade | Achado | Tratamento na Sprint 4.13 |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | F4-01 | Crítica | Exceção depois da abertura da transação da estratégia anual podia escapar sem rollback. | Proteção de todo o trecho transacional e falha segura prevalente no rollback. |
 | F4-02 | Alta | O limite de 1000 era aplicado a `PUBLICAR`, mas não ao estado desejado de `RETIFICAR`. | Validação da fotografia resultante antes da primeira escrita. |
 | F4-03 | Alta | `Demanda` usava `float` para valores monetários, contrariando DI-008 e DI-009. | `DecimalExato` mínimo e remoção do cálculo unitário em ponto flutuante. |

@@ -67,18 +67,34 @@ final class PublicacaoPncpTest extends TestCase
         );
     }
 
-    public function testDeveAceitarLocationAbsolutoSomenteNoAmbienteConfigurado(): void
+    #[DataProvider('locationsAceitosPorAmbiente')]
+    public function testDeveAceitarSomenteLocationCanonicoDoAmbiente(
+        AmbientePncp $ambiente,
+        string $location,
+        int $sequencial
+    ): void
     {
-        $aceito = $this->publicarComLocation(
-            'https://treina.pncp.gov.br/api/pncp/v1/orgaos/12345678000195/pca/2026/88'
-        );
-        $divergente = $this->publicarComLocation(
-            'https://pncp.gov.br/api/pncp/v1/orgaos/12345678000195/pca/2026/88'
+        $resultado = $this->publicarComLocation($location, $ambiente);
+
+        $this->assertSame(SituacaoEscritaPncp::ACEITA, $resultado->getSituacao());
+        $this->assertSame($sequencial, $resultado->getSequencialPca()?->getValor());
+        $this->assertNull($resultado->getFalha());
+    }
+
+    #[DataProvider('locationsRejeitadosEmProducao')]
+    public function testProducaoDeveRejeitarLocationForaDoPrefixoCanonico(string $location): void
+    {
+        $resultado = $this->publicarComLocation(
+            $location,
+            AmbientePncp::PRODUCAO
         );
 
-        $this->assertSame(SituacaoEscritaPncp::ACEITA, $aceito->getSituacao());
-        $this->assertSame(88, $aceito->getSequencialPca()?->getValor());
-        $this->assertSame(SituacaoEscritaPncp::RESULTADO_INCERTO, $divergente->getSituacao());
+        $this->assertSame(SituacaoEscritaPncp::RESULTADO_INCERTO, $resultado->getSituacao());
+        $this->assertNull($resultado->getSequencialPca());
+        $this->assertSame(
+            'PNCP_PUBLICACAO_RESULTADO_INCERTO',
+            $resultado->getFalha()?->getCodigo()
+        );
     }
 
     #[DataProvider('locationsInvalidos')]
@@ -110,6 +126,54 @@ final class PublicacaoPncpTest extends TestCase
         ];
     }
 
+    /** @return array<string, array{AmbientePncp, string, int}> */
+    public static function locationsAceitosPorAmbiente(): array
+    {
+        return [
+            'homologacao relativo' => [
+                AmbientePncp::HOMOLOGACAO,
+                '/v1/orgaos/12345678000195/pca/2026/21',
+                21,
+            ],
+            'homologacao absoluto canonico' => [
+                AmbientePncp::HOMOLOGACAO,
+                'https://treina.pncp.gov.br/api/pncp/v1/orgaos/12345678000195/pca/2026/22',
+                22,
+            ],
+            'homologacao absoluto emitido sob pncp-api' => [
+                AmbientePncp::HOMOLOGACAO,
+                'https://treina.pncp.gov.br/pncp-api/v1/orgaos/12345678000195/pca/2026/24',
+                24,
+            ],
+            'producao relativo' => [
+                AmbientePncp::PRODUCAO,
+                '/v1/orgaos/12345678000195/pca/2026/31',
+                31,
+            ],
+            'producao absoluto canonico' => [
+                AmbientePncp::PRODUCAO,
+                'https://pncp.gov.br/api/pncp/v1/orgaos/12345678000195/pca/2026/32',
+                32,
+            ],
+        ];
+    }
+
+    /** @return array<string, array{string}> */
+    public static function locationsRejeitadosEmProducao(): array
+    {
+        return [
+            'alias exclusivo da homologacao' => [
+                'https://pncp.gov.br/pncp-api/v1/orgaos/12345678000195/pca/2026/41',
+            ],
+            'host divergente' => [
+                'https://treina.pncp.gov.br/api/pncp/v1/orgaos/12345678000195/pca/2026/42',
+            ],
+            'esquema diferente de HTTPS' => [
+                'http://pncp.gov.br/api/pncp/v1/orgaos/12345678000195/pca/2026/43',
+            ],
+        ];
+    }
+
     /** @return array<string, array{array<string, string[]>}> */
     public static function locationsInvalidos(): array
     {
@@ -137,19 +201,25 @@ final class PublicacaoPncpTest extends TestCase
         ];
     }
 
-    private function publicarComLocation(string $location): ResultadoPublicacaoPncp
+    private function publicarComLocation(
+        string $location,
+        AmbientePncp $ambiente = AmbientePncp::HOMOLOGACAO
+    ): ResultadoPublicacaoPncp
     {
         return $this->adapter(new TransporteEscritaPncpFake(
             new RespostaHttpPncp(201, ['location' => [$location]], '')
-        ))->publicar(new SessaoPncpAutenticada('token-opaco'), $this->comando());
+        ), $ambiente)->publicar(new SessaoPncpAutenticada('token-opaco'), $this->comando());
     }
 
-    private function adapter(TransporteHttpPncp $transporte): EscritorPncpAdapter
+    private function adapter(
+        TransporteHttpPncp $transporte,
+        AmbientePncp $ambiente = AmbientePncp::HOMOLOGACAO
+    ): EscritorPncpAdapter
     {
         return new EscritorPncpAdapter(
             $transporte,
             new ConfiguracaoTransportePncp(
-                AmbientePncp::HOMOLOGACAO,
+                $ambiente,
                 1_000_000,
                 1_000_000
             ),

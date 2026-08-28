@@ -9,8 +9,9 @@
 O sistema recebe um CNPJ e um exercício, descobre os Planos homologados, forma
 uma ou mais unidades externas, compara a fotografia desejada com o PNCP e leva o
 estado externo à convergência. O Domain decide **o que** fazer; a Application
-coordena **quando** consultar, escrever, confirmar ou desfazer; a futura
-Infrastructure executará **como** falar com Oracle, PNCP e Scriptcase.
+coordena **quando** consultar, escrever, confirmar ou desfazer; a Infrastructure
+concreta executa **como** falar com Oracle e PNCP sobre a conexão ADOdb
+emprestada e o transporte cURL.
 
 ```mermaid
 flowchart LR
@@ -18,12 +19,15 @@ flowchart LR
     U --> A[Application]
     A --> D[Domain]
     A --> P[Ports]
-    I[Futura Infrastructure] -. implementa .-> P
-    I -. traduz .-> O[(Oracle)]
-    I -. transporta .-> N[PNCP]
+    I[Infrastructure] --> P
+    I --> O[(Oracle)]
+    I --> N[PNCP]
 ```
 
-As setas pontilhadas representam a Fase 5, ainda sem adapters concretos.
+Os adapters concretos das Sprints 5.2 a 5.8 implementam essas fronteiras. A
+única Port ainda sem adapter é `EvidenciaCancelamentoHomologadoPort`; por isso,
+a Fase 5 e o avanço à Fase 6 permanecem bloqueados. A Sprint 5.10 investiga a
+fonte física dessa evidência sem antecipar sua implementação.
 
 ## 2. O fluxo completo
 
@@ -119,21 +123,21 @@ Não memorize cada classe isoladamente. Leia os pares por capacidade: Port,
 Result e Enum de autenticação; depois os de observação; depois escrita; depois
 persistência.
 
-## 6. Ports e futuros adapters
+## 6. Ports e adapters
 
-| Port | Capacidade | Adapter esperado na Fase 5 |
+| Port | Capacidade | Implementação concreta atual |
 |---|---|---|
-| `ContextoUsuarioPort` | Resolver Representante e Lotação. | Contexto Scriptcase/Oracle. |
-| `PlanoRepository` | Descobrir e reconstruir o Aggregate Plano. | Oracle. |
-| `EstrategiaPublicacaoPort` | Consultar e congelar a estratégia anual. | Oracle. |
-| `UnidadeDeTrabalhoPort` | Transação e exclusividade. | ADOdb emprestado ou OCI8 próprio. |
-| `AutenticadorPncp` | Obter sessão opaca. | Transporte HTTPS PNCP. |
-| `LeitorPncp` | Observar PCA e localizar candidatos. | Cliente HTTP paginado. |
-| `EscritorPncp` | Publicar, inserir e excluir. | Cliente HTTP PNCP. |
-| `EstadoOperacionalPublicacaoPort` | Ler e persistir projeção operacional. | Oracle. |
-| `EvidenciaCancelamentoHomologadoPort` | Obter o cancelamento que esvaziou a unidade. | Oracle. |
-| `RegistroAuditoriaPort` | Persistir fato confirmado. | Oracle. |
-| `LoggerInterface` | Diagnóstico técnico. | Adapter PSR-3 do ambiente. |
+| `ContextoUsuarioPort` | Resolver Representante e Lotação. | `OracleContextoUsuarioAdapter`. |
+| `PlanoRepository` | Descobrir e reconstruir o Aggregate Plano. | `OraclePlanoRepository`. |
+| `EstrategiaPublicacaoPort` | Consultar e congelar a estratégia anual. | `OracleEstrategiaPublicacaoAdapter`. |
+| `UnidadeDeTrabalhoPort` | Transação e exclusividade. | `OracleUnidadeDeTrabalhoAdapter` sobre ADOdb emprestado. |
+| `AutenticadorPncp` | Obter sessão opaca. | `AutenticadorPncpAdapter`. |
+| `LeitorPncp` | Observar PCA e localizar candidatos. | `LeitorPncpAdapter`. |
+| `EscritorPncp` | Publicar, inserir e excluir. | `EscritorPncpAdapter`. |
+| `EstadoOperacionalPublicacaoPort` | Ler e persistir projeção operacional. | `OracleEstadoOperacionalPublicacaoAdapter`. |
+| `EvidenciaCancelamentoHomologadoPort` | Obter o cancelamento que esvaziou a unidade. | **Ausente; bloqueia o encerramento da Fase 5.** |
+| `RegistroAuditoriaPort` | Persistir fato confirmado. | `OracleRegistroAuditoriaAdapter`. |
+| `LoggerInterface` | Diagnóstico técnico. | `AcumuladorEventosTecnicos` em memória. |
 
 ## 7. Ordem prática de leitura
 
@@ -164,7 +168,20 @@ está e evita procurar pelo repositório inteiro.
 
 ## 9. O que ainda não existe
 
-Não existem adapters Oracle/PNCP, Composition Root, Controller, Presenter nem
-fachada Scriptcase. `DecimalExato` apenas preserva os valores monetários sem
-`float`; serialização numérica, divisão unitária e `HALF_UP` continuam na Sprint
-5.6, depois dos gates contratuais.
+Não existe adapter concreto de `EvidenciaCancelamentoHomologadoPort`,
+Composition Root, Controller, Presenter nem fachada Scriptcase. O entrypoint
+da Sprint 5.9 em `tests/Contract/Sprint59/scriptcase_probe.php` pertence somente
+à suíte contratual e não antecipa nenhuma dessas fronteiras de produção.
+
+O entrypoint `tests/Contract/Sprint510/scriptcase_probe.php` também é exclusivo
+de teste. Ele executa apenas `SELECT` com binds sobre uma conexão ADOdb
+emprestada, nos modos `metadata`, `individual`, `consolidado` e `ausente`, e
+impede transações, comandos e `Close()`. SQL, mapeamentos físicos e valores da
+massa permanecem na configuração externa indicada por
+`PCA_SPRINT510_CONFIG_FILE`.
+
+Os contratos controlados e os gates Oracle/Scriptcase e PNCP de treinamento da
+Sprint 5.9 estão aprovados. A Sprint está concluída, mas a Fase 5 permanece
+bloqueada pelo adapter ausente. O inventário da Sprint 5.10 não encontrou outra
+Port sem implementação, mas a fonte Oracle e sua semântica ainda precisam ser
+comprovadas antes do plano TDD do adapter.

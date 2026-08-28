@@ -14,18 +14,27 @@ final class MapeamentoEstadoOperacionalOracleTest extends TestCase
     {
         $mapeamento = $this->criarMapeamento();
 
-        $this->assertSame('APP.PAC_PLANOS', $mapeamento->getTabelaQualificada());
-        $this->assertSame('FK_UO', $mapeamento->getColunaUnidadeOrcamentaria());
+        $this->assertSame('SGI.PAC_PLANOS', $mapeamento->getTabelaQualificada());
+        $this->assertSame(
+            'FK_UNIDADE_ORCAMENTARIA',
+            $mapeamento->getColunaUnidadeOrcamentaria()
+        );
         $this->assertSame('ANO_EXERCICIO', $mapeamento->getColunaAnoExecucao());
-        $this->assertSame('MODO_PUBLICACAO', $mapeamento->getColunaModo());
-        $this->assertSame('UASG_PUBLICACAO', $mapeamento->getColunaUasg());
-        $this->assertSame('ESTADO_PUBLICACAO', $mapeamento->getColunaEstado());
-        $this->assertSame('SEQUENCIAL_PCA', $mapeamento->getColunaSequencial());
-        $this->assertSame('I', $mapeamento->getLiteralModoIndividual());
-        $this->assertSame('C', $mapeamento->getLiteralModoConsolidado());
-        $this->assertSame('N', $mapeamento->getLiteralNaoPublicado());
-        $this->assertSame('P', $mapeamento->getLiteralPublicado());
-        $this->assertSame('E', $mapeamento->getLiteralExcluido());
+        $this->assertSame(
+            'ESTRATEGIA_ADOTADA_PUBLICACAO',
+            $mapeamento->getColunaEstrategia()
+        );
+        $this->assertSame('UASG_ADOTADA', $mapeamento->getColunaUasg());
+        $this->assertSame('ESTADO_PUBLICACAO', $mapeamento->getColunaEstadoPublicacao());
+        $this->assertSame(
+            'SEQUENCIAL_PUBLICACAO_PNCP',
+            $mapeamento->getColunaSequencialPublicacaoPncp()
+        );
+        $this->assertSame('INDIVIDUAL', $mapeamento->getLiteralEstrategiaIndividual());
+        $this->assertSame('CONSOLIDADO', $mapeamento->getLiteralEstrategiaConsolidada());
+        $this->assertSame('NAO_PUBLICADO', $mapeamento->getLiteralNaoPublicado());
+        $this->assertSame('PUBLICADO', $mapeamento->getLiteralPublicado());
+        $this->assertSame('EXCLUIDO', $mapeamento->getLiteralExcluido());
     }
 
     public function testDeveRejeitarIdentificadorOracleInvalido(): void
@@ -39,16 +48,16 @@ final class MapeamentoEstadoOperacionalOracleTest extends TestCase
     public function testDeveRejeitarLiteraisVaziosOuDuplicados(): void
     {
         foreach ([
-            ['', 'C', 'N', 'P', 'E'],
-            ['I', 'I', 'N', 'P', 'E'],
-            ['I', 'C', 'N', 'N', 'E'],
+            ['', 'CONSOLIDADO', 'NAO_PUBLICADO', 'PUBLICADO', 'EXCLUIDO'],
+            ['INDIVIDUAL', 'INDIVIDUAL', 'NAO_PUBLICADO', 'PUBLICADO', 'EXCLUIDO'],
+            ['INDIVIDUAL', 'CONSOLIDADO', 'PUBLICADO', 'PUBLICADO', 'EXCLUIDO'],
         ] as [$individual, $consolidado, $naoPublicado, $publicado, $excluido]) {
             try {
                 new MapeamentoEstadoOperacionalOracle(
-                    'APP', 'PAC_PLANOS', 'FK_UO', 'ANO_EXERCICIO',
-                    'MODO_PUBLICACAO', 'UASG_PUBLICACAO', 'ESTADO_PUBLICACAO',
-                    'SEQUENCIAL_PCA', $individual, $consolidado, $naoPublicado,
-                    $publicado, $excluido
+                    'SGI', 'PAC_PLANOS', 'FK_UNIDADE_ORCAMENTARIA', 'ANO_EXERCICIO',
+                    'ESTRATEGIA_ADOTADA_PUBLICACAO', 'UASG_ADOTADA',
+                    'ESTADO_PUBLICACAO', 'SEQUENCIAL_PUBLICACAO_PNCP',
+                    $individual, $consolidado, $naoPublicado, $publicado, $excluido
                 );
                 $this->fail('Era esperado mapeamento inválido.');
             } catch (InvalidArgumentException) {
@@ -60,9 +69,19 @@ final class MapeamentoEstadoOperacionalOracleTest extends TestCase
     private function criarMapeamento(string $tabela = 'pac_planos'): MapeamentoEstadoOperacionalOracle
     {
         return new MapeamentoEstadoOperacionalOracle(
-            'app', $tabela, 'fk_uo', 'ano_exercicio', 'modo_publicacao',
-            'uasg_publicacao', 'estado_publicacao', 'sequencial_pca',
-            'I', 'C', 'N', 'P', 'E'
+            'sgi',
+            $tabela,
+            'fk_unidade_orcamentaria',
+            'ano_exercicio',
+            'estrategia_adotada_publicacao',
+            'uasg_adotada',
+            'estado_publicacao',
+            'sequencial_publicacao_pncp',
+            'INDIVIDUAL',
+            'CONSOLIDADO',
+            'NAO_PUBLICADO',
+            'PUBLICADO',
+            'EXCLUIDO'
         );
     }
 }

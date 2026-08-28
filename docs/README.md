@@ -23,7 +23,7 @@ Em caso de dúvida sobre classificação documental, caminhos, status ou vigênc
 ## 2. Classificações
 
 | Classificação | Papel |
-|---|---|
+| --- | --- |
 | **Autoritativo** | Fonte oficial da verdade para o escopo declarado |
 | **Operacional** | Estado corrente do trabalho, sem autoridade para alterar fontes prescritivas |
 | **Apoio** | Explica e contextualiza, sem criar norma concorrente |
@@ -85,7 +85,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 ### 5.1 Autoritativos
 
 | Documento | Status | Autoridade |
-|---|---|---|
+| --- | --- | --- |
 | [Este índice](README.md) | Vigente | Governança documental |
 | [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md) | Vigente | Redação normativa das regras de negócio |
 | [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md) | Vigente — V2 | Conceitos, identidades, relações e invariantes do modelo-alvo |
@@ -97,7 +97,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 ### 5.2 Apoio
 
 | Documento | Status | Papel |
-|---|---|---|
+| --- | --- | --- |
 | [Arquitetura](vigentes/apoio/arquitetura.md) | Vigente | Limites e direção de dependências |
 | [Glossário integrado](vigentes/apoio/glossario.md) | Vigente | Índice semântico da linguagem do projeto |
 | [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Vigente | Usuários, etapas e contexto funcional |
@@ -109,7 +109,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 ### 5.3 Operacional
 
 | Documento | Status | Autoridade limitada |
-|---|---|---|
+| --- | --- | --- |
 | [Estado operacional do projeto](vigentes/operacional/estado_atual.md) | Vigente | Progresso, última sprint concluída, próxima sprint na ordem, gates, pendências e restrições; não altera RN, DI, modelo, fluxo, arquitetura ou Roadmap |
 
 ### 5.4 Investigações
@@ -117,13 +117,15 @@ Quando dois documentos parecerem contraditórios, prevalece:
 Estes arquivos são evidências preservadas e não especificações:
 
 | Documento | Status |
-|---|---|
+| --- | --- |
 | [Código-fonte investigado](investigacoes/codigo-fonte_PCA_PUBLICAR_B.php) | Investigação |
 | [Cópia de entry point HTTP](investigacoes/copia_entryPointHTTP.txt) | Investigação |
 | [Estrutura observada de ADORecordSet](investigacoes/object_ADORecordSet_array.txt) | Investigação |
 | [Auditoria da Fase 4 — Application](investigacoes/auditoria_fase_4_application_2026-08-10.md) | Investigação concluída |
-| [Gui de compreensão do backend](investigacoes/guia_de_compreensao_do_backend.md) | Investigação |
+| [Guia de compreensão do backend](investigacoes/guia_de_compreensao_do_backend.md) | Investigação |
 | [Evidências da Sprint 5.1 — gates Oracle e PNCP](investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md) | Investigação concluída |
+| [Evidências da Sprint 5.9 — contratos dos adapters](investigacoes/evidencias_parciais_sprint_5_9_contratos_adapters_2026-08-26.md) | Investigação concluída — gates Oracle e PNCP aprovados |
+| [Investigação para encerramento da Fase 5 — Sprint 5.10](investigacoes/investigacao_encerramento_fase_5_sprint_5_10_2026-08-28.md) | Em andamento — suíte controlada disponível; Oracle real pendente |
 
 ### 5.5 Históricos
 
@@ -140,7 +142,7 @@ devem ser consultados apenas para auditoria, evolução e estudo:
 ## 6. Mapa de nomes antigos
 
 | Nome antigo ou concorrente | Caminho canônico |
-|---|---|
+| --- | --- |
 | `docs/1_arquitetura.md`, `docs/arquitetura.md`, `arquitetura.md` | `docs/vigentes/apoio/arquitetura.md` |
 | `docs/2_modelo_dominio.md`, `docs/modelo_dominio.md`, `docs/modelo_de_dominio_v2.md` | `docs/vigentes/autoritativos/modelo_de_dominio.md` |
 | `docs/3_fluxo_implementacao.md`, `docs/fluxo_implementacao.md` | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` |

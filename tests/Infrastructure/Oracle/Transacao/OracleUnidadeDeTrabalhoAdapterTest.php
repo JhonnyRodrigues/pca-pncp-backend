@@ -16,12 +16,12 @@ use Semae\Pca\Domain\ValueObjects\IdentidadeUnidadeOrcamentaria;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
 use Semae\Pca\Domain\ValueObjects\Uasg;
 use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
-use Semae\Pca\Infrastructure\Oracle\Transacao\MapeamentoFisicoAncorasOracle;
+use Semae\Pca\Infrastructure\Oracle\Transacao\MapeamentoControlesConcorrenciaOracle;
 use Semae\Pca\Infrastructure\Oracle\Transacao\OracleUnidadeDeTrabalhoAdapter;
 
 final class OracleUnidadeDeTrabalhoAdapterTest extends TestCase
 {
-    public function testDeveProvisionarAncoraEmTransacaoCurtaEAdquirirLockAnual(): void
+    public function testDeveProvisionarControleEmTransacaoCurtaEAdquirirLockAnual(): void
     {
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $ano = new AnoExecucao((int) date('Y') + 1);
@@ -34,19 +34,39 @@ final class OracleUnidadeDeTrabalhoAdapterTest extends TestCase
             ['BEGIN', 'EXECUTE', 'COMMIT', 'BEGIN', 'GET_ALL'],
             $adodb->eventos
         );
-        $this->assertStringContainsString('INSERT INTO APP.PAC_ANCORAS', $adodb->execucoes[0]['sql']);
+        $this->assertStringContainsString(
+            'INSERT INTO SGI.PAC_CONTROLES_CONCORRENCIA',
+            $adodb->execucoes[0]['sql']
+        );
+        $this->assertSame(
+            'INSERT INTO SGI.PAC_CONTROLES_CONCORRENCIA '
+            . '(ESCOPO, ANO_EXECUCAO, IDENTIFICADOR_ALVO) '
+            . 'SELECT :param_0, :param_1, :param_2 FROM DUAL WHERE NOT EXISTS ('
+            . 'SELECT 1 FROM SGI.PAC_CONTROLES_CONCORRENCIA '
+            . 'WHERE ESCOPO = :param_3 AND ANO_EXECUCAO = :param_4 '
+            . 'AND IDENTIFICADOR_ALVO = :param_5)',
+            $adodb->execucoes[0]['sql']
+        );
         $this->assertStringContainsString('WHERE NOT EXISTS', $adodb->execucoes[0]['sql']);
         $this->assertStringNotContainsString('CREATE', $adodb->execucoes[0]['sql']);
         $this->assertStringNotContainsString('ALTER', $adodb->execucoes[0]['sql']);
         $this->assertSame(
-            ['ESTRATEGIA_ANUAL', $ano->getValor(), 'ESTRATEGIA_GLOBAL', 'ESTRATEGIA_ANUAL', $ano->getValor(), 'ESTRATEGIA_GLOBAL'],
+            ['ESTRATEGIA_ANUAL', $ano->getValor(), 'ESTRATEGIA_ANUAL', 'ESTRATEGIA_ANUAL', $ano->getValor(), 'ESTRATEGIA_ANUAL'],
             array_values($adodb->execucoes[0]['parametros'])
         );
         $this->assertStringContainsString('FOR UPDATE NOWAIT', $adodb->consultas[0]['sql']);
         $this->assertSame(
-            ['ESTRATEGIA_ANUAL', $ano->getValor(), 'ESTRATEGIA_GLOBAL'],
+            'SELECT ESCOPO FROM SGI.PAC_CONTROLES_CONCORRENCIA '
+            . 'WHERE ESCOPO = :param_0 AND ANO_EXECUCAO = :param_1 '
+            . 'AND IDENTIFICADOR_ALVO = :param_2 '
+            . 'FOR UPDATE NOWAIT',
+            $adodb->consultas[0]['sql']
+        );
+        $this->assertSame(
+            ['ESTRATEGIA_ANUAL', $ano->getValor(), 'ESTRATEGIA_ANUAL'],
             array_values($adodb->consultas[0]['parametros'])
         );
+        $this->assertFalse($adodb->closed);
     }
 
     public function testDeveUsarAUasgExternaComoIdentificadorAlvoDaUnidade(): void
@@ -63,7 +83,7 @@ final class OracleUnidadeDeTrabalhoAdapterTest extends TestCase
         );
     }
 
-    public function testDeveTratarCorridaDeProvisionamentoComoAncoraJaExistente(): void
+    public function testDeveTratarCorridaDeProvisionamentoComoControleJaExistente(): void
     {
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $adodb->errosExecute[0] = 1;
@@ -106,7 +126,7 @@ final class OracleUnidadeDeTrabalhoAdapterTest extends TestCase
         $this->assertSame(1, $adodb->rollbacks);
     }
 
-    public function testDeveTiparTabelaDeAncorasInexistenteSemTentarCriarDdl(): void
+    public function testDeveTiparTabelaDeControlesInexistenteSemTentarCriarDdl(): void
     {
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $adodb->errosExecute[0] = 942;
@@ -125,7 +145,7 @@ final class OracleUnidadeDeTrabalhoAdapterTest extends TestCase
         $this->assertStringNotContainsString('CREATE', $adodb->execucoes[0]['sql']);
     }
 
-    public function testDeveFalharEExecutarRollbackQuandoAncoraNaoForLocalizada(): void
+    public function testDeveFalharEExecutarRollbackQuandoControleNaoForLocalizado(): void
     {
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $adodb->resultadosGetAll[0] = [];
@@ -259,13 +279,13 @@ final class OracleUnidadeDeTrabalhoAdapterTest extends TestCase
     {
         $adodb = new AdodbTransacaoFake();
         $conexao = new ConexaoAdodbEmprestada($adodb);
-        $mapeamento = new MapeamentoFisicoAncorasOracle(
-            'APP',
-            'PAC_ANCORAS',
+        $mapeamento = new MapeamentoControlesConcorrenciaOracle(
+            'SGI',
+            'PAC_CONTROLES_CONCORRENCIA',
             'ESCOPO',
-            'ANO_EXERCICIO',
+            'ANO_EXECUCAO',
             'IDENTIFICADOR_ALVO',
-            'ESTRATEGIA_GLOBAL'
+            'ESTRATEGIA_ANUAL'
         );
 
         return [
@@ -313,6 +333,7 @@ final class AdodbTransacaoFake
     public int $commits = 0;
     public bool $resultadoCommit = true;
     public bool $resultadoRollback = true;
+    public bool $closed = false;
     private int $numeroErro = 0;
 
     public function BeginTrans(): bool
@@ -336,6 +357,11 @@ final class AdodbTransacaoFake
         $this->rollbacks++;
 
         return $this->resultadoRollback;
+    }
+
+    public function Close(): void
+    {
+        $this->closed = true;
     }
 
     /** @param array<int|string, mixed> $parametros */

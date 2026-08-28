@@ -7,7 +7,6 @@ namespace Tests\Infrastructure\Oracle\Estrategia;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Semae\Pca\Infrastructure\Oracle\Estrategia\MapeamentoCadastroUasgOracle;
 use Semae\Pca\Infrastructure\Oracle\Estrategia\MapeamentoConfiguracaoEstrategiaOracle;
 use Semae\Pca\Infrastructure\Oracle\Estrategia\MapeamentoPlanosEstrategiaOracle;
 
@@ -16,137 +15,89 @@ final class MapeamentosFisicosEstrategiaOracleTest extends TestCase
     public function testDeveDeclararConfiguracaoSemDefaultsImplicitos(): void
     {
         $mapeamento = new MapeamentoConfiguracaoEstrategiaOracle(
-            'app',
+            'sgi',
             'pac_configuracoes',
             'chave',
             'valor',
-            'PUBLICAR_EM_UNICA_UASG',
+            'descricao',
+            'ESTRATEGIA_PUBLICACAO_PLANOS',
             'UASG_CONSOLIDADORA',
-            'NAO',
-            'SIM'
+            'INDIVIDUAL',
+            'CONSOLIDADO'
         );
 
-        $this->assertSame('APP.PAC_CONFIGURACOES', $mapeamento->getTabelaQualificada());
+        $this->assertSame('SGI.PAC_CONFIGURACOES', $mapeamento->getTabelaQualificada());
         $this->assertSame('CHAVE', $mapeamento->getColunaChave());
         $this->assertSame('VALOR', $mapeamento->getColunaValor());
-        $this->assertSame('PUBLICAR_EM_UNICA_UASG', $mapeamento->getChaveModo());
+        $this->assertSame('DESCRICAO', $mapeamento->getColunaDescricao());
+        $this->assertSame('ESTRATEGIA_PUBLICACAO_PLANOS', $mapeamento->getChaveEstrategia());
         $this->assertSame('UASG_CONSOLIDADORA', $mapeamento->getChaveUasgConsolidadora());
-        $this->assertSame('NAO', $mapeamento->getLiteralModoIndividual());
-        $this->assertSame('SIM', $mapeamento->getLiteralModoConsolidado());
+        $this->assertSame('INDIVIDUAL', $mapeamento->getLiteralEstrategiaIndividual());
+        $this->assertSame('CONSOLIDADO', $mapeamento->getLiteralEstrategiaConsolidada());
     }
 
     public function testDeveDeclararProjecaoDaEstrategiaNosPlanos(): void
     {
         $mapeamento = new MapeamentoPlanosEstrategiaOracle(
-            'app',
+            'sgi',
             'pac_planos',
-            'ano_execucao',
+            'ano_exercicio',
             'fk_unidade_orcamentaria',
-            'modo_publicacao',
-            'uasg_publicacao',
+            'estrategia_adotada_publicacao',
+            'uasg_adotada',
             'INDIVIDUAL',
             'CONSOLIDADO'
         );
 
-        $this->assertSame('APP.PAC_PLANOS', $mapeamento->getTabelaQualificada());
-        $this->assertSame('ANO_EXECUCAO', $mapeamento->getColunaAnoExecucao());
-        $this->assertSame(
-            'FK_UNIDADE_ORCAMENTARIA',
-            $mapeamento->getColunaUnidadeOrcamentaria()
-        );
-        $this->assertSame('MODO_PUBLICACAO', $mapeamento->getColunaModoAdotado());
-        $this->assertSame('UASG_PUBLICACAO', $mapeamento->getColunaUasgAdotada());
-        $this->assertSame('INDIVIDUAL', $mapeamento->getLiteralModoIndividual());
-        $this->assertSame('CONSOLIDADO', $mapeamento->getLiteralModoConsolidado());
-    }
-
-    public function testDeveDeclararLookupAtivoEUniquenessDaUasgConsolidadora(): void
-    {
-        $mapeamento = new MapeamentoCadastroUasgOracle(
-            'app',
-            'pac_unidades_orcamentarias',
-            'id_unidade_orcamentaria',
-            'uasg',
-            'descricao',
-            'ativa',
-            'S'
-        );
-
-        $this->assertSame(
-            'APP.PAC_UNIDADES_ORCAMENTARIAS',
-            $mapeamento->getTabelaQualificada()
-        );
-        $this->assertSame(
-            'ID_UNIDADE_ORCAMENTARIA',
-            $mapeamento->getColunaUnidadeOrcamentaria()
-        );
-        $this->assertSame('UASG', $mapeamento->getColunaCodigo());
-        $this->assertSame('DESCRICAO', $mapeamento->getColunaDescricao());
-        $this->assertSame('ATIVA', $mapeamento->getColunaAtivo());
-        $this->assertSame('S', $mapeamento->getValorAtivo());
-        $this->assertSame(1, $mapeamento->getCardinalidadeExataDoLookup());
+        $this->assertSame('SGI.PAC_PLANOS', $mapeamento->getTabelaQualificada());
+        $this->assertSame('ANO_EXERCICIO', $mapeamento->getColunaAnoExecucao());
+        $this->assertSame('FK_UNIDADE_ORCAMENTARIA', $mapeamento->getColunaUnidadeOrcamentaria());
+        $this->assertSame('ESTRATEGIA_ADOTADA_PUBLICACAO', $mapeamento->getColunaEstrategiaAdotada());
+        $this->assertSame('UASG_ADOTADA', $mapeamento->getColunaUasgAdotada());
+        $this->assertSame('INDIVIDUAL', $mapeamento->getLiteralEstrategiaIndividual());
+        $this->assertSame('CONSOLIDADO', $mapeamento->getLiteralEstrategiaConsolidada());
     }
 
     /** @return array<string, array{class-string, array<int, string>}> */
     public static function identificadoresInvalidos(): array
     {
         return [
-            'configuração' => [
+            'configuracao' => [
                 MapeamentoConfiguracaoEstrategiaOracle::class,
-                ['APP', 'PAC CONFIG', 'CHAVE', 'VALOR', 'MODO', 'UASG', 'N', 'S'],
+                ['SGI', 'PAC CONFIG', 'CHAVE', 'VALOR', 'DESCRICAO', 'ESTRATEGIA', 'UASG', 'I', 'C'],
             ],
             'planos' => [
                 MapeamentoPlanosEstrategiaOracle::class,
-                ['APP', 'PAC_PLANOS', 'ANO;DROP', 'UO', 'MODO', 'UASG', 'I', 'C'],
-            ],
-            'cadastro UASG' => [
-                MapeamentoCadastroUasgOracle::class,
-                ['APP', 'PAC_UO', 'ID', 'UASG', 'DESC', 'ATIVA = S', 'S'],
+                ['SGI', 'PAC_PLANOS', 'ANO;DROP', 'UO', 'ESTRATEGIA', 'UASG', 'I', 'C'],
             ],
         ];
     }
 
     /** @param class-string $classe */
     #[DataProvider('identificadoresInvalidos')]
-    public function testDeveRejeitarIdentificadorForaDaAllowlist(
-        string $classe,
-        array $argumentos
-    ): void {
+    public function testDeveRejeitarIdentificadorForaDaAllowlist(string $classe, array $argumentos): void
+    {
         $this->expectException(InvalidArgumentException::class);
 
         new $classe(...$argumentos);
     }
 
-    public function testDeveRejeitarLiteralObrigatorioVazio(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        new MapeamentoCadastroUasgOracle(
-            'APP',
-            'PAC_UO',
-            'ID',
-            'UASG',
-            'DESCRICAO',
-            'ATIVA',
-            ' '
-        );
-    }
-
-    public function testDeveRejeitarChavesOuModosFisicosIndistinguiveis(): void
+    public function testDeveRejeitarChavesOuEstrategiasFisicasIndistinguiveis(): void
     {
         foreach (
             [
                 fn () => new MapeamentoConfiguracaoEstrategiaOracle(
-                    'APP', 'PAC_CONFIG', 'CHAVE', 'VALOR', 'MODO', 'MODO', 'N', 'S'
+                    'SGI', 'PAC_CONFIG', 'CHAVE', 'VALOR', 'DESCRICAO',
+                    'ESTRATEGIA', 'ESTRATEGIA', 'INDIVIDUAL', 'CONSOLIDADO'
                 ),
                 fn () => new MapeamentoPlanosEstrategiaOracle(
-                    'APP', 'PAC_PLANOS', 'ANO', 'UO', 'MODO', 'UASG', 'X', 'X'
+                    'SGI', 'PAC_PLANOS', 'ANO', 'UO', 'ESTRATEGIA', 'UASG', 'X', 'X'
                 ),
             ] as $criar
         ) {
             try {
                 $criar();
-                $this->fail('Era esperada rejeição de literais físicos indistinguíveis.');
+                $this->fail('Era esperada rejeicao de valores fisicos indistinguiveis.');
             } catch (InvalidArgumentException) {
                 $this->addToAssertionCount(1);
             }

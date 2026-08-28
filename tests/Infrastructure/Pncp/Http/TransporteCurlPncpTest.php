@@ -77,6 +77,31 @@ final class TransporteCurlPncpTest extends TestCase
         $this->assertSame(1, $executor->execucoes);
     }
 
+    public function testProducaoDeveManterBaseCanonicaDoTransporte(): void
+    {
+        $executor = new ExecutorCurlPncpFake();
+        $transporte = new TransporteCurlPncp(
+            $this->configuracao(ambiente: AmbientePncp::PRODUCAO),
+            $executor
+        );
+
+        $transporte->enviar(new RequisicaoHttpPncp(
+            'GET',
+            '/v1/orgaos/12345678000195/pca/2026/32/consolidado',
+            [],
+            null,
+            30
+        ));
+
+        $this->assertSame(
+            'https://pncp.gov.br/api/pncp/v1/orgaos/12345678000195/pca/2026/32/consolidado',
+            $executor->url
+        );
+        $this->assertSame(CURLPROTO_HTTPS, $executor->opcoes[CURLOPT_PROTOCOLS]);
+        $this->assertSame(true, $executor->opcoes[CURLOPT_SSL_VERIFYPEER]);
+        $this->assertSame(2, $executor->opcoes[CURLOPT_SSL_VERIFYHOST]);
+    }
+
     public function testDeveRecusarPayloadAcimaDoLimiteAntesDaExecucao(): void
     {
         $executor = new ExecutorCurlPncpFake();
@@ -163,10 +188,11 @@ final class TransporteCurlPncpTest extends TestCase
     private function configuracao(
         int $limitePayload = 1_024,
         int $limiteResposta = 1_024,
-        ?string $caminhoCaBundle = null
+        ?string $caminhoCaBundle = null,
+        AmbientePncp $ambiente = AmbientePncp::HOMOLOGACAO
     ): ConfiguracaoTransportePncp {
         return new ConfiguracaoTransportePncp(
-            AmbientePncp::HOMOLOGACAO,
+            $ambiente,
             $limitePayload,
             $limiteResposta,
             caminhoCaBundle: $caminhoCaBundle

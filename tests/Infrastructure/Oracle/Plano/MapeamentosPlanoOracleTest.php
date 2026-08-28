@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoDemandasOracle;
+use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoLotacoesOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoPlanosOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoUnidadesOrcamentariasOracle;
 
@@ -56,8 +57,14 @@ final class MapeamentosPlanoOracleTest extends TestCase
             'valor_orcamento_exercicio',
             'catalogo',
             'codigo_item',
-            'grupo',
-            'descricao_grupo',
+            'grupo_codigo',
+            [
+                'schema' => 'cebisis',
+                'tabela' => 'mt_grupos_materiais',
+                'dblink' => 'read_orcl',
+                'colunaCodigo' => 'codigo',
+                'colunaDescricao' => 'descricao',
+            ],
             'origem'
         );
 
@@ -81,9 +88,42 @@ final class MapeamentosPlanoOracleTest extends TestCase
         );
         $this->assertSame('CATALOGO', $mapeamento->getColunaCatalogo());
         $this->assertSame('CODIGO_ITEM', $mapeamento->getColunaCodigoItem());
-        $this->assertSame('GRUPO', $mapeamento->getColunaGrupo());
-        $this->assertSame('DESCRICAO_GRUPO', $mapeamento->getColunaDescricaoGrupo());
+        $this->assertSame('GRUPO_CODIGO', $mapeamento->getColunaGrupo());
+        $this->assertSame(
+            'CEBISIS.MT_GRUPOS_MATERIAIS@READ_ORCL',
+            $mapeamento->getTabelaGrupoRemotoQualificada()
+        );
+        $this->assertSame('CODIGO', $mapeamento->getColunaCodigoGrupoRemoto());
+        $this->assertSame('DESCRICAO', $mapeamento->getColunaDescricaoGrupoRemoto());
         $this->assertSame('ORIGEM', $mapeamento->getColunaOrigem());
+    }
+
+    /** @return array<string, array{array<string, string>}> */
+    public static function gruposRemotosInvalidos(): array
+    {
+        $valido = [
+            'schema' => 'CEBISIS',
+            'tabela' => 'MT_GRUPOS_MATERIAIS',
+            'dblink' => 'READ_ORCL',
+            'colunaCodigo' => 'CODIGO',
+            'colunaDescricao' => 'DESCRICAO',
+        ];
+
+        return [
+            'schema com SQL' => [[...$valido, 'schema' => 'CEBISIS;DROP']],
+            'tabela qualificada livre' => [[...$valido, 'tabela' => 'CEBISIS.MT_GRUPOS_MATERIAIS']],
+            'coluna com expressão' => [[...$valido, 'colunaDescricao' => 'MGM.DESCRICAO']],
+            'DBLINK não autorizado' => [[...$valido, 'dblink' => 'OUTRO_LINK']],
+        ];
+    }
+
+    /** @param array<string, string> $grupoRemoto */
+    #[DataProvider('gruposRemotosInvalidos')]
+    public function testDeveRejeitarMapeamentoRemotoInseguro(array $grupoRemoto): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->criarMapeamentoDemandas($grupoRemoto);
     }
 
     public function testDeveDeclararMapeamentoFisicoDasUnidadesOrcamentarias(): void
@@ -91,36 +131,36 @@ final class MapeamentosPlanoOracleTest extends TestCase
         $mapeamento = new MapeamentoUnidadesOrcamentariasOracle(
             'app',
             'pac_unidades_orcamentarias',
-            'fk_lotacao',
-            'codigo_uo',
-            'fk_lotacao',
-            'descricao_lotacao',
-            'descricao_uo',
-            'uasg',
+            'id_unidade_orcamentaria',
+            'id_unidade_orcamentaria',
+            'codigo_uasg',
             'descricao_uasg',
             'ativa',
             'S'
+        );
+        $lotacoes = new MapeamentoLotacoesOracle(
+            'app',
+            'rh_lotacoes',
+            'cod_lotacao',
+            'nome_lotacao'
         );
 
         $this->assertSame(
             'APP.PAC_UNIDADES_ORCAMENTARIAS',
             $mapeamento->getTabelaQualificada()
         );
-        $this->assertSame('FK_LOTACAO', $mapeamento->getColunaRelacaoPlano());
-        $this->assertSame('CODIGO_UO', $mapeamento->getColunaIdentidade());
-        $this->assertSame('FK_LOTACAO', $mapeamento->getColunaLotacao());
-        $this->assertSame(
-            'DESCRICAO_LOTACAO',
-            $mapeamento->getColunaDescricaoLotacao()
-        );
-        $this->assertSame('DESCRICAO_UO', $mapeamento->getColunaDescricao());
-        $this->assertSame('UASG', $mapeamento->getColunaCodigoUasg());
+        $this->assertSame('ID_UNIDADE_ORCAMENTARIA', $mapeamento->getColunaRelacaoPlano());
+        $this->assertSame('ID_UNIDADE_ORCAMENTARIA', $mapeamento->getColunaIdentidade());
+        $this->assertSame('CODIGO_UASG', $mapeamento->getColunaCodigoUasg());
         $this->assertSame('DESCRICAO_UASG', $mapeamento->getColunaDescricaoUasg());
         $this->assertSame('ATIVA', $mapeamento->getColunaAtivo());
         $this->assertSame('S', $mapeamento->getValorAtivo());
+        $this->assertSame('APP.RH_LOTACOES', $lotacoes->getTabelaQualificada());
+        $this->assertSame('COD_LOTACAO', $lotacoes->getColunaId());
+        $this->assertSame('NOME_LOTACAO', $lotacoes->getColunaDescricao());
     }
 
-    /** @return array<string, array{class-string, array<int, string>}> */
+    /** @return array<string, array{class-string, array<int, mixed>}> */
     public static function mapeamentosInvalidos(): array
     {
         return [
@@ -134,16 +174,26 @@ final class MapeamentosPlanoOracleTest extends TestCase
                     'APP', 'PAC DEMANDAS', 'ID', 'PLANO', 'SITUACAO', 'UNIDADE',
                     'DATA', 'CATEGORIA', 'DESCRICAO', 'MEDIDA', 'QUANTIDADE',
                     'TOTAL', 'ORCAMENTO', 'CATALOGO', 'ITEM', 'GRUPO',
-                    'DESCRICAO_GRUPO', 'ORIGEM',
+                    [
+                        'schema' => 'CEBISIS',
+                        'tabela' => 'MT_GRUPOS_MATERIAIS',
+                        'dblink' => 'READ_ORCL',
+                        'colunaCodigo' => 'CODIGO',
+                        'colunaDescricao' => 'DESCRICAO',
+                    ],
+                    'ORIGEM',
                 ],
             ],
             'Unidades Orçamentárias' => [
                 MapeamentoUnidadesOrcamentariasOracle::class,
                 [
-                    'APP', 'PAC_UO', 'RELACAO', 'IDENTIDADE', 'LOTACAO',
-                    'DESCRICAO_LOTACAO', 'DESCRICAO', 'UASG', 'DESCRICAO_UASG',
-                    'ATIVA = S', 'S',
+                    'APP', 'PAC_UO', 'RELACAO', 'IDENTIDADE', 'UASG',
+                    'DESCRICAO_UASG', 'ATIVA = S', 'S',
                 ],
+            ],
+            'Lotações' => [
+                MapeamentoLotacoesOracle::class,
+                ['APP', 'RH_LOTACOES', 'ID', 'NOME || SEGREDO'],
             ],
         ];
     }
@@ -168,13 +218,35 @@ final class MapeamentosPlanoOracleTest extends TestCase
             'PAC_UO',
             'RELACAO',
             'IDENTIDADE',
-            'LOTACAO',
-            'DESCRICAO_LOTACAO',
-            'DESCRICAO',
             'UASG',
             'DESCRICAO_UASG',
             'ATIVA',
             ' '
+        );
+    }
+
+    /** @param array<string, string> $grupoRemoto */
+    private function criarMapeamentoDemandas(array $grupoRemoto): MapeamentoDemandasOracle
+    {
+        return new MapeamentoDemandasOracle(
+            'APP',
+            'PAC_DEMANDAS',
+            'ID_DEMANDA',
+            'FK_PLANO',
+            'SITUACAO',
+            'FK_UNIDADE_REQUISITANTE',
+            'DATA_DESEJADA',
+            'CATEGORIA',
+            'DESCRICAO',
+            'UNIDADE_MEDIDA',
+            'QUANTIDADE',
+            'VALOR_TOTAL',
+            'VALOR_ORCAMENTO_EXERCICIO',
+            'CATALOGO',
+            'CODIGO_ITEM',
+            'GRUPO_CODIGO',
+            $grupoRemoto,
+            'ORIGEM'
         );
     }
 }

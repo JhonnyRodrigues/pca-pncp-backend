@@ -17,6 +17,7 @@ use Semae\Pca\Application\Results\ResultadoPublicacaoPncp;
 use Semae\Pca\Application\ValueObjects\FalhaSegura;
 use Semae\Pca\Domain\ValueObjects\SequencialPca;
 use Semae\Pca\Infrastructure\Pncp\Autenticacao\SessaoPncpAutenticada;
+use Semae\Pca\Infrastructure\Pncp\Http\AmbientePncp;
 use Semae\Pca\Infrastructure\Pncp\Http\ConfiguracaoTransportePncp;
 use Semae\Pca\Infrastructure\Pncp\Http\FalhaTransportePncpException;
 use Semae\Pca\Infrastructure\Pncp\Http\RequisicaoHttpPncp;
@@ -29,6 +30,7 @@ use Throwable;
 final class EscritorPncpAdapter implements EscritorPncp
 {
     private const STATUS_PUBLICACAO_ACEITOS = [200, 201];
+    private const PREFIXO_LOCATION_ALTERNATIVO_HOMOLOGACAO = 'https://treina.pncp.gov.br/pncp-api';
 
     /** @var string[] */
     private const FALHAS_TRANSPORTE_SISTEMICAS = [
@@ -452,6 +454,9 @@ final class EscritorPncpAdapter implements EscritorPncp
             $recurso,
             rtrim($this->configuracao->getBaseUrl(), '/') . $recurso,
         ];
+        if ($this->configuracao->getAmbiente() === AmbientePncp::HOMOLOGACAO) {
+            $prefixos[] = self::PREFIXO_LOCATION_ALTERNATIVO_HOMOLOGACAO . $recurso;
+        }
 
         foreach ($prefixos as $prefixo) {
             $correspondencias = [];

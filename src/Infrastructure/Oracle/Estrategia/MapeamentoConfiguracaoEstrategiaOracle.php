@@ -12,20 +12,22 @@ final class MapeamentoConfiguracaoEstrategiaOracle
     private readonly string $tabela;
     private readonly string $colunaChave;
     private readonly string $colunaValor;
-    private readonly string $chaveModo;
+    private readonly string $colunaDescricao;
+    private readonly string $chaveEstrategia;
     private readonly string $chaveUasgConsolidadora;
-    private readonly string $literalModoIndividual;
-    private readonly string $literalModoConsolidado;
+    private readonly string $literalEstrategiaIndividual;
+    private readonly string $literalEstrategiaConsolidada;
 
     public function __construct(
         string $schema,
         string $tabela,
         string $colunaChave,
         string $colunaValor,
-        string $chaveModo,
+        string $colunaDescricao,
+        string $chaveEstrategia,
         string $chaveUasgConsolidadora,
-        string $literalModoIndividual,
-        string $literalModoConsolidado
+        string $literalEstrategiaIndividual,
+        string $literalEstrategiaConsolidada
     ) {
         $this->schema = self::normalizarIdentificador($schema, 'schema');
         $this->tabela = self::normalizarIdentificador($tabela, 'tabela de configuração');
@@ -37,29 +39,36 @@ final class MapeamentoConfiguracaoEstrategiaOracle
             $colunaValor,
             'coluna do valor de configuração'
         );
-        $this->chaveModo = self::normalizarLiteral($chaveModo, 'chave do modo');
+        $this->colunaDescricao = self::normalizarIdentificador(
+            $colunaDescricao,
+            'coluna da descrição de configuração'
+        );
+        $this->chaveEstrategia = self::normalizarLiteral(
+            $chaveEstrategia,
+            'chave da estratégia'
+        );
         $this->chaveUasgConsolidadora = self::normalizarLiteral(
             $chaveUasgConsolidadora,
             'chave da UASG consolidadora'
         );
-        $this->literalModoIndividual = self::normalizarLiteral(
-            $literalModoIndividual,
-            'literal do modo individual'
+        $this->literalEstrategiaIndividual = self::normalizarLiteral(
+            $literalEstrategiaIndividual,
+            'literal da estratégia individual'
         );
-        $this->literalModoConsolidado = self::normalizarLiteral(
-            $literalModoConsolidado,
-            'literal do modo consolidado'
+        $this->literalEstrategiaConsolidada = self::normalizarLiteral(
+            $literalEstrategiaConsolidada,
+            'literal da estratégia consolidada'
         );
 
-        if ($this->chaveModo === $this->chaveUasgConsolidadora) {
+        if ($this->chaveEstrategia === $this->chaveUasgConsolidadora) {
             throw new InvalidArgumentException(
                 'As chaves físicas da estratégia devem ser distintas.'
             );
         }
 
-        if ($this->literalModoIndividual === $this->literalModoConsolidado) {
+        if ($this->literalEstrategiaIndividual === $this->literalEstrategiaConsolidada) {
             throw new InvalidArgumentException(
-                'Os literais físicos dos modos devem ser distintos.'
+                'Os literais físicos das estratégias devem ser distintos.'
             );
         }
     }
@@ -79,9 +88,14 @@ final class MapeamentoConfiguracaoEstrategiaOracle
         return $this->colunaValor;
     }
 
-    public function getChaveModo(): string
+    public function getColunaDescricao(): string
     {
-        return $this->chaveModo;
+        return $this->colunaDescricao;
+    }
+
+    public function getChaveEstrategia(): string
+    {
+        return $this->chaveEstrategia;
     }
 
     public function getChaveUasgConsolidadora(): string
@@ -89,14 +103,14 @@ final class MapeamentoConfiguracaoEstrategiaOracle
         return $this->chaveUasgConsolidadora;
     }
 
-    public function getLiteralModoIndividual(): string
+    public function getLiteralEstrategiaIndividual(): string
     {
-        return $this->literalModoIndividual;
+        return $this->literalEstrategiaIndividual;
     }
 
-    public function getLiteralModoConsolidado(): string
+    public function getLiteralEstrategiaConsolidada(): string
     {
-        return $this->literalModoConsolidado;
+        return $this->literalEstrategiaConsolidada;
     }
 
     private static function normalizarIdentificador(string $valor, string $campo): string

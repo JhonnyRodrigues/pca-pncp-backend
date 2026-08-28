@@ -8,6 +8,8 @@ use InvalidArgumentException;
 
 final class MapeamentoDemandasOracle
 {
+    private const DBLINK_GRUPO_AUTORIZADO = 'READ_ORCL';
+
     private readonly string $schema;
     private readonly string $tabela;
     private readonly string $colunaId;
@@ -24,9 +26,22 @@ final class MapeamentoDemandasOracle
     private readonly string $colunaCatalogo;
     private readonly string $colunaCodigoItem;
     private readonly string $colunaGrupo;
-    private readonly string $colunaDescricaoGrupo;
+    private readonly string $schemaGrupoRemoto;
+    private readonly string $tabelaGrupoRemoto;
+    private readonly string $dblinkGrupoRemoto;
+    private readonly string $colunaCodigoGrupoRemoto;
+    private readonly string $colunaDescricaoGrupoRemoto;
     private readonly string $colunaOrigem;
 
+    /**
+     * @param array{
+     *     schema: string,
+     *     tabela: string,
+     *     dblink: string,
+     *     colunaCodigo: string,
+     *     colunaDescricao: string
+     * } $grupoRemoto
+     */
     public function __construct(
         string $schema,
         string $tabela,
@@ -44,7 +59,7 @@ final class MapeamentoDemandasOracle
         string $colunaCatalogo,
         string $colunaCodigoItem,
         string $colunaGrupo,
-        string $colunaDescricaoGrupo,
+        array $grupoRemoto,
         string $colunaOrigem
     ) {
         $campos = [
@@ -64,7 +79,6 @@ final class MapeamentoDemandasOracle
             'coluna do catálogo' => $colunaCatalogo,
             'coluna do código do item' => $colunaCodigoItem,
             'coluna do grupo' => $colunaGrupo,
-            'coluna da descrição do grupo' => $colunaDescricaoGrupo,
             'coluna da origem' => $colunaOrigem,
         ];
 
@@ -91,9 +105,16 @@ final class MapeamentoDemandasOracle
             $this->colunaCatalogo,
             $this->colunaCodigoItem,
             $this->colunaGrupo,
-            $this->colunaDescricaoGrupo,
             $this->colunaOrigem,
         ] = $normalizados;
+
+        [
+            $this->schemaGrupoRemoto,
+            $this->tabelaGrupoRemoto,
+            $this->dblinkGrupoRemoto,
+            $this->colunaCodigoGrupoRemoto,
+            $this->colunaDescricaoGrupoRemoto,
+        ] = self::normalizarGrupoRemoto($grupoRemoto);
     }
 
     public function getTabelaQualificada(): string
@@ -171,9 +192,21 @@ final class MapeamentoDemandasOracle
         return $this->colunaGrupo;
     }
 
-    public function getColunaDescricaoGrupo(): string
+    public function getTabelaGrupoRemotoQualificada(): string
     {
-        return $this->colunaDescricaoGrupo;
+        return $this->schemaGrupoRemoto
+            . '.' . $this->tabelaGrupoRemoto
+            . '@' . $this->dblinkGrupoRemoto;
+    }
+
+    public function getColunaCodigoGrupoRemoto(): string
+    {
+        return $this->colunaCodigoGrupoRemoto;
+    }
+
+    public function getColunaDescricaoGrupoRemoto(): string
+    {
+        return $this->colunaDescricaoGrupoRemoto;
     }
 
     public function getColunaOrigem(): string
@@ -192,5 +225,51 @@ final class MapeamentoDemandasOracle
         }
 
         return strtoupper($valor);
+    }
+
+    /**
+     * @param array<string, mixed> $mapeamento
+     * @return array{string, string, string, string, string}
+     */
+    private static function normalizarGrupoRemoto(array $mapeamento): array
+    {
+        $campos = [
+            'schema' => 'schema remoto do grupo',
+            'tabela' => 'tabela remota do grupo',
+            'dblink' => 'DBLINK remoto do grupo',
+            'colunaCodigo' => 'coluna remota do código do grupo',
+            'colunaDescricao' => 'coluna remota da descrição do grupo',
+        ];
+
+        if (
+            array_diff_key($campos, $mapeamento) !== []
+            || array_diff_key($mapeamento, $campos) !== []
+        ) {
+            throw new InvalidArgumentException(
+                'O mapeamento remoto do grupo deve declarar somente os campos obrigatórios.'
+            );
+        }
+
+        $normalizados = [];
+
+        foreach ($campos as $chave => $campo) {
+            $valor = $mapeamento[$chave];
+
+            if (!is_string($valor)) {
+                throw new InvalidArgumentException(
+                    "O mapeamento da {$campo} contém um identificador Oracle inválido."
+                );
+            }
+
+            $normalizados[] = self::normalizarIdentificador($valor, $campo);
+        }
+
+        if ($normalizados[2] !== self::DBLINK_GRUPO_AUTORIZADO) {
+            throw new InvalidArgumentException(
+                'O DBLINK remoto do grupo não pertence ao contrato autorizado.'
+            );
+        }
+
+        return $normalizados;
     }
 }

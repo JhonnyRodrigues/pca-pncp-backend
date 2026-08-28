@@ -12,12 +12,12 @@ final class MapeamentoEstadoOperacionalOracle
     private readonly string $tabela;
     private readonly string $colunaUnidadeOrcamentaria;
     private readonly string $colunaAnoExecucao;
-    private readonly string $colunaModo;
+    private readonly string $colunaEstrategia;
     private readonly string $colunaUasg;
-    private readonly string $colunaEstado;
-    private readonly string $colunaSequencial;
-    private readonly string $literalModoIndividual;
-    private readonly string $literalModoConsolidado;
+    private readonly string $colunaEstadoPublicacao;
+    private readonly string $colunaSequencialPublicacaoPncp;
+    private readonly string $literalEstrategiaIndividual;
+    private readonly string $literalEstrategiaConsolidada;
     private readonly string $literalNaoPublicado;
     private readonly string $literalPublicado;
     private readonly string $literalExcluido;
@@ -27,12 +27,12 @@ final class MapeamentoEstadoOperacionalOracle
         string $tabela,
         string $colunaUnidadeOrcamentaria,
         string $colunaAnoExecucao,
-        string $colunaModo,
+        string $colunaEstrategia,
         string $colunaUasg,
-        string $colunaEstado,
-        string $colunaSequencial,
-        string $literalModoIndividual,
-        string $literalModoConsolidado,
+        string $colunaEstadoPublicacao,
+        string $colunaSequencialPublicacaoPncp,
+        string $literalEstrategiaIndividual,
+        string $literalEstrategiaConsolidada,
         string $literalNaoPublicado,
         string $literalPublicado,
         string $literalExcluido
@@ -47,20 +47,29 @@ final class MapeamentoEstadoOperacionalOracle
             $colunaAnoExecucao,
             'coluna de exercício'
         );
-        $this->colunaModo = self::normalizarIdentificador($colunaModo, 'coluna de modo');
-        $this->colunaUasg = self::normalizarIdentificador($colunaUasg, 'coluna de UASG');
-        $this->colunaEstado = self::normalizarIdentificador($colunaEstado, 'coluna de estado');
-        $this->colunaSequencial = self::normalizarIdentificador(
-            $colunaSequencial,
-            'coluna de sequencial'
+        $this->colunaEstrategia = self::normalizarIdentificador(
+            $colunaEstrategia,
+            'coluna de estratégia adotada'
         );
-        $this->literalModoIndividual = self::normalizarLiteral(
-            $literalModoIndividual,
-            'literal do modo individual'
+        $this->colunaUasg = self::normalizarIdentificador(
+            $colunaUasg,
+            'coluna de UASG adotada'
         );
-        $this->literalModoConsolidado = self::normalizarLiteral(
-            $literalModoConsolidado,
-            'literal do modo consolidado'
+        $this->colunaEstadoPublicacao = self::normalizarIdentificador(
+            $colunaEstadoPublicacao,
+            'coluna de estado da publicação'
+        );
+        $this->colunaSequencialPublicacaoPncp = self::normalizarIdentificador(
+            $colunaSequencialPublicacaoPncp,
+            'coluna do sequencial da publicação no PNCP'
+        );
+        $this->literalEstrategiaIndividual = self::normalizarLiteral(
+            $literalEstrategiaIndividual,
+            'literal da estratégia individual'
+        );
+        $this->literalEstrategiaConsolidada = self::normalizarLiteral(
+            $literalEstrategiaConsolidada,
+            'literal da estratégia consolidada'
         );
         $this->literalNaoPublicado = self::normalizarLiteral(
             $literalNaoPublicado,
@@ -75,8 +84,10 @@ final class MapeamentoEstadoOperacionalOracle
             'literal do estado excluído'
         );
 
-        if ($this->literalModoIndividual === $this->literalModoConsolidado) {
-            throw new InvalidArgumentException('Os literais de modo devem ser distintos.');
+        if ($this->literalEstrategiaIndividual === $this->literalEstrategiaConsolidada) {
+            throw new InvalidArgumentException(
+                'Os literais de estratégia devem ser distintos.'
+            );
         }
 
         if (count(array_unique([
@@ -103,9 +114,9 @@ final class MapeamentoEstadoOperacionalOracle
         return $this->colunaAnoExecucao;
     }
 
-    public function getColunaModo(): string
+    public function getColunaEstrategia(): string
     {
-        return $this->colunaModo;
+        return $this->colunaEstrategia;
     }
 
     public function getColunaUasg(): string
@@ -113,24 +124,24 @@ final class MapeamentoEstadoOperacionalOracle
         return $this->colunaUasg;
     }
 
-    public function getColunaEstado(): string
+    public function getColunaEstadoPublicacao(): string
     {
-        return $this->colunaEstado;
+        return $this->colunaEstadoPublicacao;
     }
 
-    public function getColunaSequencial(): string
+    public function getColunaSequencialPublicacaoPncp(): string
     {
-        return $this->colunaSequencial;
+        return $this->colunaSequencialPublicacaoPncp;
     }
 
-    public function getLiteralModoIndividual(): string
+    public function getLiteralEstrategiaIndividual(): string
     {
-        return $this->literalModoIndividual;
+        return $this->literalEstrategiaIndividual;
     }
 
-    public function getLiteralModoConsolidado(): string
+    public function getLiteralEstrategiaConsolidada(): string
     {
-        return $this->literalModoConsolidado;
+        return $this->literalEstrategiaConsolidada;
     }
 
     public function getLiteralNaoPublicado(): string
