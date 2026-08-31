@@ -42,8 +42,6 @@
         "contract:adapters:preflight:oracle":"php tests/Contract/Sprint59/run-preflight.php oracle",
         "contract:adapters:pncp:cleanup":"php tests/Contract/Sprint59/run-pncp-cleanup.php",
         "contract:adapters:pncp":"vendor/bin/phpunit --configuration phpunit.adapters.contract.xml --group pncp-live",
-        "contract:sprint510:tests":"vendor/bin/phpunit --configuration phpunit.sprint510.contract.xml",
-        "contract:sprint510:preflight":"php tests/Contract/Sprint510/run-preflight.php",
         "contract:preflight":"php tests/Contract/Sprint51/run-preflight.php",
         "contract:preflight:pncp":"php tests/Contract/Sprint51/run-preflight.php pncp",
         "contract:preflight:oracle":"php tests/Contract/Sprint51/run-preflight.php oracle",

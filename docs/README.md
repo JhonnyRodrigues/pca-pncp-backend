@@ -125,7 +125,7 @@ Estes arquivos são evidências preservadas e não especificações:
 | [Guia de compreensão do backend](investigacoes/guia_de_compreensao_do_backend.md) | Investigação |
 | [Evidências da Sprint 5.1 — gates Oracle e PNCP](investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md) | Investigação concluída |
 | [Evidências da Sprint 5.9 — contratos dos adapters](investigacoes/evidencias_parciais_sprint_5_9_contratos_adapters_2026-08-26.md) | Investigação concluída — gates Oracle e PNCP aprovados |
-| [Investigação para encerramento da Fase 5 — Sprint 5.10](investigacoes/investigacao_encerramento_fase_5_sprint_5_10_2026-08-28.md) | Em andamento — suíte controlada disponível; Oracle real pendente |
+| [Investigação para encerramento da Fase 5 — Sprint 5.10](investigacoes/investigacao_encerramento_fase_5_sprint_5_10_2026-08-28.md) | Encerrada sem execução Oracle real — superada pela revisão normativa de `RN-PUB-003` |
 
 ### 5.5 Históricos
 

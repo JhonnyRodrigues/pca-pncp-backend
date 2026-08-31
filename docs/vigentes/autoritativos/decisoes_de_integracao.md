@@ -44,7 +44,8 @@ As principais revisões incrementais consolidadas aqui são:
 - o baseline detalhado de conteúdo foi retirado da V1;
 - PCA conhecido e definitivamente ausente pode ser recriado;
 - a estratégia anual é congelada na primeira execução válida;
-- DI-008 e DI-010 foram encerradas como aceitas condicionalmente;
+- a DI-008 foi aceita depois do gate Oracle real da Sprint 5.9 e da auditoria
+  final da Fase 5; a DI-010 permanece aceita condicionalmente;
 - a DI-009 foi aceita depois dos gates reais das Sprints 5.1 e 5.9.
 
 ## 3. Convenção de status
@@ -74,7 +75,7 @@ sem serem apresentadas como decisões confirmadas.
 | `DI-005` | Estado operacional e confirmação versionada | Aceita | Coerência física validada pela DI-008 |
 | `DI-006` | Auditoria e procedimentos PNCP | Aceita | Contratos Oracle de auditoria e contexto |
 | `DI-007` | Portas necessárias na Application | Aceita | UseCase completo demonstrado com mocks |
-| `DI-008` | Mecanismo Oracle | Aceita condicionalmente | ADOdb/OCI8, schema, sessão, datas e decimais |
+| `DI-008` | Mecanismo Oracle | Aceita | Reabrir somente diante de incompatibilidade Oracle concreta |
 | `DI-009` | Transporte HTTP | Aceita | Reabrir somente diante de incompatibilidade externa concreta |
 | `DI-010` | Composition Root e Scriptcase | Aceita condicionalmente | Fachada, identidade, conexão e pacote em homologação |
 
@@ -539,11 +540,9 @@ As portas e contratos são definidos por capacidades:
     - reconstruir fotografia vigente;
     - reconstruir Plano vazio;
     - registrar confirmação orientada à intenção;
-12. porta própria na Application para consultar a evidência do último cancelamento homologado que tornou vazia a unidade externa individual ou consolidada, retornando `DISPONIVEL`, `AUSENTE`, `CONFLITO` ou
-    `FALHA_SISTEMICA`;
-13. política pura no Domain para decidir ações e IDs envolvidos;
-14. PSR-3 como contrato de observabilidade;
-15. resultados por unidade externa:
+12. política pura no Domain para decidir ações e IDs envolvidos;
+13. PSR-3 como contrato de observabilidade;
+14. resultados por unidade externa:
     - `CONCLUIDO`;
     - `SEM_ALTERACAO`;
     - `FALHA_RECONCILIAVEL`;
@@ -559,15 +558,14 @@ As portas e contratos são definidos por capacidades:
 | Repositories separados de Representante e Lotação | Fragmenta o contexto da autoria |
 | Metadados cross-Plan no `PlanoRepository` | Mistura Aggregate e projeção externa |
 | Incluir Demandas canceladas na fotografia vigente | Mistura estado ativo com evidência histórica e contraria `RN-DEM-009` |
-| Consultar a justificativa histórica pelo `PlanoRepository` | Acopla ao Aggregate uma projeção distinta da fotografia vigente |
 | Porta proprietária de logging | PSR-3 já atende ao contrato |
 
 #### DI-007 — Consequências e limitações
 
 - Interfaces internas não usam URL, JSON, HTTP, SQL, ADOdb, OCI8 ou macros.
 - Contratos devem ser demonstrados por testes do consumidor com doubles.
-- O Domain possui `EvidenciaCancelamentoHomologado`; a Application possui a porta de consulta; somente um adapter futuro conhecerá a fonte física.
-- Ausência e conflito da evidência são resultados seguros distintos de falha sistêmica, sem texto padrão ou dedução silenciosa.
+- A justificativa da exclusão integral é uma decisão institucional fixa da
+  Application e não exige capacidade de consulta histórica.
 - Falhas sistêmicas permanecem no resultado global, não em resultado unitário fabricado.
 
 #### DI-007 — Gates e critérios de reabertura
@@ -577,7 +575,7 @@ As portas e contratos são definidos por capacidades:
 
 #### DI-007 — Regras de negócio relacionadas
 
-`RN-DEM-003`, `RN-DEM-004` e `RN-PUB-006`.
+`RN-DEM-003`, `RN-DEM-004`, `RN-PUB-003` e `RN-PUB-006`.
 
 #### DI-007 — Impacto no roadmap
 
@@ -587,12 +585,14 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 
 - Aceita depois da definição de auditoria.
 - Incorporou a revisão da DI-002 para reconciliação sem baseline.
+- Revisada em 31/08/2026 para remover a capacidade histórica de evidência de
+  cancelamento, substituída pela justificativa institucional de `RN-PUB-003`.
 
 ---
 
 ### DI-008 — Mecanismo Oracle
 
-- **Status:** Aceita condicionalmente.
+- **Status:** Aceita.
 - **Contexto e problema:** é necessário compartilhar conexão, transação, lock, reconstrução, confirmação e auditoria no ambiente Scriptcase sem contaminar Domain ou Application com ADOdb, OCI8 ou schema físico.
 - **Fontes:** checkpoint complementar, seção 8; continuação 03, seção 2.
 
@@ -711,6 +711,12 @@ decisões.
 - coerência da projeção;
 - datas e decimais.
 
+A fonte histórica de justificativas de cancelamento não integra este gate. A
+revisão de `RN-PUB-003` eliminou essa necessidade sem alterar os mapeamentos
+Oracle vigentes. Os gates ADOdb e de schema foram satisfeitos pelos contratos
+controlados e pelo gate Oracle/Scriptcase real da Sprint 5.9. Incompatibilidade
+Oracle concreta futura reabre somente o contrato afetado.
+
 #### DI-008 — Regras de negócio relacionadas
 
 `RN-CAD-005`, `RN-CAD-006`, `RN-DEM-009`, `RN-PLA-001`, `RN-PLA-002`,
@@ -726,6 +732,11 @@ testes contratuais aplicáveis.
 
 - Iniciada parcialmente no checkpoint complementar.
 - Encerrada condicionalmente na continuação 03 com fotografia, versão vigente, UASG, projeção e chave de exclusividade definidas.
+- Revisada em 31/08/2026 para retirar do gate a fonte histórica de justificativa
+  de cancelamento, que deixou de ser requisito de `RN-PUB-003`.
+- Aceita em 31/08/2026 após os gates reais da Sprint 5.9 e a auditoria final da
+  Infrastructure confirmarem sessão compartilhada, transação, rollback,
+  contenção, schema e adapters Oracle vigentes.
 
 ---
 
@@ -852,7 +863,8 @@ testes contratuais aplicáveis.
 
 1. Exclusão em lote com motivos diferentes usa mensagem padronizada e mantém os motivos completos localmente.
 2. Motivos não são concatenados nem truncados.
-3. Exclusão integral usa o motivo que retirou o último item.
+3. Exclusão integral usa a justificativa institucional fixa `Exclusão integral
+   do PCA por ausência de demandas vigentes no SGI.`.
 4. Decimais permanecem exatos, sem `float`.
 5. Número JSON exato usa marcador interno e validação lexical.
 6. Não são aceitos fragmentos JSON arbitrários.
@@ -929,6 +941,8 @@ e da execução dos gates de ambiente e contrato.
 - Aceita em 28/08/2026 após os gates reais das Sprints 5.1 e 5.9; CNPJ
   alfanumérico deixou de ser pendência de avanço e passa a reabrir a decisão
   somente se houver incompatibilidade externa concreta.
+- Revisada em 31/08/2026 para adotar a justificativa institucional fixa na
+  exclusão integral, sem alterar o contrato HTTP ou os adapters PNCP.
 
 ---
 

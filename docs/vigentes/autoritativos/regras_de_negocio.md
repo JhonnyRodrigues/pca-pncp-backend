@@ -696,28 +696,28 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Status normativo:** Vigente.
 - **Enunciado normativo:** O sistema DEVE decidir `EXCLUIR_PCA` quando a
   fotografia vigente estiver vazia e houver PCA externo ativo. A exclusão
-  integral DEVE usar a justificativa do cancelamento homologado que retirou a
-  última Demanda ativa.
+  integral DEVE usar a justificativa institucional fixa `Exclusão integral do
+  PCA por ausência de demandas vigentes no SGI.`.
 - **Origem ou autoridade:** DI-001, DI-003 e DI-005.
 - **Contexto e justificativa:** um PCA externo não deve permanecer ativo sem
-  Demandas homologadas vigentes. A Application DEVE obter, por capacidade
-  tipada própria, a evidência do cancelamento homologado que tornou vazia a
-  unidade externa. Essa evidência histórica não integra a fotografia vigente
-  do Plano e sua justificativa NÃO PODE ser inferida, concatenada, truncada ou
-  substituída por texto padrão. No modo consolidado, a evidência corresponde
-  ao cancelamento que tornou vazia a união completa da unidade externa.
+  Demandas homologadas vigentes. A justificativa descreve a transição
+  institucional executada pelo backend e NÃO depende da causa histórica de uma
+  Demanda específica. No modo consolidado, a unidade somente está vazia quando
+  a união completa das UOs participantes não possui Demandas vigentes.
 - **Exemplo:** cancelar a única Demanda ativa de um PCA publicado leva à
   exclusão integral.
 - **Contraexemplo:** manter o PCA ativo vazio ou impedir o cancelamento.
-- **Elementos afetados:** Plano vazio, `EvidenciaCancelamentoHomologado`,
-  capacidade de consulta da Application, justificativa e publicação.
+- **Elementos afetados:** Plano vazio, justificativa institucional e
+  publicação.
 - **Evidências de teste:** evidência parcial em
   `tests/Domain/Policies/PoliticaProcessamentoPlanoTest.php`, cobrindo decisão
-  com Plano vazio e rejeição da ausência de Planos. A obtenção tipada da
-  justificativa pertence à orquestração da Application.
+  com Plano vazio e rejeição da ausência de Planos. O envio do texto fixo
+  pertence à orquestração da Application.
 - **Decisões e documentos relacionados:** DI-001, DI-003, DI-005, DI-007,
   `RN-DEM-008` e `RN-PLA-005`.
-- **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
+- **Histórico:** criada em 30/07/2026 na consolidação do catálogo; revisada em
+  31/08/2026 para substituir a evidência do último cancelamento por
+  justificativa institucional fixa.
 
 ### RN-PUB-004 — Decisão de não agir
 

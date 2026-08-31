@@ -8,9 +8,7 @@ use Semae\Pca\Application\Commands\ComandoExcluirItensPca;
 use Semae\Pca\Application\Commands\ComandoExcluirPca;
 use Semae\Pca\Application\Commands\ComandoInserirItensPca;
 use Semae\Pca\Application\Commands\ComandoPublicarPca;
-use Semae\Pca\Application\Enums\SituacaoConsultaEvidenciaCancelamento;
 use Semae\Pca\Application\Enums\SituacaoEscritaPncp;
-use Semae\Pca\Application\Ports\EvidenciaCancelamentoHomologadoPort;
 use Semae\Pca\Application\Ports\EscritorPncp;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
@@ -20,21 +18,19 @@ use Semae\Pca\Application\Results\ResultadoPublicacaoPncp;
 use Semae\Pca\Application\ValueObjects\ContextoUnidadeComDecisao;
 use Semae\Pca\Application\ValueObjects\FalhaSegura;
 use Semae\Pca\Domain\Entities\Demanda;
-use Semae\Pca\Domain\Entities\Plano;
 use Semae\Pca\Domain\Enums\DecisaoProcessamentoPlano;
-use Semae\Pca\Domain\ValueObjects\EvidenciaCancelamentoHomologado;
-use Semae\Pca\Domain\ValueObjects\IdentidadePlano;
 use Semae\Pca\Domain\ValueObjects\SequencialPca;
 
 final class ExecutorComandosUnidade
 {
     private const LIMITE_ITENS_PUBLICACAO = 1000;
+    private const JUSTIFICATIVA_EXCLUSAO_PCA =
+        'Exclusão integral do PCA por ausência de demandas vigentes no SGI.';
 
     private readonly DesfazedorUnidadeProcessamento $desfazedor;
 
     public function __construct(
         private readonly EscritorPncp $escritorPncp,
-        private readonly EvidenciaCancelamentoHomologadoPort $evidenciaCancelamento,
         UnidadeDeTrabalhoPort $unidadeDeTrabalho
     ) {
         $this->desfazedor = new DesfazedorUnidadeProcessamento($unidadeDeTrabalho);
@@ -183,53 +179,6 @@ final class ExecutorComandosUnidade
         ContextoUnidadeComDecisao $contexto
     ): array|DesfechoProcessamentoUnidade {
         $sobExclusividade = $contexto->getContextoSobExclusividade();
-        $identidades = array_map(
-            static fn (Plano $plano): IdentidadePlano => $plano->getIdentidade(),
-            $sobExclusividade->getPlanos()
-        );
-        $resultadoEvidencia = $this->evidenciaCancelamento
-            ->consultarUltimoCancelamentoQueTornouUnidadeVazia(
-                $sobExclusividade->getUnidadeExterna(),
-                $identidades
-            );
-
-        if (
-            $resultadoEvidencia->getSituacao()
-            === SituacaoConsultaEvidenciaCancelamento::FALHA_SISTEMICA
-        ) {
-            return $this->interromperEDesfazer($this->falhaOuDiagnostico(
-                $resultadoEvidencia->getFalha(),
-                'CONSULTA_EVIDENCIA_CANCELAMENTO_FALHOU',
-                'Não foi possível consultar a evidência de cancelamento.'
-            ));
-        }
-
-        if (
-            $resultadoEvidencia->getSituacao()
-            !== SituacaoConsultaEvidenciaCancelamento::DISPONIVEL
-        ) {
-            return $this->bloquearEDesfazer(
-                $contexto,
-                $this->falhaOuDiagnostico(
-                    $resultadoEvidencia->getFalha(),
-                    'EVIDENCIA_CANCELAMENTO_INDISPONIVEL',
-                    'A evidência homologada do cancelamento não está disponível.'
-                )
-            );
-        }
-
-        $evidencia = $resultadoEvidencia->getEvidencia();
-
-        if ($evidencia === null || !$this->evidenciaPertenceAUnidade($evidencia, $identidades)) {
-            return $this->bloquearEDesfazer(
-                $contexto,
-                new FalhaSegura(
-                    'EVIDENCIA_CANCELAMENTO_CONFLITANTE',
-                    'A evidência de cancelamento diverge da unidade processada.'
-                )
-            );
-        }
-
         $sequencial = $this->obterSequencialExistente($contexto);
 
         if ($sequencial === null) {
@@ -248,7 +197,7 @@ final class ExecutorComandosUnidade
                 $contexto->getCnpj(),
                 $sobExclusividade->getUnidadeExterna(),
                 $sequencial,
-                $evidencia->getJustificativa()
+                self::JUSTIFICATIVA_EXCLUSAO_PCA
             )
         );
         $falhaSistemica = $this->classificarFalhaSistemicaEscrita($resultado);
@@ -317,20 +266,6 @@ final class ExecutorComandosUnidade
             'ESCRITA_PNCP_FALHOU',
             'A escrita externa falhou de forma sistêmica.'
         ));
-    }
-
-    /** @param IdentidadePlano[] $identidades */
-    private function evidenciaPertenceAUnidade(
-        EvidenciaCancelamentoHomologado $evidencia,
-        array $identidades
-    ): bool {
-        foreach ($identidades as $identidade) {
-            if ($evidencia->getIdentidadePlano()->equals($identidade)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static function justificativaExclusaoItens(int $quantidade): string

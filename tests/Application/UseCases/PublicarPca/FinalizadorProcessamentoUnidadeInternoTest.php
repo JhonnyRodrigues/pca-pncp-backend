@@ -12,7 +12,6 @@ use Psr\Log\NullLogger;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoProcessamentoUnidade;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
-use Semae\Pca\Application\Ports\EvidenciaCancelamentoHomologadoPort;
 use Semae\Pca\Application\Ports\EscritorPncp;
 use Semae\Pca\Application\Ports\LeitorPncp;
 use Semae\Pca\Application\Ports\RegistroAuditoriaPort;
@@ -929,12 +928,11 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
     {
         $leitor = $this->createMock(LeitorPncp::class);
         $escritor = $this->createMock(EscritorPncp::class);
-        $evidencia = $this->createMock(EvidenciaCancelamentoHomologadoPort::class);
         $repository = $this->createMock(PlanoRepository::class);
         $estado = $this->createMock(EstadoOperacionalPublicacaoPort::class);
         $auditoria = $this->createMock(RegistroAuditoriaPort::class);
         $unidadeTrabalho = $this->createMock(UnidadeDeTrabalhoPort::class);
-        $executor = new ExecutorComandosUnidade($escritor, $evidencia, $unidadeTrabalho);
+        $executor = new ExecutorComandosUnidade($escritor, $unidadeTrabalho);
 
         return new DependenciasFinalizador(
             new FinalizadorProcessamentoUnidadeInterno(

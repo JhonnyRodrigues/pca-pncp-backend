@@ -1,6 +1,8 @@
 *.env
 /config/
 
+*.deb
+
 /vendor/
 .phpunit.result.cache
 

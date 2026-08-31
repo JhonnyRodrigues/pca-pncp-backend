@@ -155,8 +155,6 @@ composer contract:adapters:preflight:oracle
 composer contract:adapters:preflight:pncp
 composer contract:adapters:pncp:cleanup
 composer contract:adapters:pncp
-composer contract:sprint510:tests
-composer contract:sprint510:preflight
 ```
 
 Os cinco comandos da Sprint 5.9 iniciados por
@@ -166,30 +164,6 @@ reais somente no ambiente de treinamento. O gate Oracle é executado no
 Scriptcase pelo entrypoint contratual documentado em
 `tests/Contract/Sprint59/scriptcase_probe.php`. Nenhum desses gates é alcançado
 por `composer tests`.
-
-A investigação Oracle da Sprint 5.10 é igualmente opt-in, mas exclusivamente
-de leitura. `PCA_SPRINT510_CONFIG_FILE` deve apontar para um arquivo externo
-baseado em `tests/Contract/Sprint510/config.example.php`, preenchido somente
-depois de o DBA confirmar a fonte física e de a massa ter sido preparada pelo
-fluxo oficial do SGI. O preflight recusa autorização de escrita, DML, DDL,
-consultas com lock e qualquer modo sem massa dedicada confirmada.
-
-No Scriptcase, carregue o autoloader e
-`tests/Contract/Sprint510/scriptcase_probe.php`, então execute um modo por vez:
-
-```php
-$relatorio = executar_investigacao_evidencia_cancelamento_oracle_sprint_510(
-    $db,
-    $login,
-    'metadata' // metadata, individual, consolidado ou ausente
-);
-```
-
-O entrypoint usa uma única conexão ADOdb emprestada, não inicia transação e
-impede `Execute()`, `BeginTrans()`, `CommitTrans()`, `RollbackTrans()` e
-`Close()`. Os SELECTs, binds e expectativas permanecem no arquivo externo; o
-relatório contém somente cardinalidades, verificações booleanas e hash. A
-aprovação dessa investigação não implementa a Port nem encerra a Fase 5.
 
 Quando uma execução PNCP deixar resíduo conhecido, informe exclusivamente esse
 valor em `owned_residue_sequence` e execute primeiro:

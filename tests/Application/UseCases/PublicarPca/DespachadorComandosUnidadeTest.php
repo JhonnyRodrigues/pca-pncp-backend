@@ -16,11 +16,9 @@ use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoDesfechoProcessamentoUnidade;
 use Semae\Pca\Application\Enums\SituacaoEscritaPncp;
 use Semae\Pca\Application\Enums\SituacaoProcessamentoUnidade;
-use Semae\Pca\Application\Ports\EvidenciaCancelamentoHomologadoPort;
 use Semae\Pca\Application\Ports\EscritorPncp;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
-use Semae\Pca\Application\Results\ResultadoConsultaEvidenciaCancelamento;
 use Semae\Pca\Application\Results\ResultadoEscritaPncp;
 use Semae\Pca\Application\Results\ResultadoFinalizacaoUnidadeTrabalho;
 use Semae\Pca\Application\Results\ResultadoInicioUnidadeTrabalho;
@@ -44,7 +42,6 @@ use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 use Semae\Pca\Domain\ValueObjects\DecimalExato;
 use Semae\Pca\Domain\ValueObjects\Cnpj;
 use Semae\Pca\Domain\ValueObjects\EstadoOperacionalPublicacao;
-use Semae\Pca\Domain\ValueObjects\EvidenciaCancelamentoHomologado;
 use Semae\Pca\Domain\ValueObjects\IdentidadePlano;
 use Semae\Pca\Domain\ValueObjects\IdentidadeUnidadeOrcamentaria;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
@@ -324,22 +321,14 @@ final class DespachadorComandosUnidadeTest extends TestCase
         $this->assertSame(1, $dependencias->unidadeTrabalho->desfazimentos);
     }
 
-    public function testExcluirPcaDeveUsarIntegralmenteAEvidenciaHomologada(): void
+    /** @regra RN-PUB-003 */
+    public function testExcluirPcaDeveUsarJustificativaInstitucionalFixa(): void
     {
         $contexto = $this->criarContexto(
             [],
             ResultadoDecisaoProcessamentoPlano::excluirPca()
         );
-        $identidade = $contexto->getContextoSobExclusividade()->getPlanos()[0]->getIdentidade();
-        $evidencia = new EvidenciaCancelamentoHomologado(
-            $identidade,
-            1001,
-            'Justificativa homologada integral; sem adaptações.'
-        );
-        $dependencias = $this->criarDependencias(
-            $contexto,
-            ResultadoConsultaEvidenciaCancelamento::disponivel($evidencia)
-        );
+        $dependencias = $this->criarDependencias($contexto);
 
         $resultado = $dependencias->despachador->despachar(
             $this->criarContextoUsuario(),
@@ -349,26 +338,20 @@ final class DespachadorComandosUnidadeTest extends TestCase
         $this->assertSame($dependencias->finalizador->desfechoRetornado, $resultado);
         $this->assertSame(['excluir_pca'], $dependencias->escritor->chamadas);
         $this->assertSame(
-            'Justificativa homologada integral; sem adaptações.',
+            'Exclusão integral do PCA por ausência de demandas vigentes no SGI.',
             $dependencias->escritor->comandoExcluirPca?->getJustificativa()
         );
-        $this->assertSame([$identidade], $dependencias->evidencia->identidadesConsultadas);
         $this->assertSame(1, $dependencias->finalizador->chamadas);
     }
 
-    #[DataProvider('evidenciasBloqueantes')]
-    public function testEvidenciaAusenteOuConflitanteDeveBloquearSemEscrever(
-        string $situacao
-    ): void {
+    public function testExcluirPcaSemSequencialDeveBloquearAntesDaEscritaEDesfazer(): void
+    {
         $contexto = $this->criarContexto(
             [],
-            ResultadoDecisaoProcessamentoPlano::excluirPca()
+            ResultadoDecisaoProcessamentoPlano::excluirPca(),
+            EstadoOperacionalPublicacao::naoPublicado()
         );
-        $falha = new FalhaSegura('EVIDENCIA_INDISPONIVEL', 'Evidência indisponível.');
-        $resultadoEvidencia = $situacao === 'ausente'
-            ? ResultadoConsultaEvidenciaCancelamento::ausente($falha)
-            : ResultadoConsultaEvidenciaCancelamento::conflito($falha);
-        $dependencias = $this->criarDependencias($contexto, $resultadoEvidencia);
+        $dependencias = $this->criarDependencias($contexto);
 
         $resultado = $dependencias->despachador->despachar(
             $this->criarContextoUsuario(),
@@ -376,26 +359,53 @@ final class DespachadorComandosUnidadeTest extends TestCase
         );
 
         $this->assertSame(
-            SituacaoProcessamentoUnidade::BLOQUEADO,
-            $resultado->getResultadoUnitario()?->getSituacao()
+            'SEQUENCIAL_PCA_AUSENTE',
+            $resultado->getResultadoUnitario()?->getFalha()?->getCodigo()
         );
-        $this->assertSame($falha, $resultado->getResultadoUnitario()?->getFalha());
         $this->assertSame([], $dependencias->escritor->chamadas);
         $this->assertSame(0, $dependencias->finalizador->chamadas);
         $this->assertSame(1, $dependencias->unidadeTrabalho->desfazimentos);
     }
 
-    public function testFalhaSistemicaNaEvidenciaDeveDesfazerEInterromper(): void
+    #[DataProvider('resultadosNaoSistemicosExclusaoIntegral')]
+    public function testResultadoNaoSistemicoDaExclusaoIntegralDeveSeguirParaReconciliacao(
+        string $tipo
+    ): void {
+        $contexto = $this->criarContexto(
+            [],
+            ResultadoDecisaoProcessamentoPlano::excluirPca()
+        );
+        $dependencias = $this->criarDependencias($contexto);
+        $falha = new FalhaSegura('EXCLUSAO_NAO_CONFIRMADA', 'Exclusão não confirmada.');
+        $resultadoEscrita = $tipo === 'rejeitada'
+            ? ResultadoEscritaPncp::rejeitada($falha)
+            : ResultadoEscritaPncp::resultadoIncerto($falha);
+        $dependencias->escritor->resultadoExcluirPca = $resultadoEscrita;
+
+        $resultado = $dependencias->despachador->despachar(
+            $this->criarContextoUsuario(),
+            $contexto
+        );
+
+        $this->assertSame($dependencias->finalizador->desfechoRetornado, $resultado);
+        $this->assertSame(['excluir_pca'], $dependencias->escritor->chamadas);
+        $this->assertSame(
+            [$resultadoEscrita],
+            $dependencias->finalizador->contextoRecebido?->getResultadosEscrita()
+        );
+        $this->assertSame(0, $dependencias->unidadeTrabalho->desfazimentos);
+    }
+
+    public function testFalhaSistemicaNaExclusaoIntegralDeveDesfazerSemFinalizar(): void
     {
         $contexto = $this->criarContexto(
             [],
             ResultadoDecisaoProcessamentoPlano::excluirPca()
         );
-        $falha = new FalhaSegura('HISTORICO_INDISPONIVEL', 'Histórico indisponível.');
-        $dependencias = $this->criarDependencias(
-            $contexto,
-            ResultadoConsultaEvidenciaCancelamento::falhaSistemica($falha)
-        );
+        $dependencias = $this->criarDependencias($contexto);
+        $falha = new FalhaSegura('PNCP_INDISPONIVEL', 'PNCP indisponível.');
+        $dependencias->escritor->resultadoExcluirPca =
+            ResultadoEscritaPncp::falhaSistemica($falha);
 
         $resultado = $dependencias->despachador->despachar(
             $this->criarContextoUsuario(),
@@ -403,7 +413,7 @@ final class DespachadorComandosUnidadeTest extends TestCase
         );
 
         $this->assertSame($falha, $resultado->getFalhaSistemica());
-        $this->assertSame([], $dependencias->escritor->chamadas);
+        $this->assertSame(['excluir_pca'], $dependencias->escritor->chamadas);
         $this->assertSame(0, $dependencias->finalizador->chamadas);
         $this->assertSame(1, $dependencias->unidadeTrabalho->desfazimentos);
     }
@@ -446,9 +456,9 @@ final class DespachadorComandosUnidadeTest extends TestCase
     }
 
     /** @return array<string, array{string}> */
-    public static function evidenciasBloqueantes(): array
+    public static function resultadosNaoSistemicosExclusaoIntegral(): array
     {
-        return ['ausente' => ['ausente'], 'conflitante' => ['conflito']];
+        return ['rejeitada' => ['rejeitada'], 'resultado incerto' => ['incerta']];
     }
 
     private function criarContextoUsuario(): ContextoUsuario
@@ -460,30 +470,19 @@ final class DespachadorComandosUnidadeTest extends TestCase
     }
 
     private function criarDependencias(
-        ContextoUnidadeComDecisao $contexto,
-        ?ResultadoConsultaEvidenciaCancelamento $resultadoEvidencia = null
+        ContextoUnidadeComDecisao $contexto
     ): DependenciasDespachadorFake {
         $escritor = new EscritorPncpFakeDespacho();
-        $identidade = $contexto->getContextoSobExclusividade()->getPlanos()[0]->getIdentidade();
-        $resultadoEvidencia ??= ResultadoConsultaEvidenciaCancelamento::disponivel(
-            new EvidenciaCancelamentoHomologado(
-                $identidade,
-                1001,
-                'Cancelamento homologado.'
-            )
-        );
-        $evidencia = new EvidenciaCancelamentoFakeDespacho($resultadoEvidencia);
         $finalizador = new FinalizadorFakeDespacho();
         $unidadeTrabalho = new UnidadeTrabalhoFakeDespacho();
 
         return new DependenciasDespachadorFake(
             new DespachadorComandosUnidade(
-                new ExecutorComandosUnidade($escritor, $evidencia, $unidadeTrabalho),
+                new ExecutorComandosUnidade($escritor, $unidadeTrabalho),
                 $finalizador,
                 $unidadeTrabalho
             ),
             $escritor,
-            $evidencia,
             $finalizador,
             $unidadeTrabalho
         );
@@ -564,7 +563,6 @@ final class DependenciasDespachadorFake
     public function __construct(
         public readonly DespachadorComandosUnidade $despachador,
         public readonly EscritorPncpFakeDespacho $escritor,
-        public readonly EvidenciaCancelamentoFakeDespacho $evidencia,
         public readonly FinalizadorFakeDespacho $finalizador,
         public readonly UnidadeTrabalhoFakeDespacho $unidadeTrabalho
     ) {}
@@ -633,27 +631,6 @@ final class EscritorPncpFakeDespacho implements EscritorPncp
         $this->comandoExcluirPca = $comando;
 
         return $this->resultadoExcluirPca;
-    }
-}
-
-final class EvidenciaCancelamentoFakeDespacho implements EvidenciaCancelamentoHomologadoPort
-{
-    public int $chamadas = 0;
-    /** @var IdentidadePlano[] */
-    public array $identidadesConsultadas = [];
-
-    public function __construct(
-        private readonly ResultadoConsultaEvidenciaCancelamento $resultado
-    ) {}
-
-    public function consultarUltimoCancelamentoQueTornouUnidadeVazia(
-        UnidadeExternaPublicacao $unidade,
-        array $identidades
-    ): ResultadoConsultaEvidenciaCancelamento {
-        $this->chamadas++;
-        $this->identidadesConsultadas = $identidades;
-
-        return $this->resultado;
     }
 }
 

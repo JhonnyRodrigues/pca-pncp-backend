@@ -8,7 +8,6 @@ use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Semae\Pca\Application\Contracts\SessaoPncp;
-use Semae\Pca\Application\Ports\EvidenciaCancelamentoHomologadoPort;
 use Semae\Pca\Application\Ports\EscritorPncp;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
 use Semae\Pca\Application\Ports\LeitorPncp;
@@ -64,7 +63,6 @@ final class ProcessadorUnidadeInternoTest extends TestCase
         $estado = $this->createMock(EstadoOperacionalPublicacaoPort::class);
         $leitor = $this->createMock(LeitorPncp::class);
         $escritor = $this->createMock(EscritorPncp::class);
-        $evidencia = $this->createMock(EvidenciaCancelamentoHomologadoPort::class);
         $auditoria = $this->createMock(RegistroAuditoriaPort::class);
 
         $unidadeTrabalho->expects($this->once())
@@ -99,13 +97,10 @@ final class ProcessadorUnidadeInternoTest extends TestCase
         $escritor->expects($this->never())->method('inserirItens');
         $escritor->expects($this->never())->method('excluirItens');
         $escritor->expects($this->never())->method('excluirPca');
-        $evidencia->expects($this->never())
-            ->method('consultarUltimoCancelamentoQueTornouUnidadeVazia');
         $auditoria->expects($this->never())->method('registrar');
 
         $executor = new ExecutorComandosUnidade(
             $escritor,
-            $evidencia,
             $unidadeTrabalho
         );
         $finalizador = new FinalizadorProcessamentoUnidadeInterno(

@@ -483,16 +483,16 @@ parcialmente conectado, preservando a transação única de `DI-004`.
 - observar o estado externo completo;
 - fornecer fatos ao Domain;
 - executar os comandos tipados necessários;
-- consultar por capacidade própria a evidência homologada exigida para
-  `EXCLUIR_PCA`, sem alterar a fotografia vigente ou o `PlanoRepository`;
+- construir a justificativa de `EXCLUIR_PCA` na Application, sem alterar a
+  fotografia vigente ou o `PlanoRepository`;
 - continuar unidades independentes somente nos casos aprovados.
 
 Referências: RN-PUB-003, DI-002, DI-003, DI-004, DI-007 e fluxo vigente.
 
 **Estado do PCA:** concluída e validada em 05/08/2026 após implementação em
 seis microciclos com TDD e pausas de validação. O incremento interno passou a
-obter a evidência homologada da exclusão integral, proteger os desfechos e o
-contexto da finalização futura, reler a unidade sob exclusividade, observar o
+proteger os desfechos e o contexto da finalização futura, reler a unidade sob
+exclusividade, observar o
 PNCP, delegar a decisão à política do Domain, despachar comandos tipados e
 coordenar a continuidade entre unidades independentes. Falhas sistêmicas
 interrompem a varredura sem fabricar resultados para unidades não visitadas;
@@ -502,6 +502,9 @@ apenas como contrato mockado, e nenhum adapter, observação final, confirmaçã
 auditoria ou conexão ao caso de uso público foi antecipado. A regressão final
 aprovou 276 testes e 827 asserções. As Sprints 4.11 e 4.12 foram posteriormente
 implementadas e submetidas ao checkpoint de auditoria encerrado abaixo.
+
+A consulta histórica introduzida naquele incremento foi posteriormente
+superada pela revisão de `RN-PUB-003` e removida na Sprint 5.10.
 
 #### Sprint 4.11 — Reconciliação, confirmação e auditoria
 
@@ -683,22 +686,25 @@ Referências: DI-001, DI-004 e DI-009.
 - validar sessão compartilhada, rollback, segurança e tradução de erros;
 - documentar limitações e evidências efetivamente observadas.
 
-#### Sprint 5.10 — Evidência de cancelamento e encerramento da Infrastructure
+#### Sprint 5.10 — Simplificação da justificativa e encerramento da Infrastructure
 
-- inventariar os critérios restantes da Fase 5 e investigar, com o DBA, a
-  fonte Oracle do cancelamento homologado que tornou a unidade vazia;
-- comprovar a fonte com massa dedicada criada pelo fluxo oficial do SGI e probe
-  opt-in exclusivamente de leitura;
-- pausar obrigatoriamente depois da investigação para aprovar o plano TDD do
-  mapeamento, do adapter e do gate real;
-- encerrar a Fase 5 somente depois de implementar a Port restante, aprovar seu
-  contrato Oracle e reconciliar o estado final da DI-008.
+- revisar `RN-PUB-003` para usar justificativa institucional fixa na exclusão
+  integral, preservando o gatilho da fotografia vigente vazia com PCA ativo;
+- simplificar a Application em TDD, sem alterar o contrato PNCP ou adapters;
+- remover a capacidade histórica sem consumidor e encerrar sua investigação
+  Oracle sem execução real;
+- reconciliar a DI-008 e auditar todas as Ports e gates da Infrastructure.
 
 Referências: RN-PUB-003, DI-007 e DI-008.
 
-**Ponto em aberto:** fonte física, autoridade do evento homologado, justificativa
-integral, vínculos e ordenação total devem ser comprovados antes de qualquer
-adapter. A Sprint 6.1 permanece bloqueada.
+**Estado do PCA:** concluída em 31/08/2026 após quatro microciclos autorizados.
+A auditoria final confirmou que todas as nove Ports vigentes possuem adapters
+concretos, os gates reais Oracle e PNCP da Sprint 5.9 permanecem válidos e
+nenhuma regra migrou para a Infrastructure.
+
+**Estado final da Fase 5:** concluída. A entrada da Fase 6 está satisfeita, mas
+nenhuma sprint dessa fase foi iniciada ou autorizada. A Sprint 6.1 depende de
+planejamento e autorização próprios.
 
 ### Fase 6 — Wiring controlado do núcleo
 
@@ -894,7 +900,7 @@ O contexto, as alternativas e as consequências completas permanecem no
 | DI-005 | Estado operacional e confirmação versionada | Separa publicação externa, sequencial e confirmação da versão | Aceita | Coerência física validada pela DI-008 |
 | DI-006 | Auditoria e procedimentos PNCP | Registra somente fatos concluídos e confirmados | Aceita | Contratos Oracle de auditoria e contexto |
 | DI-007 | Portas necessárias na Application | Define capacidades internas sem vazamento tecnológico | Aceita | UseCase completo demonstrado com mocks |
-| DI-008 | Mecanismo Oracle | Define conexão, transação, lock, reconstrução e projeção | Aceita condicionalmente | ADOdb/OCI8, schema, sessão, datas e decimais |
+| DI-008 | Mecanismo Oracle | Define conexão, transação, lock, reconstrução e projeção | Aceita | Reabrir somente diante de incompatibilidade Oracle concreta |
 | DI-009 | Transporte HTTP | Define cURL, TLS, autenticação, leitura e escrita segura | Aceita | Reabrir somente diante de incompatibilidade externa concreta |
 | DI-010 | Composition Root e Scriptcase | Define fachada, composição, perfil e ciclo da execução | Aceita condicionalmente | Fachada, identidade, conexão e pacote em homologação |
 

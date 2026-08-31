@@ -30,7 +30,6 @@ fazem parte do fluxo executável.
 | `ValueObjects/Cnpj.php` | Normaliza e valida CNPJ alfanumérico. |
 | `ValueObjects/DecimalExato.php` | Preserva uma string decimal válida sem `float`. |
 | `ValueObjects/EstadoOperacionalPublicacao.php` | Representa não publicado, publicado ou excluído e seu sequencial. |
-| `ValueObjects/EvidenciaCancelamentoHomologado.php` | Identifica o cancelamento homologado que esvaziou uma unidade. |
 | `ValueObjects/IdentidadePlano.php` | Identidade lógica formada por UO e exercício. |
 | `ValueObjects/IdentidadeUnidadeOrcamentaria.php` | Identificador estável da UO. |
 | `ValueObjects/Lotacao.php` | Identifica e descreve uma lotação administrativa. |
@@ -92,7 +91,6 @@ fazem parte do fluxo executável.
 | `Ports/EscritorPncp.php` | Publica e executa inclusões ou exclusões no PNCP. |
 | `Ports/EstadoOperacionalPublicacaoPort.php` | Consulta e persiste a projeção operacional. |
 | `Ports/EstrategiaPublicacaoPort.php` | Consulta e adota a estratégia anual. |
-| `Ports/EvidenciaCancelamentoHomologadoPort.php` | Obtém a evidência necessária à exclusão integral. |
 | `Ports/LeitorPncp.php` | Observa PCA conhecido e localiza candidatos. |
 | `Ports/RegistroAuditoriaPort.php` | Persiste uma intenção de auditoria confirmada. |
 | `Ports/UnidadeDeTrabalhoPort.php` | Inicia, confirma ou desfaz unidade transacional. |
@@ -132,7 +130,6 @@ fazem parte do fluxo executável.
 | `Results/ResultadoObservacaoPca.php` | PCA encontrado, ausência definitiva ou observação insegura. |
 | `Results/ResultadoPublicacaoPncp.php` | Resultado da criação com possível sequencial. |
 | `Results/ResultadoEscritaPncp.php` | Resultado de inclusão ou exclusão. |
-| `Results/ResultadoConsultaEvidenciaCancelamento.php` | Resultado da busca da evidência homologada. |
 | `Results/ResultadoPersistenciaLocal.php` | Resultado de estado local ou auditoria. |
 
 ### Enums da Application
@@ -146,7 +143,6 @@ fazem parte do fluxo executável.
 | `Enums/SituacaoBuscaCandidatosPca.php` | Estados da busca de candidatos. |
 | `Enums/SituacaoConsultaEstadoOperacional.php` | Estados da consulta local. |
 | `Enums/SituacaoConsultaEstrategia.php` | Estados da estratégia anual. |
-| `Enums/SituacaoConsultaEvidenciaCancelamento.php` | Estados da evidência de cancelamento. |
 | `Enums/SituacaoDesfechoProcessamentoUnidade.php` | Tipo do desfecho unitário. |
 | `Enums/SituacaoEscritaPncp.php` | Aceita, rejeitada, incerta ou sistêmica. |
 | `Enums/SituacaoFinalizacaoUnidadeTrabalho.php` | Resultado de finalização transacional. |
@@ -295,7 +291,6 @@ fazem parte do fluxo executável.
 | `ValueObjects/CnpjTest.php` | CNPJ numérico e alfanumérico. |
 | `ValueObjects/DecimalExatoTest.php` | Preservação decimal e rejeição de `float`. |
 | `ValueObjects/EstadoOperacionalPublicacaoTest.php` | Coerência entre estado e sequencial. |
-| `ValueObjects/EvidenciaCancelamentoHomologadoTest.php` | Identidade e justificativa da evidência. |
 | `ValueObjects/IdentidadePlanoTest.php` | Igualdade lógica do Plano. |
 | `ValueObjects/IdentidadeUnidadeOrcamentariaTest.php` | Validação da identidade da UO. |
 | `ValueObjects/LotacaoTest.php` | Validação de Lotação. |
@@ -309,13 +304,11 @@ fazem parte do fluxo executável.
 | `Commands/ComandosEscritaPncpTest.php` | Invariantes de todos os comandos externos. |
 | `Contracts/FinalizadorProcessamentoUnidadeTest.php` | Consumo do contrato de finalização. |
 | `Ports/ContextoAuditoriaEstadoOperacionalPortsTest.php` | Contratos de contexto, estado e auditoria. |
-| `Ports/EvidenciaCancelamentoHomologadoPortTest.php` | Contrato específico da evidência. |
 | `Ports/IntegracaoPncpEEstrategiaPortsTest.php` | Contratos PNCP e estratégia. |
 | `Ports/UnidadeDeTrabalhoPortTest.php` | Contrato de begin, commit e rollback. |
 | `Results/PublicarPcaResponseTest.php` | Quatro estados e invariantes globais. |
 | `Results/ResultadoAutenticacaoPncpTest.php` | Desfechos de autenticação. |
 | `Results/ResultadoBuscaCandidatosPcaTest.php` | Busca de candidatos e conflitos. |
-| `Results/ResultadoConsultaEvidenciaCancelamentoTest.php` | Desfechos da evidência. |
 | `Results/ResultadoEstrategiaPublicacaoTest.php` | Consulta e adoção da estratégia. |
 | `Results/ResultadoObservacaoPcaTest.php` | Desfechos da observação externa. |
 | `Results/ResultadoPreparacaoPublicacaoPcaTest.php` | Invariantes da preparação global. |
@@ -433,19 +426,6 @@ fazem parte do fluxo executável.
 | `Contract/Sprint59/run-pncp-cleanup.php` | Remove somente o resíduo PNCP explicitamente autorizado e exige ausência definitiva sem publicar. |
 | `Contract/Sprint59/config.example.php` | Modelo sem segredos da configuração externa. |
 
-### Investigação opt-in — Sprint 5.10
-
-| Arquivo | Demonstração principal |
-| --- | --- |
-| `Contract/Sprint510/Sprint510InvestigationTest.php` | Preflight, binds, sessão, cardinalidade, ausência, ambiguidade, sanitização e proibição de escrita ou fechamento. |
-| `Contract/Sprint510/Support/Sprint510Config.php` | Carrega a configuração externa e valida os quatro modos, SELECTs, binds, aliases e massa dedicada. |
-| `Contract/Sprint510/Support/BorrowedAdodbReadOnlyGuard.php` | Delega somente consultas ADOdb e impede transações, comandos e `Close()`. |
-| `Contract/Sprint510/Support/OracleCancellationEvidenceInvestigationRunner.php` | Executa checks read-only na mesma sessão e produz somente resultados sanitizados. |
-| `Contract/Sprint510/Support/SafeInvestigationReport.php` | Recusa campos e valores sensíveis e calcula o hash do relatório. |
-| `Contract/Sprint510/scriptcase_probe.php` | Expõe somente o entrypoint investigativo da Sprint 5.10 para o Scriptcase. |
-| `Contract/Sprint510/run-preflight.php` | Valida a configuração externa antes de qualquer acesso Oracle. |
-| `Contract/Sprint510/config.example.php` | Modelo deliberadamente não executável, sem SQL, nomes físicos ou massa. |
-
 ## 5. Configuração executável
 
 | Arquivo | Função |
@@ -455,7 +435,6 @@ fazem parte do fluxo executável.
 | `phpunit.xml` | Bootstrap da suíte padrão, com exclusão explícita dos contratos opt-in. |
 | `phpunit.contract.xml` | Suíte contratual legada da Sprint 5.1. |
 | `phpunit.adapters.contract.xml` | Suíte separada dos contratos de adapters da Sprint 5.9. |
-| `phpunit.sprint510.contract.xml` | Suíte separada da investigação read-only da Sprint 5.10. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
 
 ## 6. Documentação vigente

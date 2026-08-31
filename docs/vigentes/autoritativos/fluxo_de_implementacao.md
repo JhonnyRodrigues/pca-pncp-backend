@@ -19,7 +19,7 @@ Sua autoridade limita-se à sequência dinâmica e às responsabilidades dessa
 colaboração. A autoridade dos assuntos relacionados permanece distribuída:
 
 | Assunto | Fonte autoritativa |
-|---|---|
+| --- | --- |
 | Regras de negócio | [Regras de negócio](regras_de_negocio.md) |
 | Conceitos, identidades, relações e invariantes | [Modelo de domínio](modelo_de_dominio.md) |
 | Contratos externos, persistência técnica e operação | [Decisões de integração](decisoes_de_integracao.md) |
@@ -58,7 +58,7 @@ concorrente de negócio, domínio ou integração.
 ## 2. Participantes e responsabilidades
 
 | Participante | Responsabilidade no fluxo |
-|---|---|
+| --- | --- |
 | Aplicação hospedeira | Fornecer o contexto externo aprovado e invocar somente a fachada pública |
 | Fachada pública | Proteger a fronteira do backend e impedir que exceções ou detalhes internos atravessem para o consumidor |
 | Controller | Adaptar a entrada tipada, construir o Request e acionar o UseCase já composto |
@@ -206,7 +206,7 @@ forma as unidades externas sem fundir os Aggregates `Plano` (`DI-003` e
 `DI-007`).
 
 | Modo | Formação da unidade | Resultado esperado |
-|---|---|---|
+| --- | --- | --- |
 | Individual | Uma unidade para cada UO e sua UASG | Um resultado independente por unidade |
 | Consolidado | Uma unidade para a união completa das UOs do exercício na UASG consolidadora | Um único resultado conjunto |
 
@@ -317,7 +317,7 @@ envolvidas. Ele não conhece mecanismos de persistência, transporte,
 configuração ou observabilidade (`DI-007`).
 
 | Condição | Decisão | Autoridade |
-|---|---|---|
+| --- | --- | --- |
 | Há Demandas vigentes e não há PCA ativo conhecido | `PUBLICAR` | `RN-PUB-001` |
 | Há PCA ativo e inclusões ou exclusões homologadas | `RETIFICAR` | `RN-PUB-002`, `RN-PUB-006` |
 | A unidade ficou vazia e há PCA ativo | `EXCLUIR_PCA` | `RN-PUB-003` |
@@ -379,21 +379,13 @@ sem Demandas vigentes (`RN-PUB-003`).
 No modo individual, isso depende da fotografia da UO. No consolidado, depende
 da união completa de todas as UOs (`RN-PUB-009` e `RN-PUB-010`).
 
-A justificativa é a do cancelamento homologado que retirou o último item
-vigente, nos termos de `RN-PUB-003` e `DI-009`. Lacuna que impeça identificar
-essa justificativa não pode ser preenchida por inferência.
+A Application constrói o comando de exclusão com a justificativa institucional
+fixa `Exclusão integral do PCA por ausência de demandas vigentes no SGI.`, nos
+termos de `RN-PUB-003` e `DI-009`. Não há consulta histórica nem dependência da
+justificativa de uma Demanda cancelada.
 
-Depois da decisão `EXCLUIR_PCA` e antes do comando de escrita, a Application
-consulta pela porta própria a evidência do último cancelamento que tornou
-vazia a unidade externa. A consulta recebe a identidade do Plano no modo
-individual ou todas as identidades participantes no modo consolidado:
-
-- `DISPONIVEL`: usa integralmente a justificativa homologada;
-- `AUSENTE` ou `CONFLITO`: bloqueia a unidade sem executar a exclusão;
-- `FALHA_SISTEMICA`: interrompe a varredura conforme a regra de falha global.
-
-Nenhuma dessas situações autoriza inferência, concatenação, truncamento ou
-texto padrão.
+Essa simplificação não altera o gatilho da decisão, a exigência de sequencial
+conhecido ou a classificação dos resultados da escrita externa.
 
 Depois da observação final comprovar a exclusão, a Application ordena:
 
@@ -424,7 +416,7 @@ Depois de qualquer escrita, a Application observa novamente o estado externo
 completo. A classificação final segue `DI-002`, `DI-004` e `DI-009`:
 
 | Estado final observado | Consequência |
-|---|---|
+| --- | --- |
 | Convergente | Registrar a confirmação local da sincronização e concluir a unidade |
 | Restam somente mudanças homologadas pendentes | Desfazer localmente e retornar `FALHA_RECONCILIAVEL` |
 | Divergência inesperada | Desfazer localmente, diagnosticar e bloquear |
@@ -487,7 +479,7 @@ reconciliação consciente (`DI-002` e `DI-004`).
 ### 9.1 Resultado por unidade externa
 
 | Estado | Significado |
-|---|---|
+| --- | --- |
 | `CONCLUIDO` | A convergência da operação necessária foi comprovada e seus efeitos locais foram registrados |
 | `SEM_ALTERACAO` | Não foi necessária escrita externa e a unidade terminou coerente |
 | `FALHA_RECONCILIAVEL` | Restou pendência que admite nova observação ou atuação consciente |
@@ -507,7 +499,7 @@ unidade e um único resultado (`RN-PUB-009`, `RN-PUB-010`, `DI-004` e
 Depois da varredura, a Application compõe a Response de forma determinística:
 
 | Condição | Estado global |
-|---|---|
+| --- | --- |
 | Entrada inválida | `SOLICITACAO_INVALIDA` |
 | Todas as unidades terminaram em `CONCLUIDO` ou `SEM_ALTERACAO` | `CONCLUIDA` |
 | A varredura terminou com `FALHA_RECONCILIAVEL` ou `BLOQUEADO` | `CONCLUIDA_COM_PENDENCIAS` |
@@ -565,10 +557,8 @@ adapters nem transforma decisões condicionais em contratos comprovados.
 Antes das respectivas implementações concretas, permanecem os gates:
 
 - contrato do mecanismo de persistência e compartilhamento da unidade local;
-- estrutura física dos dados (`schema`), cardinalidades, datas, decimais e
-  coerência da projeção;
-- ambiente efetivo de execução do transporte seguro (`runtime`) e suíte
-  contratual ativada explicitamente (`opt-in`) no ambiente de treinamento;
+- estrutura física dos dados (`schema`), cardinalidades, datas, decimais e coerência da projeção;
+- ambiente efetivo de execução do transporte seguro (`runtime`) e suíte contratual ativada explicitamente (`opt-in`) no ambiente de treinamento;
 - identidade externa dos itens e ausência definitiva;
 - fachada, contexto do usuário e pacote no ambiente hospedeiro real.
 
@@ -629,7 +619,7 @@ documento.
 ## 12. Matriz de rastreabilidade
 
 | Parte do fluxo | Regras de negócio | Decisões de integração |
-|---|---|---|
+| --- | --- | --- |
 | Entrada e contexto | `RN-CAD-001` a `RN-CAD-004` | `DI-006`, `DI-010` |
 | UO, UASG e estratégia | `RN-CAD-005`, `RN-CAD-006`, `RN-PUB-009` a `RN-PUB-011` | `DI-003`, `DI-008` |
 | Descoberta e reconstrução | `RN-DEM-009`, `RN-PLA-001` a `RN-PLA-006` | `DI-007`, `DI-008` |

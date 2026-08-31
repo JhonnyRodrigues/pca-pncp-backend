@@ -18,7 +18,6 @@ use Semae\Pca\Application\Ports\ContextoUsuarioPort;
 use Semae\Pca\Application\Ports\EscritorPncp;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
 use Semae\Pca\Application\Ports\EstrategiaPublicacaoPort;
-use Semae\Pca\Application\Ports\EvidenciaCancelamentoHomologadoPort;
 use Semae\Pca\Application\Ports\LeitorPncp;
 use Semae\Pca\Application\Ports\RegistroAuditoriaPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
@@ -28,7 +27,6 @@ use Semae\Pca\Application\Results\ResultadoAutenticacaoPncp;
 use Semae\Pca\Application\Results\ResultadoBuscaCandidatosPca;
 use Semae\Pca\Application\Results\ResultadoConsultaEstadoOperacional;
 use Semae\Pca\Application\Results\ResultadoConsultaEstrategia;
-use Semae\Pca\Application\Results\ResultadoConsultaEvidenciaCancelamento;
 use Semae\Pca\Application\Results\ResultadoEscritaPncp;
 use Semae\Pca\Application\Results\ResultadoFinalizacaoUnidadeTrabalho;
 use Semae\Pca\Application\Results\ResultadoInicioUnidadeTrabalho;
@@ -62,7 +60,6 @@ use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 use Semae\Pca\Domain\ValueObjects\Cnpj;
 use Semae\Pca\Domain\ValueObjects\DecimalExato;
 use Semae\Pca\Domain\ValueObjects\EstadoOperacionalPublicacao;
-use Semae\Pca\Domain\ValueObjects\EvidenciaCancelamentoHomologado;
 use Semae\Pca\Domain\ValueObjects\IdentidadePlano;
 use Semae\Pca\Domain\ValueObjects\IdentidadeUnidadeOrcamentaria;
 use Semae\Pca\Domain\ValueObjects\Lotacao;
@@ -110,7 +107,8 @@ final class FluxoConcretoApplicationTest extends TestCase
         $this->assertSame(1, $cenario->auditoria->registros);
     }
 
-    public function testDeveExcluirPcaComEvidenciaEGrafoConcreto(): void
+    /** @regra RN-PUB-003 */
+    public function testDeveExcluirPcaIndividualComJustificativaInstitucionalFixa(): void
     {
         $cenario = CenarioFluxoConcreto::individual([]);
         $sequencial = new SequencialPca(77);
@@ -119,18 +117,36 @@ final class FluxoConcretoApplicationTest extends TestCase
             ResultadoObservacaoPca::encontrado(PcaObservado::ativo($sequencial, [1001])),
             ResultadoObservacaoPca::ausenciaDefinitiva(),
         ];
-        $cenario->evidencia->resultado = ResultadoConsultaEvidenciaCancelamento::disponivel(
-            new EvidenciaCancelamentoHomologado(
-                $cenario->identidades[0],
-                1001,
-                'Cancelamento homologado que esvaziou a unidade.'
-            )
-        );
-
         $response = $this->executar($cenario);
 
         $this->assertConcluidaComOperacoes($response, ['excluir_pca'], $cenario);
-        $this->assertSame(1, $cenario->evidencia->consultas);
+        $this->assertSame(
+            'Exclusão integral do PCA por ausência de demandas vigentes no SGI.',
+            $cenario->escritor->comandoExcluirPca?->getJustificativa()
+        );
+    }
+
+    /** @regra RN-PUB-003 @regra RN-PUB-010 */
+    public function testDeveExcluirPcaConsolidadoComJustificativaInstitucionalFixa(): void
+    {
+        $cenario = CenarioFluxoConcreto::consolidado([
+            'uo-101' => [],
+            'uo-102' => [],
+        ]);
+        $sequencial = new SequencialPca(77);
+        $cenario->estadoInicial = EstadoOperacionalPublicacao::publicado($sequencial);
+        $cenario->observacoes = [
+            ResultadoObservacaoPca::encontrado(PcaObservado::ativo($sequencial, [1001, 1002])),
+            ResultadoObservacaoPca::ausenciaDefinitiva(),
+        ];
+        $response = $this->executar($cenario);
+
+        $this->assertConcluidaComOperacoes($response, ['excluir_pca'], $cenario);
+        $this->assertSame(
+            'Exclusão integral do PCA por ausência de demandas vigentes no SGI.',
+            $cenario->escritor->comandoExcluirPca?->getJustificativa()
+        );
+        $this->assertCount(2, $cenario->repository->confirmados);
     }
 
     public function testDevePublicarModoConsolidadoComoUmaUnidade(): void
@@ -159,7 +175,6 @@ final class FluxoConcretoApplicationTest extends TestCase
         $politica = new PoliticaProcessamentoPlano();
         $executor = new ExecutorComandosUnidade(
             $cenario->escritor,
-            $cenario->evidencia,
             $cenario->unidadeTrabalho
         );
         $finalizador = new FinalizadorProcessamentoUnidadeInterno(
@@ -240,7 +255,6 @@ final class CenarioFluxoConcreto
     public readonly EstadoFluxoConcreto $estado;
     public readonly LeitorFluxoConcreto $leitor;
     public readonly EscritorFluxoConcreto $escritor;
-    public readonly EvidenciaFluxoConcreto $evidencia;
     public readonly AuditoriaFluxoConcreto $auditoria;
 
     /** @param array<string, int[]> $idsPorUo */
@@ -284,7 +298,6 @@ final class CenarioFluxoConcreto
         $this->estado = new EstadoFluxoConcreto($this);
         $this->leitor = new LeitorFluxoConcreto($this);
         $this->escritor = new EscritorFluxoConcreto();
-        $this->evidencia = new EvidenciaFluxoConcreto();
         $this->auditoria = new AuditoriaFluxoConcreto();
     }
 
@@ -483,6 +496,7 @@ final class EscritorFluxoConcreto implements EscritorPncp
 {
     /** @var string[] */
     public array $operacoes = [];
+    public ?ComandoExcluirPca $comandoExcluirPca = null;
 
     public function publicar(
         SessaoPncp $sessao,
@@ -516,28 +530,9 @@ final class EscritorFluxoConcreto implements EscritorPncp
         ComandoExcluirPca $comando
     ): ResultadoEscritaPncp {
         $this->operacoes[] = 'excluir_pca';
+        $this->comandoExcluirPca = $comando;
 
         return ResultadoEscritaPncp::aceita();
-    }
-}
-
-final class EvidenciaFluxoConcreto implements EvidenciaCancelamentoHomologadoPort
-{
-    public int $consultas = 0;
-    public ?ResultadoConsultaEvidenciaCancelamento $resultado = null;
-
-    public function consultarUltimoCancelamentoQueTornouUnidadeVazia(
-        UnidadeExternaPublicacao $unidade,
-        array $identidades
-    ): ResultadoConsultaEvidenciaCancelamento {
-        $this->consultas++;
-
-        return $this->resultado ?? ResultadoConsultaEvidenciaCancelamento::ausente(
-            new \Semae\Pca\Application\ValueObjects\FalhaSegura(
-                'EVIDENCIA_AUSENTE',
-                'Evidência ausente.'
-            )
-        );
     }
 }
 

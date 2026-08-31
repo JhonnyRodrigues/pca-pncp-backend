@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 28/08/2026
+**Atualizado em:** 31/08/2026
 
 ## Limites de autoridade
 
@@ -32,25 +32,38 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 5.9.
+- A última sprint concluída é a Sprint 5.10.
 - A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
 - A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
   aprovado no treinamento, incluindo publicação, operações de itens, exclusão
   integral, ausência definitiva, TLS e eventos sanitizados. O gate Oracle foi
   aprovado no Scriptcase real nos modos `adapters`, `lock_holder`,
   `lock_expect_blocked` e `lock_expect_available`.
-- A Fase 5 não está encerrada. `EvidenciaCancelamentoHomologadoPort` ainda não
-  possui adapter concreto.
-- A Sprint 5.10 — Evidência de cancelamento e encerramento da Infrastructure
-  está em andamento no incremento investigativo. A suíte read-only controlada
-  foi implementada; a confirmação da fonte pelo DBA, a preparação da massa no
-  SGI e a execução Oracle real permanecem pendentes.
-- A suíte controlada da Sprint 5.10 aprovou 17 testes e 46 asserções. As suítes
-  dos adapters, dos contratos controlados 5.9, dos contratos legados e padrão
-  permaneceram verdes, respectivamente com 476/1.804, 54/149, 24/51 e
-  815/2.949 testes/asserções em PHP 8.4.7.
-- A Fase 6 permanece bloqueada até o encerramento explícito da Fase 5 e
-  planejamento e autorização próprios; a Sprint 6.1 não está autorizada.
+- A Sprint 5.10 — Simplificação da justificativa e encerramento da
+  Infrastructure está concluída. A investigação Oracle real foi encerrada sem
+  execução porque `RN-PUB-003` passou a exigir justificativa institucional fixa.
+- Todas as nove Ports vigentes possuem adapter concreto. A DI-008 foi aceita
+  após os gates reais e a auditoria final.
+- A Fase 5 — Infrastructure concreta está concluída.
+- A entrada da Fase 6 está satisfeita, mas nenhuma sprint dessa fase foi
+  iniciada ou autorizada. A Sprint 6.1 depende de planejamento e autorização
+  próprios.
+
+## Evidências da Sprint 5.10
+
+- `EXCLUIR_PCA` preserva o gatilho da fotografia vigente vazia com PCA externo
+  ativo e envia a justificativa fixa `Exclusão integral do PCA por ausência de
+  demandas vigentes no SGI.` nos modos individual e consolidado.
+- A Port, o resultado, o enum, o Value Object e a suíte investigativa da fonte
+  histórica foram removidos sem alterar contratos PNCP, adapters ou APIs
+  públicas.
+- A auditoria encontrou nove Ports vigentes e suas nove implementações
+  concretas. Nenhuma capacidade de Infrastructure permanece sem adapter.
+- A suíte Application aprovou 237 testes e 978 asserções; adapters, contratos
+  controlados da Sprint 5.9, contratos legados e suíte padrão aprovaram,
+  respectivamente, 476/1.804, 54/149, 24/51 e 807/2.928 testes/asserções.
+- O autoload PSR-4 estrito gerou 1.733 classes. Lint, catálogo, referências e
+  `git diff --check` foram aprovados em PHP 8.4.7.
 
 ## Evidências da Sprint 5.9
 
@@ -337,14 +350,8 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   ser fechada pelo backend.
 - Os contratos autorizados dos adapters e os gates reais Oracle/Scriptcase e
   PNCP de treinamento da Sprint 5.9 estão aprovados.
-- A ausência de adapter concreto para `EvidenciaCancelamentoHomologadoPort`
-  impede encerrar a Fase 5. O inventário da Sprint 5.10 confirmou essa como a
-  única Port sem implementação concreta.
-- A fonte física, a autoridade do cancelamento homologado, a justificativa
-  integral, os vínculos e a ordenação total ainda devem ser comprovados pelo
-  DBA e pelo probe read-only antes do planejamento do adapter.
-- A Fase 6 e a Sprint 6.1 permanecem bloqueadas até planejamento e autorização
-  próprios para tratar essa lacuna.
+- A Fase 6 não começa automaticamente com o encerramento da Infrastructure. A
+  Sprint 6.1 exige planejamento e autorização próprios.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos

@@ -1,10 +1,24 @@
 # Investigação para encerramento da Fase 5 — Sprint 5.10
 
 **Classificação documental:** Investigação  
-**Status:** Em andamento — suíte controlada disponível; execução Oracle real pendente  
+**Status:** Encerrada sem execução Oracle real — superada por revisão normativa em 31/08/2026
 **Data de referência:** 28/08/2026  
 **Autoridade/Escopo:** inventário e procedimento investigativo; não cria regra,
 decisão física ou contrato
+
+## Nota de encerramento
+
+Em 31/08/2026, `RN-PUB-003` foi revisada para usar a justificativa
+institucional fixa `Exclusão integral do PCA por ausência de demandas vigentes
+no SGI.`. A fonte histórica, a ordenação do último cancelamento e o adapter
+investigado deixaram de ser requisitos vigentes.
+
+Por isso, a execução Oracle real descrita abaixo foi cancelada antes de ocorrer.
+O conteúdo restante preserva o inventário e o procedimento disponíveis em
+28/08/2026 como registro histórico; não representa mais uma pendência normativa
+nem autoriza implementar o adapter. A Fase 5 somente poderá ser encerrada após
+a implementação simplificada, a remoção da capacidade obsoleta e o gate final
+aprovado nos microciclos posteriores.
 
 ## 1. Resultado do inventário
 
@@ -86,14 +100,10 @@ PSR-4 estrito gerou 1.745 classes. Os arquivos PHP passaram no lint, o catálogo
 contém todos os caminhos de `src/` e `tests/`, e `git diff --check` não apontou
 erro. As execuções usaram PHP 8.4.7.
 
-## 4. Checkpoint
+## 4. Checkpoint original
 
-A investigação real ainda não foi executada. Até que os quatro modos sejam
-aprovados e a semântica seja confirmada pelo DBA, a Sprint 5.10 permanece em
-andamento, a DI-008 permanece condicional, a Fase 5 continua aberta e a Sprint
-6.1 não está autorizada.
-
-Se a fonte for compatível, o próximo artefato será um plano TDD específico para
-o mapeamento, o adapter e o gate Oracle real. Uma incompatibilidade reabre
-somente a DI ou regra diretamente afetada. Evidência insuficiente mantém a
-lacuna bloqueante sem default ou implementação aproximada.
+Em 28/08/2026, a investigação real ainda não havia sido executada e a fonte
+permanecia como condição para a Sprint 5.10 e a Fase 5. Esse checkpoint foi
+superado pela revisão normativa registrada na nota de encerramento acima. Não
+houve execução Oracle, desenho de mapeamento ou implementação de adapter para a
+capacidade posteriormente removida.

@@ -83,6 +83,7 @@ históricos, investigações e prompts antigos não definem o significado vigent
 | Estado operacional da publicação | Referência local cross-Plan sobre a situação conhecida da publicação externa. | `RN-PUB-008`; `DI-005`, `DI-007` |
 | Estados operacionais | `NAO_PUBLICADO`, `PUBLICADO` e `EXCLUIDO`. | `RN-PUB-008`; `DI-005` |
 | Exclusão integral | Encerramento do PCA externo quando a unidade de publicação fica sem Demandas vigentes. | `RN-PUB-003`; `DI-001` |
+| Justificativa institucional da exclusão integral | Texto fixo enviado pela Application ao excluir um PCA por ausência de Demandas vigentes, sem depender da causa histórica de uma Demanda específica. | `RN-PUB-003`; `DI-007`, `DI-009` |
 | Falha reconciliável | Resultado de unidade que exige nova observação ou atuação consciente sem caracterizar falha sistêmica global. | `DI-004`, `DI-007` |
 | Modo consolidado | Estratégia em que uma publicação representa a união completa dos Planos participantes do exercício. | `RN-PUB-010`; `DI-003` |
 | Modo individual | Estratégia em que cada UO possui publicação e resultado independentes. | `RN-PUB-009`; `DI-003` |

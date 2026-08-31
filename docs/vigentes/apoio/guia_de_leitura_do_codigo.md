@@ -24,10 +24,9 @@ flowchart LR
     I --> N[PNCP]
 ```
 
-Os adapters concretos das Sprints 5.2 a 5.8 implementam essas fronteiras. A
-única Port ainda sem adapter é `EvidenciaCancelamentoHomologadoPort`; por isso,
-a Fase 5 e o avanço à Fase 6 permanecem bloqueados. A Sprint 5.10 investiga a
-fonte física dessa evidência sem antecipar sua implementação.
+Os adapters concretos das Sprints 5.2 a 5.8 implementam todas as Ports
+vigentes. A Sprint 5.9 comprovou os contratos Oracle e PNCP reais, e a Sprint
+5.10 simplificou a justificativa da exclusão integral e encerrou a Fase 5.
 
 ## 2. O fluxo completo
 
@@ -79,7 +78,7 @@ tipados. O finalizador comprova o resultado antes de confirmar dados locais.
 |---|---|---|
 | `PUBLICAR` | Existe fotografia desejada e não existe PCA ativo conhecido. | Cria o PCA com a fotografia completa. |
 | `RETIFICAR` | O PCA ativo difere da fotografia desejada. | Exclui itens, inclui itens e observa, nessa ordem. |
-| `EXCLUIR_PCA` | A fotografia ficou vazia e existe PCA ativo. | Consulta evidência homologada e exclui integralmente. |
+| `EXCLUIR_PCA` | A fotografia ficou vazia e existe PCA ativo. | Exclui integralmente com a justificativa institucional fixa. |
 | `NENHUMA_ACAO` | O estado já converge ou ambos os lados estão vazios. | Nenhuma; apenas conclui a unidade localmente. |
 
 O limite de 1000 protege a fotografia desejada. Uma retificação de 1000 para
@@ -135,7 +134,6 @@ persistência.
 | `LeitorPncp` | Observar PCA e localizar candidatos. | `LeitorPncpAdapter`. |
 | `EscritorPncp` | Publicar, inserir e excluir. | `EscritorPncpAdapter`. |
 | `EstadoOperacionalPublicacaoPort` | Ler e persistir projeção operacional. | `OracleEstadoOperacionalPublicacaoAdapter`. |
-| `EvidenciaCancelamentoHomologadoPort` | Obter o cancelamento que esvaziou a unidade. | **Ausente; bloqueia o encerramento da Fase 5.** |
 | `RegistroAuditoriaPort` | Persistir fato confirmado. | `OracleRegistroAuditoriaAdapter`. |
 | `LoggerInterface` | Diagnóstico técnico. | `AcumuladorEventosTecnicos` em memória. |
 
@@ -168,20 +166,11 @@ está e evita procurar pelo repositório inteiro.
 
 ## 9. O que ainda não existe
 
-Não existe adapter concreto de `EvidenciaCancelamentoHomologadoPort`,
-Composition Root, Controller, Presenter nem fachada Scriptcase. O entrypoint
-da Sprint 5.9 em `tests/Contract/Sprint59/scriptcase_probe.php` pertence somente
-à suíte contratual e não antecipa nenhuma dessas fronteiras de produção.
+Não existem Composition Root, Controller, Presenter nem fachada Scriptcase. O
+entrypoint da Sprint 5.9 em `tests/Contract/Sprint59/scriptcase_probe.php`
+pertence somente à suíte contratual e não antecipa nenhuma dessas fronteiras de
+produção.
 
-O entrypoint `tests/Contract/Sprint510/scriptcase_probe.php` também é exclusivo
-de teste. Ele executa apenas `SELECT` com binds sobre uma conexão ADOdb
-emprestada, nos modos `metadata`, `individual`, `consolidado` e `ausente`, e
-impede transações, comandos e `Close()`. SQL, mapeamentos físicos e valores da
-massa permanecem na configuração externa indicada por
-`PCA_SPRINT510_CONFIG_FILE`.
-
-Os contratos controlados e os gates Oracle/Scriptcase e PNCP de treinamento da
-Sprint 5.9 estão aprovados. A Sprint está concluída, mas a Fase 5 permanece
-bloqueada pelo adapter ausente. O inventário da Sprint 5.10 não encontrou outra
-Port sem implementação, mas a fonte Oracle e sua semântica ainda precisam ser
-comprovadas antes do plano TDD do adapter.
+Todas as Ports vigentes possuem adapter concreto e a Fase 5 está concluída. A
+Sprint 6.1 ainda não foi iniciada nem autorizada; sua composição manual depende
+de planejamento próprio.
