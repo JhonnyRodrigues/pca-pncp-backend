@@ -12,10 +12,10 @@ use Semae\Pca\Application\Commands\ComandoInserirItensPca;
 use Semae\Pca\Application\Commands\ComandoPublicarPca;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoEscritaPncp;
-use Semae\Pca\Application\Ports\AutenticadorPncp;
-use Semae\Pca\Application\Ports\EscritorPncp;
+use Semae\Pca\Application\Ports\AutenticadorPncpPort;
+use Semae\Pca\Application\Ports\EscritorPncpPort;
 use Semae\Pca\Application\Ports\EstrategiaPublicacaoPort;
-use Semae\Pca\Application\Ports\LeitorPncp;
+use Semae\Pca\Application\Ports\LeitorPncpPort;
 use Semae\Pca\Application\Results\ResultadoAdocaoEstrategia;
 use Semae\Pca\Application\Results\ResultadoAutenticacaoPncp;
 use Semae\Pca\Application\Results\ResultadoBuscaCandidatosPca;
@@ -68,8 +68,8 @@ final class IntegracaoPncpEEstrategiaPortsTest extends TestCase
         [$cnpj, $unidade] = $this->criarContextoPublicacao();
         $sequencial = new SequencialPca(55);
         $sessao = new SessaoPncpFake();
-        $autenticador = $this->createMock(AutenticadorPncp::class);
-        $leitor = $this->createMock(LeitorPncp::class);
+        $autenticador = $this->createMock(AutenticadorPncpPort::class);
+        $leitor = $this->createMock(LeitorPncpPort::class);
 
         $autenticador->expects($this->once())
             ->method('autenticar')
@@ -112,7 +112,7 @@ final class IntegracaoPncpEEstrategiaPortsTest extends TestCase
             $sequencial,
             'Cancelamento da última Demanda ativa.'
         );
-        $port = $this->createMock(EscritorPncp::class);
+        $port = $this->createMock(EscritorPncpPort::class);
 
         $port->expects($this->once())
             ->method('publicar')

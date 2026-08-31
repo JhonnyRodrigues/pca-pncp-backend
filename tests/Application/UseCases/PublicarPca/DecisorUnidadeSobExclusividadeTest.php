@@ -11,7 +11,7 @@ use RuntimeException;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoDesfechoProcessamentoUnidade;
 use Semae\Pca\Application\Enums\SituacaoProcessamentoUnidade;
-use Semae\Pca\Application\Ports\LeitorPncp;
+use Semae\Pca\Application\Ports\LeitorPncpPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
 use Semae\Pca\Application\Results\ResultadoBuscaCandidatosPca;
@@ -380,7 +380,7 @@ final class DecisorUnidadeSobExclusividadeTest extends TestCase
     }
 
     private function decisor(
-        LeitorPncp $leitor,
+        LeitorPncpPort $leitor,
         ?UnidadeDeTrabalhoPort $unidadeTrabalho = null
     ): DecisorUnidadeSobExclusividade {
         return new DecisorUnidadeSobExclusividade(
@@ -468,7 +468,7 @@ final class SessaoPncpFakeDecisao implements SessaoPncp
 {
 }
 
-final class LeitorPncpFakeDecisao implements LeitorPncp
+final class LeitorPncpFakeDecisao implements LeitorPncpPort
 {
     public int $observacoesConhecidas = 0;
     public int $buscasCandidatos = 0;

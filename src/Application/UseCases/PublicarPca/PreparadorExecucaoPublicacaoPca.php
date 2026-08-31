@@ -12,7 +12,7 @@ use Semae\Pca\Application\Enums\SituacaoConsultaEstrategia;
 use Semae\Pca\Application\Enums\SituacaoFinalizacaoUnidadeTrabalho;
 use Semae\Pca\Application\Enums\SituacaoInicioUnidadeTrabalho;
 use Semae\Pca\Application\Enums\SituacaoResolucaoContextoUsuario;
-use Semae\Pca\Application\Ports\AutenticadorPncp;
+use Semae\Pca\Application\Ports\AutenticadorPncpPort;
 use Semae\Pca\Application\Ports\ContextoUsuarioPort;
 use Semae\Pca\Application\Ports\EstrategiaPublicacaoPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
@@ -34,7 +34,7 @@ final class PreparadorExecucaoPublicacaoPca
         private readonly PlanoRepository $planoRepository,
         private readonly EstrategiaPublicacaoPort $estrategiaPublicacao,
         private readonly UnidadeDeTrabalhoPort $unidadeDeTrabalho,
-        private readonly AutenticadorPncp $autenticadorPncp
+        private readonly AutenticadorPncpPort $autenticadorPncp
     ) {}
 
     public function preparar(PublicarPcaRequest $request): ResultadoPreparacaoPublicacaoPca

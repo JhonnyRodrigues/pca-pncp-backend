@@ -6,7 +6,7 @@ namespace Semae\Pca\Application\Ports;
 
 use Semae\Pca\Application\Results\ResultadoAutenticacaoPncp;
 
-interface AutenticadorPncp
+interface AutenticadorPncpPort
 {
     public function autenticar(): ResultadoAutenticacaoPncp;
 }

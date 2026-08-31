@@ -124,7 +124,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
-| Adapter | Implementação concreta de uma Port para um mecanismo externo. | Arquitetura §§5 e 8 |
+| Adapter | Implementação concreta de uma Port para um mecanismo externo; a implementação concreta de um Repository também exerce esse papel, mesmo quando conserva o sufixo `Repository`. | Arquitetura §§5 e 8 |
 | Application | Camada de casos de uso, orquestração e contratos necessários ao fluxo. | Arquitetura §4.2; `DI-007` |
 | Composition Root | Ponto do backend que cria o grafo e injeta dependências concretas. | Arquitetura §7; `DI-010` |
 | Conexão emprestada | Conexão criada e administrada pela aplicação hospedeira, reutilizada pelo backend sem transferência de seu ciclo de vida; o backend não a fecha. | `DI-008`; Roadmap Sprint 5.2 |
@@ -134,10 +134,11 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Fachada pública | Único ponto do backend consumido pela aplicação hospedeira. | Arquitetura §7; `DI-010` |
 | Infrastructure | Camada dos adapters concretos de persistência, transporte e recursos externos. | Arquitetura §4.3 |
 | Mapeamento físico explícito | Descrição injetada e validada dos nomes físicos e literais usados pelo adapter, sem incorporá-los aos contratos internos nem assumir valores implícitos. | `DI-008`; Arquitetura §4.3 |
+| Mapeador de dados | Tradutor dos valores retornados por um mecanismo externo para tipos internos, sem definir nomes físicos nem decidir regras de negócio. | Arquitetura §4.3 |
 | Port | Contrato interno pertencente à camada que necessita da capacidade. | Arquitetura §5; `DI-007` |
 | Presentation | Camada que protege a entrada pública e apresenta o resultado. | Arquitetura §4.4; `DI-010` |
 | Presenter | Componente que transforma a Response em ViewModel estruturado. | Arquitetura §§4.4 e 8; `DI-010` |
-| Repository | Port especializada em reconstrução e persistência de um Aggregate. | Arquitetura §§5 e 8; `DI-007` |
+| Repository | Port especializada em reconstrução e persistência de um Aggregate; sua implementação concreta também é um Adapter. | Arquitetura §§5 e 8; `DI-007` |
 | Request | Contrato de entrada de um caso de uso. | Arquitetura §8; `DI-010` |
 | Response | Contrato de saída de um caso de uso. | Arquitetura §8; `DI-010` |
 | Sessão compartilhada | Mesma sessão Oracle e sua transação reutilizadas pelos adapters que participam da unidade, preservando contenção, visibilidade e atomicidade locais. | `DI-004`, `DI-008` |
@@ -193,7 +194,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Publicação ativa × confirmação | Existência do recurso externo versus convergência da versão. | `RN-PLA-007`; `DI-005` |
 | Estado desejado × observado × operacional | Planejamento homologado, fato externo e referência local cross-Plan. | `DI-002`, `DI-005` |
 | Sequencial PCA × identidade do Plano | Referência externa versus UO e Ano de Execução. | `RN-PLA-001`; `DI-005` |
-| Port × Adapter × Repository | Contrato, implementação concreta e especialização ligada a Aggregate. | Arquitetura §§5 e 8; `DI-007` |
+| Port × Adapter × Repository | Port é o contrato; Adapter é sua implementação concreta; Repository é uma especialização de Port ligada a Aggregate, cuja implementação concreta também é Adapter. | Arquitetura §§5 e 8; `DI-007` |
 | Suíte padrão × suíte opt-in | Execução ordinária, sem interação externa real implícita, versus execução deliberadamente ativada e protegida por configuração e preflight. | `DI-009`; Fluxo §11 |
 | Contrato controlado × gate real | Evidência determinística em condições controladas versus comprovação com os adapters concretos no ambiente externo efetivo. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |
 | Conexão emprestada × conexão própria | Recurso cujo ciclo de vida pertence à aplicação hospedeira versus recurso criado e administrado pelo próprio backend. | `DI-008` |

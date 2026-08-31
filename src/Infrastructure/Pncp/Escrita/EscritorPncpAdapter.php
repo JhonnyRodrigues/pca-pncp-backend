@@ -11,7 +11,7 @@ use Semae\Pca\Application\Commands\ComandoInserirItensPca;
 use Semae\Pca\Application\Commands\ComandoPublicarPca;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoEscritaPncp;
-use Semae\Pca\Application\Ports\EscritorPncp;
+use Semae\Pca\Application\Ports\EscritorPncpPort;
 use Semae\Pca\Application\Results\ResultadoEscritaPncp;
 use Semae\Pca\Application\Results\ResultadoPublicacaoPncp;
 use Semae\Pca\Application\ValueObjects\FalhaSegura;
@@ -27,7 +27,7 @@ use Semae\Pca\Infrastructure\Pncp\Observabilidade\AcaoTecnicaPncp;
 use Semae\Pca\Infrastructure\Pncp\Serializacao\SerializadorPayloadPncp;
 use Throwable;
 
-final class EscritorPncpAdapter implements EscritorPncp
+final class EscritorPncpAdapter implements EscritorPncpPort
 {
     private const STATUS_PUBLICACAO_ACEITOS = [200, 201];
     private const PREFIXO_LOCATION_ALTERNATIVO_HOMOLOGACAO = 'https://treina.pncp.gov.br/pncp-api';

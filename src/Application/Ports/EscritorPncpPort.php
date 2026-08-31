@@ -12,7 +12,7 @@ use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Results\ResultadoEscritaPncp;
 use Semae\Pca\Application\Results\ResultadoPublicacaoPncp;
 
-interface EscritorPncp
+interface EscritorPncpPort
 {
     public function publicar(
         SessaoPncp $sessao,

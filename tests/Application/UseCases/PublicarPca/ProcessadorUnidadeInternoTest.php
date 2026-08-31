@@ -8,9 +8,9 @@ use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Semae\Pca\Application\Contracts\SessaoPncp;
-use Semae\Pca\Application\Ports\EscritorPncp;
+use Semae\Pca\Application\Ports\EscritorPncpPort;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
-use Semae\Pca\Application\Ports\LeitorPncp;
+use Semae\Pca\Application\Ports\LeitorPncpPort;
 use Semae\Pca\Application\Ports\RegistroAuditoriaPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\ResultadoBuscaCandidatosPca;
@@ -61,8 +61,8 @@ final class ProcessadorUnidadeInternoTest extends TestCase
         $unidadeTrabalho = $this->createMock(UnidadeDeTrabalhoPort::class);
         $repository = $this->createMock(PlanoRepository::class);
         $estado = $this->createMock(EstadoOperacionalPublicacaoPort::class);
-        $leitor = $this->createMock(LeitorPncp::class);
-        $escritor = $this->createMock(EscritorPncp::class);
+        $leitor = $this->createMock(LeitorPncpPort::class);
+        $escritor = $this->createMock(EscritorPncpPort::class);
         $auditoria = $this->createMock(RegistroAuditoriaPort::class);
 
         $unidadeTrabalho->expects($this->once())

@@ -12,8 +12,8 @@ use Psr\Log\NullLogger;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoProcessamentoUnidade;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
-use Semae\Pca\Application\Ports\EscritorPncp;
-use Semae\Pca\Application\Ports\LeitorPncp;
+use Semae\Pca\Application\Ports\EscritorPncpPort;
+use Semae\Pca\Application\Ports\LeitorPncpPort;
 use Semae\Pca\Application\Ports\RegistroAuditoriaPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\ResultadoBuscaCandidatosPca;
@@ -926,8 +926,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
 
     private function criarDependencias(?LoggerInterface $logger = null): DependenciasFinalizador
     {
-        $leitor = $this->createMock(LeitorPncp::class);
-        $escritor = $this->createMock(EscritorPncp::class);
+        $leitor = $this->createMock(LeitorPncpPort::class);
+        $escritor = $this->createMock(EscritorPncpPort::class);
         $repository = $this->createMock(PlanoRepository::class);
         $estado = $this->createMock(EstadoOperacionalPublicacaoPort::class);
         $auditoria = $this->createMock(RegistroAuditoriaPort::class);
@@ -1039,8 +1039,8 @@ final class DependenciasFinalizador
 {
     public function __construct(
         public readonly FinalizadorProcessamentoUnidadeInterno $finalizador,
-        public readonly LeitorPncp $leitor,
-        public readonly EscritorPncp $escritor,
+        public readonly LeitorPncpPort $leitor,
+        public readonly EscritorPncpPort $escritor,
         public readonly PlanoRepository $repository,
         public readonly EstadoOperacionalPublicacaoPort $estado,
         public readonly RegistroAuditoriaPort $auditoria,

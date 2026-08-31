@@ -86,12 +86,12 @@ fazem parte do fluxo executável.
 
 | Arquivo | Função |
 | --- | --- |
-| `Ports/AutenticadorPncp.php` | Autentica uma vez e devolve sessão opaca. |
+| `Ports/AutenticadorPncpPort.php` | Autentica uma vez e devolve sessão opaca. |
 | `Ports/ContextoUsuarioPort.php` | Resolve Representante e Lotação conjuntamente. |
-| `Ports/EscritorPncp.php` | Publica e executa inclusões ou exclusões no PNCP. |
+| `Ports/EscritorPncpPort.php` | Publica e executa inclusões ou exclusões no PNCP. |
 | `Ports/EstadoOperacionalPublicacaoPort.php` | Consulta e persiste a projeção operacional. |
 | `Ports/EstrategiaPublicacaoPort.php` | Consulta e adota a estratégia anual. |
-| `Ports/LeitorPncp.php` | Observa PCA conhecido e localiza candidatos. |
+| `Ports/LeitorPncpPort.php` | Observa PCA conhecido e localiza candidatos. |
 | `Ports/RegistroAuditoriaPort.php` | Persiste uma intenção de auditoria confirmada. |
 | `Ports/UnidadeDeTrabalhoPort.php` | Inicia, confirma ou desfaz unidade transacional. |
 

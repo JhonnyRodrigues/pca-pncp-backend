@@ -130,12 +130,19 @@ persistência.
 | `PlanoRepository` | Descobrir e reconstruir o Aggregate Plano. | `OraclePlanoRepository`. |
 | `EstrategiaPublicacaoPort` | Consultar e congelar a estratégia anual. | `OracleEstrategiaPublicacaoAdapter`. |
 | `UnidadeDeTrabalhoPort` | Transação e exclusividade. | `OracleUnidadeDeTrabalhoAdapter` sobre ADOdb emprestado. |
-| `AutenticadorPncp` | Obter sessão opaca. | `AutenticadorPncpAdapter`. |
-| `LeitorPncp` | Observar PCA e localizar candidatos. | `LeitorPncpAdapter`. |
-| `EscritorPncp` | Publicar, inserir e excluir. | `EscritorPncpAdapter`. |
+| `AutenticadorPncpPort` | Obter sessão opaca. | `AutenticadorPncpAdapter`. |
+| `LeitorPncpPort` | Observar PCA e localizar candidatos. | `LeitorPncpAdapter`. |
+| `EscritorPncpPort` | Publicar, inserir e excluir. | `EscritorPncpAdapter`. |
 | `EstadoOperacionalPublicacaoPort` | Ler e persistir projeção operacional. | `OracleEstadoOperacionalPublicacaoAdapter`. |
 | `RegistroAuditoriaPort` | Persistir fato confirmado. | `OracleRegistroAuditoriaAdapter`. |
 | `LoggerInterface` | Diagnóstico técnico. | `AcumuladorEventosTecnicos` em memória. |
+
+`PlanoRepository` é uma Port especializada no Aggregate `Plano`.
+`OraclePlanoRepository` é sua implementação concreta e, portanto, também
+exerce o papel arquitetural de Adapter sem precisar acumular esse sufixo.
+Nesse adapter, `MapeamentoPlanosOracle` declara e valida tabela e colunas
+físicas usadas na SQL, enquanto `MapeadorDadosPlanoOracle` traduz as linhas já
+projetadas por aliases canônicos para objetos do Domain.
 
 ## 7. Ordem prática de leitura
 

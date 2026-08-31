@@ -11,7 +11,7 @@ use Semae\Pca\Application\ValueObjects\UnidadeExternaPublicacao;
 use Semae\Pca\Domain\ValueObjects\Cnpj;
 use Semae\Pca\Domain\ValueObjects\SequencialPca;
 
-interface LeitorPncp
+interface LeitorPncpPort
 {
     public function observarPcaConhecido(
         SessaoPncp $sessao,

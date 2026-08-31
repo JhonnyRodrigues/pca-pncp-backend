@@ -9,7 +9,7 @@ use RuntimeException;
 use Semae\Pca\Application\Contracts\ProcessadorUnidade;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoPublicacaoPca;
-use Semae\Pca\Application\Ports\AutenticadorPncp;
+use Semae\Pca\Application\Ports\AutenticadorPncpPort;
 use Semae\Pca\Application\Ports\ContextoUsuarioPort;
 use Semae\Pca\Application\Ports\EstrategiaPublicacaoPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
@@ -294,7 +294,7 @@ final class PublicarPcaUseCaseTest extends TestCase
                 $repository,
                 $this->createMock(EstrategiaPublicacaoPort::class),
                 $this->createMock(UnidadeDeTrabalhoPort::class),
-                $this->createMock(AutenticadorPncp::class)
+                $this->createMock(AutenticadorPncpPort::class)
             ),
             new CoordenadorVarreduraUnidades($processador)
         );
@@ -330,7 +330,7 @@ final class PublicarPcaUseCaseTest extends TestCase
                 $repository,
                 $this->createMock(EstrategiaPublicacaoPort::class),
                 $this->createMock(UnidadeDeTrabalhoPort::class),
-                $this->createMock(AutenticadorPncp::class)
+                $this->createMock(AutenticadorPncpPort::class)
             ),
             new CoordenadorVarreduraUnidades($processador)
         );
@@ -348,7 +348,7 @@ final class PublicarPcaUseCaseTest extends TestCase
         $repository = $this->createMock(PlanoRepository::class);
         $estrategiaPort = $this->createMock(EstrategiaPublicacaoPort::class);
         $unidadeTrabalho = $this->createMock(UnidadeDeTrabalhoPort::class);
-        $autenticador = $this->createMock(AutenticadorPncp::class);
+        $autenticador = $this->createMock(AutenticadorPncpPort::class);
         $estrategia ??= EstrategiaPublicacao::individual();
         $contexto->method('resolver')->willReturn(ResultadoResolucaoContextoUsuario::resolvido(
             $this->criarContextoUsuario()

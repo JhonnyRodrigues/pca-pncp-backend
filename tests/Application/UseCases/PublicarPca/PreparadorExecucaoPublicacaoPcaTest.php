@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoPreparacaoPublicacaoPca;
-use Semae\Pca\Application\Ports\AutenticadorPncp;
+use Semae\Pca\Application\Ports\AutenticadorPncpPort;
 use Semae\Pca\Application\Ports\ContextoUsuarioPort;
 use Semae\Pca\Application\Ports\EstrategiaPublicacaoPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
@@ -101,7 +101,7 @@ final class PreparadorExecucaoPublicacaoPcaTest extends TestCase
         $unidadeDeTrabalho->expects($this->never())
             ->method('desfazer');
 
-        $autenticador = $this->createMock(AutenticadorPncp::class);
+        $autenticador = $this->createMock(AutenticadorPncpPort::class);
         $autenticador->expects($this->once())
             ->method('autenticar')
             ->willReturnCallback(
@@ -708,7 +708,7 @@ final class PreparadorExecucaoPublicacaoPcaTest extends TestCase
      *     repository: PlanoRepository,
      *     estrategia: EstrategiaPublicacaoPort,
      *     unidadeDeTrabalho: UnidadeDeTrabalhoPort,
-     *     autenticador: AutenticadorPncp
+     *     autenticador: AutenticadorPncpPort
      * }
      */
     private function criarCenarioBase(array $unidades = [['UO-01', '986789']]): array
@@ -754,7 +754,7 @@ final class PreparadorExecucaoPublicacaoPcaTest extends TestCase
      *     repository: PlanoRepository,
      *     estrategia: EstrategiaPublicacaoPort,
      *     unidadeDeTrabalho: UnidadeDeTrabalhoPort,
-     *     autenticador: AutenticadorPncp
+     *     autenticador: AutenticadorPncpPort
      * }
      */
     private function criarCenarioSemExpectativas(): array
@@ -768,7 +768,7 @@ final class PreparadorExecucaoPublicacaoPcaTest extends TestCase
             'repository' => $this->createMock(PlanoRepository::class),
             'estrategia' => $this->createMock(EstrategiaPublicacaoPort::class),
             'unidadeDeTrabalho' => $this->createMock(UnidadeDeTrabalhoPort::class),
-            'autenticador' => $this->createMock(AutenticadorPncp::class),
+            'autenticador' => $this->createMock(AutenticadorPncpPort::class),
         ];
     }
 

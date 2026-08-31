@@ -12,7 +12,7 @@ use JsonException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Semae\Pca\Application\Contracts\SessaoPncp;
-use Semae\Pca\Application\Ports\LeitorPncp;
+use Semae\Pca\Application\Ports\LeitorPncpPort;
 use Semae\Pca\Application\Results\ResultadoBuscaCandidatosPca;
 use Semae\Pca\Application\Results\ResultadoObservacaoPca;
 use Semae\Pca\Application\ValueObjects\FalhaSegura;
@@ -30,7 +30,7 @@ use Semae\Pca\Infrastructure\Pncp\Observabilidade\AcaoTecnicaPncp;
 use Throwable;
 use UnexpectedValueException;
 
-final class LeitorPncpAdapter implements LeitorPncp
+final class LeitorPncpAdapter implements LeitorPncpPort
 {
     private const NUMERO_ITEM_MAXIMO = 2_147_483_647;
     private const QUANTIDADE_MAXIMA_ITENS = 1_000;

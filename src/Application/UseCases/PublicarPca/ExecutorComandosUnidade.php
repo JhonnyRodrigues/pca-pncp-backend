@@ -9,7 +9,7 @@ use Semae\Pca\Application\Commands\ComandoExcluirPca;
 use Semae\Pca\Application\Commands\ComandoInserirItensPca;
 use Semae\Pca\Application\Commands\ComandoPublicarPca;
 use Semae\Pca\Application\Enums\SituacaoEscritaPncp;
-use Semae\Pca\Application\Ports\EscritorPncp;
+use Semae\Pca\Application\Ports\EscritorPncpPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
 use Semae\Pca\Application\Results\ResultadoEscritaPncp;
@@ -30,7 +30,7 @@ final class ExecutorComandosUnidade
     private readonly DesfazedorUnidadeProcessamento $desfazedor;
 
     public function __construct(
-        private readonly EscritorPncp $escritorPncp,
+        private readonly EscritorPncpPort $escritorPncp,
         UnidadeDeTrabalhoPort $unidadeDeTrabalho
     ) {
         $this->desfazedor = new DesfazedorUnidadeProcessamento($unidadeDeTrabalho);

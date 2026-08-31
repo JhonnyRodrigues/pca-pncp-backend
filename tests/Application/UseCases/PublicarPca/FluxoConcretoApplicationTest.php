@@ -13,12 +13,12 @@ use Semae\Pca\Application\Commands\ComandoInserirItensPca;
 use Semae\Pca\Application\Commands\ComandoPublicarPca;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoPublicacaoPca;
-use Semae\Pca\Application\Ports\AutenticadorPncp;
+use Semae\Pca\Application\Ports\AutenticadorPncpPort;
 use Semae\Pca\Application\Ports\ContextoUsuarioPort;
-use Semae\Pca\Application\Ports\EscritorPncp;
+use Semae\Pca\Application\Ports\EscritorPncpPort;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
 use Semae\Pca\Application\Ports\EstrategiaPublicacaoPort;
-use Semae\Pca\Application\Ports\LeitorPncp;
+use Semae\Pca\Application\Ports\LeitorPncpPort;
 use Semae\Pca\Application\Ports\RegistroAuditoriaPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\PublicarPcaResponse;
@@ -438,7 +438,7 @@ final class UnidadeTrabalhoFluxoConcreto implements UnidadeDeTrabalhoPort
     }
 }
 
-final class AutenticadorFluxoConcreto implements AutenticadorPncp
+final class AutenticadorFluxoConcreto implements AutenticadorPncpPort
 {
     public function autenticar(): ResultadoAutenticacaoPncp
     {
@@ -469,7 +469,7 @@ final class EstadoFluxoConcreto implements EstadoOperacionalPublicacaoPort
     }
 }
 
-final class LeitorFluxoConcreto implements LeitorPncp
+final class LeitorFluxoConcreto implements LeitorPncpPort
 {
     public function __construct(private readonly CenarioFluxoConcreto $cenario) {}
 
@@ -492,7 +492,7 @@ final class LeitorFluxoConcreto implements LeitorPncp
     }
 }
 
-final class EscritorFluxoConcreto implements EscritorPncp
+final class EscritorFluxoConcreto implements EscritorPncpPort
 {
     /** @var string[] */
     public array $operacoes = [];

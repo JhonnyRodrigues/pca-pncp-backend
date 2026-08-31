@@ -7,7 +7,7 @@ namespace Semae\Pca\Infrastructure\Pncp\Autenticacao;
 use InvalidArgumentException;
 use JsonException;
 use Psr\Log\LoggerInterface;
-use Semae\Pca\Application\Ports\AutenticadorPncp;
+use Semae\Pca\Application\Ports\AutenticadorPncpPort;
 use Semae\Pca\Application\Results\ResultadoAutenticacaoPncp;
 use Semae\Pca\Application\ValueObjects\FalhaSegura;
 use Semae\Pca\Infrastructure\Pncp\Http\ConfiguracaoTransportePncp;
@@ -18,7 +18,7 @@ use Semae\Pca\Infrastructure\Pncp\Http\TransporteHttpPncp;
 use Semae\Pca\Infrastructure\Pncp\Observabilidade\AcaoTecnicaPncp;
 use Throwable;
 
-final class AutenticadorPncpAdapter implements AutenticadorPncp
+final class AutenticadorPncpAdapter implements AutenticadorPncpPort
 {
     public function __construct(
         private readonly TransporteHttpPncp $transporte,

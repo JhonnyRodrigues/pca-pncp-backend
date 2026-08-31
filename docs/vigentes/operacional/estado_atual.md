@@ -161,7 +161,7 @@ externa ou integração Scriptcase foi executado durante a Sprint 5.8.
 
 ## Evidências da Sprint 5.7
 
-- `LeitorPncpAdapter` implementa os dois métodos existentes de `LeitorPncp`,
+- `LeitorPncpAdapter` implementa os dois métodos existentes de `LeitorPncpPort`,
   usando a sessão autenticada opaca somente para compor o Bearer interno e sem
   alterar Domain, Application, Ports, Commands ou APIs públicas.
 - A observação do PCA conhecido consulta o consolidado e percorre integralmente

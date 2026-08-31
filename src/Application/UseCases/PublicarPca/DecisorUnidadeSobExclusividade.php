@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoBuscaCandidatosPca;
 use Semae\Pca\Application\Enums\SituacaoObservacaoPca;
-use Semae\Pca\Application\Ports\LeitorPncp;
+use Semae\Pca\Application\Ports\LeitorPncpPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
 use Semae\Pca\Application\Results\ResultadoBuscaCandidatosPca;
@@ -30,7 +30,7 @@ final class DecisorUnidadeSobExclusividade
     private readonly DesfazedorUnidadeProcessamento $desfazedor;
 
     public function __construct(
-        private readonly LeitorPncp $leitorPncp,
+        private readonly LeitorPncpPort $leitorPncp,
         private readonly PoliticaProcessamentoPlano $politica,
         UnidadeDeTrabalhoPort $unidadeDeTrabalho
     ) {

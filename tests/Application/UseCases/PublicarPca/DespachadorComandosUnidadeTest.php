@@ -16,7 +16,7 @@ use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoDesfechoProcessamentoUnidade;
 use Semae\Pca\Application\Enums\SituacaoEscritaPncp;
 use Semae\Pca\Application\Enums\SituacaoProcessamentoUnidade;
-use Semae\Pca\Application\Ports\EscritorPncp;
+use Semae\Pca\Application\Ports\EscritorPncpPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
 use Semae\Pca\Application\Results\ResultadoEscritaPncp;
@@ -572,7 +572,7 @@ final class SessaoPncpFakeDespacho implements SessaoPncp
 {
 }
 
-final class EscritorPncpFakeDespacho implements EscritorPncp
+final class EscritorPncpFakeDespacho implements EscritorPncpPort
 {
     /** @var string[] */
     public array $chamadas = [];

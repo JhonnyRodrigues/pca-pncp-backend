@@ -59,7 +59,7 @@ Política dos identificadores:
 ### 2.3 Status normativo
 
 | Status | Significado |
-|---|---|
+| --- | --- |
 | `Em validação` | Regra candidata ainda não confirmada pela autoridade de negócio |
 | `Vigente` | Regra aprovada e aplicável |
 | `Substituída` | Regra preservada para rastreabilidade, mas não aplicável |
@@ -79,19 +79,19 @@ registrada explicitamente e não autoriza inferir comportamento.
 ## 3. Índice
 
 | ID | Título | Contexto | Status | Decisões relacionadas |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | `RN-CAD-001` | CNPJ do órgão | Cadastros | Vigente | DI-009, DI-010 |
 | `RN-CAD-002` | Ano de execução permitido | Cadastros | Vigente | DI-010 |
 | `RN-CAD-003` | Identificação do Representante | Cadastros | Vigente | DI-006 |
 | `RN-CAD-004` | Validade e distinção da Lotação | Cadastros | Vigente | DI-006 |
 | `RN-CAD-005` | Composição da Unidade Orçamentária | Cadastros | Vigente | DI-003, DI-008 |
 | `RN-CAD-006` | Cadastro ativo e UASG da UO participante | Cadastros | Vigente | DI-003, DI-008 |
-||||||
+| | | | | |
 | `RN-FLX-001` | Planejamento ordinário | Fluxo | Vigente | — |
 | `RN-FLX-002` | Demanda extraordinária | Fluxo | Vigente | — |
 | `RN-FLX-003` | Consolidação e desconsolidação | Fluxo | Vigente | — |
 | `RN-FLX-004` | Revisão de Demanda avaliada | Fluxo | Vigente | — |
-||||||
+| | | | | |
 | `RN-DEM-001` | Quantidade, categoria e origem | Demandas | Vigente | — |
 | `RN-DEM-002` | Identidade global da Demanda | Demandas | Vigente | DI-001, DI-002 |
 | `RN-DEM-003` | Imutabilidade após homologação | Demandas | Vigente | DI-001, DI-007 |
@@ -101,7 +101,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 | `RN-DEM-007` | Versão gerada por DFD-E | Demandas | Vigente | DI-001 |
 | `RN-DEM-008` | Cancelamento da última Demanda ativa | Demandas | Vigente | DI-001 |
 | `RN-DEM-009` | Situações participantes da fotografia | Demandas | Vigente | DI-008 |
-||||||
+| | | | | |
 | `RN-PLA-001` | Identidade lógica do Plano | Planos | Vigente | DI-001, DI-008 |
 | `RN-PLA-002` | Origem e versionamento do Plano | Planos | Vigente | DI-001, DI-008 |
 | `RN-PLA-003` | Seleção da versão vigente | Planos | Vigente | DI-008 |
@@ -109,7 +109,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 | `RN-PLA-005` | Plano sem Demandas ativas | Planos | Vigente | DI-001, DI-005 |
 | `RN-PLA-006` | Unidade e exercício da fotografia | Planos | Vigente | DI-001, DI-008 |
 | `RN-PLA-007` | Confirmação versionada da sincronização | Planos | Vigente | DI-005, DI-008 |
-||||||
+| | | | | |
 | `RN-PUB-001` | Decisão de publicar | Publicação | Vigente | DI-001, DI-002, DI-005 |
 | `RN-PUB-002` | Decisão de retificar | Publicação | Vigente | DI-001, DI-002, DI-005 |
 | `RN-PUB-003` | Decisão de excluir o PCA | Publicação | Vigente | DI-001, DI-003, DI-005 |
@@ -121,7 +121,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 | `RN-PUB-009` | Publicação no modo individual | Publicação | Vigente | DI-003, DI-004 |
 | `RN-PUB-010` | Publicação no modo consolidado | Publicação | Vigente | DI-003, DI-004 |
 | `RN-PUB-011` | UASG por modo de publicação | Publicação | Vigente | DI-003, DI-008 |
-||||||
+| | | | | |
 | `RN-AUD-001` | Fatos que geram histórico | Auditoria | Vigente | DI-006 |
 | `RN-AUD-002` | Procedimentos de publicação no PNCP | Auditoria | Vigente | DI-006 |
 | `RN-AUD-003` | Unidade do histórico | Auditoria | Vigente | DI-006 |
@@ -1015,7 +1015,7 @@ Textos antigos superados permanecem rastreados nesta matriz e NÃO DEVEM ser
 tratados como regras vigentes.
 
 | Texto anterior | Resolução vigente |
-|---|---|
+| --- | --- |
 | A identidade do Plano inclui versão ou `ID_PLANO` | `RN-PLA-001` |
 | Plano não pode existir sem Demandas | `RN-PLA-005` |
 | `FK_PLANO` define pertencimento exclusivo ao Plano vigente | `RN-PLA-004` e `RN-PLA-006` |
