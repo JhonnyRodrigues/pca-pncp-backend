@@ -25,8 +25,9 @@ flowchart LR
 ```
 
 Os adapters concretos das Sprints 5.2 a 5.8 implementam todas as Ports
-vigentes. A Sprint 5.9 comprovou os contratos Oracle e PNCP reais, e a Sprint
-5.10 simplificou a justificativa da exclusão integral e encerrou a Fase 5.
+vigentes. A Sprint 5.9 comprovou os contratos Oracle e PNCP reais, a Sprint
+5.10 encerrou a Fase 5, e as Sprints 6.1 e 6.2 montaram e exercitaram o núcleo
+com adapters concretos sobre fronteiras controladas.
 
 ## 2. O fluxo completo
 
@@ -146,16 +147,20 @@ projetadas por aliases canônicos para objetos do Domain.
 
 ## 7. Ordem prática de leitura
 
-1. `PublicarPcaUseCase` e este diagrama.
-2. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
-3. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
-4. `PreparadorUnidadeSobExclusividade`.
-5. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
-6. `ExecutorComandosUnidade`.
-7. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
+1. `MontadorNucleoPublicacaoPca`, que explicita a topologia do núcleo.
+2. `PublicarPcaUseCase` e este diagrama.
+3. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
+4. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
+5. `PreparadorUnidadeSobExclusividade`.
+6. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
+7. `ExecutorComandosUnidade`.
+8. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
    recalcular, persistir e concluir.
-8. Results e Enums somente quando aparecerem no caminho estudado.
-9. `FluxoConcretoApplicationTest`, que monta todo o grafo sem Infrastructure.
+9. Results e Enums somente quando aparecerem no caminho estudado.
+10. `FluxoConcretoApplicationTest`, que executa o grafo montado sem Infrastructure.
+11. `MontadorNucleoPublicacaoPcaIntegrationTest`, que executa o mesmo ponto de
+    montagem com os nove adapters concretos sobre ADOdb, cURL e tempo
+    controlados.
 
 O [catálogo de arquivos](catalogo_de_arquivos.md) responde onde cada conceito
 está e evita procurar pelo repositório inteiro.
@@ -173,11 +178,15 @@ está e evita procurar pelo repositório inteiro.
 
 ## 9. O que ainda não existe
 
-Não existem Composition Root, Controller, Presenter nem fachada Scriptcase. O
-entrypoint da Sprint 5.9 em `tests/Contract/Sprint59/scriptcase_probe.php`
-pertence somente à suíte contratual e não antecipa nenhuma dessas fronteiras de
-produção.
+Não existem Composition Root final, Controller, Presenter nem fachada
+Scriptcase. `MontadorNucleoPublicacaoPca` é o wiring intermediário da Sprint
+6.1: recebe Ports e logger já construídos, sem selecionar perfil, instanciar
+recursos externos ou antecipar a fronteira pública. O entrypoint da Sprint 5.9
+em `tests/Contract/Sprint59/scriptcase_probe.php` pertence somente à suíte
+contratual e não antecipa nenhuma dessas fronteiras de produção.
 
-Todas as Ports vigentes possuem adapter concreto e a Fase 5 está concluída. A
-Sprint 6.1 ainda não foi iniciada nem autorizada; sua composição manual depende
-de planejamento próprio.
+Todas as Ports vigentes possuem adapter concreto e as Fases 5 e 6 estão
+concluídas. O gate da Sprint 6.3 comprovou o núcleo executável sem Presentation.
+A Sprint 7.1 — Controller e entrada tipada é a próxima etapa na ordem e depende
+de planejamento e autorização próprios; nenhum componente da Fase 7 foi
+antecipado.

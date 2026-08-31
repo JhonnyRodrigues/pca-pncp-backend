@@ -702,9 +702,8 @@ A auditoria final confirmou que todas as nove Ports vigentes possuem adapters
 concretos, os gates reais Oracle e PNCP da Sprint 5.9 permanecem válidos e
 nenhuma regra migrou para a Infrastructure.
 
-**Estado final da Fase 5:** concluída. A entrada da Fase 6 está satisfeita, mas
-nenhuma sprint dessa fase foi iniciada ou autorizada. A Sprint 6.1 depende de
-planejamento e autorização próprios.
+**Estado final da Fase 5:** concluída. A entrada da Fase 6 foi satisfeita e a
+Sprint 6.1 avançou posteriormente mediante planejamento e autorização próprios.
 
 ### Fase 6 — Wiring controlado do núcleo
 
@@ -730,17 +729,41 @@ colocar construção no Controller.
 - manter o ponto de montagem dentro do backend;
 - impedir container e Service Locator.
 
+**Estado do PCA:** concluída em 31/08/2026 após três microciclos autorizados.
+`MontadorNucleoPublicacaoPca` recebe as nove Ports vigentes e o logger PSR-3,
+constrói explicitamente o grafo da Application e devolve o UseCase sem depender
+de Presentation, container, Service Locator ou adapters concretos específicos.
+
 #### Sprint 6.2 — Integração controlada dos adapters
 
 - testar reconstrução, transporte e coordenação com ambientes controlados;
 - validar compartilhamento da sessão e ordem de encerramento;
 - usar doubles onde chamadas reais ainda não forem autorizadas.
 
+**Estado do PCA:** concluída em 31/08/2026 após quatro microciclos autorizados.
+A suíte de integração monta os nove adapters concretos pelo montador do núcleo
+sobre ADOdb e cURL controlados, sem Oracle, PNCP ou Scriptcase reais. Foram
+demonstrados o caminho individual já convergente, a retificação com sessão
+Bearer compartilhada e o rollback reconciliável após o retry final inconclusivo,
+sempre sem fechar a conexão emprestada.
+
 #### Sprint 6.3 — Gate do núcleo executável
 
 - executar suítes unitárias e de integração controlada;
 - verificar direção das dependências;
 - confirmar que nenhuma dependência de Presentation é necessária.
+
+**Estado do PCA:** concluída em 31/08/2026 após quatro microciclos autorizados.
+As suítes unitárias, de Composition, de integração controlada, dos adapters e
+dos contratos permaneceram verdes. A auditoria confirmou as nove Ports com
+implementações concretas, a direção interna das dependências e a execução do
+núcleo sem Presentation, container ou Service Locator.
+
+**Estado final da Fase 6:** concluída. As dependências do núcleo são injetadas
+por construtor, os adapters compartilham corretamente os recursos controlados e
+o Domain permanece independente. A Sprint 7.1 é a próxima etapa na ordem e
+depende de planejamento e autorização próprios; a Fase 7 não foi iniciada
+implicitamente.
 
 ### Fase 7 — Presentation
 

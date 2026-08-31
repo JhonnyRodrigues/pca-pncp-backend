@@ -32,7 +32,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 5.10.
+- A última sprint concluída é a Sprint 6.3.
 - A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
 - A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
   aprovado no treinamento, incluindo publicação, operações de itens, exclusão
@@ -45,9 +45,73 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - Todas as nove Ports vigentes possuem adapter concreto. A DI-008 foi aceita
   após os gates reais e a auditoria final.
 - A Fase 5 — Infrastructure concreta está concluída.
-- A entrada da Fase 6 está satisfeita, mas nenhuma sprint dessa fase foi
-  iniciada ou autorizada. A Sprint 6.1 depende de planejamento e autorização
-  próprios.
+- A Sprint 6.1 — Grafo manual sem Presentation está concluída.
+- A Sprint 6.2 — Integração controlada dos adapters está concluída.
+- A Sprint 6.3 — Gate do núcleo executável está concluída.
+- A Fase 6 — Wiring controlado do núcleo está concluída. A Sprint 7.1 —
+  Controller e entrada tipada é a próxima etapa na ordem e depende de
+  planejamento e autorização próprios; a Fase 7 não foi iniciada.
+
+## Evidências da Sprint 6.3
+
+- Composition aprovou 1 teste e 1 asserção; Integration aprovou 3 testes e 70
+  asserções, preservando convergência sem escrita, retificação e falha final
+  reconciliável sobre ADOdb e cURL controlados.
+- Domain aprovou 94 testes e 146 asserções; Application aprovou 237 testes e
+  978 asserções.
+- A auditoria encontrou nove Ports e nove implementações concretas. Domain não
+  depende das camadas externas; Application não depende de Infrastructure,
+  Composition ou Presentation; o montador intermediário depende somente de
+  Application, Domain e PSR-3.
+- Não existem Presentation, container, Service Locator, configuração global no
+  montador ou aliases das antigas Ports PNCP. O núcleo foi construído e
+  executado sem a fronteira pública futura.
+- No gate completo, a suíte padrão aprovou 811 testes e 2.999 asserções;
+  adapters, contratos controlados legados e contratos controlados dos adapters
+  aprovaram, respectivamente, 476/1.804, 24/51 e 54/149 testes/asserções.
+- O autoload PSR-4 estrito gerou 1.741 classes, o lint aprovou 268 arquivos PHP
+  e `git diff --check` foi aprovado. Nenhum preflight, grupo `pncp-live`, probe
+  ou acesso externo foi executado.
+
+## Evidências da Sprint 6.2
+
+- `tests/Integration/Composition/` monta os seis adapters Oracle sobre uma
+  única `ConexaoAdodbEmprestada` e os três adapters PNCP sobre um único
+  `TransporteCurlPncp`, usando o `MontadorNucleoPublicacaoPca`.
+- O caminho individual já convergente produz `NENHUMA_ACAO`, autentica uma vez,
+  observa identidade e itens pelo transporte concreto, confirma as unidades de
+  estratégia e publicação e não escreve no PNCP.
+- A retificação exclui o item `1001`, inclui o item `1002`, reutiliza o mesmo
+  Bearer, comprova a convergência final, confirma o Plano, registra auditoria e
+  somente então confirma a unidade. O estado `PUBLICADO(77)` não é persistido
+  novamente porque permaneceu inalterado.
+- O caminho inconclusivo esgota duas respostas transitórias sem espera real,
+  produz `CONCLUIDA_COM_PENDENCIAS` e `FALHA_RECONCILIAVEL` e desfaz a unidade
+  sem confirmação de Plano, estado operacional ou auditoria.
+- O ADOdb e o executor cURL controlados exigem filas ordenadas, compartilham um
+  registro cronológico sanitizado e impedem Oracle, PNCP ou Scriptcase reais. A
+  conexão emprestada não é fechada em nenhum cenário.
+- A suíte de integração aprovou 3 testes e 70 asserções; Integration,
+  Composition e Application aprovaram 241 testes e 1.049 asserções durante os
+  microciclos de implementação.
+- No gate final, a suíte padrão aprovou 811 testes e 2.999 asserções; adapters,
+  contratos controlados legados e contratos controlados dos adapters aprovaram,
+  respectivamente, 476/1.804, 24/51 e 54/149 testes/asserções. O autoload PSR-4
+  estrito gerou 1.741 classes, e o lint aprovou 268 arquivos PHP.
+
+## Evidências da Sprint 6.1
+
+- `MontadorNucleoPublicacaoPca` recebe por construtor as nove Ports vigentes e
+  o logger PSR-3 e devolve `PublicarPcaUseCase` com sua topologia interna
+  composta explicitamente.
+- `FluxoConcretoApplicationTest` usa o montador e preserva os cinco cenários de
+  publicação, retificação, exclusão e consolidação, sem acessar Infrastructure.
+- O wiring intermediário não seleciona perfis, não instancia recursos ou
+  adapters concretos e não depende de Presentation, container ou Service
+  Locator.
+- A suíte padrão aprovou 808 testes e 2.929 asserções; o autoload PSR-4 estrito
+  gerou 1.735 classes, e o lint aprovou os 262 arquivos PHP de `src/` e
+  `tests/`.
 
 ## Evidências da Sprint 5.10
 
@@ -350,8 +414,8 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   ser fechada pelo backend.
 - Os contratos autorizados dos adapters e os gates reais Oracle/Scriptcase e
   PNCP de treinamento da Sprint 5.9 estão aprovados.
-- A Fase 6 não começa automaticamente com o encerramento da Infrastructure. A
-  Sprint 6.1 exige planejamento e autorização próprios.
+- A conclusão da Fase 6 não autoriza automaticamente a Presentation. A Sprint
+  7.1 exige planejamento e autorização próprios.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos

@@ -34,16 +34,7 @@ use Semae\Pca\Application\Results\ResultadoObservacaoPca;
 use Semae\Pca\Application\Results\ResultadoPersistenciaLocal;
 use Semae\Pca\Application\Results\ResultadoPublicacaoPncp;
 use Semae\Pca\Application\Results\ResultadoResolucaoContextoUsuario;
-use Semae\Pca\Application\UseCases\PublicarPca\CoordenadorVarreduraUnidades;
-use Semae\Pca\Application\UseCases\PublicarPca\DecisorUnidadeSobExclusividade;
-use Semae\Pca\Application\UseCases\PublicarPca\DespachadorComandosUnidade;
-use Semae\Pca\Application\UseCases\PublicarPca\ExecutorComandosUnidade;
-use Semae\Pca\Application\UseCases\PublicarPca\FinalizadorProcessamentoUnidadeInterno;
-use Semae\Pca\Application\UseCases\PublicarPca\PreparadorExecucaoPublicacaoPca;
-use Semae\Pca\Application\UseCases\PublicarPca\PreparadorUnidadeSobExclusividade;
-use Semae\Pca\Application\UseCases\PublicarPca\ProcessadorUnidadeInterno;
 use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaRequest;
-use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaUseCase;
 use Semae\Pca\Application\ValueObjects\ChaveUnidadeTrabalho;
 use Semae\Pca\Application\ValueObjects\ContextoUsuario;
 use Semae\Pca\Application\ValueObjects\CorrelacaoExecucao;
@@ -54,7 +45,7 @@ use Semae\Pca\Domain\Entities\Demanda;
 use Semae\Pca\Domain\Entities\Plano;
 use Semae\Pca\Domain\Entities\UnidadeOrcamentaria;
 use Semae\Pca\Domain\Enums\SituacaoDemanda;
-use Semae\Pca\Domain\Policies\PoliticaProcessamentoPlano;
+use Semae\Pca\Composition\MontadorNucleoPublicacaoPca;
 use Semae\Pca\Domain\Ports\PlanoRepository;
 use Semae\Pca\Domain\ValueObjects\AnoExecucao;
 use Semae\Pca\Domain\ValueObjects\Cnpj;
@@ -167,53 +158,20 @@ final class FluxoConcretoApplicationTest extends TestCase
         $this->assertCount(2, $cenario->repository->confirmados);
     }
 
-    /**
-     * é praticamente um futuro Composition Root em miniatura para testes
-     */
     private function executar(CenarioFluxoConcreto $cenario): PublicarPcaResponse
     {
-        $politica = new PoliticaProcessamentoPlano();
-        $executor = new ExecutorComandosUnidade(
-            $cenario->escritor,
-            $cenario->unidadeTrabalho
-        );
-        $finalizador = new FinalizadorProcessamentoUnidadeInterno(
-            $cenario->leitor,
-            $politica,
-            $executor,
+        $useCase = (new MontadorNucleoPublicacaoPca(
+            $cenario->contexto,
             $cenario->repository,
+            $cenario->estrategia,
+            $cenario->unidadeTrabalho,
+            $cenario->autenticador,
+            $cenario->leitor,
+            $cenario->escritor,
             $cenario->estado,
             $cenario->auditoria,
-            $cenario->unidadeTrabalho,
             new NullLogger()
-        );
-        $processador = new ProcessadorUnidadeInterno(
-            new PreparadorUnidadeSobExclusividade(
-                $cenario->unidadeTrabalho,
-                $cenario->repository,
-                $cenario->estado
-            ),
-            new DecisorUnidadeSobExclusividade(
-                $cenario->leitor,
-                $politica,
-                $cenario->unidadeTrabalho
-            ),
-            new DespachadorComandosUnidade(
-                $executor,
-                $finalizador,
-                $cenario->unidadeTrabalho
-            )
-        );
-        $useCase = new PublicarPcaUseCase(
-            new PreparadorExecucaoPublicacaoPca(
-                $cenario->contexto,
-                $cenario->repository,
-                $cenario->estrategia,
-                $cenario->unidadeTrabalho,
-                $cenario->autenticador
-            ),
-            new CoordenadorVarreduraUnidades($processador)
-        );
+        ))->montar();
 
         return $useCase->executar(
             new PublicarPcaRequest($cenario->cnpj, $cenario->ano),

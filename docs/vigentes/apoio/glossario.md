@@ -127,12 +127,14 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Adapter | Implementação concreta de uma Port para um mecanismo externo; a implementação concreta de um Repository também exerce esse papel, mesmo quando conserva o sufixo `Repository`. | Arquitetura §§5 e 8 |
 | Application | Camada de casos de uso, orquestração e contratos necessários ao fluxo. | Arquitetura §4.2; `DI-007` |
 | Composition Root | Ponto do backend que cria o grafo e injeta dependências concretas. | Arquitetura §7; `DI-010` |
+| Montador do núcleo | Componente intermediário que recebe Ports e logger já construídos e compõe a topologia da Application, sem selecionar perfil ou administrar recursos externos. | Roadmap Sprint 6.1 |
 | Conexão emprestada | Conexão criada e administrada pela aplicação hospedeira, reutilizada pelo backend sem transferência de seu ciclo de vida; o backend não a fecha. | `DI-008`; Roadmap Sprint 5.2 |
 | Controller | Componente que adapta a entrada pública para o caso de uso. | Arquitetura §§4.4 e 8; `DI-010` |
 | Domain | Camada que representa o negócio, protege invariantes e decide por políticas puras. | Modelo; Arquitetura §4.1 |
 | Double de teste | Substituto controlado usado para demonstrar como um consumidor utiliza um contrato. | Arquitetura §9; `DI-007` |
 | Fachada pública | Único ponto do backend consumido pela aplicação hospedeira. | Arquitetura §7; `DI-010` |
 | Infrastructure | Camada dos adapters concretos de persistência, transporte e recursos externos. | Arquitetura §4.3 |
+| Integração controlada do núcleo | Prova interna que monta adapters concretos sobre fronteiras programáveis e sem I/O real para verificar composição, compartilhamento de sessão e encerramento transacional. Não substitui gate real nem constitui o Composition Root final. | Roadmap Sprint 6.2; Arquitetura §9 |
 | Mapeamento físico explícito | Descrição injetada e validada dos nomes físicos e literais usados pelo adapter, sem incorporá-los aos contratos internos nem assumir valores implícitos. | `DI-008`; Arquitetura §4.3 |
 | Mapeador de dados | Tradutor dos valores retornados por um mecanismo externo para tipos internos, sem definir nomes físicos nem decidir regras de negócio. | Arquitetura §4.3 |
 | Port | Contrato interno pertencente à camada que necessita da capacidade. | Arquitetura §5; `DI-007` |
@@ -156,7 +158,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | --- | --- | --- |
 | Controle de concorrência (antes “âncora”) | Linha técnica da tabela PAC_CONTROLES_CONCORRENCIA, sem identidade de negócio, utilizada para serializar execuções por ESCOPO + ANO_EXECUCAO + IDENTIFICADOR_ALVO. Ela funciona como um "ponto de cadeado" persistente: se duas execuções disputarem a mesma publicação, ambas encontrarão essa mesma linha e uma delas será bloqueada via FOR UPDATE NOWAIT. A alteração do termo "âncora" para "controle de concorrência" é apenas semântica e não altera o comportamento do adapter. | `DI-008`; Sprint 5.9 |
 | Ambiente de treinamento | Ambiente oficial protegido, distinto da produção, no qual integrações externas autorizadas podem ser exercitadas com massa dedicada. | `DI-009` |
-| Contrato controlado | Prova contratual executada com condições, fixtures ou doubles controlados; demonstra o comportamento do adapter, mas não substitui a evidência obtida no ambiente externo real. | Arquitetura §9; Roadmap Sprint 5.9 |
+| Contrato controlado | Prova contratual executada com condições, fixtures ou doubles controlados; demonstra o comportamento do adapter, mas não substitui a evidência obtida no ambiente externo real. | Arquitetura §9; Roadmap Sprints 5.9 e 6.2 |
 | Fail-closed | Postura que recusa a execução antes da interação externa quando configuração, destino, autorização ou pré-condição não estão comprovados, sem recorrer a valores alternativos silenciosos. | `DI-009`, `DI-010` |
 | Gate real | Condição de avanço comprovada no ambiente efetivo por meio dos adapters concretos; a aprovação em ambiente controlado, isoladamente, não o encerra. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |
 | Limpeza best-effort | Tentativa de remover os artefatos criados pelo teste sem presumir que a remoção sempre será possível; qualquer resíduo possível deve permanecer diagnosticado. | `DI-009` |

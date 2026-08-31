@@ -274,7 +274,13 @@ fazem parte do fluxo executável.
 | `Observabilidade/LoteEventosTecnicos.php` | Cópia exportável dos envelopes com duração somente no último metadata. |
 | `Observabilidade/AcumuladorEventosTecnicos.php` | Logger PSR-3 que valida ações tipadas, sanitiza e acumula eventos ordenados sem I/O. |
 
-## 4. Testes
+## 4. Composition
+
+| Arquivo | Função |
+| --- | --- |
+| `MontadorNucleoPublicacaoPca.php` | Recebe as nove Ports e o logger e monta explicitamente o grafo interno de `PublicarPcaUseCase`, sem Presentation ou seleção de adapters concretos. |
+
+## 5. Testes
 
 ### Domain
 
@@ -338,7 +344,24 @@ fazem parte do fluxo executável.
 | `UseCases/PublicarPca/DespachadorComandosUnidadeTest.php` | Escritas, limite de 1000, ordem e rollback. |
 | `UseCases/PublicarPca/FinalizadorProcessamentoUnidadeInternoTest.php` | Observação final, reconciliação, persistência e auditoria. |
 | `UseCases/PublicarPca/ProcessadorUnidadeInternoTest.php` | Encadeamento concreto no caminho sem escrita. |
-| `UseCases/PublicarPca/FluxoConcretoApplicationTest.php` | Grafo completo para publicação, retificação, exclusão e consolidação. |
+| `UseCases/PublicarPca/FluxoConcretoApplicationTest.php` | Executa pelo montador o grafo completo para publicação, retificação, exclusão e consolidação. |
+
+### Composition
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Composition/MontadorNucleoPublicacaoPcaTest.php` | Contrato de montagem do UseCase a partir das nove Ports vigentes e do logger PSR-3. |
+
+### Integration — Composition
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Integration/Composition/MontadorNucleoPublicacaoPcaIntegrationTest.php` | Exercita os nove adapters concretos pelo montador em convergência, retificação e falha final reconciliável, sem recursos externos reais. |
+| `Integration/Composition/Support/CenarioIntegracaoNucleo.php` | Constrói as configurações fictícias, os adapters concretos e os roteiros Oracle e PNCP dos cenários controlados. |
+| `Integration/Composition/Support/AdodbControlado.php` | Responde consultas por fila estrita e registra transações, consultas, escritas e tentativas de fechamento sem acessar Oracle. |
+| `Integration/Composition/Support/ExecutorCurlRoteirizado.php` | Exige método e URL, alimenta os callbacks do transporte concreto e impede qualquer chamada de rede. |
+| `Integration/Composition/Support/RegistroCronologico.php` | Reúne eventos Oracle e PNCP sanitizados na ordem em que foram observados. |
+| `Integration/Composition/Support/TemporizadorControlado.php` | Registra a espera de retry solicitada pelo leitor sem suspender a execução do teste. |
 
 ### Infrastructure — Oracle
 
