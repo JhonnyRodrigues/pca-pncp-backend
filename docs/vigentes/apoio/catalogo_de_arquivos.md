@@ -280,7 +280,12 @@ fazem parte do fluxo executável.
 | Arquivo | Função |
 | --- | --- |
 | `Inputs/EntradaPublicarPca.php` | Entrada imutável com CNPJ textual e ano inteiro, sem materializar o Domain. |
-| `Controllers/PublicarPcaController.php` | Materializa CNPJ e Ano de Execução, cria a Request válida e delega a `PublicadorPca`, sem macros, wiring ou tratamento global de exceções. |
+| `Controllers/PublicarPcaController.php` | Materializa CNPJ e Ano de Execução, sinaliza internamente entradas inválidas, delega a `PublicadorPca` e entrega a Response ao Presenter. |
+| `Exceptions/EntradaPublicarPcaInvalidaException.php` | Transporta uma falha de entrada segura exclusivamente entre Controller e fachada, preservando internamente a causa original para diagnóstico. |
+| `Facades/FachadaPublicarPca.php` | Ponto tipado da Presentation que converte entradas inválidas e falhas inesperadas em ViewModels seguros. |
+| `Presenters/PublicarPcaPresenter.php` | Projeta a Response global e seus resultados unitários em dados escalares seguros. |
+| `ViewModels/PublicarPcaViewModel.php` | Estrutura imutável do resultado global apresentado ao consumidor. |
+| `ViewModels/ResultadoUnidadeViewModel.php` | Estrutura imutável do resultado apresentado por unidade externa. |
 
 ## 5. Composition
 
@@ -358,8 +363,11 @@ fazem parte do fluxo executável.
 
 | Arquivo | Demonstração principal |
 | --- | --- |
+| `Presentation/PublicacaoPcaPresentationTest.php` | Fluxo transversal da entrada aos ViewModels, saída renderizável, preservação de resultados e sanitização de falhas inesperadas. |
 | `Presentation/Inputs/EntradaPublicarPcaTest.php` | Preservação dos primitivos tipados e imutabilidade da entrada. |
-| `Presentation/Controllers/PublicarPcaControllerTest.php` | Materialização dos Value Objects, delegação, preservação da correlação e propagação de exceções sem acionar o UseCase inválido. |
+| `Presentation/Controllers/PublicarPcaControllerTest.php` | Classificação localizada da entrada, materialização dos Value Objects, delegação, apresentação e distinção de falhas posteriores. |
+| `Presentation/Facades/FachadaPublicarPcaTest.php` | Caminhos válidos, solicitações inválidas, fronteira de `Throwable`, ausência de vazamento e preservação de Responses seguras. |
+| `Presentation/Presenters/PublicarPcaPresenterTest.php` | Estados globais e unitários, modos, decisões, campos opcionais, ordem, contagens, correlação e falhas seguras. |
 
 ### Composition
 

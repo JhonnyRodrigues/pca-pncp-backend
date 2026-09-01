@@ -15,7 +15,7 @@ emprestada e o transporte cURL.
 
 ```mermaid
 flowchart LR
-    F[Futura fachada] --> E[EntradaPublicarPca]
+    F[FachadaPublicarPca] --> E[EntradaPublicarPca]
     E --> C[PublicarPcaController]
     C --> R[PublicarPcaRequest]
     R --> U[PublicarPcaUseCase]
@@ -154,20 +154,22 @@ projetadas por aliases canônicos para objetos do Domain.
 
 ## 7. Ordem prática de leitura
 
-1. `EntradaPublicarPca` e `PublicarPcaController`, que adaptam a entrada sem
-   conhecer mecanismos externos.
-2. `MontadorNucleoPublicacaoPca`, que explicita a topologia do núcleo.
-3. `PublicarPcaUseCase` e este diagrama.
-4. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
-5. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
-6. `PreparadorUnidadeSobExclusividade`.
-7. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
-8. `ExecutorComandosUnidade`.
-9. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
+1. `FachadaPublicarPca`, `EntradaPublicarPca` e `PublicarPcaController`, que
+   protegem a fronteira e adaptam a entrada sem conhecer mecanismos externos.
+2. `PublicarPcaPresenter`, `PublicarPcaViewModel` e
+   `ResultadoUnidadeViewModel`, que projetam a saída segura sem renderizá-la.
+3. `MontadorNucleoPublicacaoPca`, que explicita a topologia do núcleo.
+4. `PublicarPcaUseCase` e este diagrama.
+5. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
+6. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
+7. `PreparadorUnidadeSobExclusividade`.
+8. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
+9. `ExecutorComandosUnidade`.
+10. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
    recalcular, persistir e concluir.
-10. Results e Enums somente quando aparecerem no caminho estudado.
-11. `FluxoConcretoApplicationTest`, que executa o grafo montado sem Infrastructure.
-12. `MontadorNucleoPublicacaoPcaIntegrationTest`, que executa o mesmo ponto de
+11. Results e Enums somente quando aparecerem no caminho estudado.
+12. `FluxoConcretoApplicationTest`, que executa o grafo montado sem Infrastructure.
+13. `MontadorNucleoPublicacaoPcaIntegrationTest`, que executa o mesmo ponto de
     montagem com os nove adapters concretos sobre ADOdb, cURL e tempo
     controlados.
 
@@ -187,17 +189,24 @@ está e evita procurar pelo repositório inteiro.
 
 ## 9. O que ainda não existe
 
-Não existem Composition Root final, Presenter, ViewModels nem fachada
-Scriptcase. `MontadorNucleoPublicacaoPca` é o wiring intermediário da Sprint
-6.1: recebe Ports e logger já construídos, sem selecionar perfil ou instanciar
-recursos externos. O entrypoint da Sprint 5.9 em
+Não existem Composition Root final, perfil allowlisted nem assinatura
+hospedeira da fachada com conexão, login, `SERVER_NAME` e ano.
+`FachadaPublicarPca` é somente a fronteira tipada da Presentation;
+`MontadorNucleoPublicacaoPca` continua sendo o wiring intermediário da Sprint
+6.1, recebendo Ports e logger já construídos sem selecionar perfil ou
+instanciar recursos externos. O entrypoint da Sprint 5.9 em
 `tests/Contract/Sprint59/scriptcase_probe.php` pertence somente à suíte
 contratual e não antecipa a fronteira pública de produção.
 
 Todas as Ports vigentes possuem adapter concreto e as Fases 5 e 6 estão
 concluídas. O gate da Sprint 6.3 comprovou o núcleo executável sem Presentation.
-A Sprint 7.1 adicionou a primeira parte da Presentation. Enquanto a fachada não
-existir, as exceções de CNPJ ou ano inválido propagam internamente sem acionar o
-UseCase; a conversão para `SOLICITACAO_INVALIDA` permanece reservada à Sprint
-7.3. A Sprint 7.2 — Presenter e ViewModels é a próxima etapa na ordem e depende
-de planejamento e autorização próprios.
+As Sprints 7.1 a 7.4 adicionaram entrada, Controller, Presenter, ViewModels e a
+fachada tipada e comprovaram transversalmente essa fronteira. Entradas inválidas
+produzem `SOLICITACAO_INVALIDA`, e falhas inesperadas produzem `INTERROMPIDA`
+sem detalhes internos. A Fase 7 está concluída; a Sprint 8.1 — Composition Root
+e perfil Scriptcase é a próxima etapa e depende de planejamento e autorização
+próprios.
+
+A fachada ainda não registra via PSR-3 a falha inesperada que captura e
+sanitiza. Essa pendência permanece na Sprint 8.1, quando o grafo final tornará o
+acumulador e a correlação da execução disponíveis à mesma fronteira.

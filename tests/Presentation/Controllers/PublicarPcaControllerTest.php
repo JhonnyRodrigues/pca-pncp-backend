@@ -13,25 +13,30 @@ use Semae\Pca\Application\UseCases\PublicarPca\PublicarPcaRequest;
 use Semae\Pca\Application\ValueObjects\CorrelacaoExecucao;
 use Semae\Pca\Domain\Exceptions\AnoExecucaoInvalidoException;
 use Semae\Pca\Presentation\Controllers\PublicarPcaController;
+use Semae\Pca\Presentation\Exceptions\EntradaPublicarPcaInvalidaException;
 use Semae\Pca\Presentation\Inputs\EntradaPublicarPca;
+use Semae\Pca\Presentation\Presenters\PublicarPcaPresenter;
+use Semae\Pca\Presentation\ViewModels\PublicarPcaViewModel;
 
 final class PublicarPcaControllerTest extends TestCase
 {
     /** @regra RN-CAD-001 @regra RN-CAD-002 */
-    public function testEntradaValidaDeveCriarRequestEDevolverAMesmaResponse(): void
+    public function testEntradaValidaDeveCriarRequestEDevolverViewModelApresentado(): void
     {
         $correlacao = new CorrelacaoExecucao('corr-controller-valido');
         $responseEsperada = PublicarPcaResponse::concluida([], 0, 0, $correlacao);
         $publicador = new PublicadorPcaSpy($responseEsperada);
-        $controller = new PublicarPcaController($publicador);
+        $controller = new PublicarPcaController($publicador, new PublicarPcaPresenter());
         $ano = (int) date('Y') + 1;
 
-        $response = $controller->executar(
+        $viewModel = $controller->executar(
             new EntradaPublicarPca('12.345.678/0001-95', $ano),
             $correlacao
         );
 
-        $this->assertSame($responseEsperada, $response);
+        $this->assertInstanceOf(PublicarPcaViewModel::class, $viewModel);
+        $this->assertSame('CONCLUIDA', $viewModel->getSituacao());
+        $this->assertSame('corr-controller-valido', $viewModel->getCorrelacao());
         $this->assertSame(1, $publicador->chamadas);
         $this->assertSame($correlacao, $publicador->correlacaoRecebida);
         $this->assertNotNull($publicador->requestRecebido);
@@ -57,8 +62,10 @@ final class PublicarPcaControllerTest extends TestCase
                 $correlacao
             );
             $this->fail('Era esperada a rejeição do CNPJ inválido.');
-        } catch (InvalidArgumentException $exception) {
-            $this->assertSame('CNPJ inválido.', $exception->getMessage());
+        } catch (EntradaPublicarPcaInvalidaException $exception) {
+            $this->assertSame('CNPJ_INVALIDO', $exception->getFalha()->getCodigo());
+            $this->assertSame('CNPJ inválido.', $exception->getFalha()->getMensagem());
+            $this->assertInstanceOf(InvalidArgumentException::class, $exception->getPrevious());
         }
 
         $this->assertSame(0, $publicador->chamadas);
@@ -76,8 +83,16 @@ final class PublicarPcaControllerTest extends TestCase
                 $correlacao
             );
             $this->fail('Era esperada a rejeição do ano inválido.');
-        } catch (AnoExecucaoInvalidoException $exception) {
-            $this->assertSame('Ano de execução inválido.', $exception->getMessage());
+        } catch (EntradaPublicarPcaInvalidaException $exception) {
+            $this->assertSame('ANO_EXECUCAO_INVALIDO', $exception->getFalha()->getCodigo());
+            $this->assertSame(
+                'Ano de execução inválido.',
+                $exception->getFalha()->getMensagem()
+            );
+            $this->assertInstanceOf(
+                AnoExecucaoInvalidoException::class,
+                $exception->getPrevious()
+            );
         }
 
         $this->assertSame(0, $publicador->chamadas);
@@ -95,8 +110,9 @@ final class PublicarPcaControllerTest extends TestCase
                 $correlacao
             );
             $this->fail('Era esperada a rejeição do CNPJ inválido.');
-        } catch (InvalidArgumentException $exception) {
-            $this->assertSame('CNPJ inválido.', $exception->getMessage());
+        } catch (EntradaPublicarPcaInvalidaException $exception) {
+            $this->assertSame('CNPJ_INVALIDO', $exception->getFalha()->getCodigo());
+            $this->assertSame('CNPJ inválido.', $exception->getFalha()->getMensagem());
         }
 
         $this->assertSame(0, $publicador->chamadas);
@@ -112,7 +128,7 @@ final class PublicarPcaControllerTest extends TestCase
                 throw new RuntimeException('falha inesperada');
             }
         };
-        $controller = new PublicarPcaController($publicador);
+        $controller = new PublicarPcaController($publicador, new PublicarPcaPresenter());
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('falha inesperada');
@@ -120,6 +136,27 @@ final class PublicarPcaControllerTest extends TestCase
         $controller->executar(
             new EntradaPublicarPca('12.345.678/0001-95', (int) date('Y')),
             new CorrelacaoExecucao('corr-falha-inesperada')
+        );
+    }
+
+    public function testInvalidArgumentExceptionDoUseCaseNaoDeveSerClassificadaComoEntrada(): void
+    {
+        $publicador = new class implements PublicadorPca {
+            public function executar(
+                PublicarPcaRequest $request,
+                CorrelacaoExecucao $correlacao
+            ): PublicarPcaResponse {
+                throw new InvalidArgumentException('falha posterior à validação');
+            }
+        };
+        $controller = new PublicarPcaController($publicador, new PublicarPcaPresenter());
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('falha posterior à validação');
+
+        $controller->executar(
+            new EntradaPublicarPca('12.345.678/0001-95', (int) date('Y')),
+            new CorrelacaoExecucao('corr-falha-posterior')
         );
     }
 
@@ -131,7 +168,10 @@ final class PublicarPcaControllerTest extends TestCase
             PublicarPcaResponse::concluida([], 0, 0, $correlacao)
         );
 
-        return [new PublicarPcaController($publicador), $publicador];
+        return [
+            new PublicarPcaController($publicador, new PublicarPcaPresenter()),
+            $publicador,
+        ];
     }
 
 }

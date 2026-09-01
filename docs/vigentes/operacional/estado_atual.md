@@ -32,7 +32,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 7.1.
+- A última sprint concluída é a Sprint 7.4.
 - A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
 - A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
   aprovado no treinamento, incluindo publicação, operações de itens, exclusão
@@ -49,9 +49,86 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 6.2 — Integração controlada dos adapters está concluída.
 - A Sprint 6.3 — Gate do núcleo executável está concluída.
 - A Fase 6 — Wiring controlado do núcleo está concluída.
-- A Sprint 7.1 — Controller e entrada tipada está concluída. A Fase 7 está em
-  andamento; a Sprint 7.2 — Presenter e ViewModels é a próxima etapa e depende
-  de planejamento e autorização próprios.
+- A Sprint 7.1 — Controller e entrada tipada está concluída.
+- A Sprint 7.2 — Presenter e ViewModels está concluída.
+- A Sprint 7.3 — Fachada e fronteira de exceções está concluída.
+- A Sprint 7.4 — Suíte da Presentation está concluída.
+- A Fase 7 — Presentation está concluída. A Sprint 8.1 — Composition Root e
+  perfil Scriptcase é a próxima etapa e depende de planejamento e autorização
+  próprios.
+
+## Evidências da Sprint 7.4
+
+- A suíte transversal percorre entrada, fachada, Controller, Presenter e
+  ViewModels e aprovou 6 testes e 152 asserções.
+- O caminho válido preserva chamada única ao UseCase, ordem dos resultados,
+  contagens e correlação textual. A saída consumível contém somente ViewModels,
+  escalares e valores nulos.
+- Entradas inválidas não alcançam o UseCase. Falhas seguras globais e unitárias
+  preservam exclusivamente seus códigos e mensagens, e resultados conhecidos
+  não são descartados nem fabricados.
+- `RuntimeException` e `Error` com SQL, payload, senha, token e stack simulados
+  produzem a falha pública fixa sem expor esses detalhes no ViewModel.
+- Presentation aprovou 28 testes e 300 asserções; Application aprovou 237
+  testes e 978 asserções; Composition aprovou 1 teste e 1 asserção; Integration
+  aprovou 3 testes e 70 asserções.
+- A suíte padrão aprovou 839 testes e 3.299 asserções. O autoload PSR-4 estrito
+  gerou 1.754 classes, e o lint aprovou 286 arquivos PHP.
+- As auditorias de direção das dependências, ViewModels, conteúdo proibido,
+  sanitização da fachada e whitespace foram aprovadas.
+- Nenhum arquivo de produção foi alterado, e nenhum preflight, grupo
+  `pncp-live`, probe ou acesso externo foi executado.
+- A suíte comprova que a fronteira entrega ViewModels renderizáveis. A prova da
+  renderização pela Blank real permanece para a Fase 8.
+- A fachada captura e sanitiza falhas inesperadas, mas ainda não registra essa
+  captura via PSR-3. A pendência permanece destinada à Sprint 8.1, quando
+  fachada, acumulador, correlação e grafo final compartilharem o mesmo ciclo de
+  execução.
+
+## Evidências da Sprint 7.3
+
+- `EntradaPublicarPcaInvalidaException` transporta internamente uma
+  `FalhaSegura`; o Controller classifica somente os erros originados ao
+  materializar CNPJ e ano, preservando a precedência do CNPJ e impedindo a
+  chamada ao UseCase.
+- `FachadaPublicarPca` preserva ViewModels e Responses seguras já produzidas e
+  converte entradas inválidas em `SOLICITACAO_INVALIDA`.
+- Qualquer outro `Throwable` produz `INTERROMPIDA`, código
+  `FALHA_INESPERADA`, mensagem pública fixa, contagens zeradas e correlação
+  textual exata, sem fabricar resultados ou transportar detalhes da exceção.
+- A fachada é a fronteira tipada da Presentation. Conexão emprestada, login,
+  `SERVER_NAME`, perfil, geração da correlação e assinatura final do Scriptcase
+  permanecem na Fase 8.
+- Presentation aprovou 22 testes e 148 asserções; Application aprovou 237
+  testes e 978 asserções; Composition aprovou 1 teste e 1 asserção; Integration
+  aprovou 3 testes e 70 asserções.
+- A suíte padrão aprovou 833 testes e 3.147 asserções. O autoload PSR-4 estrito
+  gerou 1.753 classes, e o lint aprovou 285 arquivos PHP.
+- Domain e Application não dependem de Presentation. Presentation não depende
+  de Infrastructure, Composition ou Scriptcase, e a fachada não realiza
+  wiring, serialização ou logging.
+- Nenhum preflight, grupo `pncp-live`, probe ou acesso externo foi executado.
+
+## Evidências da Sprint 7.2
+
+- `PublicarPcaPresenter` converte a Response em `PublicarPcaViewModel` e
+  `ResultadoUnidadeViewModel`, expondo somente escalares, valores nulos e a
+  coleção ordenada de resultados unitários.
+- Situações, decisões, identidade individual, modo, ano, UASG, sequencial,
+  contagens, correlação e falhas seguras são projetados sem normalização,
+  tradução ou criação de mensagens. No modo consolidado, o ID da UO é `null`.
+- `PublicarPcaController` entrega a Response ao Presenter e devolve o ViewModel.
+  Exceções de entrada e falhas inesperadas continuam reservadas à fronteira
+  global da Sprint 7.3.
+- Presentation aprovou 14 testes e 80 asserções; Application aprovou 237 testes
+  e 978 asserções; Composition aprovou 1 teste e 1 asserção; Integration
+  aprovou 3 testes e 70 asserções.
+- A suíte padrão aprovou 825 testes e 3.079 asserções. O autoload PSR-4 estrito
+  gerou 1.750 classes, e o lint aprovou 282 arquivos PHP.
+- Domain e Application não dependem de Presentation. Presentation não depende
+  de Infrastructure, Composition ou Scriptcase; seus ViewModels não dependem
+  de Domain ou Application.
+- Nenhum preflight, grupo `pncp-live`, probe ou acesso externo foi executado.
 
 ## Evidências da Sprint 7.1
 
@@ -434,9 +511,11 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   ser fechada pelo backend.
 - Os contratos autorizados dos adapters e os gates reais Oracle/Scriptcase e
   PNCP de treinamento da Sprint 5.9 estão aprovados.
-- A conclusão da Sprint 7.1 não autoriza automaticamente Presenter, ViewModels,
-  fachada, tratamento global de exceções ou Composition Root final. A Sprint
-  7.2 exige planejamento e autorização próprios.
+- A conclusão da Fase 7 não autoriza automaticamente o Composition Root final.
+  A Sprint 8.1 exige planejamento e autorização próprios.
+- O registro PSR-3 da falha inesperada capturada pela fachada permanece
+  pendente para a Sprint 8.1; a sanitização do resultado público já está
+  comprovada, mas a captura ainda não produz evento técnico.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos

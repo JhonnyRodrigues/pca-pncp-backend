@@ -812,6 +812,18 @@ ou wiring.
 - testar entrada, Controller, Presenter, fachada e sanitização;
 - demonstrar que o hospedeiro somente renderiza o ViewModel.
 
+**Estado do PCA:** concluída em 01/09/2026 após um microciclo autorizado. A
+suíte transversal comprovou o fluxo da entrada até os ViewModels, a preservação
+dos resultados conhecidos e a sanitização de falhas inesperadas. A fronteira
+entrega somente ViewModels, escalares e valores nulos; a renderização pela Blank
+real permanece para a Fase 8. O registro PSR-3 da falha inesperada capturada
+pela fachada permanece pendente e rastreado para a Sprint 8.1, junto do grafo
+final e do acumulador compartilhado.
+
+**Estado final da Fase 7:** concluída. Entrada, Controller, Presenter,
+ViewModels e fachada formam uma fronteira protegida, sem acesso a adapters,
+wiring, HTML, JSON ou macros do Scriptcase.
+
 Referência principal: DI-010.
 
 ### Fase 8 — Integração real e Composition Root final
