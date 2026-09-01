@@ -761,9 +761,8 @@ núcleo sem Presentation, container ou Service Locator.
 
 **Estado final da Fase 6:** concluída. As dependências do núcleo são injetadas
 por construtor, os adapters compartilham corretamente os recursos controlados e
-o Domain permanece independente. A Sprint 7.1 é a próxima etapa na ordem e
-depende de planejamento e autorização próprios; a Fase 7 não foi iniciada
-implicitamente.
+o Domain permanece independente. A entrada da Fase 7 foi satisfeita, e a Sprint
+7.1 avançou posteriormente mediante planejamento e autorização próprios.
 
 ### Fase 7 — Presentation
 
@@ -788,6 +787,13 @@ Scriptcase conhecer componentes internos.
 - adaptar a entrada para CNPJ e Ano de Execução;
 - chamar o UseCase já montado;
 - impedir macros, credenciais e regras no Controller.
+
+**Estado do PCA:** concluída em 01/09/2026 após quatro microciclos autorizados.
+`EntradaPublicarPca` preserva os primitivos tipados, o Controller materializa
+`Cnpj` e `AnoExecucao`, cria a Request válida e delega pelo contrato
+`PublicadorPca`. Exceções de entrada permanecem internas até a futura fachada,
+sem iniciar o UseCase, e o Controller não acessa macros, configuração, adapters
+ou wiring.
 
 #### Sprint 7.2 — Presenter e ViewModels
 

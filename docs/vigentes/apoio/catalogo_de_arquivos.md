@@ -59,7 +59,7 @@ fazem parte do fluxo executável.
 | Arquivo | Função |
 | --- | --- |
 | `UseCases/PublicarPca/PublicarPcaRequest.php` | Entrada tipada com CNPJ e exercício já válidos. |
-| `UseCases/PublicarPca/PublicarPcaUseCase.php` | Orquestrador global e produtor da Response final. |
+| `UseCases/PublicarPca/PublicarPcaUseCase.php` | Implementa `PublicadorPca`, orquestra o fluxo global e produz a Response final. |
 | `UseCases/PublicarPca/PreparadorExecucaoPublicacaoPca.php` | Resolve contexto, estratégia, unidades e sessão PNCP. |
 | `UseCases/PublicarPca/CoordenadorVarreduraUnidades.php` | Visita unidades, preserva resultados e interrompe em falha sistêmica. |
 | `UseCases/PublicarPca/ProcessadorUnidadeInterno.php` | Encadeia preparação, decisão e despacho de uma unidade. |
@@ -79,6 +79,7 @@ fazem parte do fluxo executável.
 | `Commands/ComandoExcluirItensPca.php` | Ordem de exclusão de itens com justificativa. |
 | `Commands/ComandoExcluirPca.php` | Ordem de exclusão integral do PCA. |
 | `Contracts/SessaoPncp.php` | Tipo opaco da sessão autenticada. |
+| `Contracts/PublicadorPca.php` | Contrato executável usado pela Presentation para acionar o UseCase já montado. |
 | `Contracts/ProcessadorUnidade.php` | Contrato consumido pelo coordenador global. |
 | `Contracts/FinalizadorProcessamentoUnidade.php` | Contrato entre despacho e finalização da unidade. |
 
@@ -274,13 +275,20 @@ fazem parte do fluxo executável.
 | `Observabilidade/LoteEventosTecnicos.php` | Cópia exportável dos envelopes com duração somente no último metadata. |
 | `Observabilidade/AcumuladorEventosTecnicos.php` | Logger PSR-3 que valida ações tipadas, sanitiza e acumula eventos ordenados sem I/O. |
 
-## 4. Composition
+## 4. Presentation
+
+| Arquivo | Função |
+| --- | --- |
+| `Inputs/EntradaPublicarPca.php` | Entrada imutável com CNPJ textual e ano inteiro, sem materializar o Domain. |
+| `Controllers/PublicarPcaController.php` | Materializa CNPJ e Ano de Execução, cria a Request válida e delega a `PublicadorPca`, sem macros, wiring ou tratamento global de exceções. |
+
+## 5. Composition
 
 | Arquivo | Função |
 | --- | --- |
 | `MontadorNucleoPublicacaoPca.php` | Recebe as nove Ports e o logger e monta explicitamente o grafo interno de `PublicarPcaUseCase`, sem Presentation ou seleção de adapters concretos. |
 
-## 5. Testes
+## 6. Testes
 
 ### Domain
 
@@ -345,6 +353,13 @@ fazem parte do fluxo executável.
 | `UseCases/PublicarPca/FinalizadorProcessamentoUnidadeInternoTest.php` | Observação final, reconciliação, persistência e auditoria. |
 | `UseCases/PublicarPca/ProcessadorUnidadeInternoTest.php` | Encadeamento concreto no caminho sem escrita. |
 | `UseCases/PublicarPca/FluxoConcretoApplicationTest.php` | Executa pelo montador o grafo completo para publicação, retificação, exclusão e consolidação. |
+
+### Presentation
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Presentation/Inputs/EntradaPublicarPcaTest.php` | Preservação dos primitivos tipados e imutabilidade da entrada. |
+| `Presentation/Controllers/PublicarPcaControllerTest.php` | Materialização dos Value Objects, delegação, preservação da correlação e propagação de exceções sem acionar o UseCase inválido. |
 
 ### Composition
 
@@ -449,7 +464,7 @@ fazem parte do fluxo executável.
 | `Contract/Sprint59/run-pncp-cleanup.php` | Remove somente o resíduo PNCP explicitamente autorizado e exige ausência definitiva sem publicar. |
 | `Contract/Sprint59/config.example.php` | Modelo sem segredos da configuração externa. |
 
-## 5. Configuração executável
+## 7. Configuração executável
 
 | Arquivo | Função |
 | --- | --- |
@@ -460,7 +475,7 @@ fazem parte do fluxo executável.
 | `phpunit.adapters.contract.xml` | Suíte separada dos contratos de adapters da Sprint 5.9. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
 
-## 6. Documentação vigente
+## 8. Documentação vigente
 
 | Arquivo | Função |
 | --- | --- |

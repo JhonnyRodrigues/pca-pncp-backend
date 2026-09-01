@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Semae\Pca\Application\UseCases\PublicarPca;
 
+use Semae\Pca\Application\Contracts\PublicadorPca;
 use Semae\Pca\Application\Enums\SituacaoPreparacaoPublicacaoPca;
 use Semae\Pca\Application\Enums\SituacaoProcessamentoUnidade;
 use Semae\Pca\Application\Results\PublicarPcaResponse;
@@ -12,7 +13,7 @@ use Semae\Pca\Application\ValueObjects\CorrelacaoExecucao;
 use Semae\Pca\Application\ValueObjects\FalhaSegura;
 use Throwable;
 
-final class PublicarPcaUseCase
+final class PublicarPcaUseCase implements PublicadorPca
 {
     public function __construct(
         private readonly PreparadorExecucaoPublicacaoPca $preparador,

@@ -15,7 +15,10 @@ emprestada e o transporte cURL.
 
 ```mermaid
 flowchart LR
-    H[Scriptcase / futura Presentation] --> U[PublicarPcaUseCase]
+    F[Futura fachada] --> E[EntradaPublicarPca]
+    E --> C[PublicarPcaController]
+    C --> R[PublicarPcaRequest]
+    R --> U[PublicarPcaUseCase]
     U --> A[Application]
     A --> D[Domain]
     A --> P[Ports]
@@ -27,12 +30,16 @@ flowchart LR
 Os adapters concretos das Sprints 5.2 a 5.8 implementam todas as Ports
 vigentes. A Sprint 5.9 comprovou os contratos Oracle e PNCP reais, a Sprint
 5.10 encerrou a Fase 5, e as Sprints 6.1 e 6.2 montaram e exercitaram o núcleo
-com adapters concretos sobre fronteiras controladas.
+com adapters concretos sobre fronteiras controladas. A Sprint 6.3 encerrou o
+gate do núcleo, e a Sprint 7.1 adicionou a entrada tipada e o Controller sem
+acesso a adapters ou wiring.
 
 ## 2. O fluxo completo
 
 ```mermaid
 flowchart TD
+    E[EntradaPublicarPca] --> C[PublicarPcaController]
+    C --> R[PublicarPcaRequest]
     R[PublicarPcaRequest] --> U[PublicarPcaUseCase]
     U --> PG[PreparadorExecucaoPublicacaoPca]
     PG --> CU[Resolver contexto do usuário]
@@ -76,7 +83,7 @@ tipados. O finalizador comprova o resultado antes de confirmar dados locais.
 ## 3. As quatro decisões
 
 | Decisão | Quando ocorre | Escrita externa |
-|---|---|---|
+| --- | --- | --- |
 | `PUBLICAR` | Existe fotografia desejada e não existe PCA ativo conhecido. | Cria o PCA com a fotografia completa. |
 | `RETIFICAR` | O PCA ativo difere da fotografia desejada. | Exclui itens, inclui itens e observa, nessa ordem. |
 | `EXCLUIR_PCA` | A fotografia ficou vazia e existe PCA ativo. | Exclui integralmente com a justificativa institucional fixa. |
@@ -126,7 +133,7 @@ persistência.
 ## 6. Ports e adapters
 
 | Port | Capacidade | Implementação concreta atual |
-|---|---|---|
+| --- | --- | --- |
 | `ContextoUsuarioPort` | Resolver Representante e Lotação. | `OracleContextoUsuarioAdapter`. |
 | `PlanoRepository` | Descobrir e reconstruir o Aggregate Plano. | `OraclePlanoRepository`. |
 | `EstrategiaPublicacaoPort` | Consultar e congelar a estratégia anual. | `OracleEstrategiaPublicacaoAdapter`. |
@@ -147,18 +154,20 @@ projetadas por aliases canônicos para objetos do Domain.
 
 ## 7. Ordem prática de leitura
 
-1. `MontadorNucleoPublicacaoPca`, que explicita a topologia do núcleo.
-2. `PublicarPcaUseCase` e este diagrama.
-3. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
-4. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
-5. `PreparadorUnidadeSobExclusividade`.
-6. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
-7. `ExecutorComandosUnidade`.
-8. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
+1. `EntradaPublicarPca` e `PublicarPcaController`, que adaptam a entrada sem
+   conhecer mecanismos externos.
+2. `MontadorNucleoPublicacaoPca`, que explicita a topologia do núcleo.
+3. `PublicarPcaUseCase` e este diagrama.
+4. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
+5. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
+6. `PreparadorUnidadeSobExclusividade`.
+7. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
+8. `ExecutorComandosUnidade`.
+9. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
    recalcular, persistir e concluir.
-9. Results e Enums somente quando aparecerem no caminho estudado.
-10. `FluxoConcretoApplicationTest`, que executa o grafo montado sem Infrastructure.
-11. `MontadorNucleoPublicacaoPcaIntegrationTest`, que executa o mesmo ponto de
+10. Results e Enums somente quando aparecerem no caminho estudado.
+11. `FluxoConcretoApplicationTest`, que executa o grafo montado sem Infrastructure.
+12. `MontadorNucleoPublicacaoPcaIntegrationTest`, que executa o mesmo ponto de
     montagem com os nove adapters concretos sobre ADOdb, cURL e tempo
     controlados.
 
@@ -178,15 +187,17 @@ está e evita procurar pelo repositório inteiro.
 
 ## 9. O que ainda não existe
 
-Não existem Composition Root final, Controller, Presenter nem fachada
+Não existem Composition Root final, Presenter, ViewModels nem fachada
 Scriptcase. `MontadorNucleoPublicacaoPca` é o wiring intermediário da Sprint
-6.1: recebe Ports e logger já construídos, sem selecionar perfil, instanciar
-recursos externos ou antecipar a fronteira pública. O entrypoint da Sprint 5.9
-em `tests/Contract/Sprint59/scriptcase_probe.php` pertence somente à suíte
-contratual e não antecipa nenhuma dessas fronteiras de produção.
+6.1: recebe Ports e logger já construídos, sem selecionar perfil ou instanciar
+recursos externos. O entrypoint da Sprint 5.9 em
+`tests/Contract/Sprint59/scriptcase_probe.php` pertence somente à suíte
+contratual e não antecipa a fronteira pública de produção.
 
 Todas as Ports vigentes possuem adapter concreto e as Fases 5 e 6 estão
 concluídas. O gate da Sprint 6.3 comprovou o núcleo executável sem Presentation.
-A Sprint 7.1 — Controller e entrada tipada é a próxima etapa na ordem e depende
-de planejamento e autorização próprios; nenhum componente da Fase 7 foi
-antecipado.
+A Sprint 7.1 adicionou a primeira parte da Presentation. Enquanto a fachada não
+existir, as exceções de CNPJ ou ano inválido propagam internamente sem acionar o
+UseCase; a conversão para `SOLICITACAO_INVALIDA` permanece reservada à Sprint
+7.3. A Sprint 7.2 — Presenter e ViewModels é a próxima etapa na ordem e depende
+de planejamento e autorização próprios.

@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 31/08/2026
+**Atualizado em:** 01/09/2026
 
 ## Limites de autoridade
 
@@ -32,7 +32,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 6.3.
+- A última sprint concluída é a Sprint 7.1.
 - A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
 - A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
   aprovado no treinamento, incluindo publicação, operações de itens, exclusão
@@ -48,9 +48,29 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 6.1 — Grafo manual sem Presentation está concluída.
 - A Sprint 6.2 — Integração controlada dos adapters está concluída.
 - A Sprint 6.3 — Gate do núcleo executável está concluída.
-- A Fase 6 — Wiring controlado do núcleo está concluída. A Sprint 7.1 —
-  Controller e entrada tipada é a próxima etapa na ordem e depende de
-  planejamento e autorização próprios; a Fase 7 não foi iniciada.
+- A Fase 6 — Wiring controlado do núcleo está concluída.
+- A Sprint 7.1 — Controller e entrada tipada está concluída. A Fase 7 está em
+  andamento; a Sprint 7.2 — Presenter e ViewModels é a próxima etapa e depende
+  de planejamento e autorização próprios.
+
+## Evidências da Sprint 7.1
+
+- `EntradaPublicarPca` recebe somente CNPJ textual e ano inteiro, enquanto
+  `PublicarPcaController` materializa os Value Objects, cria a Request válida e
+  delega ao contrato `PublicadorPca`, implementado pelo UseCase existente.
+- CNPJ ou ano inválido impedem a chamada ao UseCase e propagam suas exceções
+  específicas até a futura fachada. A conversão centralizada para
+  `SOLICITACAO_INVALIDA` permanece na Sprint 7.3.
+- Presentation aprovou 7 testes e 18 asserções; Application aprovou 237 testes
+  e 978 asserções; Composition aprovou 1 teste e 1 asserção; Integration
+  aprovou 3 testes e 70 asserções.
+- A suíte padrão aprovou 818 testes e 3.017 asserções. O autoload PSR-4 estrito
+  gerou 1.746 classes, o lint aprovou 278 arquivos PHP e `git diff --check` foi
+  aprovado.
+- Domain e Application não dependem de Presentation. Presentation não depende
+  de Infrastructure ou Composition e não contém macros, wiring, container,
+  Service Locator ou tratamento de exceções.
+- Nenhum preflight, grupo `pncp-live`, probe ou acesso externo foi executado.
 
 ## Evidências da Sprint 6.3
 
@@ -414,8 +434,9 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   ser fechada pelo backend.
 - Os contratos autorizados dos adapters e os gates reais Oracle/Scriptcase e
   PNCP de treinamento da Sprint 5.9 estão aprovados.
-- A conclusão da Fase 6 não autoriza automaticamente a Presentation. A Sprint
-  7.1 exige planejamento e autorização próprios.
+- A conclusão da Sprint 7.1 não autoriza automaticamente Presenter, ViewModels,
+  fachada, tratamento global de exceções ou Composition Root final. A Sprint
+  7.2 exige planejamento e autorização próprios.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos
