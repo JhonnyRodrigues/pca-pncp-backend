@@ -8,6 +8,9 @@ use Error;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use RuntimeException;
 use Semae\Pca\Application\Contracts\PublicadorPca;
 use Semae\Pca\Application\Results\PublicarPcaResponse;
@@ -19,10 +22,28 @@ use Semae\Pca\Presentation\Facades\FachadaPublicarPca;
 use Semae\Pca\Presentation\Inputs\EntradaPublicarPca;
 use Semae\Pca\Presentation\Presenters\PublicarPcaPresenter;
 use Semae\Pca\Presentation\ViewModels\PublicarPcaViewModel;
+use Stringable;
 use Throwable;
 
 final class FachadaPublicarPcaTest extends TestCase
 {
+    public function testRequestIdInvalidoDeveProduzirInterrupcaoSemCorrelacao(): void
+    {
+        $viewModel = FachadaPublicarPca::interrompidaPorRequestIdInvalido();
+
+        $this->assertSame('INTERROMPIDA', $viewModel->getSituacao());
+        $this->assertSame([], $viewModel->getResultadosUnitarios());
+        $this->assertSame('REQUEST_ID_INVALIDO', $viewModel->getCodigoFalha());
+        $this->assertSame(
+            'Identificador da requisição ausente ou inválido.',
+            $viewModel->getMensagemFalha()
+        );
+        $this->assertSame(0, $viewModel->getQuantidadePlanejadas());
+        $this->assertSame(0, $viewModel->getQuantidadeVisitadas());
+        $this->assertSame(0, $viewModel->getQuantidadeNaoProcessadas());
+        $this->assertNull($viewModel->getCorrelacao());
+    }
+
     public function testCaminhoValidoDevePreservarOViewModelDoController(): void
     {
         $correlacao = new CorrelacaoExecucao('corr-fachada-valida');
@@ -114,6 +135,57 @@ final class FachadaPublicarPcaTest extends TestCase
         $this->assertSame('  corr-falha-inesperada  ', $viewModel->getCorrelacao());
     }
 
+    public function testFalhaInesperadaDeveRegistrarSomenteEventoSeguro(): void
+    {
+        $logger = new LoggerRegistroFachada();
+        $correlacao = new CorrelacaoExecucao('550E8400-E29B-41D4-A716-446655440000');
+        $fachada = $this->criarFachadaComFalha(
+            new RuntimeException('SELECT segredo FROM tabela; senha=oculta'),
+            $logger
+        );
+
+        $viewModel = $fachada->executar(
+            new EntradaPublicarPca('12.345.678/0001-95', (int) date('Y')),
+            $correlacao
+        );
+
+        $this->assertSame('FALHA_INESPERADA', $viewModel->getCodigoFalha());
+        $this->assertSame('550E8400-E29B-41D4-A716-446655440000', $viewModel->getCorrelacao());
+        $this->assertCount(1, $logger->registros);
+        $this->assertSame('error', $logger->registros[0]['nivel']);
+        $this->assertSame(
+            'Não foi possível concluir a publicação do PCA.',
+            $logger->registros[0]['mensagem']
+        );
+        $this->assertSame('EXECUTAR_PUBLICACAO_PCA', $logger->registros[0]['contexto']['action']);
+        $this->assertSame([
+            'code' => 'FALHA_INESPERADA',
+            'message' => 'Não foi possível concluir a publicação do PCA.',
+        ], $logger->registros[0]['contexto']['error']);
+        $this->assertStringNotContainsString(
+            'segredo',
+            json_encode($logger->registros, JSON_THROW_ON_ERROR)
+        );
+    }
+
+    public function testFalhaDoLoggerNaoDeveAtravessarAFachada(): void
+    {
+        $correlacao = new CorrelacaoExecucao('550e8400-e29b-41d4-a716-446655440000');
+        $fachada = $this->criarFachadaComFalha(
+            new RuntimeException('falha original'),
+            new LoggerFalhoFachada()
+        );
+
+        $viewModel = $fachada->executar(
+            new EntradaPublicarPca('12.345.678/0001-95', (int) date('Y')),
+            $correlacao
+        );
+
+        $this->assertSame('INTERROMPIDA', $viewModel->getSituacao());
+        $this->assertSame('FALHA_INESPERADA', $viewModel->getCodigoFalha());
+        $this->assertSame($correlacao->getValor(), $viewModel->getCorrelacao());
+    }
+
     public function testResponseSeguraDaApplicationNaoDeveSerReclassificada(): void
     {
         $correlacao = new CorrelacaoExecucao('corr-interrompida-application');
@@ -180,18 +252,58 @@ final class FachadaPublicarPcaTest extends TestCase
         $presenter = new PublicarPcaPresenter();
         $controller = new PublicarPcaController($publicador, $presenter);
 
-        return [new FachadaPublicarPca($controller, $presenter), $publicador];
+        return [
+            new FachadaPublicarPca($controller, $presenter, new NullLogger()),
+            $publicador,
+        ];
     }
 
-    private function criarFachadaComFalha(Throwable $falha): FachadaPublicarPca
-    {
+    private function criarFachadaComFalha(
+        Throwable $falha,
+        ?LoggerInterface $logger = null
+    ): FachadaPublicarPca {
         $presenter = new PublicarPcaPresenter();
         $controller = new PublicarPcaController(
             new PublicadorPcaFalhoFachada($falha),
             $presenter
         );
 
-        return new FachadaPublicarPca($controller, $presenter);
+        return new FachadaPublicarPca(
+            $controller,
+            $presenter,
+            $logger ?? new NullLogger()
+        );
+    }
+}
+
+final class LoggerRegistroFachada extends AbstractLogger
+{
+    /** @var array<int, array{nivel: mixed, mensagem: string, contexto: array<string, mixed>}> */
+    public array $registros = [];
+
+    /** @param array<string, mixed> $context */
+    public function log(
+        mixed $level,
+        string|Stringable $message,
+        array $context = []
+    ): void {
+        $this->registros[] = [
+            'nivel' => $level,
+            'mensagem' => (string) $message,
+            'contexto' => $context,
+        ];
+    }
+}
+
+final class LoggerFalhoFachada extends AbstractLogger
+{
+    /** @param array<string, mixed> $context */
+    public function log(
+        mixed $level,
+        string|Stringable $message,
+        array $context = []
+    ): void {
+        throw new RuntimeException('logger indisponível');
     }
 }
 

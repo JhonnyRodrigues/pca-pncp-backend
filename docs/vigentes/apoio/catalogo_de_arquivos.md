@@ -137,6 +137,7 @@ fazem parte do fluxo executável.
 
 | Arquivo | Função |
 | --- | --- |
+| `Enums/AcaoExecucaoPublicacao.php` | Ação técnica global usada pela fachada ao registrar uma falha inesperada segura. |
 | `Enums/AcaoProcessamentoUnidade.php` | Vocabulário operacional estável das ações executadas durante a finalização de uma unidade. |
 | `Enums/EscopoUnidadeTrabalho.php` | Distingue estratégia anual e unidade externa. |
 | `Enums/ModoPublicacao.php` | Distingue individual e consolidado. |
@@ -275,25 +276,33 @@ fazem parte do fluxo executável.
 | `Observabilidade/LoteEventosTecnicos.php` | Cópia exportável dos envelopes com duração somente no último metadata. |
 | `Observabilidade/AcumuladorEventosTecnicos.php` | Logger PSR-3 que valida ações tipadas, sanitiza e acumula eventos ordenados sem I/O. |
 
-## 4. Presentation
+## 4. Fronteira Scriptcase
+
+| Arquivo | Função |
+| --- | --- |
+| `PublicadorPcaScriptcase.php` | Única API conhecida pela Blank; valida o request ID, seleciona e carrega o perfil pelo registro externo, materializa o CNPJ, solicita o grafo e devolve ViewModel seguro. |
+
+## 5. Presentation
 
 | Arquivo | Função |
 | --- | --- |
 | `Inputs/EntradaPublicarPca.php` | Entrada imutável com CNPJ textual e ano inteiro, sem materializar o Domain. |
 | `Controllers/PublicarPcaController.php` | Materializa CNPJ e Ano de Execução, sinaliza internamente entradas inválidas, delega a `PublicadorPca` e entrega a Response ao Presenter. |
 | `Exceptions/EntradaPublicarPcaInvalidaException.php` | Transporta uma falha de entrada segura exclusivamente entre Controller e fachada, preservando internamente a causa original para diagnóstico. |
-| `Facades/FachadaPublicarPca.php` | Ponto tipado da Presentation que converte entradas inválidas e falhas inesperadas em ViewModels seguros. |
+| `Facades/FachadaPublicarPca.php` | Fronteira interna da Presentation que converte entradas inválidas e falhas inesperadas em ViewModels seguros e registra a captura inesperada pelo logger compartilhado. |
 | `Presenters/PublicarPcaPresenter.php` | Projeta a Response global e seus resultados unitários em dados escalares seguros. |
 | `ViewModels/PublicarPcaViewModel.php` | Estrutura imutável do resultado global apresentado ao consumidor. |
 | `ViewModels/ResultadoUnidadeViewModel.php` | Estrutura imutável do resultado apresentado por unidade externa. |
 
-## 5. Composition
+## 6. Composition
 
 | Arquivo | Função |
 | --- | --- |
 | `MontadorNucleoPublicacaoPca.php` | Recebe as nove Ports e o logger e monta explicitamente o grafo interno de `PublicarPcaUseCase`, sem Presentation ou seleção de adapters concretos. |
+| `CompositionRootPublicacaoPca.php` | Materializa o perfil carregado, cria os adapters concretos e compartilha conexão, transporte, logger e correlação em um grafo novo por chamada. |
+| `PerfilPublicacaoPca.php` | Trata o array externo como não confiável e materializa ambiente, configurações e os onze mapeamentos Oracle sem defaults implícitos. |
 
-## 6. Testes
+## 7. Testes
 
 ### Domain
 
@@ -374,6 +383,7 @@ fazem parte do fluxo executável.
 | Arquivo | Demonstração principal |
 | --- | --- |
 | `Composition/MontadorNucleoPublicacaoPcaTest.php` | Contrato de montagem do UseCase a partir das nove Ports vigentes e do logger PSR-3. |
+| `Composition/CompositionRootPublicacaoPcaTest.php` | Validação integral do perfil, grafo novo, recursos compartilhados, ausência de I/O na montagem e preservação da conexão emprestada. |
 
 ### Integration — Composition
 
@@ -385,6 +395,8 @@ fazem parte do fluxo executável.
 | `Integration/Composition/Support/ExecutorCurlRoteirizado.php` | Exige método e URL, alimenta os callbacks do transporte concreto e impede qualquer chamada de rede. |
 | `Integration/Composition/Support/RegistroCronologico.php` | Reúne eventos Oracle e PNCP sanitizados na ordem em que foram observados. |
 | `Integration/Composition/Support/TemporizadorControlado.php` | Registra a espera de retry solicitada pelo leitor sem suspender a execução do teste. |
+| `Integration/PublicadorPcaScriptcaseIntegrationTest.php` | Percorre o entrypoint, perfil, Composition Root, Presentation e Application até uma saída local controlada anterior ao PNCP, preservando duas correlações externas sem rede real. |
+| `PublicadorPcaScriptcaseTest.php` | Contrato público mínimo, request ID, localizador externo, seleção literal, perfil e CNPJ em comportamento fail-closed. |
 
 ### Infrastructure — Oracle
 
@@ -472,7 +484,7 @@ fazem parte do fluxo executável.
 | `Contract/Sprint59/run-pncp-cleanup.php` | Remove somente o resíduo PNCP explicitamente autorizado e exige ausência definitiva sem publicar. |
 | `Contract/Sprint59/config.example.php` | Modelo sem segredos da configuração externa. |
 
-## 7. Configuração executável
+## 8. Configuração executável
 
 | Arquivo | Função |
 | --- | --- |
@@ -483,7 +495,7 @@ fazem parte do fluxo executável.
 | `phpunit.adapters.contract.xml` | Suíte separada dos contratos de adapters da Sprint 5.9. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
 
-## 8. Documentação vigente
+## 9. Documentação vigente
 
 | Arquivo | Função |
 | --- | --- |

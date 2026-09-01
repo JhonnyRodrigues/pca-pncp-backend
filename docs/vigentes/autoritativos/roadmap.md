@@ -847,10 +847,18 @@ ou tratar integração real como autorização automática de implantação.
 
 #### Sprint 8.1 — Composition Root e perfil Scriptcase
 
-- selecionar perfil por allowlist exata;
-- construir um grafo novo por chamada;
-- receber conexão e identidade aprovadas pela fachada;
-- manter perfis e segredos fora do repositório.
+- expor `PublicadorPcaScriptcase` como única API conhecida pela Blank, recebendo
+  conexão emprestada, login, `SERVER_NAME`, ano e `X-Request-ID`;
+- localizar por `PCA_PNCP_PROFILE_REGISTRY_FILE` o registro externo que contém
+  somente a allowlist exata `SERVER_NAME => caminho absoluto do perfil`;
+- carregar CNPJ, ambiente, credenciais e parâmetros exclusivamente do perfil
+  externo validado, sem `.env`, defaults ou caminhos fornecidos pela Blank;
+- preservar o UUID v4 fornecido pelo servidor HTTP em todo o fluxo e falhar
+  fechado antes de I/O quando estiver ausente ou inválido;
+- construir um grafo novo por chamada, compartilhando conexão, transporte,
+  logger e correlação sem fechar a conexão emprestada;
+- manter registro, perfis e segredos fora do repositório e do webroot e provar
+  o fluxo transversal sem Oracle, PNCP ou Scriptcase reais.
 
 #### Sprint 8.2 — Integração Oracle real
 

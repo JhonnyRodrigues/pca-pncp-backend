@@ -132,7 +132,8 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Controller | Componente que adapta a entrada pública para o caso de uso. | Arquitetura §§4.4 e 8; `DI-010` |
 | Domain | Camada que representa o negócio, protege invariantes e decide por políticas puras. | Modelo; Arquitetura §4.1 |
 | Double de teste | Substituto controlado usado para demonstrar como um consumidor utiliza um contrato. | Arquitetura §9; `DI-007` |
-| Fachada pública | Único ponto do backend consumido pela aplicação hospedeira. | Arquitetura §7; `DI-010` |
+| Entrypoint Scriptcase | Única API do backend conhecida pela Blank; recebe recursos naturais do host, seleciona o perfil externo e aciona o grafo interno. | Arquitetura §7; `DI-010` |
+| Fachada da Presentation | Fronteira interna que converte a execução em ViewModel seguro e impede a passagem de exceções ao consumidor. | Arquitetura §7; `DI-010` |
 | Infrastructure | Camada dos adapters concretos de persistência, transporte e recursos externos. | Arquitetura §4.3 |
 | Integração controlada do núcleo | Prova interna que monta adapters concretos sobre fronteiras programáveis e sem I/O real para verificar composição, compartilhamento de sessão e encerramento transacional. Não substitui gate real nem constitui o Composition Root final. | Roadmap Sprint 6.2; Arquitetura §9 |
 | Mapeamento físico explícito | Descrição injetada e validada dos nomes físicos e literais usados pelo adapter, sem incorporá-los aos contratos internos nem assumir valores implícitos. | `DI-008`; Arquitetura §4.3 |
@@ -144,6 +145,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Request | Contrato de entrada de um caso de uso. | Arquitetura §8; `DI-010` |
 | Response | Contrato de saída de um caso de uso. | Arquitetura §8; `DI-010` |
 | Sessão compartilhada | Mesma sessão Oracle e sua transação reutilizadas pelos adapters que participam da unidade, preservando contenção, visibilidade e atomicidade locais. | `DI-004`, `DI-008` |
+| Registro externo de perfis | Índice provisionado fora da release que associa literalmente `SERVER_NAME` ao caminho absoluto de um perfil, sem duplicar sua configuração. | `DI-010` |
 | Sessão opaca | Capacidade autenticada do PNCP usada sem interpretar nem expor o token que a representa e descartada ao fim da execução. | `DI-009`, `DI-010` |
 | Teste contratual | Teste que demonstra compatibilidade com um contrato interno ou externo. | Arquitetura §9; `DI-007`, `DI-009` |
 | Tradução de erro externo | Conversão de falhas do mecanismo externo em resultados internos tipados e seguros, sem fazer sua representação física atravessar a Port. | `DI-008`, `DI-009`; Arquitetura §4.3 |
@@ -200,6 +202,6 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Suíte padrão × suíte opt-in | Execução ordinária, sem interação externa real implícita, versus execução deliberadamente ativada e protegida por configuração e preflight. | `DI-009`; Fluxo §11 |
 | Contrato controlado × gate real | Evidência determinística em condições controladas versus comprovação com os adapters concretos no ambiente externo efetivo. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |
 | Conexão emprestada × conexão própria | Recurso cujo ciclo de vida pertence à aplicação hospedeira versus recurso criado e administrado pelo próprio backend. | `DI-008` |
-| Fachada × Controller × Composition Root | Entrada pública, adaptação da chamada e wiring. | Arquitetura §§7 e 8; `DI-010` |
+| Entrypoint × Fachada × Controller × Composition Root | Bootstrap público do host, proteção da Presentation, adaptação da chamada e wiring. | Arquitetura §§7 e 8; `DI-010` |
 | Auditoria × observabilidade | Fato de negócio confirmado versus diagnóstico técnico. | `DI-006` |
 | Regra × decisão × fluxo | Norma de negócio, escolha arquitetural e colaboração dinâmica. | Docs; `RN`; `DI` |

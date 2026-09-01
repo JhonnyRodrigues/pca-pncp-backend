@@ -6,16 +6,19 @@
 
 ## 1. A ideia central
 
-O sistema recebe um CNPJ e um exercício, descobre os Planos homologados, forma
-uma ou mais unidades externas, compara a fotografia desejada com o PNCP e leva o
-estado externo à convergência. O Domain decide **o que** fazer; a Application
-coordena **quando** consultar, escrever, confirmar ou desfazer; a Infrastructure
-concreta executa **como** falar com Oracle e PNCP sobre a conexão ADOdb
-emprestada e o transporte cURL.
+O Scriptcase fornece conexão emprestada, login, `SERVER_NAME`, exercício e
+`X-Request-ID`. O backend seleciona externamente um perfil autorizado, obtém
+dele o CNPJ e monta um grafo novo para descobrir os Planos homologados, formar
+as unidades externas e levar a fotografia ao PNCP. O Domain decide **o que**
+fazer; a Application coordena **quando** consultar, escrever, confirmar ou
+desfazer; a Infrastructure concreta executa **como** falar com Oracle e PNCP.
 
 ```mermaid
 flowchart LR
-    F[FachadaPublicarPca] --> E[EntradaPublicarPca]
+    S[PublicadorPcaScriptcase] --> CR[CompositionRootPublicacaoPca]
+    CR --> F[FachadaPublicarPca]
+    S --> E[EntradaPublicarPca]
+    E --> F
     E --> C[PublicarPcaController]
     C --> R[PublicarPcaRequest]
     R --> U[PublicarPcaUseCase]
@@ -32,7 +35,9 @@ vigentes. A Sprint 5.9 comprovou os contratos Oracle e PNCP reais, a Sprint
 5.10 encerrou a Fase 5, e as Sprints 6.1 e 6.2 montaram e exercitaram o núcleo
 com adapters concretos sobre fronteiras controladas. A Sprint 6.3 encerrou o
 gate do núcleo, e a Sprint 7.1 adicionou a entrada tipada e o Controller sem
-acesso a adapters ou wiring.
+acesso a adapters ou wiring. A Sprint 8.1 adicionou o entrypoint público, o
+registro externo e o Composition Root final e os provou transversalmente sem
+acessar recursos reais.
 
 ## 2. O fluxo completo
 
@@ -154,24 +159,32 @@ projetadas por aliases canônicos para objetos do Domain.
 
 ## 7. Ordem prática de leitura
 
-1. `FachadaPublicarPca`, `EntradaPublicarPca` e `PublicarPcaController`, que
-   protegem a fronteira e adaptam a entrada sem conhecer mecanismos externos.
-2. `PublicarPcaPresenter`, `PublicarPcaViewModel` e
+1. `PublicadorPcaScriptcase`, que mostra o contrato mínimo da Blank, a
+   correlação externa, o registro allowlisted e a entrada construída com CNPJ
+   do perfil.
+2. `CompositionRootPublicacaoPca` e `PerfilPublicacaoPca`, que validam a
+   configuração e montam os recursos concretos sem conhecer `SERVER_NAME` ou
+   arquivos.
+3. `FachadaPublicarPca`, `EntradaPublicarPca` e `PublicarPcaController`, que
+   protegem a fronteira e adaptam a entrada.
+4. `PublicarPcaPresenter`, `PublicarPcaViewModel` e
    `ResultadoUnidadeViewModel`, que projetam a saída segura sem renderizá-la.
-3. `MontadorNucleoPublicacaoPca`, que explicita a topologia do núcleo.
-4. `PublicarPcaUseCase` e este diagrama.
-5. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
-6. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
-7. `PreparadorUnidadeSobExclusividade`.
-8. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
-9. `ExecutorComandosUnidade`.
-10. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
-   recalcular, persistir e concluir.
-11. Results e Enums somente quando aparecerem no caminho estudado.
-12. `FluxoConcretoApplicationTest`, que executa o grafo montado sem Infrastructure.
-13. `MontadorNucleoPublicacaoPcaIntegrationTest`, que executa o mesmo ponto de
+5. `MontadorNucleoPublicacaoPca`, que explicita a topologia do núcleo.
+6. `PublicarPcaUseCase` e este diagrama.
+7. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
+8. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
+9. `PreparadorUnidadeSobExclusividade`.
+10. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
+11. `ExecutorComandosUnidade`.
+12. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
+    recalcular, persistir e concluir.
+13. Results e Enums somente quando aparecerem no caminho estudado.
+14. `FluxoConcretoApplicationTest`, que executa o grafo montado sem Infrastructure.
+15. `MontadorNucleoPublicacaoPcaIntegrationTest`, que executa o mesmo ponto de
     montagem com os nove adapters concretos sobre ADOdb, cURL e tempo
     controlados.
+16. `PublicadorPcaScriptcaseIntegrationTest`, que atravessa a fronteira pública
+    até a Application e encerra localmente antes de qualquer rede real.
 
 O [catálogo de arquivos](catalogo_de_arquivos.md) responde onde cada conceito
 está e evita procurar pelo repositório inteiro.
@@ -189,24 +202,18 @@ está e evita procurar pelo repositório inteiro.
 
 ## 9. O que ainda não existe
 
-Não existem Composition Root final, perfil allowlisted nem assinatura
-hospedeira da fachada com conexão, login, `SERVER_NAME` e ano.
-`FachadaPublicarPca` é somente a fronteira tipada da Presentation;
-`MontadorNucleoPublicacaoPca` continua sendo o wiring intermediário da Sprint
-6.1, recebendo Ports e logger já construídos sem selecionar perfil ou
-instanciar recursos externos. O entrypoint da Sprint 5.9 em
-`tests/Contract/Sprint59/scriptcase_probe.php` pertence somente à suíte
-contratual e não antecipa a fronteira pública de produção.
+A Sprint 8.1 concluiu `PublicadorPcaScriptcase`, o registro externo, o perfil
+validado e `CompositionRootPublicacaoPca`. O fluxo controlado comprova o grafo
+até a Application, duas correlações externas distintas e ausência de rede. A
+fachada registra sua captura inesperada pelo acumulador compartilhado; request
+ID inválido e falhas anteriores ao logger não fabricam evento técnico.
 
-Todas as Ports vigentes possuem adapter concreto e as Fases 5 e 6 estão
-concluídas. O gate da Sprint 6.3 comprovou o núcleo executável sem Presentation.
-As Sprints 7.1 a 7.4 adicionaram entrada, Controller, Presenter, ViewModels e a
-fachada tipada e comprovaram transversalmente essa fronteira. Entradas inválidas
-produzem `SOLICITACAO_INVALIDA`, e falhas inesperadas produzem `INTERROMPIDA`
-sem detalhes internos. A Fase 7 está concluída; a Sprint 8.1 — Composition Root
-e perfil Scriptcase é a próxima etapa e depende de planejamento e autorização
-próprios.
+Ainda não foram executados a Blank de produção, o provisionamento real de
+`PCA_PNCP_PROFILE_REGISTRY_FILE`, os fluxos completos sobre Oracle e PNCP nem o
+smoke test do pacote autocontido. O entrypoint da Sprint 5.9 em
+`tests/Contract/Sprint59/scriptcase_probe.php` continua pertencendo somente à
+suíte contratual e não substitui `PublicadorPcaScriptcase`.
 
-A fachada ainda não registra via PSR-3 a falha inesperada que captura e
-sanitiza. Essa pendência permanece na Sprint 8.1, quando o grafo final tornará o
-acumulador e a correlação da execução disponíveis à mesma fronteira.
+A exposição do lote de eventos pela fronteira pública, sua adaptação para
+`sc_log_add` e a renderização real pela Blank permanecem adiadas. Esses limites
+não alteram o ViewModel seguro já entregue pela Sprint 8.1.

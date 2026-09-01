@@ -17,7 +17,7 @@ final class PublicarPcaViewModel
         private readonly int $quantidadePlanejadas,
         private readonly int $quantidadeVisitadas,
         private readonly int $quantidadeNaoProcessadas,
-        private readonly string $correlacao
+        private readonly ?string $correlacao
     ) {}
 
     public function getSituacao(): string
@@ -56,7 +56,7 @@ final class PublicarPcaViewModel
         return $this->quantidadeNaoProcessadas;
     }
 
-    public function getCorrelacao(): string
+    public function getCorrelacao(): ?string
     {
         return $this->correlacao;
     }

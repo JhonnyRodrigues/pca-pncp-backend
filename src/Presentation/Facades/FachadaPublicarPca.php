@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Semae\Pca\Presentation\Facades;
 
+use Psr\Log\LoggerInterface;
+use Semae\Pca\Application\Enums\AcaoExecucaoPublicacao;
 use Semae\Pca\Application\Results\PublicarPcaResponse;
 use Semae\Pca\Application\ValueObjects\CorrelacaoExecucao;
 use Semae\Pca\Application\ValueObjects\FalhaSegura;
@@ -16,10 +18,33 @@ use Throwable;
 
 final class FachadaPublicarPca
 {
+    private const CODIGO_FALHA_INESPERADA = 'FALHA_INESPERADA';
+    private const MENSAGEM_FALHA_INESPERADA = 'Não foi possível concluir a publicação do PCA.';
+
     public function __construct(
         private readonly PublicarPcaController $controller,
-        private readonly PublicarPcaPresenter $presenter
+        private readonly PublicarPcaPresenter $presenter,
+        private readonly LoggerInterface $logger
     ) {}
+
+    public static function interrompidaPorRequestIdInvalido(): PublicarPcaViewModel
+    {
+        return self::criarInterrupcaoSegura(
+            'REQUEST_ID_INVALIDO',
+            'Identificador da requisição ausente ou inválido.',
+            null
+        );
+    }
+
+    public static function interrompidaPorFalhaInesperada(
+        CorrelacaoExecucao $correlacao
+    ): PublicarPcaViewModel {
+        return self::criarInterrupcaoSegura(
+            self::CODIGO_FALHA_INESPERADA,
+            self::MENSAGEM_FALHA_INESPERADA,
+            $correlacao->getValor()
+        );
+    }
 
     public function executar(
         EntradaPublicarPca $entrada,
@@ -35,18 +60,41 @@ final class FachadaPublicarPca
                 )
             );
         } catch (Throwable) {
-            return $this->presenter->apresentar(
-                PublicarPcaResponse::interrompida(
-                    [],
-                    new FalhaSegura(
-                        'FALHA_INESPERADA',
-                        'Não foi possível concluir a publicação do PCA.'
-                    ),
-                    0,
-                    0,
-                    $correlacao
-                )
-            );
+            $this->registrarFalhaInesperada();
+
+            return self::interrompidaPorFalhaInesperada($correlacao);
+        }
+    }
+
+    private static function criarInterrupcaoSegura(
+        string $codigo,
+        string $mensagem,
+        ?string $correlacao
+    ): PublicarPcaViewModel {
+        return new PublicarPcaViewModel(
+            'INTERROMPIDA',
+            [],
+            $codigo,
+            $mensagem,
+            0,
+            0,
+            0,
+            $correlacao
+        );
+    }
+
+    private function registrarFalhaInesperada(): void
+    {
+        try {
+            $this->logger->error(self::MENSAGEM_FALHA_INESPERADA, [
+                'action' => AcaoExecucaoPublicacao::EXECUTAR_PUBLICACAO_PCA->value,
+                'error' => [
+                    'code' => self::CODIGO_FALHA_INESPERADA,
+                    'message' => self::MENSAGEM_FALHA_INESPERADA,
+                ],
+            ]);
+        } catch (Throwable) {
+            // A falha do logger não pode romper a fronteira pública.
         }
     }
 }

@@ -72,6 +72,31 @@ final class AcumuladorEventosTecnicosTest extends TestCase
         }
     }
 
+    public function testDevePreservarUuidV4LiteralEAceitarAcaoGlobal(): void
+    {
+        $correlacao = '550E8400-E29B-41D4-A716-446655440000';
+        $logger = new AcumuladorEventosTecnicos(
+            $correlacao,
+            'HOMOLOGACAO',
+            'PUBLICACAO_PCA',
+            null,
+            new RelogioEventosTecnicosFake()
+        );
+
+        $logger->error('Não foi possível concluir a publicação do PCA.', [
+            'action' => 'EXECUTAR_PUBLICACAO_PCA',
+            'error' => [
+                'code' => 'FALHA_INESPERADA',
+                'message' => 'Não foi possível concluir a publicação do PCA.',
+            ],
+        ]);
+
+        $this->assertCount(1, $logger->getEventos());
+        $envelope = $logger->getEventos()[0]->paraEnvelope();
+        $this->assertSame($correlacao, $envelope['correlationId']);
+        $this->assertSame('EXECUTAR_PUBLICACAO_PCA', $envelope['action']);
+    }
+
     public function testDeveExigirAmbienteEModuloExplicitosETratarIpInvalidoComoAusente(): void
     {
         foreach ([['', 'modulo'], ['producao', '   ']] as [$ambiente, $modulo]) {

@@ -25,7 +25,7 @@ mapas sem conteúdo permanecem vazios e `ipAddress` pode ser `null`.
 | --- | --- | --- |
 | `timestamp` | string | Instante do evento em ISO 8601. |
 | `level` | string | Severidade normalizada: `DEBUG`, `INFO`, `WARNING` ou `ERROR`. |
-| `correlationId` | string | UUID v4 que correlaciona os eventos da execução. |
+| `correlationId` | string | UUID v4 fornecido pelo servidor HTTP e preservado literalmente em toda a execução. |
 | `environment` | string | Ambiente explícito da execução. |
 | `system` | string | Sistema emissor, identificado como `pca-pncp-backend`. |
 | `module` | string | Módulo lógico que originou o evento. |
@@ -60,6 +60,19 @@ serializáveis.
 
 A correlação necessária ao diagnóstico deve usar os campos próprios do
 envelope e dados técnicos seguros, sem transportar conteúdo externo integral.
+
+O backend não gera, normaliza ou substitui `correlationId`. A Blank encaminha o
+`X-Request-ID` já gerado pelo servidor HTTP, e o acumulador aceita somente UUID
+v4 válido, preservando sua representação byte a byte. Ausência ou formato
+inválido interrompem o entrypoint antes da criação do logger; por isso, essa
+falha pública possui correlação `null` e não produz evento técnico com identidade
+fabricada.
+
+Uma falha inesperada capturada pela fachada já construída usa a ação
+`EXECUTAR_PUBLICACAO_PCA` e erro seguro `FALHA_INESPERADA`. O evento não recebe
+o `Throwable`, e eventual falha do próprio logger não atravessa a fronteira
+pública. Falhas de bootstrap anteriores à construção do logger também não
+produzem evento técnico.
 
 ## 5. Imutabilidade e exportação
 

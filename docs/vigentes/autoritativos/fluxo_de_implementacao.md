@@ -59,8 +59,9 @@ concorrente de negócio, domínio ou integração.
 
 | Participante | Responsabilidade no fluxo |
 | --- | --- |
-| Aplicação hospedeira | Fornecer o contexto externo aprovado e invocar somente a fachada pública |
-| Fachada pública | Proteger a fronteira do backend e impedir que exceções ou detalhes internos atravessem para o consumidor |
+| Aplicação hospedeira | Extrair conexão, login, `SERVER_NAME`, ano e `X-Request-ID` e invocar somente o entrypoint público |
+| `PublicadorPcaScriptcase` | Validar a correlação, selecionar e carregar o perfil externo, construir a entrada e acionar o grafo sem expor o bootstrap à Blank |
+| Fachada interna | Proteger a fronteira da Presentation e impedir que exceções ou detalhes internos atravessem para o consumidor |
 | Controller | Adaptar a entrada tipada, construir o Request e acionar o UseCase já composto |
 | UseCase da Application | Validar, coordenar Ports, formar unidades externas, solicitar decisões ao Domain e compor resultados |
 | Ports da Application | Fornecer contexto, estratégia, exclusividade, estado operacional, observação e escrita externas e auditoria |
@@ -79,7 +80,7 @@ operacional e estado observado seguem `DI-005`, `DI-006`, `DI-007` e
 ```text
 contexto externo aprovado
         ↓
-Fachada → Controller → Request
+PublicadorPcaScriptcase → Composition Root → Fachada → Controller → Request
         ↓
 validar solicitação e contexto
         ↓
@@ -124,27 +125,46 @@ intermediário de escrita não substitui a comprovação da convergência.
 
 ### 4.1 Entrada pública e composição
 
-A aplicação hospedeira invoca somente a fachada pública. O Composition Root do
-backend seleciona o perfil de implantação autorizado para o host corrente,
-constrói um novo grafo para a chamada e injeta as implementações necessárias.
-Esse perfil reúne ambiente externo, identidade institucional, credenciais e
-parâmetros contratuais e deve corresponder à lista exata de perfis autorizados
-(`allowlist`). O Controller recebe a entrada tipada e constrói o Request com
-CNPJ e Ano de Execução (`DI-010`).
+A aplicação hospedeira extrai somente conexão ADOdb emprestada, login
+autenticado, `SERVER_NAME`, ano e `X-Request-ID` e invoca
+`PublicadorPcaScriptcase`. Antes de qualquer outro passo, o entrypoint exige que
+a correlação recebida seja um UUID v4 completo e preserva literalmente o texto
+fornecido pelo servidor HTTP (`DI-010`).
+
+Com correlação válida, o entrypoint lê exclusivamente de
+`PCA_PNCP_PROFILE_REGISTRY_FILE` o caminho absoluto do registro externo. O
+registro funciona somente como índice allowlisted de `SERVER_NAME` exato para
+caminho absoluto de perfil; não contém configuração e não deriva caminhos ou
+ambiente do hostname. Registro, chave, caminho ou perfil inválido falham
+fechado.
+
+O perfil PHP externo é tratado como entrada não confiável. Dele vêm ambiente,
+CNPJ institucional, credenciais e parâmetros. O entrypoint materializa o CNPJ
+e constrói `EntradaPublicarPca` com o ano recebido; a Blank não fornece CNPJ,
+perfil, allowlist ou caminhos.
+
+O `CompositionRootPublicacaoPca` recebe os recursos já extraídos, o perfil
+carregado e a correlação validada. Ele materializa a configuração restante,
+constrói um novo grafo para a chamada, compartilha conexão, transporte, logger
+e correlação e cria Presenter, Controller e `FachadaPublicarPca`. O Controller
+recebe a entrada tipada e constrói o Request com CNPJ e Ano de Execução
+(`DI-010`).
 
 O Request não recebe ambiente, endereço externo, credenciais, identidade do
 usuário ou detalhes dos mecanismos integrados. O hospedeiro não monta o
 UseCase nem conhece adapters concretos.
 
-Qualquer falha na inicialização e composição global da aplicação (`bootstrap`)
-deve falhar de forma fechada. Nenhuma exceção ou segredo pode atravessar a
-fachada (`DI-010`).
+Request ID ausente ou inválido produz `INTERROMPIDA/REQUEST_ID_INVALIDO`, com
+correlação `null`, sem consultar o registro e sem evento técnico. Qualquer outra
+falha na inicialização e composição global (`bootstrap`) produz
+`INTERROMPIDA/FALHA_INESPERADA`, preserva a correlação externa válida e não
+expõe exceção, caminho, perfil, CNPJ ou segredo (`DI-010`).
 
 ### 4.2 Validação da solicitação e do contexto
 
-A futura fronteira de entrada materializa CNPJ e Ano de Execução pelos Value
-Objects do Domain antes de invocar o UseCase tipado (`RN-CAD-001`,
-`RN-CAD-002` e `DI-010`). Se a entrada bruta for inválida, ela usa o contrato
+A fronteira de entrada materializa CNPJ e Ano de Execução pelos Value Objects
+do Domain antes de invocar o UseCase tipado (`RN-CAD-001`, `RN-CAD-002` e
+`DI-010`). Se a entrada bruta for inválida, ela usa o contrato
 `PublicarPcaResponse::solicitacaoInvalida`; o UseCase não recebe um Request
 inválido e nenhum processamento externo é iniciado.
 
@@ -532,6 +552,12 @@ dicionário de campos, erro seguro, sanitização e imutabilidade obedecem à
 O backend produz os eventos por PSR-3 e os mantém ordenados somente em memória.
 O lote para exportação é preparado sem modificar os eventos originais.
 
+O logger usa exatamente a correlação válida fornecida pelo servidor HTTP. Uma
+falha inesperada capturada pela fachada gera a ação
+`EXECUTAR_PUBLICACAO_PCA` com erro seguro, sem transportar a exceção. A falha
+anterior à correlação válida ou à construção do logger não fabrica evento
+técnico, e uma falha do logger não altera o ViewModel seguro.
+
 Nesta etapa, os eventos não integram `PublicarPcaResponse`, e sua exposição
 pela fachada ou persistência pelo Scriptcase não estão implementadas. Em etapa
 futura, a fachada os devolverá separadamente ao hospedeiro; depois do
@@ -560,7 +586,8 @@ Antes das respectivas implementações concretas, permanecem os gates:
 - estrutura física dos dados (`schema`), cardinalidades, datas, decimais e coerência da projeção;
 - ambiente efetivo de execução do transporte seguro (`runtime`) e suíte contratual ativada explicitamente (`opt-in`) no ambiente de treinamento;
 - identidade externa dos itens e ausência definitiva;
-- fachada, contexto do usuário e pacote no ambiente hospedeiro real.
+- entrypoint, provisionamento do registro, contexto do usuário e pacote no
+  ambiente hospedeiro real.
 
 Os critérios completos e as condições de reabertura pertencem a `DI-008`,
 `DI-009` e `DI-010`.

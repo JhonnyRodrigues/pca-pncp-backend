@@ -66,7 +66,10 @@ Aplicação Blank (Scriptcase)
             │
             │ invoca
             ▼
-      Fachada pública
+    Entrypoint Scriptcase
+            │
+            ▼
+      Composition Root
             │
             ▼
       Presentation ───────► Application ───────► Domain
@@ -82,7 +85,7 @@ Composition Root do backend
 O diagrama representa dependências de código, não a ordem temporal completa de
 uma execução.
 
-- A aplicação Blank consome somente a fachada pública do backend.
+- A aplicação Blank consome somente o entrypoint Scriptcase do backend.
 - Presentation depende dos contratos e casos de uso da Application.
 - Application depende do modelo e das políticas do Domain.
 - Infrastructure depende das abstrações internas que implementa.
@@ -213,23 +216,37 @@ Blank:
 
 ```text
 Scriptcase
-    └── autoloader + fachada pública do backend
+    └── autoloader + PublicadorPcaScriptcase
                             │
                             ▼
-                  grafo interno encapsulado
+                  Composition Root interno
+                            │
+                            ▼
+                Fachada + grafo encapsulados
 ```
 
 Conforme a `DI-010`:
 
-- Scriptcase não conhece Controller, UseCase, Repository concreto, cliente
-  PNCP ou política transacional;
+- Scriptcase fornece somente conexão emprestada, login, `SERVER_NAME`, ano e
+  `X-Request-ID` ao entrypoint público;
+- Scriptcase não fornece CNPJ, perfil, allowlist ou caminho e não conhece
+  Controller, UseCase, Repository concreto, cliente PNCP ou política
+  transacional;
 - o Composition Root pertence ao backend;
+- o entrypoint seleciona o perfil pelo registro externo e o Composition Root
+  recebe perfil já carregado e correlação validada;
 - o wiring é manual por construtores;
 - não há container nem Service Locator;
 - o Controller não usa macros e não faz wiring;
 - o Presenter produz ViewModel, sem renderizar HTML, JSON ou macros;
 - nenhuma exceção atravessa a fachada;
 - detalhes internos e credenciais não são expostos ao consumidor.
+
+O registro externo é somente o índice literal `SERVER_NAME => caminho absoluto
+do perfil`. Seu próprio caminho vem da variável de processo provisionada
+`PCA_PNCP_PROFILE_REGISTRY_FILE`; não existe `.env`, default ou derivação de
+caminho. O mesmo UUID v4 recebido em `X-Request-ID` atravessa logger, fachada,
+Controller, Application e ViewModel sem normalização ou regeneração.
 
 Configuração, ciclo de vida de recursos, distribuição e tratamento global de
 falhas permanecem detalhados na `DI-010`.
@@ -250,7 +267,8 @@ falhas permanecem detalhados na `DI-010`.
 | Request/Response | Contratos de entrada e saída do caso de uso |
 | Controller | Adapta a entrada pública para o caso de uso |
 | Presenter | Transforma a Response em ViewModel estruturado |
-| Fachada | Único ponto público consumido pela aplicação hospedeira |
+| Entrypoint Scriptcase | Único ponto público consumido pela aplicação hospedeira |
+| Fachada | Fronteira interna da Presentation que converte a execução em ViewModel seguro |
 | Composition Root | Ponto do backend que cria o grafo e injeta dependências concretas |
 
 Repository não é sinônimo de acesso físico a banco. A interface pertence à

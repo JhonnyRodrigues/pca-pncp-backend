@@ -32,7 +32,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 7.4.
+- A última sprint concluída é a Sprint 8.1.
 - A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
 - A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
   aprovado no treinamento, incluindo publicação, operações de itens, exclusão
@@ -53,9 +53,48 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 7.2 — Presenter e ViewModels está concluída.
 - A Sprint 7.3 — Fachada e fronteira de exceções está concluída.
 - A Sprint 7.4 — Suíte da Presentation está concluída.
-- A Fase 7 — Presentation está concluída. A Sprint 8.1 — Composition Root e
-  perfil Scriptcase é a próxima etapa e depende de planejamento e autorização
-  próprios.
+- A Fase 7 — Presentation está concluída.
+- A Sprint 8.1 — Composition Root e perfil Scriptcase está concluída.
+- A Sprint 8.2 — Integração Oracle real é a próxima etapa na ordem e depende de
+  planejamento e autorização próprios.
+
+## Evidências da Sprint 8.1
+
+- `PublicadorPcaScriptcase` é a única API conhecida pela Blank e recebe somente
+  conexão ADOdb emprestada, login autenticado, `SERVER_NAME`, ano e request ID.
+  CNPJ, perfil, registro, allowlist e caminhos não integram o contrato público.
+- `PCA_PNCP_PROFILE_REGISTRY_FILE` é o único localizador do registro externo.
+  O índice aceita somente `SERVER_NAME => caminho absoluto do perfil`, valida
+  todos os caminhos e rejeita registro ou perfil dentro da release.
+- A seleção é literal, sem normalizar hostname, concatenar caminho ou inferir
+  ambiente. Registro, servidor, caminho, perfil e CNPJ inválidos falham
+  fechado, sem default ou fallback silencioso.
+- O CNPJ vem exclusivamente do perfil PHP externo, tratado como entrada não
+  confiável, e é validado antes de compor `EntradaPublicarPca` com o ano
+  recebido da Blank.
+- O `X-Request-ID` deve ser UUID v4 e permanece byte a byte idêntico na
+  correlação, logger e ViewModel. Ausência ou formato inválido retorna
+  `INTERROMPIDA/REQUEST_ID_INVALIDO`, correlação `null` e não acessa registro ou
+  serviço; o backend não gera correlação alternativa.
+- `CompositionRootPublicacaoPca` valida e materializa o perfil, cria um grafo
+  novo por chamada, reutiliza `MontadorNucleoPublicacaoPca` e compartilha uma
+  conexão entre seis adapters Oracle, um transporte entre três adapters PNCP e
+  um logger com a correlação recebida.
+- A fachada centraliza as interrupções públicas e registra sua captura
+  inesperada com `EXECUTAR_PUBLICACAO_PCA` e erro seguro, sem transportar a
+  exceção. Falha do logger não atravessa a fronteira.
+- A prova transversal executou duas chamadas públicas até a preparação da
+  Application e as encerrou por uma saída ADOdb local anterior à autenticação.
+  Cada ViewModel preservou seu UUID externo; não houve transação, escrita,
+  `Close()` ou rede.
+- A regressão de Presentation, Composition, Integration, Application e
+  entrypoint aprovou 293 testes e 1.833 asserções. A suíte padrão aprovou 864
+  testes e 3.786 asserções.
+- O autoload PSR-4 estrito gerou 1.761 classes, e o lint aprovou 293 arquivos
+  PHP. Direção das dependências, conteúdo proibido, segredos e caminhos,
+  correlação e whitespace foram auditados.
+- Nenhum preflight, probe, grupo `pncp-live`, Oracle, PNCP ou Scriptcase real
+  foi executado. Nenhum commit foi criado.
 
 ## Evidências da Sprint 7.4
 
@@ -80,10 +119,9 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   `pncp-live`, probe ou acesso externo foi executado.
 - A suíte comprova que a fronteira entrega ViewModels renderizáveis. A prova da
   renderização pela Blank real permanece para a Fase 8.
-- A fachada captura e sanitiza falhas inesperadas, mas ainda não registra essa
-  captura via PSR-3. A pendência permanece destinada à Sprint 8.1, quando
-  fachada, acumulador, correlação e grafo final compartilharem o mesmo ciclo de
-  execução.
+- Na conclusão da Sprint 7.4, o registro PSR-3 da captura inesperada permanecia
+  pendente; essa pendência foi resolvida pela Sprint 8.1 com o logger e a
+  correlação compartilhados no grafo final.
 
 ## Evidências da Sprint 7.3
 
@@ -511,11 +549,11 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   ser fechada pelo backend.
 - Os contratos autorizados dos adapters e os gates reais Oracle/Scriptcase e
   PNCP de treinamento da Sprint 5.9 estão aprovados.
-- A conclusão da Fase 7 não autoriza automaticamente o Composition Root final.
-  A Sprint 8.1 exige planejamento e autorização próprios.
-- O registro PSR-3 da falha inesperada capturada pela fachada permanece
-  pendente para a Sprint 8.1; a sanitização do resultado público já está
-  comprovada, mas a captura ainda não produz evento técnico.
+- A conclusão da Sprint 8.1 não autoriza automaticamente a integração Oracle
+  real da Sprint 8.2 nem qualquer acesso externo.
+- O registro e os perfis reais devem permanecer fora da release e do webroot;
+  o servidor deve provisionar `PCA_PNCP_PROFILE_REGISTRY_FILE` com o caminho
+  absoluto do índice antes da implantação.
 - A exposição dos eventos pela fachada e sua persistência pela Blank com
   `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos

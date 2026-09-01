@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Psr\Log\AbstractLogger;
 use Psr\Log\InvalidArgumentException as InvalidArgumentExceptionPsr;
 use Psr\Log\LogLevel;
+use Semae\Pca\Application\Enums\AcaoExecucaoPublicacao;
 use Semae\Pca\Application\Enums\AcaoProcessamentoUnidade;
 use Semae\Pca\Infrastructure\Pncp\Observabilidade\AcaoTecnicaPncp;
 use Stringable;
@@ -59,7 +60,6 @@ final class AcumuladorEventosTecnicos extends AbstractLogger
         ?string $ipAddress,
         private readonly RelogioEventosTecnicos $relogio
     ) {
-        $correlationId = strtolower(trim($correlationId));
         $environment = trim($environment);
         $module = trim($module);
 
@@ -150,6 +150,10 @@ final class AcumuladorEventosTecnicos extends AbstractLogger
 
     private function normalizarAcao(mixed $acao): ?string
     {
+        if ($acao instanceof AcaoExecucaoPublicacao) {
+            return $acao->value;
+        }
+
         if ($acao instanceof AcaoProcessamentoUnidade) {
             return $acao->value;
         }
@@ -164,7 +168,8 @@ final class AcumuladorEventosTecnicos extends AbstractLogger
 
         $acao = trim($acao);
 
-        return AcaoProcessamentoUnidade::tryFrom($acao)?->value
+        return AcaoExecucaoPublicacao::tryFrom($acao)?->value
+            ?? AcaoProcessamentoUnidade::tryFrom($acao)?->value
             ?? AcaoTecnicaPncp::tryFrom($acao)?->value;
     }
 

@@ -7,6 +7,7 @@ namespace Tests\Presentation;
 use Error;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use RuntimeException;
 use Semae\Pca\Application\Contracts\PublicadorPca;
 use Semae\Pca\Application\Results\PublicarPcaResponse;
@@ -215,7 +216,8 @@ final class PublicacaoPcaPresentationTest extends TestCase
 
         return new FachadaPublicarPca(
             new PublicarPcaController($publicador, $presenter),
-            $presenter
+            $presenter,
+            new NullLogger()
         );
     }
 

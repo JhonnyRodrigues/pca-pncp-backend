@@ -950,7 +950,7 @@ e da execução dos gates de ambiente e contrato.
 
 - **Status:** Aceita condicionalmente.
 - **Contexto e problema:** o backend deve ser consumido pelo Scriptcase sem transferir wiring, credenciais, conexão ou estrutura interna para a aplicação Blank.
-- **Fontes:** continuação 03, seção 4.
+- **Fontes:** continuação 03, seção 4; plano aprovado da Sprint 8.1.
 
 #### DI-010 — Decisão vigente
 
@@ -960,13 +960,19 @@ e da execução dos gates de ambiente e contrato.
 2. O Composition Root pertence ao backend.
 3. Wiring é manual por construtores.
 4. Não há container ou Service Locator.
-5. Scriptcase carrega o autoloader e chama uma única fachada pública.
-6. A fachada recebe:
+5. Scriptcase carrega o autoloader e chama somente
+   `PublicadorPcaScriptcase`, entrypoint público do backend.
+6. O entrypoint recebe exclusivamente:
    - conexão `$this->Db` emprestada;
    - login autenticado confiável;
    - `SERVER_NAME`;
-   - ano selecionado.
-7. O Scriptcase não conhece Repository concreto, cliente PNCP, token ou política transacional.
+   - ano selecionado;
+   - `X-Request-ID` já extraído de `$_SERVER['HTTP_X_REQUEST_ID']` pela Blank.
+7. A Blank não fornece CNPJ, perfil, registro, allowlist ou caminho de arquivo.
+8. O entrypoint seleciona e carrega o perfil, constrói a entrada, delega a
+   montagem ao Composition Root e aciona a `FachadaPublicarPca` interna.
+9. O Scriptcase não conhece Controller, Repository concreto, cliente PNCP,
+   token ou política transacional.
 
 ##### DI-010 — Request, Controller e Presenter
 
@@ -983,18 +989,31 @@ e da execução dos gates de ambiente e contrato.
 
 ##### DI-010 — Configuração
 
-1. `SERVER_NAME` seleciona por allowlist exata um perfil conhecido.
-2. O perfil declara explicitamente:
+1. A variável de processo `PCA_PNCP_PROFILE_REGISTRY_FILE`, provisionada pelo
+   servidor sem `.env`, contém exclusivamente o caminho absoluto do registro
+   externo.
+2. O backend não possui valor padrão, busca por diretório nem localizador
+   fornecido pela Blank.
+3. O registro externo é somente um índice `SERVER_NAME => caminho absoluto do
+   perfil`; não duplica ambiente, CNPJ, credenciais ou parâmetros.
+4. `SERVER_NAME` seleciona por comparação literal uma chave da allowlist, sem
+   normalização, concatenação de caminho ou inferência de ambiente.
+5. Todos os caminhos devem ser absolutos, existentes, legíveis e externos à
+   release. Registro e perfis reais permanecem também fora do webroot por
+   obrigação do provisionamento.
+6. O perfil PHP retorna um array tratado como entrada não confiável e declara
+   explicitamente:
    - `HOMOLOGACAO` ou `PRODUCAO`;
    - CNPJ autorizado;
    - credenciais PNCP;
    - parâmetros da implantação.
-3. Ambiente não é inferido pelo hostname.
-4. Perfil desconhecido, ausente ou incoerente falha fechado.
-5. Não existe fallback silencioso para produção.
-6. A V1 usa um arquivo externo por perfil.
-7. Perfis e segredos ficam fora do repositório e do webroot.
-8. `.env` e arquivo externo não são suportados simultaneamente na V1.
+7. O CNPJ é carregado exclusivamente do perfil, validado integralmente e usado
+   com o ano recebido da Blank para construir a entrada. Não vem da Blank ou do
+   usuário, não é inferido do hostname e não possui default.
+8. Registro ausente ou inválido, servidor desconhecido, caminho inválido,
+   perfil ausente ou incoerente e CNPJ inválido falham fechado.
+9. Não existe fallback silencioso para perfil, CNPJ, ambiente ou produção.
+10. A V1 usa um arquivo externo por perfil e não introduz `.env`.
 
 ##### DI-010 — Ciclo de vida e execução
 
@@ -1003,13 +1022,25 @@ e da execução dos gates de ambiente e contrato.
 3. A sessão PNCP é opaca e descartada no fim.
 4. A mesma conexão Oracle é compartilhada entre adapters.
 5. Conexão emprestada nunca é fechada.
-6. No fallback OCI8, o backend possui e encerra a conexão.
+6. O grafo final usa exclusivamente a conexão ADOdb emprestada já aprovada e
+   não implementa fallback OCI8.
 7. A V1 é síncrona.
 8. Não há fila, worker, polling ou progresso persistido.
 9. A tela bloqueia nova submissão enquanto aguarda.
 10. Não há lock global nem chave de idempotência persistida na V1.
 11. Autorização de acesso à Blank permanece no Scriptcase.
 12. Backend exige identidade e contexto resolvíveis, sem inventar novos papéis.
+
+##### DI-010 — Correlação da requisição
+
+1. O servidor HTTP gera um UUID v4 em `X-Request-ID`; a Blank lê
+   `$_SERVER['HTTP_X_REQUEST_ID']` e encaminha o texto sem alterações.
+2. O backend valida o formato antes de consultar registro, perfil, Oracle ou
+   PNCP e não normaliza, substitui nem regenera o valor.
+3. A mesma correlação externa é compartilhada por logger, fachada, Controller,
+   Application e ViewModel e preservada byte a byte.
+4. Ausência ou formato inválido produz interrupção fechada antes de qualquer
+   interação externa, sem correlação alternativa e sem evento técnico.
 
 ##### DI-010 — Respostas e falhas
 
@@ -1026,6 +1057,12 @@ e da execução dos gates de ambiente e contrato.
 7. Unidades não visitadas não recebem resultados fabricados.
 8. Nenhuma exceção atravessa a fachada.
 9. ViewModel não expõe stack trace, payload, SQL, credenciais, JWT ou detalhes de cURL, ADOdb e OCI8.
+10. Request ID ausente ou inválido produz `INTERROMPIDA`, código
+    `REQUEST_ID_INVALIDO`, mensagem pública fixa, resultados vazios, contagens
+    zeradas e correlação `null`.
+11. Demais falhas anteriores à execução produzem
+    `INTERROMPIDA/FALHA_INESPERADA`, mensagem pública fixa e preservam a
+    correlação externa válida.
 
 ##### DI-010 — Eventos técnicos na fronteira hospedeira
 
@@ -1036,13 +1073,18 @@ e da execução dos gates de ambiente e contrato.
 5. A ação operacional detalhada será gravada no JSON de `DESCRIPTION`. A ação genérica da coluna física `SEGURANCA_LOG.ACTION` será escolhida pela Blank e não é definida pelo backend.
 6. Essa persistência não reutiliza `PAC_HISTORICOS`, não cria uma segunda conexão Oracle no backend e não foi implementada ou demonstrada nesta etapa.
 7. Uma falha fatal antes do retorno à Blank pode impedir a persistência dos eventos acumulados; essa limitação é aceita conscientemente.
+8. Falha inesperada capturada pela fachada gera evento seguro com a ação
+   `EXECUTAR_PUBLICACAO_PCA`, sem transportar o `Throwable`; falha do logger não
+   rompe a fronteira pública.
+9. Falhas anteriores à correlação válida ou à construção do logger não geram
+   evento técnico fabricado.
 
 ##### DI-010 — Distribuição
 
 1. A release é autocontida com código e `vendor/`.
 2. Composer não executa em produção.
 3. Perfis e segredos permanecem externos ao artefato.
-4. Scriptcase conhece somente autoloader e fachada pública.
+4. Scriptcase conhece somente autoloader e `PublicadorPcaScriptcase`.
 
 #### DI-010 — Alternativas rejeitadas
 
@@ -1053,6 +1095,9 @@ e da execução dos gates de ambiente e contrato.
 | Integração HTTP entre Blank e backend | O consumo aprovado é em processo |
 | Ambiente inferido do hostname | Pode selecionar perfil incorreto |
 | URL livre ou `HTTP_HOST` | Permite destino não allowlisted |
+| Allowlist, perfil ou caminho fornecido pela Blank | Transfere configuração protegida e seleção de destino ao hospedeiro |
+| Caminho derivado ou concatenado a partir de `SERVER_NAME` | Permite seleção fora do índice externo autorizado |
+| UUID gerado ou normalizado pelo backend | Rompe a correlação já estabelecida pelo servidor HTTP |
 | `.env` e arquivo externo simultâneos | Cria fontes concorrentes |
 | Execução assíncrona | Não há requisito de fila ou progresso na V1 |
 | Lock global | Bloqueia unidades independentes |
@@ -1065,15 +1110,19 @@ e da execução dos gates de ambiente e contrato.
 - A aplicação Blank aguarda o resultado final.
 - A fronteira pública permanece pequena e estável.
 - A futura devolução dos eventos técnicos permanece separada da Response de negócio.
-- Perfis precisam ser provisionados externamente ao release.
+- Registro, perfis e a variável localizadora precisam ser provisionados fora
+  da release; a posição fora do webroot permanece gate operacional.
 - A decisão depende de comportamento real do Scriptcase.
 
 #### DI-010 — Gates e critérios de reabertura
 
-- testar a fachada no Scriptcase real;
-- concluir o gate da conexão emprestada;
+- testar o entrypoint e a fachada no Scriptcase real;
+- a conexão emprestada já foi comprovada no gate Oracle/Scriptcase; validar sua
+  reutilização pelo pacote final no ambiente hospedeiro;
 - validar login, Representante e Lotação;
-- validar seleção allowlisted do perfil;
+- a seleção allowlisted, a correlação externa e o grafo completo estão
+  comprovados em testes controlados; validar seu provisionamento no ambiente
+  hospedeiro real;
 - executar smoke test do pacote autocontido em homologação;
 - reabrir apenas o contrato incompatível com o ambiente real.
 
@@ -1090,6 +1139,10 @@ distribuição, sem antecipar essas etapas durante a criação deste documento.
 
 - Iniciada e encerrada condicionalmente na continuação 03.
 - Confirma o Composition Root no backend e remove ambiente, credenciais e usuário do Request.
+- Revisada em 01/09/2026 pela Sprint 8.1 para definir o registro externo como
+  índice, `PCA_PNCP_PROFILE_REGISTRY_FILE` como localizador provisionado, CNPJ
+  no perfil, `PublicadorPcaScriptcase` como API da Blank e preservação do
+  `X-Request-ID` fornecido pelo servidor HTTP.
 
 ## 6. Matriz de decisões substituídas
 
@@ -1136,10 +1189,10 @@ vigentes.
 
 ### Gates antes da integração Scriptcase
 
-- fachada no ambiente real;
+- entrypoint e fachada no ambiente real;
 - contexto de identidade, Representante e Lotação;
-- conexão emprestada ou fallback;
-- seleção allowlisted do perfil;
+- reutilização da conexão ADOdb emprestada pelo pacote final;
+- provisionamento real do registro e seleção allowlisted do perfil;
 - pacote autocontido em homologação.
 
 ### Política de reabertura
