@@ -299,7 +299,9 @@ fazem parte do fluxo executável.
 | Arquivo | Função |
 | --- | --- |
 | `MontadorNucleoPublicacaoPca.php` | Recebe as nove Ports e o logger e monta explicitamente o grafo interno de `PublicarPcaUseCase`, sem Presentation ou seleção de adapters concretos. |
-| `CompositionRootPublicacaoPca.php` | Materializa o perfil carregado, cria os adapters concretos e compartilha conexão, transporte, logger e correlação em um grafo novo por chamada. |
+| `CarregadorPerfilPublicacaoPca.php` | Seleciona literalmente o perfil pelo registro externo e valida integralmente seus caminhos antes do carregamento. |
+| `ComposicaoOraclePublicacaoPca.php` | Única receita de produção dos seis adapters Oracle sobre uma mesma `ConexaoAdodbEmprestada`. |
+| `CompositionRootPublicacaoPca.php` | Materializa o perfil carregado, usa a subcomposição Oracle única e compartilha transporte, logger e correlação em um grafo novo por chamada. |
 | `PerfilPublicacaoPca.php` | Trata o array externo como não confiável e materializa ambiente, configurações e os onze mapeamentos Oracle sem defaults implícitos. |
 
 ## 7. Testes
@@ -484,6 +486,34 @@ fazem parte do fluxo executável.
 | `Contract/Sprint59/run-pncp-cleanup.php` | Remove somente o resíduo PNCP explicitamente autorizado e exige ausência definitiva sem publicar. |
 | `Contract/Sprint59/config.example.php` | Modelo sem segredos da configuração externa. |
 
+### Contratos opt-in — Sprint 8.2
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Contract/Sprint82/SafetyContractTest.php` | Assinatura do gate, modos autorizados, sanitização, ausência de segredos e separação da suíte padrão. |
+| `Contract/Sprint82/Sprint82ConfigTest.php` | Configuração externa exata, servidor literal, consentimento de escrita e perfil exclusivo de homologação. |
+| `Contract/Sprint82/OracleCompositionContractTest.php` | Uso da subcomposição Oracle de produção, seis adapters na mesma conexão e montagem do Root sem I/O. |
+| `Contract/Sprint82/OracleAdaptersExerciseTest.php` | Sequência transacional do commit controlado, restauração por rollback e preservação da conexão emprestada. |
+| `Contract/Sprint82/OracleContractRunnerTest.php` | Relatório seguro do exercício sobre a composição Oracle real. |
+| `Contract/Sprint82/OracleFailureReportTest.php` | Diagnóstico opt-in sanitizado e relatório genérico por padrão. |
+| `Contract/Sprint82/Support/Sprint82Config.php` | Carrega a configuração própria e o perfil final selecionado pelo registro da implantação. |
+| `Contract/Sprint82/Support/OracleContractRunner.php` | Monta o Root sem I/O e executa a mesma subcomposição Oracle nos cinco modos contratuais. |
+| `Contract/Sprint82/Support/OracleFailureReport.php` | Produz a falha segura da Sprint 8.2 e limita os detalhes diagnósticos aos modos permitidos. |
+| `Contract/Sprint82/scriptcase_probe.php` | Expõe somente o entrypoint Oracle da Sprint 8.2 para uma Blank protegida. |
+| `Contract/Sprint82/run-preflight.php` | Valida configuração, registro e perfil de homologação sem acessar Oracle ou PNCP. |
+| `Contract/Sprint82/config.example.php` | Modelo sem segredos da configuração específica da massa 8.2. |
+
+### Suporte contratual compartilhado
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Contract/Support/OracleAdaptersExercise.php` | Reúne o exercício transacional compartilhado pelas Sprints 5.9 e 8.2 sem alterar seus entrypoints. |
+| `Contract/Support/OracleAdaptersSet.php` | Transporta explicitamente os seis adapters Oracle da subcomposição. |
+| `Contract/Support/BorrowedAdodbGuard.php` | Registra operações ADOdb e impede `Close()` sobre a conexão emprestada. |
+| `Contract/Support/OracleContractFailure.php` | Preserva internamente a causa e identifica a etapa segura da falha. |
+| `Contract/Support/OracleTechnicalMessageSanitizer.php` | Remove valores sensíveis conhecidos da mensagem diagnóstica opt-in. |
+| `Contract/Support/SafeContractReport.php` | Valida, serializa e calcula o hash de relatórios sanitizados. |
+
 ## 8. Configuração executável
 
 | Arquivo | Função |
@@ -493,6 +523,7 @@ fazem parte do fluxo executável.
 | `phpunit.xml` | Bootstrap da suíte padrão, com exclusão explícita dos contratos opt-in. |
 | `phpunit.contract.xml` | Suíte contratual legada da Sprint 5.1. |
 | `phpunit.adapters.contract.xml` | Suíte separada dos contratos de adapters da Sprint 5.9. |
+| `phpunit.oracle82.contract.xml` | Suíte separada da integração Oracle da Sprint 8.2. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
 
 ## 9. Documentação vigente
@@ -510,6 +541,7 @@ fazem parte do fluxo executável.
 | `docs/vigentes/apoio/glossario.md` | Mantém o índice semântico da linguagem de negócio, integração e arquitetura. |
 | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
 | `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |
+| `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | Ensina a preparar, executar e diagnosticar com segurança as probes das Sprints 5.1, 5.9 e 8.2. |
 | `docs/vigentes/apoio/catalogo_de_arquivos.md` | Cataloga a função dos arquivos ativos de código, testes, configuração e documentação vigente. |
 | `docs/diagramas/DER_PUBLICACAO_PCA.png` | Apoia visualmente a compreensão do modelo de dados da publicação do PCA. |
 | `docs/diagramas/fluxograma_PCA.png` | Apoia visualmente a compreensão do fluxo funcional do PCA. |

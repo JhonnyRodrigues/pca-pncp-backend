@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 01/09/2026
+**Atualizado em:** 02/09/2026
 
 ## Limites de autoridade
 
@@ -32,7 +32,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 8.1.
+- A última sprint concluída é a Sprint 8.2.
 - A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
 - A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
   aprovado no treinamento, incluindo publicação, operações de itens, exclusão
@@ -55,8 +55,47 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 7.4 — Suíte da Presentation está concluída.
 - A Fase 7 — Presentation está concluída.
 - A Sprint 8.1 — Composition Root e perfil Scriptcase está concluída.
-- A Sprint 8.2 — Integração Oracle real é a próxima etapa na ordem e depende de
-  planejamento e autorização próprios.
+- A Sprint 8.2 — Integração Oracle real está concluída.
+- A Sprint 8.3 — Suíte PNCP de treinamento é a próxima etapa na ordem e depende
+  de planejamento e autorização próprios.
+
+## Evidências da Sprint 8.2
+
+- `ComposicaoOraclePublicacaoPca` tornou-se a única receita de produção dos
+  seis adapters Oracle. O `CompositionRootPublicacaoPca` e o gate 8.2 usam
+  obrigatoriamente essa mesma subcomposição, sem branch ou seam de teste.
+- Testes estruturais comprovaram uma única `ConexaoAdodbEmprestada` nos seis
+  adapters. A montagem do Root real não executou ADOdb nem rede PNCP.
+- O preflight foi confirmado no PHP 8.1 `cgi-fcgi` de desenvolvimento, com
+  perfil de homologação e sem acesso Oracle ou PNCP.
+- O modo `commit` foi aprovado com hash sanitizado
+  `4d0111f16fa205ecca028a3dc8f1cf2c0ea5b567432f379e453e03a19d3bd6d7`.
+  A evidência separou o commit técnico de provisionamento da transação
+  controlada principal e confirmou início explícito, lock real na mesma sessão,
+  commit concluído, liberação e readquisição do lock, conexão reutilizável,
+  nenhuma alteração de negócio e nenhum `Close()`.
+- O modo `adapters` foi aprovado com hash sanitizado
+  `c21808c0d15d79095dcc79b78f82d1a3e1ac7e2ce612839170d3f2018d36c707`.
+  Binds, leituras tipadas, contexto, confirmação temporária, estado e auditoria
+  foram exercitados na mesma sessão; o rollback restaurou integralmente a
+  confirmação pendente, o estado e a contagem de auditoria.
+- A contenção real foi comprovada em duas sessões independentes. Os modos
+  `lock_expect_blocked`, `lock_holder` e `lock_expect_available` produziram,
+  respectivamente, os hashes sanitizados
+  `6037ce8054aedf777f41425b0f422a854137eaedcc07ec8d58767e32d4d26c84`,
+  `a0b5a315104cdf2af366c3ced1cc89d6d456ec7271f66d01ba8b61f1d72345bd` e
+  `cea92f6a4a93ab0588f0405aad4e76dccd3d7d93ef55041629cce551ce20e028`.
+  Houve tradução imediata de `ORA-00054`, liberação posterior e ausência de
+  `Close()` nos três relatórios.
+- O guia operacional das probes 5.1, 5.9 e 8.2 foi consolidado em
+  [Guia de execução das probes](../apoio/guia_de_execucao_das_probes.md); o
+  README passou a apenas encaminhar para essa fonte de apoio.
+- Por decisão do mantenedor, os arquivos externos permaneceram sob o webroot
+  somente no desenvolvimento controlado. Produção continua exigindo registro,
+  perfis e configurações fora da release e do webroot.
+- A evidência alcança a montagem real do Root e sua subcomposição Oracle; não
+  alcança o fluxo público integral até o UseCase, que envolveria autenticação
+  PNCP e permanece para as sprints posteriores.
 
 ## Evidências da Sprint 8.1
 
@@ -549,8 +588,8 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   ser fechada pelo backend.
 - Os contratos autorizados dos adapters e os gates reais Oracle/Scriptcase e
   PNCP de treinamento da Sprint 5.9 estão aprovados.
-- A conclusão da Sprint 8.1 não autoriza automaticamente a integração Oracle
-  real da Sprint 8.2 nem qualquer acesso externo.
+- A conclusão da Sprint 8.2 não autoriza automaticamente a suíte PNCP real da
+  Sprint 8.3 nem qualquer novo acesso externo.
 - O registro e os perfis reais devem permanecer fora da release e do webroot;
   o servidor deve provisionar `PCA_PNCP_PROFILE_REGISTRY_FILE` com o caminho
   absoluto do índice antes da implantação.

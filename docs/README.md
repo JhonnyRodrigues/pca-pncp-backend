@@ -63,7 +63,8 @@ aparece neste índice sem link até que o documento exista.
 9. [Roadmap de implementação](vigentes/autoritativos/roadmap.md)
 10. [Estado operacional do projeto](vigentes/operacional/estado_atual.md)
 11. [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md)
-12. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
+12. [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md)
+13. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
 
 ### 4.1 Princípio de autoridade
 
@@ -102,6 +103,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 | [Glossário integrado](vigentes/apoio/glossario.md) | Vigente | Índice semântico da linguagem do projeto |
 | [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Vigente | Usuários, etapas e contexto funcional |
 | [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) | Vigente | Mapas, fluxo, transações e roteiro de estudo |
+| [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md) | Vigente | Preparação e execução segura das probes 5.1, 5.9 e 8.2 |
 | [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md) | Vigente | Função dos arquivos ativos de código e teste |
 | [DER da publicação](diagramas/DER_PUBLICACAO_PCA.png) | Vigente como apoio visual | Diagrama visual |
 | [Fluxograma do PCA](diagramas/fluxograma_PCA.png) | Vigente como apoio visual | Diagrama visual |

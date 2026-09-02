@@ -4,11 +4,12 @@
 
 Este arquivo define as instruções operacionais permanentes para agentes que
 atuam neste repositório. Ele orienta como compreender, planejar, implementar,
-validar e comunicar uma tarefa. Regras de negócio, decisões de integração,
-modelo de domínio e etapas do roadmap pertencem aos documentos autoritativos.
+validar e comunicar uma tarefa.
+
+Regras de negócio, decisões de integração, modelo de domínio e etapas do roadmap pertencem aos documentos autoritativos.
 
 O projeto é um backend em PHP 8.1 para publicação e sincronização do Plano de
-Contratações Anual (PCA) com o PNCP, inicialmente consumido pelo Scriptcase.
+Contratações Anual (PCA) com o PNCP, inicialmente consumido por aplicação Scriptcase do tipo Blank.
 
 O projeto também tem finalidade didática. As explicações devem ajudar o
 mantenedor a compreender as decisões adotadas, sem transformar cada tarefa em
@@ -17,8 +18,7 @@ uma aula ou justificar complexidade desnecessária.
 > Implemente somente o escopo autorizado, da forma mais simples, clara,
 > testável e reversível que preserve as regras e fronteiras necessárias.
 
-DDD, Clean Architecture, SOLID, Design Patterns, SDD e TDD são meios para
-reduzir riscos e organizar responsabilidades, não metas isoladas.
+DDD, Clean Architecture, SOLID, Design Patterns, TDD e SDD são meios para reduzir riscos e organizar responsabilidades, não metas isoladas.
 
 ## 2. Fontes e autoridade
 
@@ -28,8 +28,7 @@ Leia somente o necessário para a tarefa. Use como pontos de entrada:
 - `AGENTS.md`: estas instruções operacionais;
 - `.agents/README.md`: interpretação dos artefatos de agentes;
 - `docs/README.md`: taxonomia e autoridade documental;
-- `docs/vigentes/operacional/estado_atual.md`, quando existir: progresso,
-  gates, pendências e próxima sprint autorizada;
+- `docs/vigentes/operacional/estado_atual.md`: progresso, gates, pendências e próxima sprint autorizada;
 - roadmap vigente e documentos autoritativos relacionados à tarefa.
 
 O pedido atual do mantenedor define o objetivo e o escopo. Os documentos

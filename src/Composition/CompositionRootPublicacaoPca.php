@@ -9,12 +9,6 @@ use Semae\Pca\Application\ValueObjects\CorrelacaoExecucao;
 use Semae\Pca\Infrastructure\Observabilidade\AcumuladorEventosTecnicos;
 use Semae\Pca\Infrastructure\Observabilidade\RelogioSistemaEventosTecnicos;
 use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
-use Semae\Pca\Infrastructure\Oracle\Auditoria\OracleRegistroAuditoriaAdapter;
-use Semae\Pca\Infrastructure\Oracle\Contexto\OracleContextoUsuarioAdapter;
-use Semae\Pca\Infrastructure\Oracle\EstadoOperacional\OracleEstadoOperacionalPublicacaoAdapter;
-use Semae\Pca\Infrastructure\Oracle\Estrategia\OracleEstrategiaPublicacaoAdapter;
-use Semae\Pca\Infrastructure\Oracle\Plano\OraclePlanoRepository;
-use Semae\Pca\Infrastructure\Oracle\Transacao\OracleUnidadeDeTrabalhoAdapter;
 use Semae\Pca\Infrastructure\Pncp\Autenticacao\AutenticadorPncpAdapter;
 use Semae\Pca\Infrastructure\Pncp\Escrita\EscritorPncpAdapter;
 use Semae\Pca\Infrastructure\Pncp\Http\ExecutorCurlNativoPncp;
@@ -44,6 +38,11 @@ final class CompositionRootPublicacaoPca
         }
 
         $conexao = new ConexaoAdodbEmprestada($conexaoAdodb);
+        $oracle = new ComposicaoOraclePublicacaoPca(
+            $conexao,
+            $perfilTipado,
+            $loginAutenticado
+        );
         $configuracaoTransporte = $perfilTipado->getConfiguracaoTransporte();
         $transporte = new TransporteCurlPncp(
             $configuracaoTransporte,
@@ -58,30 +57,10 @@ final class CompositionRootPublicacaoPca
         );
 
         $montadorNucleo = new MontadorNucleoPublicacaoPca(
-            new OracleContextoUsuarioAdapter(
-                $conexao,
-                $perfilTipado->getRepresentantes(),
-                $perfilTipado->getLotacoesUsuario(),
-                $loginAutenticado
-            ),
-            new OraclePlanoRepository(
-                $conexao,
-                $perfilTipado->getPlanos(),
-                $perfilTipado->getDemandas(),
-                $perfilTipado->getUnidadesOrcamentarias(),
-                $perfilTipado->getLotacoes(),
-                $perfilTipado->getFusoOperacional()
-            ),
-            new OracleEstrategiaPublicacaoAdapter(
-                $conexao,
-                $perfilTipado->getConfiguracaoEstrategia(),
-                $perfilTipado->getPlanosEstrategia(),
-                $perfilTipado->getUnidadesOrcamentarias()
-            ),
-            new OracleUnidadeDeTrabalhoAdapter(
-                $conexao,
-                $perfilTipado->getControlesConcorrencia()
-            ),
+            $oracle->getContextoUsuario(),
+            $oracle->getPlanoRepository(),
+            $oracle->getEstrategiaPublicacao(),
+            $oracle->getUnidadeDeTrabalho(),
             new AutenticadorPncpAdapter(
                 $transporte,
                 $configuracaoTransporte,
@@ -102,14 +81,8 @@ final class CompositionRootPublicacaoPca
                 new SerializadorPayloadPncp(),
                 $logger
             ),
-            new OracleEstadoOperacionalPublicacaoAdapter(
-                $conexao,
-                $perfilTipado->getEstadoOperacional()
-            ),
-            new OracleRegistroAuditoriaAdapter(
-                $conexao,
-                $perfilTipado->getHistoricos()
-            ),
+            $oracle->getEstadoOperacional(),
+            $oracle->getRegistroAuditoria(),
             $logger
         );
         $presenter = new PublicarPcaPresenter();

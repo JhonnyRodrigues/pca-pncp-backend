@@ -148,95 +148,26 @@ composer tests
 Os adapters e seus contratos opt-in possuem comandos separados:
 
 ```bash
+composer contract:tests
+composer contract:preflight:oracle
+composer contract:preflight:pncp
+composer contract:pncp
+
 composer adapters:tests
 composer contract:adapters:tests
-composer contract:adapters:preflight
 composer contract:adapters:preflight:oracle
 composer contract:adapters:preflight:pncp
 composer contract:adapters:pncp:cleanup
 composer contract:adapters:pncp
+
+composer contract:oracle82:tests
+composer contract:oracle82:preflight
 ```
 
-Os cinco comandos da Sprint 5.9 iniciados por
-`contract:adapters:preflight` ou `contract:adapters:pncp` exigem a configuração
-externa indicada por `PCA_SPRINT59_CONFIG_FILE`; o gate PNCP realiza escritas
-reais somente no ambiente de treinamento. O gate Oracle é executado no
-Scriptcase pelo entrypoint contratual documentado em
-`tests/Contract/Sprint59/scriptcase_probe.php`. Nenhum desses gates é alcançado
-por `composer tests`.
-
-Quando uma execução PNCP deixar resíduo conhecido, informe exclusivamente esse
-valor em `owned_residue_sequence` e execute primeiro:
-
-```bash
-composer contract:adapters:preflight:pncp
-composer contract:adapters:pncp:cleanup
-```
-
-A limpeza isolada não publica. Ela observa o PCA conhecido, exclui somente o
-alvo coerente com a massa dedicada e exige ausência definitiva. O gate normal
-recusa iniciar enquanto `owned_residue_sequence` estiver preenchido. Depois de
-um relatório com `confirmado: true`, `ausencia_definitiva_confirmada: true` e
-`publicacao_executada: false`, remova o valor da configuração, repita o
-preflight e somente então execute `composer contract:adapters:pncp`.
-
-### Diagnóstico do gate Oracle da Sprint 5.9
-
-O diagnóstico pertence somente ao modo `adapters` do entrypoint:
-
-```php
-$relatorio = executar_contratos_adapters_oracle_sprint_59(
-    $db,
-    $login,
-    'adapters'
-);
-```
-
-O host Scriptcase deve carregar previamente `vendor/autoload.php` e
-`tests/Contract/Sprint59/scriptcase_probe.php`. A variável
-`PCA_SPRINT59_CONFIG_FILE` deve apontar para a configuração externa já validada
-pelo preflight Oracle. Não copie credenciais nem o conteúdo dessa configuração
-para o repositório, para a aplicação Blank ou para o relatório.
-
-Quando `confirmado` for `false`, `falha.etapa` indica o último estágio iniciado:
-
-| Etapa | Operação investigada |
-| --- | --- |
-| `bind` | Identificação da sessão e bind básico em `DUAL`. |
-| `estrategia_corrente` | Leitura da configuração corrente da estratégia. |
-| `estrategia_adotada` | Leitura da estratégia anual já adotada. |
-| `contexto_usuario` | Resolução do Representante e da Lotação pelo login confiável. |
-| `identidade_plano` | Descoberta da identidade única da massa dedicada. |
-| `inicio_transacao` | Início da unidade de trabalho e aquisição da exclusividade. |
-| `reconstrucao_plano` | Reconstrução da fotografia vigente e conferência da sessão. |
-| `consulta_estado` | Leitura e validação do estado operacional. |
-| `confirmacao_plano` | Confirmação temporária e releitura do Plano na transação. |
-| `registro_estado` | Escrita e confirmação do estado operacional temporário. |
-| `registro_auditoria` | Contagem e escrita do histórico temporário. |
-| `rollback` | Desfazimento explícito da transação de prova. |
-| `verificacao_rollback` | Nova transação e comprovação da restauração da massa. |
-
-Por padrão, a etapa é informada, mas `falha.mensagem` permanece genérica e
-`falha.tipo` não é emitido. Em ambiente controlado de desenvolvimento, habilite
-temporariamente:
-
-```text
-PCA_SPRINT59_DEBUG_ORACLE=true
-```
-
-Execute novamente apenas o modo `adapters`. O relatório passa a incluir o tipo
-da exceção e a mensagem técnica que chegou ao runner, após redação de valores
-conhecidos, credenciais, Authorization, corpos, CNPJ, URLs e SQL. Quando a
-Infrastructure já tiver traduzido uma exceção para um resultado seguro, a
-mensagem disponível pode continuar genérica; nesse caso, `falha.etapa` é a
-evidência diagnóstica principal.
-
-Remova `PCA_SPRINT59_DEBUG_ORACLE` imediatamente depois da investigação. Não
-use o opt-in em produção nem trate um relatório de falha como aprovação do gate.
-Os modos `lock_holder`, `lock_expect_blocked` e `lock_expect_available` não
-expõem detalhes técnicos mesmo com debug. O rollback best-effort e a proteção
-contra `Close()` permanecem ativos; somente relatórios aprovados recebem o hash
-sanitizado do gate.
+Esses contratos são opt-in, ficam fora de `composer tests` e podem acessar
+recursos reais autorizados. A preparação das configurações, as Blanks do
+Scriptcase, os modos de lock, a limpeza PNCP e o diagnóstico de falhas estão no
+[guia didático de execução das probes](docs/vigentes/apoio/guia_de_execucao_das_probes.md).
 
 O Composer usa `vendor/autoload.php` como autoloader. O antigo exemplo manual e
 os exercícios iniciais foram preservados apenas no

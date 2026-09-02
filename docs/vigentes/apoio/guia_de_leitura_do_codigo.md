@@ -37,7 +37,9 @@ com adapters concretos sobre fronteiras controladas. A Sprint 6.3 encerrou o
 gate do núcleo, e a Sprint 7.1 adicionou a entrada tipada e o Controller sem
 acesso a adapters ou wiring. A Sprint 8.1 adicionou o entrypoint público, o
 registro externo e o Composition Root final e os provou transversalmente sem
-acessar recursos reais.
+acessar recursos reais. A Sprint 8.2 comprovou no Scriptcase real que esse Root
+usa a receita única dos seis adapters Oracle, todos sobre a mesma conexão
+emprestada, sem executar PNCP durante a montagem.
 
 ## 2. O fluxo completo
 
@@ -203,16 +205,16 @@ está e evita procurar pelo repositório inteiro.
 ## 9. O que ainda não existe
 
 A Sprint 8.1 concluiu `PublicadorPcaScriptcase`, o registro externo, o perfil
-validado e `CompositionRootPublicacaoPca`. O fluxo controlado comprova o grafo
-até a Application, duas correlações externas distintas e ausência de rede. A
-fachada registra sua captura inesperada pelo acumulador compartilhado; request
-ID inválido e falhas anteriores ao logger não fabricam evento técnico.
+validado e `CompositionRootPublicacaoPca`. A Sprint 8.2 comprovou a montagem
+desse Root sem I/O e exercitou sua subcomposição Oracle real em transações,
+rollback e contenção. O roteiro de reprodução está no
+[guia de execução das probes](guia_de_execucao_das_probes.md).
 
-Ainda não foram executados a Blank de produção, o provisionamento real de
-`PCA_PNCP_PROFILE_REGISTRY_FILE`, os fluxos completos sobre Oracle e PNCP nem o
-smoke test do pacote autocontido. O entrypoint da Sprint 5.9 em
-`tests/Contract/Sprint59/scriptcase_probe.php` continua pertencendo somente à
-suíte contratual e não substitui `PublicadorPcaScriptcase`.
+Ainda não foram executados a Blank de produção, o provisionamento de produção de
+`PCA_PNCP_PROFILE_REGISTRY_FILE`, o fluxo público integral até o UseCase sobre
+Oracle e PNCP nem o smoke test do pacote autocontido. Os entrypoints das probes
+continuam pertencendo somente às suítes contratuais e não substituem
+`PublicadorPcaScriptcase`.
 
 A exposição do lote de eventos pela fronteira pública, sua adaptação para
 `sc_log_add` e a renderização real pela Blank permanecem adiadas. Esses limites
