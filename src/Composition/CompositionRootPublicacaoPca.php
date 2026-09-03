@@ -9,13 +9,9 @@ use Semae\Pca\Application\ValueObjects\CorrelacaoExecucao;
 use Semae\Pca\Infrastructure\Observabilidade\AcumuladorEventosTecnicos;
 use Semae\Pca\Infrastructure\Observabilidade\RelogioSistemaEventosTecnicos;
 use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
-use Semae\Pca\Infrastructure\Pncp\Autenticacao\AutenticadorPncpAdapter;
-use Semae\Pca\Infrastructure\Pncp\Escrita\EscritorPncpAdapter;
 use Semae\Pca\Infrastructure\Pncp\Http\ExecutorCurlNativoPncp;
 use Semae\Pca\Infrastructure\Pncp\Http\TransporteCurlPncp;
-use Semae\Pca\Infrastructure\Pncp\Leitura\LeitorPncpAdapter;
 use Semae\Pca\Infrastructure\Pncp\Leitura\TemporizadorSistemaPncp;
-use Semae\Pca\Infrastructure\Pncp\Serializacao\SerializadorPayloadPncp;
 use Semae\Pca\Presentation\Controllers\PublicarPcaController;
 use Semae\Pca\Presentation\Facades\FachadaPublicarPca;
 use Semae\Pca\Presentation\Presenters\PublicarPcaPresenter;
@@ -55,32 +51,22 @@ final class CompositionRootPublicacaoPca
             null,
             new RelogioSistemaEventosTecnicos()
         );
+        $pncp = new ComposicaoPncpPublicacaoPca(
+            $perfilTipado,
+            $transporte,
+            $perfilTipado->getConfiguracaoLeitura(),
+            $logger,
+            new TemporizadorSistemaPncp()
+        );
 
         $montadorNucleo = new MontadorNucleoPublicacaoPca(
             $oracle->getContextoUsuario(),
             $oracle->getPlanoRepository(),
             $oracle->getEstrategiaPublicacao(),
             $oracle->getUnidadeDeTrabalho(),
-            new AutenticadorPncpAdapter(
-                $transporte,
-                $configuracaoTransporte,
-                $logger,
-                $perfilTipado->getLoginPncp(),
-                $perfilTipado->getSenhaPncp()
-            ),
-            new LeitorPncpAdapter(
-                $transporte,
-                $configuracaoTransporte,
-                $perfilTipado->getConfiguracaoLeitura(),
-                $logger,
-                new TemporizadorSistemaPncp()
-            ),
-            new EscritorPncpAdapter(
-                $transporte,
-                $configuracaoTransporte,
-                new SerializadorPayloadPncp(),
-                $logger
-            ),
+            $pncp->getAutenticador(),
+            $pncp->getLeitor(),
+            $pncp->getEscritor(),
             $oracle->getEstadoOperacional(),
             $oracle->getRegistroAuditoria(),
             $logger

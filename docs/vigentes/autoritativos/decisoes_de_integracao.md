@@ -806,22 +806,28 @@ testes contratuais aplicáveis.
 
 1. `pagina` e `tamanhoPagina` são explícitos.
 2. A leitura pagina até comprovar o fim.
-3. Convergência nunca é decidida com resultado parcial.
-4. Validar entre páginas:
+3. Na listagem de unidades, `404` encerra a paginação somente quando ocorre em
+   página maior que 1 e depois de ao menos uma página `200` válida.
+4. `400` e `404` permanecem inconclusivos nos demais contextos.
+5. A classificação não interpreta mensagens textuais do PNCP.
+6. Convergência nunca é decidida com resultado parcial.
+7. Validar entre páginas:
    - unicidade de `numeroItem`;
    - ausência de páginas repetidas;
    - coerência de CNPJ, ano, UASG e sequencial;
    - limite total de 1000 itens.
-5. Campos JSON desconhecidos são ignorados.
-6. Campos utilizados são obrigatórios e tipados.
-7. JSON malformado, profundo demais ou com UTF-8 inválido é rejeitado.
-8. Texto do PNCP não controla o fluxo.
+8. Campos JSON desconhecidos são ignorados.
+9. Campos utilizados são obrigatórios e tipados.
+10. JSON malformado, profundo demais ou com UTF-8 inválido é rejeitado.
 
 ##### DI-009 — Ausência definitiva
 
-1. Consulta pelo sequencial conhecido deve indicar ausência.
-2. Listagem paginada por órgão e ano não deve conter PCA da mesma UASG.
-3. Nenhuma ocorrência comprova ausência definitiva.
+1. `204` ou `400` na consulta pelo sequencial conhecido são apenas sinais
+   provisórios de ausência; nenhum deles confirma ausência sozinho.
+2. A listagem paginada completa por órgão e ano não deve conter PCA da mesma
+   UASG.
+3. Somente a combinação do sinal provisório com nenhuma ocorrência na listagem
+   completa comprova ausência definitiva.
 4. Outro sequencial para a mesma UASG gera conflito ou migração assistida.
 5. Respostas divergentes, inconclusivas ou falha de consulta não autorizam recriação.
 
@@ -923,6 +929,20 @@ testes contratuais aplicáveis.
 - autenticação, ausência, paginação, `Location`, sequencial, IDs com lacunas,
   decimais exatos, escrita incerta, exclusão e limpeza foram comprovados;
 - CNPJ alfanumérico permanece parte do contrato aceito, sem novo gate prévio;
+- o ensaio manual da Sprint 8.3 confirmou no treinamento `400` para consolidado
+  conhecido ausente, `404` após páginas `200` válidas na listagem de unidades
+  e `204` ao final da paginação de itens; a regra resultante é uniforme entre
+  ambientes, sem alegar que produção já apresentou esses status;
+- o gate nominal da Sprint 8.3 revalidou a regra corrigida no treinamento, com
+  ausência definitiva e limpeza confirmadas pelo relatório sanitizado de hash
+  `0688185978654e374ddf959f377d8cf619314bc906f81e19cafbdff1388aae2c`;
+- o gate de escrita incerta da Sprint 8.3 revalidou no treinamento a execução
+  de exatamente um POST, a recuperação somente por leitura e a limpeza final,
+  sem revelar incompatibilidade nova, conforme o relatório sanitizado de hash
+  `f68ee8ee61db4ea11598f88a52100bc9e1cb5ca924eb6bcbe16930d458a149ba`;
+- a regressão de encerramento da Sprint 8.3 manteve contratos locais, adapters,
+  composição, apresentação e integração verdes, sem incompatibilidade ou novo
+  contrato relevante; esta evidência não altera semanticamente a decisão;
 - reabrir somente o contrato incompatível com a evidência real.
 
 #### DI-009 — Regras de negócio relacionadas

@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 02/09/2026
+**Atualizado em:** 03/09/2026
 
 ## Limites de autoridade
 
@@ -32,7 +32,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 8.2.
+- A última sprint concluída é a Sprint 8.3.
 - A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
 - A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
   aprovado no treinamento, incluindo publicação, operações de itens, exclusão
@@ -56,8 +56,92 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Fase 7 — Presentation está concluída.
 - A Sprint 8.1 — Composition Root e perfil Scriptcase está concluída.
 - A Sprint 8.2 — Integração Oracle real está concluída.
-- A Sprint 8.3 — Suíte PNCP de treinamento é a próxima etapa na ordem e depende
-  de planejamento e autorização próprios.
+- A Sprint 8.3 — Suíte PNCP de treinamento está concluída após os seis
+  microciclos autorizados e o corretivo de paginação e ausência.
+- A Sprint 8.4 — Fluxos completos dos dois modos é a próxima na ordem e ainda
+  não possui autorização de implementação.
+
+## Evidências do microciclo corretivo da Sprint 8.3
+
+- O ensaio manual no treinamento percorreu publicação, leitura paginada,
+  inclusão, exclusão de item e exclusão integral, com limpeza operacional
+  confirmada e sem registrar identidades da massa neste documento.
+- O ambiente retornou `400` ao consultar o consolidado conhecido depois da
+  exclusão. Esse status passou a ser somente um sinal provisório: ausência
+  definitiva ainda exige listagem completa sem a mesma UASG.
+- A listagem de unidades retornou `404` após páginas `200` válidas; a paginação
+  de itens encerrou com `204`. O `404` só encerra unidades em página maior que
+  1 e depois de ao menos uma página válida.
+- A classificação é uniforme entre ambientes, mas a evidência externa alcança
+  somente o treinamento. Nenhum gate de produção foi criado ou executado.
+- Mensagens textuais do PNCP permanecem não autoritativas. Fora das condições
+  estritas acima, `400` e `404` produzem leitura inconclusiva.
+- O Red focado registrou 10 falhas esperadas. O Green aprovou 45 testes e 109
+  asserções; a suíte de leitura aprovou 84/213, Infrastructure PNCP 347/1.110,
+  contratos locais 8.3 13/58, Composition 11/187 e a suíte padrão 882/3.846.
+- Lint dos quatro arquivos PHP afetados, Composer, PSR-4 estrito com 1.792
+  classes e preflight foram aprovados no PHP 8.4.7. A configuração externa foi
+  apenas lida de forma sanitizada e permaneceu com resíduo nulo. Nenhum gate
+  real ou endpoint PNCP foi executado durante o corretivo.
+- A primeira execução automatizada do gate nominal após o corretivo completou
+  publicação, observações, operações de itens, exclusão integral e ausência
+  definitiva, mas falhou antes de emitir relatório e hash: a auditoria do
+  runner confundiu a UASG textual curta com um status HTTP numérico igual.
+  O resíduo já estava removido quando ocorreu a falha.
+- Um novo teste reproduziu o falso positivo. A auditoria passou a comparar a
+  UASG como string JSON exata, mantendo credenciais e demais valores sob busca
+  por fragmento. O teste do runner aprovou 6/29, os contratos locais 8.3
+  aprovaram 14/60 e a suíte padrão permaneceu verde em 882/3.846, preparando a
+  nova execução autorizada que produziu a evidência formal abaixo.
+
+## Evidências do Microciclo 4 da Sprint 8.3
+
+- O gate nominal real foi aprovado no treinamento em 03/09/2026. Uma única
+  autenticação sustentou o ciclo completo de publicação, observações
+  paginadas, inclusão, exclusão de item, exclusão integral e ausência
+  definitiva.
+- O relatório sanitizado confirmou paginação múltipla, IDs preservados,
+  sequencial externo positivo, decimais JSON exatos, 32 eventos seguros e
+  limpeza final, sem registrar identidades ou conteúdo de transporte.
+- SHA-256:
+  `0688185978654e374ddf959f377d8cf619314bc906f81e19cafbdff1388aae2c`.
+- O grupo nominal aprovou 1 teste e 3 asserções no PHP 8.4.7. O gate real de
+  escrita incerta não foi executado.
+- As próximas execuções de `contract:pncp83:nominal` informarão também
+  `sequencial_pca_recebido_excluido`, limitado ao sequencial transitório
+  recebido e efetivamente removido pelo próprio ciclo. Essa ampliação do
+  relatório foi validada localmente, sem nova chamada ao PNCP.
+
+## Evidências do Microciclo 5 da Sprint 8.3
+
+- O preflight sem rede foi confirmado novamente antes da execução real.
+- O gate de escrita incerta foi aprovado no treinamento em 03/09/2026 com uma
+  autenticação e exatamente um POST. A resposta de sucesso foi descartada de
+  propósito, a escrita não foi repetida e o efeito foi localizado por leitura.
+- Os identificadores foram preservados e a exclusão terminou com ausência e
+  limpeza confirmadas. O relatório registrou 23 eventos sanitizados.
+- SHA-256:
+  `f68ee8ee61db4ea11598f88a52100bc9e1cb5ca924eb6bcbe16930d458a149ba`.
+- O grupo incerto aprovou 1 teste e 3 asserções no PHP 8.4.7. O gate não revelou
+  incompatibilidade nem contrato novo relevante; a DI-009 não recebeu nova
+  alteração semântica.
+
+## Encerramento da Sprint 8.3
+
+- Infrastructure PNCP aprovou 347 testes e 1.110 asserções; Composition,
+  11/187; Presentation, 31/319; Integration, 5/103.
+- Os contratos locais 5.1, 5.9, 8.2 e 8.3 aprovaram 24/51, 54/149, 12/43 e
+  14/62, respectivamente. A suíte padrão aprovou 882 testes e 3.846 asserções.
+- O lint aprovou 325 arquivos PHP; o autoload PSR-4 estrito gerou 1.792 classes.
+  Composer, requisitos instalados, catálogo dos 22 comandos, referências,
+  ausência dos valores externos conhecidos e `git diff --check` foram
+  validados.
+- As verificações usaram PHP 8.4.7 porque não havia PHP 8.1 instalado. O
+  requisito Composer `^8.1` foi satisfeito, sem execução adicional no runtime
+  mínimo.
+- Nenhum grupo live ou integração real foi executado no encerramento. Manual
+  2.6, OpenAPI e os gates já aprovados permaneceram compatíveis, portanto a
+  DI-009 foi revalidada sem nova alteração semântica.
 
 ## Evidências da Sprint 8.2
 

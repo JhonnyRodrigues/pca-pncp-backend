@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Infrastructure\Pncp\Leitura;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Semae\Pca\Application\Enums\SituacaoObservacaoPca;
@@ -25,6 +26,77 @@ use Semae\Pca\Infrastructure\Pncp\Leitura\TemporizadorSistemaPncp;
 
 final class AusenciaDefinitivaPncpTest extends TestCase
 {
+    /** @return iterable<string, array{string, AmbientePncp}> */
+    public static function corposDeAusenciaNaoAutoritativos(): iterable
+    {
+        yield 'homologacao sem corpo' => ['', AmbientePncp::HOMOLOGACAO];
+        yield 'producao sem corpo' => ['', AmbientePncp::PRODUCAO];
+        yield 'homologacao com mensagem textual divergente' => [
+            '{"message":"texto externo nao autoritativo"}',
+            AmbientePncp::HOMOLOGACAO,
+        ];
+        yield 'producao com mensagem textual divergente' => [
+            '{"message":"outro texto externo"}',
+            AmbientePncp::PRODUCAO,
+        ];
+    }
+
+    #[DataProvider('corposDeAusenciaNaoAutoritativos')]
+    public function testStatus400NoConsolidadoExigeListaCompletaSemUasg(
+        string $corpo,
+        AmbientePncp $ambiente
+    ): void {
+        $transporte = new TransporteAusenciaPncpFake([
+            new RespostaHttpPncp(400, [], $corpo),
+            $this->respostaJson([
+                $this->candidato('999001', 1),
+                $this->candidato('999002', 2),
+            ]),
+            new RespostaHttpPncp(404, [], '{"message":"CNPJ invalido"}'),
+        ]);
+
+        $resultado = $this->observar($transporte, 5, $ambiente);
+
+        $this->assertSame(SituacaoObservacaoPca::AUSENCIA_DEFINITIVA, $resultado->getSituacao());
+        $this->assertCount(3, $transporte->requisicoes);
+    }
+
+    public function testStatus400NoConsolidadoComMesmaUasgNaListaDeveConflitar(): void
+    {
+        $transporte = new TransporteAusenciaPncpFake([
+            new RespostaHttpPncp(400, [], ''),
+            $this->respostaJson([$this->candidato('123456', 88)]),
+        ]);
+
+        $resultado = $this->observar($transporte);
+
+        $this->assertSame(SituacaoObservacaoPca::CONFLITO, $resultado->getSituacao());
+    }
+
+    public function testStatus400NoConsolidadoComListaInconclusivaNaoFabricaAusencia(): void
+    {
+        $transporte = new TransporteAusenciaPncpFake([
+            new RespostaHttpPncp(400, [], ''),
+            new RespostaHttpPncp(400, [], ''),
+        ]);
+
+        $resultado = $this->observar($transporte);
+
+        $this->assertSame(SituacaoObservacaoPca::INCONCLUSIVA, $resultado->getSituacao());
+    }
+
+    public function testStatus404NoConsolidadoConhecidoPermaneceInconclusivo(): void
+    {
+        $transporte = new TransporteAusenciaPncpFake([
+            new RespostaHttpPncp(404, [], ''),
+        ]);
+
+        $resultado = $this->observar($transporte);
+
+        $this->assertSame(SituacaoObservacaoPca::INCONCLUSIVA, $resultado->getSituacao());
+        $this->assertCount(1, $transporte->requisicoes);
+    }
+
     public function testAusenciaDiretaEListaSemCandidatosComprovamAusenciaDefinitiva(): void
     {
         $transporte = new TransporteAusenciaPncpFake([
@@ -133,11 +205,12 @@ final class AusenciaDefinitivaPncpTest extends TestCase
 
     private function observar(
         TransporteAusenciaPncpFake $transporte,
-        int $limitePaginas = 5
+        int $limitePaginas = 5,
+        AmbientePncp $ambiente = AmbientePncp::HOMOLOGACAO
     ): ResultadoObservacaoPca {
         $adapter = new LeitorPncpAdapter(
             $transporte,
-            new ConfiguracaoTransportePncp(AmbientePncp::HOMOLOGACAO, 1_024, 1_048_576),
+            new ConfiguracaoTransportePncp($ambiente, 1_024, 1_048_576),
             new ConfiguracaoLeituraPncp(2, 32, $limitePaginas, 250, 5_000),
             new NullLogger(),
             new TemporizadorSistemaPncp()

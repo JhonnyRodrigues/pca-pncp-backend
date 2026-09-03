@@ -8,6 +8,10 @@ Este catálogo cobre código de produção, testes, configuração e a referênc
 estado operacional. `vendor/`, documentação histórica e investigações não
 fazem parte do fluxo executável.
 
+Para saber como executar e classificar os scripts, consulte o
+[catálogo de comandos Composer](catalogo_de_comandos_composer.md). Esta página
+permanece dedicada à função dos arquivos.
+
 ## 1. Domain
 
 ### Entities, Facts e Policy
@@ -503,6 +507,22 @@ fazem parte do fluxo executável.
 | `Contract/Sprint82/run-preflight.php` | Valida configuração, registro e perfil de homologação sem acessar Oracle ou PNCP. |
 | `Contract/Sprint82/config.example.php` | Modelo sem segredos da configuração específica da massa 8.2. |
 
+### Contratos opt-in — Sprint 8.3
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Contract/Sprint83/Sprint83ConfigTest.php` | Configuração externa exata, massa dedicada, servidor literal e recusa de produção antes de I/O. |
+| `Contract/Sprint83/PncpTrainingTransportTest.php` | Descarte deliberado de uma única resposta real de publicação depois da delegação. |
+| `Contract/Sprint83/PncpTrainingContractRunnerTest.php` | Ciclos nominal e incerto em memória, autenticação única, paginação, limpeza e sanitização. |
+| `Contract/Sprint83/PncpTrainingContractTest.php` | Grupos opt-in separados para os gates nominal e de escrita incerta no treinamento. |
+| `Contract/Sprint83/SafetyContractTest.php` | Separação dos grupos live e proteção dos relatórios contra dados sensíveis. |
+| `Contract/Sprint83/Support/Sprint83Config.php` | Carrega autorização, massa e perfil de treinamento pelos dois arquivos externos. |
+| `Contract/Sprint83/Support/PncpTrainingTransport.php` | Envolve o transporte compartilhado, registra chamadas e simula a perda controlada da resposta. |
+| `Contract/Sprint83/Support/PncpTrainingContractRunner.php` | Exercita a composição PNCP final, observa efeitos e executa limpeza best-effort. |
+| `Contract/Sprint83/run-preflight.php` | Valida configuração, registro e perfil sem acessar Oracle ou PNCP. |
+| `Contract/Sprint83/run-pncp-cleanup.php` | Remove somente o resíduo com sequencial explicitamente autorizado. |
+| `Contract/Sprint83/config.example.php` | Modelo sem segredos da autorização e massa dedicada da Sprint 8.3. |
+
 ### Suporte contratual compartilhado
 
 | Arquivo | Demonstração principal |
@@ -524,6 +544,7 @@ fazem parte do fluxo executável.
 | `phpunit.contract.xml` | Suíte contratual legada da Sprint 5.1. |
 | `phpunit.adapters.contract.xml` | Suíte separada dos contratos de adapters da Sprint 5.9. |
 | `phpunit.oracle82.contract.xml` | Suíte separada da integração Oracle da Sprint 8.2. |
+| `phpunit.pncp83.contract.xml` | Suíte separada dos contratos locais e gates PNCP da Sprint 8.3. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
 
 ## 9. Documentação vigente
@@ -541,7 +562,8 @@ fazem parte do fluxo executável.
 | `docs/vigentes/apoio/glossario.md` | Mantém o índice semântico da linguagem de negócio, integração e arquitetura. |
 | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
 | `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |
-| `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | Ensina a preparar, executar e diagnosticar com segurança as probes das Sprints 5.1, 5.9 e 8.2. |
+| `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | Ensina a preparar, executar e diagnosticar com segurança as probes e gates das Sprints 5.1, 5.9, 8.2 e 8.3. |
+| `docs/vigentes/apoio/catalogo_de_comandos_composer.md` | Classifica os scripts Composer e informa finalidade, dependências, efeitos externos e autorização necessária. |
 | `docs/vigentes/apoio/catalogo_de_arquivos.md` | Cataloga a função dos arquivos ativos de código, testes, configuração e documentação vigente. |
 | `docs/diagramas/DER_PUBLICACAO_PCA.png` | Apoia visualmente a compreensão do modelo de dados da publicação do PCA. |
 | `docs/diagramas/fluxograma_PCA.png` | Apoia visualmente a compreensão do fluxo funcional do PCA. |

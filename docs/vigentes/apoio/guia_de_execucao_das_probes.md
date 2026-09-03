@@ -1,4 +1,4 @@
-# Guia de execução das probes das Sprints 5.1, 5.9 e 8.2
+# Guia de execução das probes e gates das Sprints 5.1, 5.9, 8.2 e 8.3
 
 **Classificação documental:** Apoio
 
@@ -13,13 +13,14 @@ Uma **probe** é uma verificação executada de propósito contra um recurso rea
 Ela não faz parte da suíte comum e pode abrir transações ou realizar escritas
 controladas. O **preflight** valida a configuração antes desse acesso.
 
-Use a probe correspondente ao que precisa comprovar:
+Use a probe ou o gate correspondente ao que precisa comprovar:
 
-| Sprint | Finalidade | Entrypoint Oracle no Scriptcase |
+| Sprint | Finalidade | Forma de execução real |
 | --- | --- | --- |
-| 5.1 | Descobrir e validar os contratos básicos do Oracle e do PNCP. | `executar_probe_oracle_sprint_51` |
-| 5.9 | Exercitar diretamente os adapters Oracle e PNCP de produção. | `executar_contratos_adapters_oracle_sprint_59` |
-| 8.2 | Exercitar a composição Oracle compartilhada pelo Composition Root final. | `executar_integracao_oracle_sprint_82` |
+| 5.1 | Descobrir e validar os contratos básicos do Oracle e do PNCP. | Scriptcase para Oracle; Composer para PNCP. |
+| 5.9 | Exercitar diretamente os adapters Oracle e PNCP de produção. | Scriptcase para Oracle; Composer para PNCP. |
+| 8.2 | Exercitar a composição Oracle compartilhada pelo Composition Root final. | Scriptcase para Oracle. |
+| 8.3 | Exercitar a composição PNCP usada pelo Composition Root final. | Composer, exclusivamente no treinamento. |
 
 Não troque entrypoints entre sprints. Em especial, o relatório Oracle da 8.2
 possui `gate: ORACLE_COMPOSITION_SCRIPTCASE`; `ORACLE_SCRIPTCASE` identifica a
@@ -53,6 +54,7 @@ arquivos protegidos:
 | 5.1 | `PCA_SPRINT51_CONFIG_FILE` |
 | 5.9 | `PCA_SPRINT59_CONFIG_FILE` |
 | 8.2 | `PCA_SPRINT82_CONFIG_FILE` e `PCA_PNCP_PROFILE_REGISTRY_FILE` |
+| 8.3 | `PCA_SPRINT83_CONFIG_FILE` e `PCA_PNCP_PROFILE_REGISTRY_FILE` |
 
 O servidor deve preferencialmente provisionar essas variáveis no processo PHP.
 No FastCGI, uma variável definida no terminal não chega necessariamente ao
@@ -70,7 +72,7 @@ Repita essas linhas em toda requisição: cada acesso pode cair em outro worker
 FastCGI. Não coloque senha, token ou conteúdo do perfil em `putenv()` e remova
 esse arranjo ao implantar em produção.
 
-## 3. Estrutura mínima de uma Blank protegida
+## 3. Estrutura de uma Blank protegida
 
 No evento `onExecute` da Blank, carregue o autoloader e o arquivo da sprint,
 chame somente uma função e serialize o retorno:
@@ -78,12 +80,60 @@ chame somente uma função e serialize o retorno:
 ```php
 header('Content-Type: application/json; charset=utf-8');
 
+putenv('VARIAVEL_DE_AMBIENTE=caminho/do/arquivo/arquivo.php');
+
+$backendRoot = 'exemplo/opt/www/pca-pncp-backend';
+
 require '/CAMINHO/DA/RELEASE/vendor/autoload.php';
 require '/CAMINHO/DA/RELEASE/tests/Contract/Sprint82/scriptcase_probe.php';
 
-$modo = 'adapters'; // altere manualmente somente para um modo permitido
 $login = (string) [usr_login]; // variável global de sessão do Scriptcase
 $servidor = (string) ($_SERVER['SERVER_NAME'] ?? '');
+
+$modosPermitidos = [
+    'preflight',
+    'commit',
+    'adapters',
+	'lock_holder',
+	'lock_expect_blocked',
+	'lock_expect_available',
+    // altere manualmente somente para um modo permitido
+];
+$modo = isset($_GET['mode']) ? (string) $_GET['mode'] : '';
+if (!in_array($modo, $modosPermitidos, true)) {
+    echo json_encode(
+        [
+            'sprint' => '8.2',
+            'gate' => 'ORACLE_SCRIPTCASE',
+            'confirmado' => false,
+            'falha' => [
+                'codigo' => 'MODO_RECUSADO',
+                'mensagem' => 'Modo recusado.',
+            ],
+            'close_invocado' => false,
+        ],
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+
+    return;
+}
+
+// $registro = (string) getenv('PCA_PNCP_PROFILE_REGISTRY_FILE');
+// $resultado = [
+//     'registro_configurado' => $registro,
+//     'registro_existe' => is_file($registro),
+//     'registro_legivel' => is_readable($registro),
+// ];
+// if (is_file($registro) && is_readable($registro)) {
+//     $indice = require $registro;
+//     $perfil = is_array($indice) ? ($indice[$serverName] ?? null) : null;
+
+//     $resultado['servidor_encontrado'] = is_string($perfil);
+//     $resultado['perfil_configurado'] = $perfil;
+//     $resultado['perfil_existe'] = is_string($perfil) && is_file($perfil);
+//     $resultado['perfil_legivel'] = is_string($perfil) && is_readable($perfil);
+// }
+// echo json_encode($resultado,JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
 $relatorio = executar_integracao_oracle_sprint_82(
     $this->Db,
@@ -92,10 +142,34 @@ $relatorio = executar_integracao_oracle_sprint_82(
     $modo
 );
 
-echo json_encode(
-    $relatorio,
-    JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-);
+try {
+    $relatorio = executar_integracao_oracle_sprint_82(
+        $this->Db,
+        $loginAutenticado,
+        $serverName,
+        $modo
+    );
+} catch (\Throwable $e) {
+    $relatorio = [
+        'sprint' => '8.2',
+        'gate' => 'ORACLE_SCRIPTCASE',
+        'confirmado' => false,
+        'falha' => [
+            'codigo' => 'EXECUCAO_FALHOU',
+            'mensagem' => 'Falha durante a execução do gate.',
+        ],
+        'close_invocado' => false,
+    ];
+}
+
+// Serialização sanitizada da evidência.
+$json = json_encode($relatorio,JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+if ($json === false) {
+    echo '{"sprint":"8.2","gate":"ORACLE_SCRIPTCASE","confirmado":false,"falha":{"codigo":"SERIALIZACAO_FALHOU","mensagem":"Falha ao serializar relatorio sanitizado."},"close_invocado":false}';
+    return;
+}
+
+echo $json;
 ```
 
 Esse exemplo é da 8.2. Nas seções seguintes estão as assinaturas das outras
@@ -266,7 +340,9 @@ return [
 Todos os caminhos devem ser absolutos e legíveis pelo processo PHP. O
 carregador valida todas as entradas do registro, então qualquer perfil citado
 nele precisa existir e estar legível, mesmo que outro servidor seja o alvo da
-execução. Se `ca_bundle` estiver preenchido, seu arquivo também precisa existir
+execução. 
+
+Se `ca_bundle` estiver preenchido, seu arquivo também precisa existir
 no servidor.
 
 Valide os contratos e o preflight, que não acessa Oracle nem PNCP:
@@ -305,17 +381,122 @@ sanitizada e etapa. Remova-o depois da investigação.
 5. Na Sessão B, execute `lock_expect_available`.
 6. B deve confirmar `situacao_inicio: INICIADA` e liberar o lock ao final.
 
-Os três relatórios precisam indicar `close_invocado: false`. A 8.2 monta o
+Os três relatórios precisam indicar `close_invocado: false`. 
+
+A 8.2 monta o
 Composition Root real sem I/O e exercita a mesma subcomposição Oracle usada por
 ele. Ela não percorre a fachada e o UseCase completos, pois isso alcançaria a
 autenticação PNCP; essa integração pertence às sprints posteriores.
 
-## 7. Como interpretar e compartilhar o resultado
+## 7. Sprint 8.3 — composição PNCP no treinamento
 
-Um gate só está aprovado quando `confirmado` é `true` e todas as verificações
-esperadas para o modo também são verdadeiras. O hash SHA-256 identifica o
-conteúdo sanitizado recebido, mas não transforma um relatório recusado em
-aprovação.
+A 8.3 usa um arquivo de autorização e massa dedicado, além do mesmo registro de
+perfis da composição final:
+
+```text
+registro.php
+└── SERVER_NAME exato -> caminho absoluto de perfil.php
+
+perfil.php
+├── ambiente, CNPJ e credenciais PNCP
+├── TLS, timeouts e limites defensivos
+└── demais configurações da composição final
+
+sprint83.php
+├── autorização explícita e SERVER_NAME esperado
+├── ano, data, UASG e três IDs lacunados da massa
+├── classificação e valores do item de treinamento
+└── sequencial de resíduo autorizado, normalmente null
+```
+
+Crie a configuração a partir de
+[`tests/Contract/Sprint83/config.example.php`](../../../tests/Contract/Sprint83/config.example.php).
+Ela e o registro devem permanecer fora da release e do webroot. No Git Bash,
+informe caminhos absolutos com barras normais:
+
+```bash
+export PCA_SPRINT83_CONFIG_FILE='C:/caminho/externo/sprint83.php'
+export PCA_PNCP_PROFILE_REGISTRY_FILE='C:/caminho/externo/registro.php'
+```
+
+Antes de qualquer rede, execute:
+
+```bash
+composer contract:pncp83:tests
+composer contract:pncp83:preflight
+```
+
+O primeiro comando é inteiramente local. O segundo lê e valida a configuração,
+mas deve declarar `oracle_acessado: false` e `pncp_acessado: false`. Preflight
+aprovado não garante autenticação nem autoriza um gate real.
+
+### Ciclo nominal
+
+Com autorização explícita, massa dedicada **sem candidato preexistente**,
+`residuo_sequencial_autorizado = null` e execução serial, use:
+
+```bash
+composer contract:pncp83:nominal
+```
+
+Esse gate:
+
+1. autentica uma vez, 
+2. publica dois IDs lacunados, 
+3. força paginação com página de tamanho 1, 
+4. inclui o terceiro item, 
+5. exclui um item, 
+6. exclui o PCA e
+7. confirma ausência definitiva.
+
+Portanto, ele **cria, altera e exclui dados reais
+no treinamento**. O relatório aprovado informa o sequencial recebido e
+excluído em `sequencial_pca_recebido_excluido`, confirma a limpeza e apresenta
+o hash SHA-256 do JSON sanitizado.
+
+Se houver falha depois da primeira escrita, o runner tenta limpeza best-effort.
+Não repita imediatamente o gate quando a mensagem indicar possível resíduo:
+primeiro localize o efeito por leitura e confirme que pertence à execução.
+
+### Escrita incerta deliberada
+
+Este modo exige autorização própria, mesmo depois de o nominal ter sido
+aprovado:
+
+```bash
+composer contract:pncp83:uncertain
+```
+
+O runner envia uma única publicação real e descarta deliberadamente sua
+resposta de sucesso (na header: location devolve o `sequencialPca`). Ele deve produzir `RESULTADO_INCERTO`:
+
+1. realizar POST e não repeti-lo,
+2. localizar o efeito somente por leitura,
+3. excluir o PCA atribuído à execução e
+4. confirmar ausência.
+
+Ambiguidade, leitura inconclusiva ou limpeza não confirmada interrompe o avanço.
+
+### Limpeza isolada
+
+Somente depois de identificar com segurança um resíduo da massa, preencha seu
+sequencial positivo em: arquivo `sprint83.php`, chave `residuo_sequencial_autorizado`, obtenha autorização e execute novamente o preflight antes de:
+
+```bash
+composer contract:pncp83:cleanup
+```
+
+A limpeza não publica e não aceita alvo inferido. Depois de confirmar ausência,
+volte o campo para `null` e repita o preflight antes de qualquer novo gate.
+Nunca altere candidatos preexistentes desconhecidos.
+
+As classificações resumidas e os riscos de todos os scripts estão no
+[catálogo de comandos Composer](catalogo_de_comandos_composer.md).
+
+## 8. Como interpretar e compartilhar o resultado
+
+Um gate só está aprovado quando o retorno do teste é `confirmado=true` e todas as verificações esperadas para o modo também são verdadeiras. O hash SHA-256 identifica o
+conteúdo sanitizado recebido, mas não transforma um relatório recusado em aprovação.
 
 Antes de compartilhar o JSON, confirme que ele não contém:
 
@@ -327,7 +508,7 @@ Antes de compartilhar o JSON, confirme que ele não contém:
 Se houver qualquer um desses dados, não envie o relatório. Corrija a origem da
 exposição e gere uma nova evidência sanitizada.
 
-## 8. Diagnóstico rápido
+## 9. Diagnóstico rápido
 
 | Sintoma | Verificação mais provável |
 | --- | --- |

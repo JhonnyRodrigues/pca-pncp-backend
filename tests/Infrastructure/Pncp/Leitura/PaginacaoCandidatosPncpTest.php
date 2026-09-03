@@ -25,6 +25,53 @@ use Semae\Pca\Infrastructure\Pncp\Leitura\TemporizadorSistemaPncp;
 
 final class PaginacaoCandidatosPncpTest extends TestCase
 {
+    #[DataProvider('ambientesPncp')]
+    public function testStatus404AposPaginaValidaEncerraListaDeUnidades(
+        AmbientePncp $ambiente
+    ): void
+    {
+        $transporte = new TransporteCandidatosPncpFake([
+            $this->respostaJson([
+                $this->candidato('999001', 1),
+                $this->candidato('999002', 2),
+            ]),
+            new RespostaHttpPncp(404, [], '{"message":"texto ignorado"}'),
+        ]);
+
+        $resultado = $this->localizar($transporte, 2, 5, $ambiente);
+
+        $this->assertSame(SituacaoBuscaCandidatosPca::CONCLUIDA, $resultado->getSituacao());
+        $this->assertSame([], $resultado->getCandidatos());
+        $this->assertCount(2, $transporte->requisicoes);
+    }
+
+    #[DataProvider('statusInconclusivoNaPrimeiraPagina')]
+    public function testStatus400Ou404NaPrimeiraPaginaPermaneceInconclusivo(int $status): void
+    {
+        $transporte = new TransporteCandidatosPncpFake([
+            new RespostaHttpPncp($status, [], '{"message":"texto ignorado"}'),
+        ]);
+
+        $resultado = $this->localizar($transporte, 2, 5);
+
+        $this->assertSame(SituacaoBuscaCandidatosPca::INCONCLUSIVA, $resultado->getSituacao());
+        $this->assertSame([], $resultado->getCandidatos());
+    }
+
+    /** @return iterable<string, array{int}> */
+    public static function statusInconclusivoNaPrimeiraPagina(): iterable
+    {
+        yield '400' => [400];
+        yield '404' => [404];
+    }
+
+    /** @return iterable<string, array{AmbientePncp}> */
+    public static function ambientesPncp(): iterable
+    {
+        yield 'homologacao' => [AmbientePncp::HOMOLOGACAO];
+        yield 'producao' => [AmbientePncp::PRODUCAO];
+    }
+
     public function testDevePercorrerListaCompletaAntesDeConcluirQueNaoHaCandidato(): void
     {
         $transporte = new TransporteCandidatosPncpFake([
@@ -232,11 +279,12 @@ final class PaginacaoCandidatosPncpTest extends TestCase
     private function localizar(
         TransporteCandidatosPncpFake $transporte,
         int $tamanhoPagina,
-        int $limitePaginas
+        int $limitePaginas,
+        AmbientePncp $ambiente = AmbientePncp::HOMOLOGACAO
     ): ResultadoBuscaCandidatosPca {
         $adapter = new LeitorPncpAdapter(
             $transporte,
-            new ConfiguracaoTransportePncp(AmbientePncp::HOMOLOGACAO, 1_024, 1_048_576),
+            new ConfiguracaoTransportePncp($ambiente, 1_024, 1_048_576),
             new ConfiguracaoLeituraPncp($tamanhoPagina, 32, $limitePaginas, 250, 5_000),
             new NullLogger(),
             new TemporizadorSistemaPncp()

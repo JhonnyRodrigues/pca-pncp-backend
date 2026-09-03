@@ -145,28 +145,17 @@ Execute a suíte configurada:
 composer tests
 ```
 
-Os adapters e seus contratos opt-in possuem comandos separados:
+A suíte padrão combina testes de unidade, componentes e integrações
+controladas, sempre sem recursos externos reais. Contratos locais, preflights,
+gates opt-in e comandos de limpeza ficam separados porque possuem dependências
+e efeitos operacionais diferentes.
 
-```bash
-composer contract:tests
-composer contract:preflight:oracle
-composer contract:preflight:pncp
-composer contract:pncp
-
-composer adapters:tests
-composer contract:adapters:tests
-composer contract:adapters:preflight:oracle
-composer contract:adapters:preflight:pncp
-composer contract:adapters:pncp:cleanup
-composer contract:adapters:pncp
-
-composer contract:oracle82:tests
-composer contract:oracle82:preflight
-```
-
-Esses contratos são opt-in, ficam fora de `composer tests` e podem acessar
-recursos reais autorizados. A preparação das configurações, as Blanks do
-Scriptcase, os modos de lock, a limpeza PNCP e o diagnóstico de falhas estão no
+Consulte o
+[catálogo de comandos Composer](docs/vigentes/apoio/catalogo_de_comandos_composer.md)
+antes de escolher outro comando. Ele informa finalidade, classificação,
+configuração, acesso externo, possibilidade de escrita ou exclusão e
+autorização necessária. A preparação passo a passo das configurações, Blanks
+do Scriptcase, gates e recuperações está no
 [guia didático de execução das probes](docs/vigentes/apoio/guia_de_execucao_das_probes.md).
 
 O Composer usa `vendor/autoload.php` como autoloader. O antigo exemplo manual e

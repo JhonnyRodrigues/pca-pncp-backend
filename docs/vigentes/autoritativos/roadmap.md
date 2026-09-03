@@ -871,7 +871,22 @@ ou tratar integração real como autorização automática de implantação.
 - executar preflight que proíbe produção;
 - comprovar autenticação, paginação, ausência, sequencial e identificadores;
 - testar decimais, escritas incertas e limpeza best-effort;
-- registrar versão do contrato, data e evidências.
+- incorporar a evidência real de que `400` no consolidado conhecido exige
+  confirmação pela listagem completa e de que `404` encerra a listagem de
+  unidades somente após página `200` válida e com página maior que 1;
+- registrar versão do contrato, data e evidências;
+- gate nominal aprovado no treinamento em 03/09/2026, com limpeza confirmada e
+  SHA-256 sanitizado
+  `0688185978654e374ddf959f377d8cf619314bc906f81e19cafbdff1388aae2c`;
+- gate de escrita incerta aprovado no treinamento em 03/09/2026, após
+  exatamente um POST, recuperação somente por leitura e limpeza confirmada,
+  com SHA-256 sanitizado
+  `f68ee8ee61db4ea11598f88a52100bc9e1cb5ca924eb6bcbe16930d458a149ba`;
+- regressão final aprovada em PHP 8.4.7: Infrastructure PNCP 347/1.110,
+  Composition 11/187, Presentation 31/319, Integration 5/103, contratos locais
+  5.1, 5.9, 8.2 e 8.3 verdes e suíte padrão 882/3.846;
+- Sprint concluída em 03/09/2026. A compatibilidade observada manteve a DI-009
+  sem nova alteração semântica; a Sprint 8.4 é a próxima na ordem.
 
 #### Sprint 8.4 — Fluxos completos dos dois modos
 

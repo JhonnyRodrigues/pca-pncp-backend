@@ -27,6 +27,29 @@ use Semae\Pca\Infrastructure\Pncp\Leitura\TemporizadorSistemaPncp;
 
 final class PaginacaoItensPncpTest extends TestCase
 {
+    #[DataProvider('statusInconclusivoNosItens')]
+    public function testStatus400Ou404NaPaginacaoDeItensPermaneceInconclusivo(
+        int $status
+    ): void {
+        $transporte = new TransportePaginacaoPncpFake([
+            $this->respostaJson($this->identidade()),
+            $this->respostaJson($this->itens([1001, 1002])),
+            new RespostaHttpPncp($status, [], '{"message":"texto ignorado"}'),
+        ]);
+
+        $resultado = $this->observar($transporte, 2, 5);
+
+        $this->assertSame(SituacaoObservacaoPca::INCONCLUSIVA, $resultado->getSituacao());
+        $this->assertNull($resultado->getPcaObservado());
+    }
+
+    /** @return iterable<string, array{int}> */
+    public static function statusInconclusivoNosItens(): iterable
+    {
+        yield '400' => [400];
+        yield '404' => [404];
+    }
+
     public function testDeveLerPaginasSequenciaisAtePaginaCurtaEPreservarLacunas(): void
     {
         $transporte = new TransportePaginacaoPncpFake([

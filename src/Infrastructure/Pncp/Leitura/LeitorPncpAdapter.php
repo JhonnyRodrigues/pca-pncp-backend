@@ -71,7 +71,7 @@ final class LeitorPncpAdapter implements LeitorPncpPort
                 AcaoTecnicaPncp::OBSERVAR_PCA_PNCP
             );
 
-            if ($consolidado->getStatus() === 204) {
+            if (in_array($consolidado->getStatus(), [204, 400], true)) {
                 $candidatos = $this->lerTodosOsCandidatos(
                     $sessao,
                     $baseAno . '/consolidado/unidades',
@@ -372,9 +372,17 @@ final class LeitorPncpAdapter implements LeitorPncpPort
 
     private function exigirStatusOk(RespostaHttpPncp $resposta): void
     {
-        if ($resposta->getStatus() !== 200) {
-            throw new RuntimeException('Status de leitura PNCP inesperado.');
+        $status = $resposta->getStatus();
+
+        if ($status === 200) {
+            return;
         }
+
+        if (in_array($status, [400, 404], true)) {
+            throw new UnexpectedValueException();
+        }
+
+        throw new RuntimeException('Status de leitura PNCP inesperado.');
     }
 
     /** @return array<string, mixed> */
@@ -486,6 +494,14 @@ final class LeitorPncpAdapter implements LeitorPncpPort
             );
 
             if ($resposta->getStatus() === 204) {
+                return $candidatos;
+            }
+
+            if (
+                $resposta->getStatus() === 404
+                && $numeroPagina > 1
+                && $paginasVistas !== []
+            ) {
                 return $candidatos;
             }
 
