@@ -7,6 +7,7 @@ namespace Semae\Pca\Infrastructure\Oracle\Adodb;
 use InvalidArgumentException;
 use LogicException;
 use Throwable;
+use UnexpectedValueException;
 
 final class ConexaoAdodbEmprestada
 {
@@ -23,8 +24,12 @@ final class ConexaoAdodbEmprestada
 
     private bool $emTransacao = false;
 
-    public function __construct(private readonly object $adodb)
-    {
+    private readonly ConversorCharsetAdodbOracle $conversorCharset;
+
+    public function __construct(
+        private readonly object $adodb,
+        string $charsetAdodb = 'UTF-8'
+    ) {
         foreach (self::METODOS_OBRIGATORIOS as $metodo) {
             if (!method_exists($this->adodb, $metodo)) {
                 throw new InvalidArgumentException(
@@ -32,6 +37,8 @@ final class ConexaoAdodbEmprestada
                 );
             }
         }
+
+        $this->conversorCharset = new ConversorCharsetAdodbOracle($charsetAdodb);
     }
 
     public function iniciarTransacao(): void
@@ -133,7 +140,7 @@ final class ConexaoAdodbEmprestada
         }
 
         /** @var array<int, array<string, mixed>> $linhas */
-        return array_values($linhas);
+        return array_values($this->conversorCharset->converterResultadoGetAll($linhas));
     }
 
     private function exigirTransacaoAtiva(): void
@@ -178,9 +185,9 @@ final class ConexaoAdodbEmprestada
                 }
 
                 $sql = substr_replace($sql, $placeholder, $posicao, 1);
-                $parametrosNomeados[$nome] = $valor;
+                $parametrosNomeados[$nome] = $this->conversorCharset->converterEscrita($valor);
             }
-        } catch (LogicException $exception) {
+        } catch (LogicException | UnexpectedValueException $exception) {
             throw $exception;
         } catch (Throwable) {
             throw $this->falha('Falha ao preparar binds Oracle.');

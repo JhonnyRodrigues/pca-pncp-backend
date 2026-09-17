@@ -187,22 +187,7 @@ final class PreparadorExecucaoPublicacaoPca
 
         $resultadoAdotada = $this->estrategiaPublicacao->consultarAdotada($anoExecucao);
 
-        if ($resultadoAdotada->getSituacao() === SituacaoConsultaEstrategia::AUSENTE) {
-            $resultadoAdocao = $this->estrategiaPublicacao->adotar(
-                $anoExecucao,
-                $estrategiaCorrente
-            );
-
-            if (!$resultadoAdocao->foiAdotada()) {
-                return $this->desfazerPreservandoFalha(
-                    $this->falhaOuDiagnostico(
-                        $resultadoAdocao->getFalha(),
-                        'ADOCAO_ESTRATEGIA_FALHOU',
-                        'Não foi possível adotar a estratégia anual.'
-                    )
-                );
-            }
-        } elseif ($resultadoAdotada->getSituacao() === SituacaoConsultaEstrategia::DISPONIVEL) {
+        if ($resultadoAdotada->getSituacao() === SituacaoConsultaEstrategia::DISPONIVEL) {
             $estrategiaAdotada = $resultadoAdotada->getEstrategia();
 
             if (
@@ -216,12 +201,27 @@ final class PreparadorExecucaoPublicacaoPca
                     )
                 );
             }
-        } else {
+        } elseif ($resultadoAdotada->getSituacao() !== SituacaoConsultaEstrategia::AUSENTE) {
             return $this->desfazerPreservandoFalha(
                 $this->falhaOuDiagnostico(
                     $resultadoAdotada->getFalha(),
                     'CONSULTA_ESTRATEGIA_ADOTADA_FALHOU',
                     'Não foi possível consultar a estratégia adotada.'
+                )
+            );
+        }
+
+        $resultadoAdocao = $this->estrategiaPublicacao->adotar(
+            $anoExecucao,
+            $estrategiaCorrente
+        );
+
+        if (!$resultadoAdocao->foiAdotada()) {
+            return $this->desfazerPreservandoFalha(
+                $this->falhaOuDiagnostico(
+                    $resultadoAdocao->getFalha(),
+                    'ADOCAO_ESTRATEGIA_FALHOU',
+                    'Não foi possível adotar a estratégia anual.'
                 )
             );
         }

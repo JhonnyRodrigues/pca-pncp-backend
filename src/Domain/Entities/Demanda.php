@@ -26,6 +26,7 @@ class Demanda
         private readonly DecimalExato $valorTotal,
         private readonly DecimalExato $valorOrcamentoExercicio,
         private readonly int $catalogo,
+        private readonly int $classificacaoCatalogo,
         private readonly string $codigoItem,
         private readonly string $grupo,
         private readonly string $descricaoGrupo,
@@ -34,6 +35,7 @@ class Demanda
         $this->validarCategoria();
         $this->validarQuantidade();
         $this->validarCatalogo();
+        $this->validarClassificacaoCatalogo();
         $this->validarOrigem();
     }
 
@@ -107,6 +109,11 @@ class Demanda
         return $this->catalogo;
     }
 
+    public function getClassificacaoCatalogo(): int
+    {
+        return $this->classificacaoCatalogo;
+    }
+
     public function getCodigoItem(): string
     {
         return $this->codigoItem;
@@ -129,8 +136,8 @@ class Demanda
 
     private function validarCategoria(): void
     {
-        if (!in_array($this->categoria, [1, 2], true)) {
-            throw new InvalidArgumentException('A categoria deve ser 1 (Material) ou 2 (Serviço).');
+        if ($this->categoria < 1 || $this->categoria > 8) {
+            throw new InvalidArgumentException('A categoria deve pertencer ao domínio PNCP de 1 a 8.');
         }
     }
 
@@ -141,10 +148,21 @@ class Demanda
         }
     }
 
+    private function validarClassificacaoCatalogo(): void
+    {
+        if (!in_array($this->classificacaoCatalogo, [1, 2], true)) {
+            throw new InvalidArgumentException(
+                'A classificação do catálogo deve ser 1 (Material) ou 2 (Serviço).'
+            );
+        }
+    }
+
     private function validarCatalogo(): void
     {
         if (!in_array($this->catalogo, [1, 2], true)) {
-            throw new InvalidArgumentException('O catálogo deve ser 1 (Catálogo de bens e serviços do Compras.gov.br) ou 2 (Outros).');
+            throw new InvalidArgumentException(
+                'O catálogo deve ser 1 (Compras.gov.br) ou 2 (Outros).'
+            );
         }
     }
 

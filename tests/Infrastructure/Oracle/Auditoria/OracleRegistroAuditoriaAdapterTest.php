@@ -158,6 +158,12 @@ final class OracleRegistroAuditoriaAdapterTest extends TestCase
             [[
                 'ESTRATEGIA_ADOTADA_PUBLICACAO' => 'INDIVIDUAL',
                 'UASG_ADOTADA' => '928344',
+                'ESTADO_PUBLICACAO' => null,
+                'SEQUENCIAL_PUBLICACAO_PNCP' => null,
+            ]],
+            [[
+                'ESTRATEGIA_ADOTADA_PUBLICACAO' => 'INDIVIDUAL',
+                'UASG_ADOTADA' => '928344',
                 'ESTADO_PUBLICACAO' => 'PUBLICADO',
                 'SEQUENCIAL_PUBLICACAO_PNCP' => '77',
             ]],
@@ -251,7 +257,8 @@ final class OracleRegistroAuditoriaAdapterTest extends TestCase
                 'APP', 'PAC_DEMANDAS', 'ID_DEMANDA', 'FK_PLANO', 'SITUACAO',
                 'FK_UNIDADE_REQUISITANTE', 'DATA_DESEJADA', 'CATEGORIA',
                 'DESCRICAO', 'UNIDADE_MEDIDA', 'QUANTIDADE', 'VALOR_TOTAL',
-                'VALOR_ORCAMENTO_EXERCICIO', 'CATALOGO', 'CODIGO_ITEM', 'GRUPO',
+                'VALOR_ORCAMENTO_EXERCICIO', 'CLASSIFICACAO_CATALOGO',
+                'CODIGO_ITEM', 'GRUPO',
                 [
                     'schema' => 'CEBISIS',
                     'tabela' => 'MT_GRUPOS_MATERIAIS',

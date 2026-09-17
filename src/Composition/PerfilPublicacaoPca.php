@@ -7,6 +7,7 @@ namespace Semae\Pca\Composition;
 use DateTimeZone;
 use InvalidArgumentException;
 use Semae\Pca\Infrastructure\Oracle\Auditoria\MapeamentoHistoricosOracle;
+use Semae\Pca\Infrastructure\Oracle\Adodb\ConversorCharsetAdodbOracle;
 use Semae\Pca\Infrastructure\Oracle\Contexto\MapeamentoLotacoesUsuarioOracle;
 use Semae\Pca\Infrastructure\Oracle\Contexto\MapeamentoRepresentantesOracle;
 use Semae\Pca\Infrastructure\Oracle\EstadoOperacional\MapeamentoEstadoOperacionalOracle;
@@ -30,6 +31,7 @@ final class PerfilPublicacaoPca
     private readonly ConfiguracaoTransportePncp $configuracaoTransporte;
     private readonly ConfiguracaoLeituraPncp $configuracaoLeitura;
     private readonly DateTimeZone $fusoOperacional;
+    private readonly string $charsetAdodb;
     private readonly MapeamentoControlesConcorrenciaOracle $controlesConcorrencia;
     private readonly MapeamentoConfiguracaoEstrategiaOracle $configuracaoEstrategia;
     private readonly MapeamentoPlanosEstrategiaOracle $planosEstrategia;
@@ -95,7 +97,10 @@ final class PerfilPublicacaoPca
             );
 
             $oracle = self::exigirSecao($perfil, 'oracle');
-            self::exigirChavesExatas($oracle, ['timezone', 'mapeamentos']);
+            self::exigirChavesExatas($oracle, ['charset_adodb', 'timezone', 'mapeamentos']);
+            $this->charsetAdodb = (new ConversorCharsetAdodbOracle(
+                self::exigirTextoNaoVazio($oracle, 'charset_adodb')
+            ))->getCharsetAdodb();
             $this->fusoOperacional = new DateTimeZone(
                 self::exigirTextoNaoVazio($oracle, 'timezone')
             );
@@ -138,6 +143,11 @@ final class PerfilPublicacaoPca
     public function getFusoOperacional(): DateTimeZone
     {
         return $this->fusoOperacional;
+    }
+
+    public function getCharsetAdodb(): string
+    {
+        return $this->charsetAdodb;
     }
 
     public function getControlesConcorrencia(): MapeamentoControlesConcorrenciaOracle
@@ -222,7 +232,8 @@ final class PerfilPublicacaoPca
                 'schema', 'tabela', 'colunaId', 'colunaPlanoOrigem', 'colunaSituacao',
                 'colunaUnidadeRequisitante', 'colunaDataDesejada', 'colunaCategoria',
                 'colunaDescricao', 'colunaUnidadeMedida', 'colunaQuantidade',
-                'colunaValorTotal', 'colunaValorOrcamentoExercicio', 'colunaCatalogo',
+                'colunaValorTotal', 'colunaValorOrcamentoExercicio',
+                'colunaClassificacaoCatalogo',
                 'colunaCodigoItem', 'colunaGrupo', 'grupoRemoto', 'colunaOrigem',
             ],
             'unidades_orcamentarias' => [
@@ -361,20 +372,38 @@ final class PerfilPublicacaoPca
         array $valores,
         string $chave
     ): ?string {
-        if (($valores[$chave] ?? null) === null) {
+        $valor = $valores[$chave] ?? null;
+        $campo = 'pncp.' . $chave;
+
+        if ($valor === null) {
             return null;
         }
+        if (!is_string($valor)) {
+            throw new InvalidArgumentException(
+                "{$campo} esperava null ou caminho absoluto legível; recebeu "
+                    . get_debug_type($valor) . '.'
+            );
+        }
 
-        $caminho = self::exigirTextoNaoVazio($valores, $chave);
+        $caminho = trim($valor);
+        if ($caminho === '') {
+            throw new InvalidArgumentException(
+                "{$campo} esperava null ou caminho absoluto legível; recebeu texto vazio."
+            );
+        }
 
         if (preg_match('/^(?:[A-Za-z]:[\\\\\/]|[\\\\\/]{2}|\/)/D', $caminho) !== 1) {
-            throw new InvalidArgumentException('Caminho de arquivo configurado deve ser absoluto.');
+            throw new InvalidArgumentException(
+                "{$campo} deve ser um caminho absoluto; recebeu {$caminho}."
+            );
         }
 
         $resolvido = realpath($caminho);
 
         if ($resolvido === false || !is_file($resolvido) || !is_readable($resolvido)) {
-            throw new InvalidArgumentException('Arquivo indicado pelo perfil não está legível.');
+            throw new InvalidArgumentException(
+                "{$campo} aponta para arquivo inexistente, irregular ou ilegível: {$caminho}."
+            );
         }
 
         return $resolvido;

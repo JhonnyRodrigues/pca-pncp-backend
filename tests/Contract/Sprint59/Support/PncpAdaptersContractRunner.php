@@ -514,6 +514,7 @@ final class PncpAdaptersContractRunner
                 new DecimalExato($totals[$index]),
                 new DecimalExato($totals[$index]),
                 $template['catalogo'],
+                $template['categoria'],
                 $template['codigo_item'],
                 $template['grupo'],
                 $template['descricao_grupo'],

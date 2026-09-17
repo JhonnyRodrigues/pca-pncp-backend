@@ -665,7 +665,7 @@ final class OraclePlanoRepositoryTest extends TestCase
                 'QUANTIDADE',
                 'VALOR_TOTAL',
                 'VALOR_ORCAMENTO_EXERCICIO',
-                'CATALOGO',
+                'CLASSIFICACAO_CATALOGO',
                 'CODIGO_ITEM',
                 'GRUPO_CODIGO',
                 [
@@ -760,7 +760,7 @@ final class OraclePlanoRepositoryTest extends TestCase
             'QUANTIDADE' => '5',
             'VALOR_TOTAL' => $valorTotal,
             'VALOR_ORCAMENTO_EXERCICIO' => '1000.0000',
-            'CATALOGO' => '1',
+            'CLASSIFICACAO_CATALOGO' => '1',
             'CODIGO_ITEM' => 'CATMAT-123',
             'GRUPO' => '75',
             'DESCRICAO_GRUPO' => 'Equipamentos',

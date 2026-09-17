@@ -178,6 +178,22 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
         );
     }
 
+    public function testDeveAceitarNovaVersaoIntegralmentePendenteAoConsultarAdotada(): void
+    {
+        [$adapter, , $adodb] = $this->criarContexto();
+        $adodb->resultadosGetAll = [[
+            ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+            ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
+            ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986702'],
+            ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
+        ]];
+
+        $resultado = $adapter->consultarAdotada($this->ano());
+
+        $this->assertSame(SituacaoConsultaEstrategia::DISPONIVEL, $resultado->getSituacao());
+        $this->assertSame(ModoPublicacao::INDIVIDUAL, $resultado->getEstrategia()?->getModo());
+    }
+
     public function testDeveConsultarEstrategiaAdotadaConsolidadaEResolverDescricao(): void
     {
         [$adapter, , $adodb] = $this->criarContexto();
@@ -212,11 +228,10 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
 
         $cenariosInvalidos = [
             [
-                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
-                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986702'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => null],
             ],
             [
-                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => null],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => '986701'],
             ],
             [
                 ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
@@ -303,6 +318,103 @@ final class OracleEstrategiaPublicacaoAdapterTest extends TestCase
             array_values($adodb->execucoes[1]['parametros'])
         );
         $this->assertSame(0, $adodb->commits);
+        $conexao->desfazerTransacao();
+    }
+
+    public function testDevePropagarAdocaoSomenteParaNovasVersoesPendentes(): void
+    {
+        [$adapter, $conexao, $adodb] = $this->criarContexto();
+        $conexao->iniciarTransacao();
+        $adodb->resultadosGetAll = [
+            [
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986702'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
+            ],
+            [
+                ['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => '986701', 'DESCRICAO_UASG' => 'UASG A'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'CODIGO_UASG' => '986702', 'DESCRICAO_UASG' => 'UASG B'],
+            ],
+            [
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986702'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986702'],
+            ],
+        ];
+
+        $resultado = $adapter->adotar($this->ano(), EstrategiaPublicacao::individual());
+
+        $this->assertTrue($resultado->foiAdotada());
+        $this->assertCount(2, $adodb->execucoes);
+        foreach ($adodb->execucoes as $execucao) {
+            $this->assertStringContainsString('ESTRATEGIA_ADOTADA_PUBLICACAO IS NULL', $execucao['sql']);
+            $this->assertStringContainsString('UASG_ADOTADA IS NULL', $execucao['sql']);
+            $this->assertStringNotContainsString('DATA_PUBLICACAO', $execucao['sql']);
+            $this->assertStringNotContainsString('VERSAO =', $execucao['sql']);
+        }
+        $this->assertTrue($conexao->estaEmTransacao());
+        $conexao->desfazerTransacao();
+    }
+
+    public function testDevePropagarAdocaoConsolidadaParaNovaVersaoPendente(): void
+    {
+        [$adapter, $conexao, $adodb] = $this->criarContexto();
+        $conexao->iniciarTransacao();
+        $adodb->resultadosGetAll = [
+            [
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'CONSOLIDADO', 'UASG_ADOTADA' => '986700'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'CONSOLIDADO', 'UASG_ADOTADA' => '986700'],
+            ],
+            [
+                ['CHAVE_CONFIGURACAO' => 'ESTRATEGIA_PUBLICACAO_PLANOS', 'VALOR_CONFIGURACAO' => 'CONSOLIDADO'],
+                ['CHAVE_CONFIGURACAO' => 'UASG_CONSOLIDADORA', 'VALOR_CONFIGURACAO' => '986700', 'DESCRICAO_CONFIGURACAO' => 'Central'],
+            ],
+            [
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'CONSOLIDADO', 'UASG_ADOTADA' => '986700'],
+                ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'CONSOLIDADO', 'UASG_ADOTADA' => '986700'],
+                ['UNIDADE_ORCAMENTARIA' => '20', 'ESTRATEGIA_ADOTADA' => 'CONSOLIDADO', 'UASG_ADOTADA' => '986700'],
+            ],
+        ];
+        $estrategia = EstrategiaPublicacao::consolidada(new Uasg('986700', 'Central'));
+
+        $resultado = $adapter->adotar($this->ano(), $estrategia);
+
+        $this->assertTrue($resultado->foiAdotada());
+        $this->assertCount(1, $adodb->execucoes);
+        $this->assertSame(
+            ['CONSOLIDADO', '986700', $this->ano()->getValor()],
+            array_values($adodb->execucoes[0]['parametros'])
+        );
+        $this->assertStringContainsString(
+            'ESTRATEGIA_ADOTADA_PUBLICACAO IS NULL',
+            $adodb->execucoes[0]['sql']
+        );
+        $this->assertStringContainsString('UASG_ADOTADA IS NULL', $adodb->execucoes[0]['sql']);
+        $conexao->desfazerTransacao();
+    }
+
+    public function testDeveFalharSeReleituraAindaEncontrarNovaVersaoPendente(): void
+    {
+        [$adapter, $conexao, $adodb] = $this->criarContexto();
+        $conexao->iniciarTransacao();
+        $mistura = [
+            ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL', 'UASG_ADOTADA' => '986701'],
+            ['UNIDADE_ORCAMENTARIA' => '10', 'ESTRATEGIA_ADOTADA' => null, 'UASG_ADOTADA' => null],
+        ];
+        $adodb->resultadosGetAll = [
+            $mistura,
+            [['UNIDADE_ORCAMENTARIA' => '10', 'CODIGO_UASG' => '986701', 'DESCRICAO_UASG' => 'UASG A']],
+            $mistura,
+        ];
+
+        $resultado = $adapter->adotar($this->ano(), EstrategiaPublicacao::individual());
+
+        $this->assertFalse($resultado->foiAdotada());
+        $this->assertSame('ADOCAO_ESTRATEGIA_NAO_CONFIRMADA', $resultado->getFalha()?->getCodigo());
+        $this->assertCount(1, $adodb->execucoes);
         $conexao->desfazerTransacao();
     }
 

@@ -77,6 +77,7 @@ final class LeitorPncpAdapter implements LeitorPncpPort
                     $baseAno . '/consolidado/unidades',
                     $cnpj,
                     $ano,
+                    $uasg,
                     AcaoTecnicaPncp::OBSERVAR_PCA_PNCP
                 );
 
@@ -149,6 +150,7 @@ final class LeitorPncpAdapter implements LeitorPncpPort
                 $base . '/consolidado/unidades',
                 $cnpj,
                 $ano,
+                $uasgEsperada,
                 AcaoTecnicaPncp::LOCALIZAR_CANDIDATOS_PNCP
             );
             $correspondentes = array_values(array_filter(
@@ -476,6 +478,7 @@ final class LeitorPncpAdapter implements LeitorPncpPort
         string $caminhoCandidatos,
         Cnpj $cnpj,
         int $ano,
+        string $uasgEsperada,
         AcaoTecnicaPncp $acao
     ): array {
         $candidatos = [];
@@ -495,6 +498,18 @@ final class LeitorPncpAdapter implements LeitorPncpPort
 
             if ($resposta->getStatus() === 204) {
                 return $candidatos;
+            }
+
+            if ($resposta->getStatus() === 404 && $numeroPagina === 1) {
+                $this->comprovarAusenciaAnual(
+                    $sessao,
+                    $cnpj,
+                    $ano,
+                    $uasgEsperada,
+                    $acao
+                );
+
+                return [];
             }
 
             if (
@@ -549,6 +564,67 @@ final class LeitorPncpAdapter implements LeitorPncpPort
         }
 
         throw new UnexpectedValueException();
+    }
+
+    private function comprovarAusenciaAnual(
+        SessaoPncpAutenticada $sessao,
+        Cnpj $cnpj,
+        int $ano,
+        string $uasgEsperada,
+        AcaoTecnicaPncp $acao
+    ): void {
+        $baseOrgao = '/v1/orgaos/' . rawurlencode($cnpj->getValor());
+        $respostaUnidades = $this->get(
+            $sessao,
+            $baseOrgao . '/unidades',
+            $acao
+        );
+        $this->exigirStatusOk($respostaUnidades);
+        $unidades = $this->decodificarLista($respostaUnidades);
+        $quantidadeCorrespondencias = 0;
+
+        foreach ($unidades as $unidade) {
+            if (!is_array($unidade) || array_is_list($unidade)) {
+                throw new UnexpectedValueException();
+            }
+
+            $orgao = $unidade['orgao'] ?? null;
+            $codigoUnidade = $unidade['codigoUnidade'] ?? null;
+            if (
+                !is_array($orgao)
+                || array_is_list($orgao)
+                || !is_string($codigoUnidade)
+                || trim($codigoUnidade) === ''
+            ) {
+                throw new UnexpectedValueException();
+            }
+
+            if ($this->normalizarCnpj($orgao['cnpj'] ?? null) !== $cnpj->getValor()) {
+                throw new DomainException();
+            }
+
+            if (trim($codigoUnidade) === $uasgEsperada) {
+                $quantidadeCorrespondencias++;
+            }
+        }
+
+        if ($quantidadeCorrespondencias !== 1) {
+            throw new DomainException();
+        }
+
+        $respostaConsolidado = $this->get(
+            $sessao,
+            $baseOrgao . '/pca/' . $ano . '/consolidado',
+            $acao
+        );
+
+        if ($respostaConsolidado->getStatus() !== 404) {
+            if ($respostaConsolidado->getStatus() !== 200) {
+                $this->exigirStatusOk($respostaConsolidado);
+            }
+
+            throw new UnexpectedValueException();
+        }
     }
 
     /** @return int[] */

@@ -108,18 +108,11 @@ final class SerializadorPayloadPncp
     /** @return array<string, mixed> */
     private function projetarItem(Demanda $demanda): array
     {
-        $categoria = $demanda->getCategoria();
-        $classificacaoCatalogo = match ($categoria) {
-            1 => '1',
-            2 => '2',
-            default => throw new FalhaSerializacaoPncp(),
-        };
-
         return [
             'numeroItem' => $demanda->getIdDemanda(),
-            'categoriaItemPca' => $categoria,
+            'categoriaItemPca' => $demanda->getCategoria(),
             'catalogo' => $demanda->getCatalogo(),
-            'classificacaoCatalogo' => $classificacaoCatalogo,
+            'classificacaoCatalogo' => (string) $demanda->getClassificacaoCatalogo(),
             'classificacaoSuperiorCodigo' => $this->validarTexto(
                 $demanda->getGrupo(),
                 100

@@ -49,6 +49,8 @@
         "contract:pncp83:nominal":"vendor/bin/phpunit --configuration phpunit.pncp83.contract.xml --group pncp83-nominal-live",
         "contract:pncp83:uncertain":"vendor/bin/phpunit --configuration phpunit.pncp83.contract.xml --group pncp83-uncertain-live",
         "contract:pncp83:cleanup":"php tests/Contract/Sprint83/run-pncp-cleanup.php",
+        "contract:sprint84:tests":"vendor/bin/phpunit --configuration phpunit.sprint84.contract.xml",
+        "contract:sprint84:preflight":"php tests/Contract/Sprint84/run-preflight.php",
         "contract:preflight":"php tests/Contract/Sprint51/run-preflight.php",
         "contract:preflight:pncp":"php tests/Contract/Sprint51/run-preflight.php pncp",
         "contract:preflight:oracle":"php tests/Contract/Sprint51/run-preflight.php oracle",

@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 03/09/2026
+**Atualizado em:** 17/09/2026
 
 ## Limites de autoridade
 
@@ -32,7 +32,142 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 8.3.
+- A última sprint concluída é a Sprint 8.4.
+- A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
+  O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
+  operacional Oracle.
+- O corretivo 8.4.7-C/C1 concluiu código, testes e documentação locais. A
+  conferência manual de C2 foi aprovada em 16/09/2026, com as 11 consultas e o
+  SHA-256 canônico ADOdb
+  `97e63e36eba262aef78fe94d056419d90e5ade4111667393ec06a7ef535a9f90`.
+  O PRECHECK real de C2 foi aprovado em 16/09/2026, sem escrita Oracle ou PNCP,
+  com relatório SHA-256
+  `95b025a2cbac00b2723a542f2da513a5b3948ba37008f4cc672b3b81e8d12d8e`.
+  A convergência somente Oracle (C3) foi aprovada em 16/09/2026. Após uma
+  tentativa recusada ainda sem I/O, a execução efetiva `NENHUMA_ACAO` completou
+  somente os quatro pares operacionais pendentes e produziu o SHA-256 Oracle
+  `8783234664560b180f75dbd2e9e166db7c0af8d58a36de7ceb3f1744ffc72f92`.
+  A execução não deve ser repetida. O arquivo externo foi recolocado em modo
+  somente leitura (`PRECHECK`, escritas Oracle/PNCP falsas). A etapa local 8A
+  do Microciclo 8 foi concluída em 16/09/2026: o PRECHECK passou a aceitar
+  fotografia vazia e o roteiro das onze consultas somente leitura foi criado.
+  A preparação SGI, a conferência manual e o PRECHECK real de 8B foram
+  concluídos em 16/09/2026. O checkpoint Oracle aprovado é
+  `ace6ef705dac4a390cb2857b85648a73fb1341da7283af845f843fc83aac8536`;
+  o relatório `PRECHECK_CONFIRMADO` tem SHA-256
+  `25afec75e32b761e84163f625db343f2ab33f65792bf202287fb212234004226`.
+  Não houve escrita Oracle nem mutação PNCP no PRECHECK. A execução única de
+  8C foi concluída com `FLUXO_CONFIRMADO`: sequenciais 1 e 2 excluídos, UASG
+  930281/sequencial 4 preservada, onze versões em `EXCLUIDO` e duas auditorias
+  de procedimento 9. O SHA-256 Oracle posterior é
+  `038ce6eeed00124118272091203f3509d8847b52c89552dbaa328d79ebc19da0` e o
+  relatório tem SHA-256
+  `96f31765a8c44b6e353884c58cff9864ac3c4a1a3710f1dc248dbb65c15d4b44`.
+  Não repetir a execução. O mantenedor confirmou que o arquivo externo voltou
+  a `PRECHECK`, com ambas as permissões de escrita falsas, sem nova chamada da
+  Blank. O Microciclo 8 está concluído. O Microciclo 9 também foi concluído em
+  17/09/2026 com o checkpoint real do modo consolidado para 2026. A tentativa
+  anterior de usar 2028 foi recusada antes de I/O, preservando `RN-CAD-002`.
+  Após limpeza Oracle controlada e autorizada dos dados antigos de 2026, o SGI
+  gerou os planos 99/UO 1 e 100/UO 3 e as Demandas 811/810. As onze consultas
+  manuais e o PRECHECK confirmaram o SHA-256 Oracle
+  `c877c94cf8a633c977192484cda37455e1443892e5098efbd5f26fc89ba0e5da`.
+  O PRECHECK, request ID `29fb8872-e6ea-4c76-8a8e-35beeb10b2de`, comprovou a
+  ausência do alvo UASG 930281 sem escrita Oracle ou mutação PNCP. Os PCAs
+  legados 16/210, 17/205 e 18/207 permaneceram intocados. O SHA-256 do relatório
+  é `ff91c0c86ae7524df608d73acfc77c87c12cfc03fd80d77d6f85644ffae1d223`.
+  A publicação consolidada do Microciclo 10 foi concluída em 17/09/2026. A
+  execução única, request ID `8c65729b-90b5-4ac5-ada7-ca53b53387f8`, retornou
+  `FLUXO_CONFIRMADO`: um único PCA consolidado na UASG 930281, sequencial 36,
+  com as Demandas 810 e 811. Os planos 99 e 100 ficaram confirmados e
+  uniformemente projetados como `CONSOLIDADO/930281/PUBLICADO/36`; foi criada
+  uma auditoria de procedimento 5 e as duas âncoras de concorrência esperadas.
+  Os PCAs legados 16, 17 e 18 permaneceram intocados. Houve quatro commits,
+  sem rollback ou `Close()`. O SHA-256 Oracle posterior é
+  `f0d5b5408d2cbc9c3305168e3e25573fdefc3d67d2b7516afa69f2971a7ead79` e o
+  SHA-256 do relatório, recalculado e conferido, é
+  `a1f9928182db44f5699fd55ec52275392d2dddfec8622aa30942c09542f581f6`.
+  O mantenedor confirmou o retorno do arquivo externo a `PRECHECK`, com ambas
+  as permissões de escrita falsas. A execução não deve ser repetida. O
+  Microciclo 11 também foi concluído em 17/09/2026. A execução única
+  `NENHUMA_ACAO`, request ID `e858fa4a-9230-4a93-a1e0-272e7b1e99be`, retornou
+  `FLUXO_CONFIRMADO`, preservando a UASG 930281/sequencial 36 e as Demandas
+  810/811. As onze consultas Oracle e o SHA-256
+  `f0d5b5408d2cbc9c3305168e3e25573fdefc3d67d2b7516afa69f2971a7ead79`
+  permaneceram idênticos; não houve confirmação, auditoria ou mutação PNCP.
+  Os únicos dois `Execute` foram garantias idempotentes das âncoras existentes.
+  Houve quatro commits, sem rollback ou `Close()`. O SHA-256 do relatório,
+  recalculado e conferido, é
+  `3fd1ac2635c7d92fe805bc9cc1a708c8f77db2240cef9729cb6678e5643815e8`.
+  A configuração externa voltou ao modo somente leitura e a execução não deve
+  ser repetida. A etapa local 12A do Microciclo 12 foi concluída em 17/09/2026:
+  o roteiro das onze consultas somente leitura para a retificação consolidada
+  foi criado e protegido por teste. O Red falhou somente pelo arquivo ausente;
+  o Green passou com 7 testes/223 asserções. Os contratos Sprint 8.4 passaram
+  com 72/672, a matriz de integração com 10/205, lint e PSR-4 estrito também
+  foram aprovados. Não houve acesso real. A preparação SGI, a conferência
+  manual e o PRECHECK de 12B foram concluídos em 17/09/2026. Após corrigir a
+  lotação ativa de `jsilva` para a lotação 1, o checkpoint aprovou os planos
+  101/102, a fotografia 810/812 e o SHA-256 Oracle
+  `44944e0472e8d42f526b70dca07710c7322cb50b48cefbc2064a20396a990b23`.
+  O PRECHECK real, request ID `214ebb5a-7012-4efa-b01a-902b6e72d280`, repetiu
+  esse hash e encontrou o PCA 36 ainda com 810/811, sem escrita Oracle ou PNCP.
+  O SHA-256 do relatório, recalculado e conferido, é
+  `724db77321c7cc507ec46fa28ebcd0c76a4c26257122d39905ca1d2ea64769df`.
+  A etapa 12B foi concluída e a retificação real de 12C também terminou em
+  17/09/2026. A execução única, request ID
+  `a1c7336d-4b48-44f7-9996-0abf8f056f64`, retornou `FLUXO_CONFIRMADO`: o item
+  811 foi excluído antes da inclusão do item 812, preservando o PCA 36 ativo
+  com as Demandas 810/812. Os planos 101/102 foram confirmados e as quatro
+  versões ficaram uniformemente em `CONSOLIDADO/930281/PUBLICADO/36`. Foi
+  acrescentada uma auditoria de procedimento 8. Houve quatro commits, sem
+  rollback ou `Close()`. O SHA-256 Oracle posterior é
+  `ae8861e51dda76c8dea577c12502636cfecdf06d084364153f4c588078a97326` e o
+  SHA-256 do relatório, recalculado e conferido, é
+  `0352b60221ce40e80d9c368b5fc7b935b39fa9b4de0426c38a2b8cb8659202f0`.
+  O mantenedor confirmou o retorno da configuração externa a `PRECHECK`, com
+  ambas as permissões de escrita falsas, sem nova execução. O Microciclo 12
+  está concluído. A etapa local 13A foi concluída em 17/09/2026: o roteiro das
+  onze consultas somente leitura para a exclusão consolidada foi criado e
+  protegido por teste. O Red focado falhou somente pelo arquivo ausente e o
+  Green passou com 1 teste/31 asserções. Os contratos Sprint 8.4 passaram com
+  73/703, a matriz de integração com 10/205, lint e PSR-4 estrito também foram
+  aprovados. Não houve acesso real em 13A. A preparação SGI e o PRECHECK de
+  13B foram concluídos em 17/09/2026. Os cancelamentos de 810 e 812 geraram os
+  planos 103 e 104; a fotografia ficou vazia e as três Demandas 810/811/812
+  ficaram em situação 4. Uma primeira tentativa foi recusada antes de I/O
+  mutante porque o hash manual preservava tipos numéricos diferentes dos tipos
+  retornados pelo ADOdb. O snapshot foi comprovado idêntico após essa
+  normalização. O SHA-256 Oracle canônico é
+  `381cbf6ebc6a1d2610bbeaafc7a4aea714b0b6f68ea841a9fd12e3faeca71df4`.
+  O PRECHECK efetivo, request ID `f95becf2-a4d7-4f08-8762-45cb6577c1b7`,
+  retornou `PRECHECK_CONFIRMADO` e encontrou a UASG 930281/sequencial 36 com
+  exatamente 810/812, sem escrita Oracle ou mutação PNCP. O SHA-256 do
+  relatório, recalculado e conferido, é
+  `6dbc3e8308275936e26770d7eb7e698ce3cfee63cb5664909190112782bd2ba1`.
+  A etapa 13B está concluída. A execução única de 13C, request ID
+  `5c6798aa-7b80-43ed-93aa-594c915f1031`, também foi confirmada em
+  17/09/2026: um único `DELETE` removeu a UASG 930281/sequencial 36, duas
+  observações posteriores concluíram ausência definitiva e os PCAs legados
+  16, 17 e 18 permaneceram preservados. As seis versões ficaram em
+  `CONSOLIDADO/930281/EXCLUIDO/36`; somente o plano vigente 104 recebeu nova
+  confirmação e foi criada uma auditoria de procedimento 9. Houve quatro
+  commits, sem rollback ou `Close()`. O SHA-256 Oracle posterior é
+  `1aee1ee6f67810f56ec0d242c90868090d4b56c0f72ed290f505cbccd37dfd67` e o
+  SHA-256 do relatório, recalculado e conferido, é
+  `78f74ee35ace7731bdb7383736a81ae6385fb40af8eed1cbeba543b0890e000b`.
+  A execução não deve ser repetida. O mantenedor confirmou que a configuração
+  externa voltou a `PRECHECK`, com ambas as permissões de escrita falsas, sem
+  nova execução da Blank. O Microciclo 13 está concluído. O Microciclo 14 de
+  regressão e encerramento aprovou: contratos 8.4 com 73 testes/703 asserções;
+  Integration+Composition 29/505; Presentation+Application 270/1.315;
+  Infrastructure 511/1.956; contratos anteriores 5.1, 5.9, 8.2 e 8.3 verdes;
+  suíte padrão 921/4.214; lint de 355 arquivos; PSR-4 com 1.817 classes;
+  direção das dependências, ausência de segredos reais e `git diff --check`.
+  O Composer não apresentou erro estrutural e manteve somente o aviso existente
+  de licença não declarada. Nenhum teste live ou acesso externo ocorreu. O
+  Microciclo 14 e a Sprint 8.4 estão concluídos; a Sprint 8.5 é a próxima na
+  ordem e permanece sem autorização.
 - A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
 - A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
   aprovado no treinamento, incluindo publicação, operações de itens, exclusão
@@ -58,8 +193,9 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 8.2 — Integração Oracle real está concluída.
 - A Sprint 8.3 — Suíte PNCP de treinamento está concluída após os seis
   microciclos autorizados e o corretivo de paginação e ausência.
-- A Sprint 8.4 — Fluxos completos dos dois modos é a próxima na ordem e ainda
-  não possui autorização de implementação.
+- A Sprint 8.4 — Fluxos completos dos dois modos está concluída.
+- A Sprint 8.5 — Falhas, segurança e smoke test do pacote é a próxima na ordem,
+  mas ainda não possui autorização de planejamento ou implementação.
 
 ## Evidências do microciclo corretivo da Sprint 8.3
 

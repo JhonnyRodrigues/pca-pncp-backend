@@ -8,11 +8,33 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Semae\Pca\Application\ValueObjects\CorrelacaoExecucao;
 use Semae\Pca\Composition\CompositionRootPublicacaoPca;
+use Semae\Pca\Composition\PerfilPublicacaoPca;
+use Semae\Pca\Infrastructure\Pncp\Http\RequisicaoHttpPncp;
+use Semae\Pca\Infrastructure\Pncp\Http\RespostaHttpPncp;
+use Semae\Pca\Infrastructure\Pncp\Http\TransporteHttpPncp;
 use Semae\Pca\Presentation\Facades\FachadaPublicarPca;
 use stdClass;
 
 final class CompositionRootPublicacaoPcaTest extends TestCase
 {
+    public function testDeveAceitarTransportePncpCompartilhadoSemExecutarIoAoMontar(): void
+    {
+        $adodb = new AdodbSemIoCompositionRoot();
+        $transporte = new TransporteCompartilhadoSemIoCompositionRoot();
+        $root = new CompositionRootPublicacaoPca(transportePncp: $transporte);
+
+        $fachada = $root->montar(
+            $adodb,
+            'usuario.teste',
+            $this->perfilValido(),
+            new CorrelacaoExecucao('550e8400-e29b-41d4-a716-446655440000')
+        );
+
+        $this->assertInstanceOf(FachadaPublicarPca::class, $fachada);
+        $this->assertSame(0, $transporte->chamadas);
+        $this->assertSame(0, $adodb->chamadas);
+    }
+
     public function testDeveCriarGrafoNovoSemExecutarIoOuFecharConexao(): void
     {
         $adodb = new AdodbSemIoCompositionRoot();
@@ -40,6 +62,17 @@ final class CompositionRootPublicacaoPcaTest extends TestCase
         $this->assertNotSame($primeira, $segunda);
         $this->assertSame(0, $adodb->chamadas);
         $this->assertFalse($adodb->fechada);
+    }
+
+    public function testPerfilDeveExporCharsetAdodbExplicitamente(): void
+    {
+        $perfil = $this->perfilValido();
+        $perfil['oracle']['charset_adodb'] = 'Windows-1252';
+
+        $this->assertSame(
+            'Windows-1252',
+            (new PerfilPublicacaoPca($perfil))->getCharsetAdodb()
+        );
     }
 
     public function testDeveExigirTodasAsChavesSemAplicarDefaults(): void
@@ -107,6 +140,8 @@ final class CompositionRootPublicacaoPcaTest extends TestCase
         $casos['CA bundle ausente'] = $perfil;
         $casos['CA bundle ausente']['pncp']['ca_bundle'] =
             __DIR__ . DIRECTORY_SEPARATOR . 'cacert-inexistente.pem';
+        $casos['charset ADOdb desconhecido'] = $perfil;
+        $casos['charset ADOdb desconhecido']['oracle']['charset_adodb'] = 'WE8DESCONHECIDO';
         $casos['timezone invalido'] = $perfil;
         $casos['timezone invalido']['oracle']['timezone'] = 'Fuso/Inexistente';
         $casos['mapeamento nao array'] = $perfil;
@@ -139,6 +174,26 @@ final class CompositionRootPublicacaoPcaTest extends TestCase
             $perfil,
             new CorrelacaoExecucao('550e8400-e29b-41d4-a716-446655440000')
         );
+    }
+
+    public function testCaBundleIlegivelDeveInformarCampoECaminhoNaCausa(): void
+    {
+        $perfil = $this->perfilValido();
+        $caminho = __DIR__ . DIRECTORY_SEPARATOR . 'cacert-inexistente.pem';
+        $perfil['pncp']['ca_bundle'] = $caminho;
+
+        try {
+            new PerfilPublicacaoPca($perfil);
+            $this->fail('CA bundle ilegível deveria invalidar o perfil.');
+        } catch (InvalidArgumentException $failure) {
+            $this->assertSame('O perfil de publicação é inválido.', $failure->getMessage());
+            $this->assertInstanceOf(InvalidArgumentException::class, $failure->getPrevious());
+            $this->assertStringContainsString(
+                'pncp.ca_bundle',
+                $failure->getPrevious()->getMessage()
+            );
+            $this->assertStringContainsString($caminho, $failure->getPrevious()->getMessage());
+        }
     }
 
     public function testDeveRejeitarLoginAusenteDepoisDeValidarOPerfil(): void
@@ -195,6 +250,7 @@ final class CompositionRootPublicacaoPcaTest extends TestCase
                 'teto_retry_after_ms' => 5_000,
             ],
             'oracle' => [
+                'charset_adodb' => 'UTF-8',
                 'timezone' => 'America/Sao_Paulo',
                 'mapeamentos' => [
                     'controles_concorrencia' => [
@@ -250,7 +306,7 @@ final class CompositionRootPublicacaoPcaTest extends TestCase
                         'colunaQuantidade' => 'QUANTIDADE',
                         'colunaValorTotal' => 'VALOR_TOTAL',
                         'colunaValorOrcamentoExercicio' => 'VALOR_ORCAMENTO_EXERCICIO',
-                        'colunaCatalogo' => 'CATALOGO',
+                        'colunaClassificacaoCatalogo' => 'CLASSIFICACAO_CATALOGO',
                         'colunaCodigoItem' => 'CODIGO_ITEM',
                         'colunaGrupo' => 'GRUPO_CODIGO',
                         'grupoRemoto' => [
@@ -326,6 +382,18 @@ final class CompositionRootPublicacaoPcaTest extends TestCase
                 ],
             ],
         ];
+    }
+}
+
+final class TransporteCompartilhadoSemIoCompositionRoot implements TransporteHttpPncp
+{
+    public int $chamadas = 0;
+
+    public function enviar(RequisicaoHttpPncp $requisicao): RespostaHttpPncp
+    {
+        $this->chamadas++;
+
+        throw new \LogicException('I/O PNCP não esperado durante a montagem.');
     }
 }
 

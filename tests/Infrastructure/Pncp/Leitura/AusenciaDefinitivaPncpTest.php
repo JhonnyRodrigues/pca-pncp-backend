@@ -97,6 +97,39 @@ final class AusenciaDefinitivaPncpTest extends TestCase
         $this->assertCount(1, $transporte->requisicoes);
     }
 
+    #[DataProvider('ambientes')]
+    public function testAusenciaDoUltimoPcaDoAnoPodeSerComprovadaAposLista404(
+        AmbientePncp $ambiente
+    ): void {
+        $transporte = new TransporteAusenciaPncpFake([
+            new RespostaHttpPncp(400, [], '{"message":"sequencial ausente"}'),
+            new RespostaHttpPncp(404, [], '{"message":"CNPJ invalido"}'),
+            $this->respostaJson([[
+                'orgao' => ['cnpj' => '12345678000195'],
+                'codigoUnidade' => '123456',
+                'nomeUnidade' => 'UASG de teste',
+            ]]),
+            new RespostaHttpPncp(404, [], '{"message":"nenhum PCA no ano"}'),
+        ]);
+
+        $resultado = $this->observar($transporte, 5, $ambiente);
+
+        $this->assertSame(SituacaoObservacaoPca::AUSENCIA_DEFINITIVA, $resultado->getSituacao());
+        $this->assertCount(4, $transporte->requisicoes);
+        $this->assertStringEndsWith('/unidades', $transporte->requisicoes[2]->getCaminho());
+        $this->assertStringEndsWith(
+            '/pca/' . date('Y') . '/consolidado',
+            $transporte->requisicoes[3]->getCaminho()
+        );
+    }
+
+    /** @return iterable<string, array{AmbientePncp}> */
+    public static function ambientes(): iterable
+    {
+        yield 'homologacao' => [AmbientePncp::HOMOLOGACAO];
+        yield 'producao' => [AmbientePncp::PRODUCAO];
+    }
+
     public function testAusenciaDiretaEListaSemCandidatosComprovamAusenciaDefinitiva(): void
     {
         $transporte = new TransporteAusenciaPncpFake([

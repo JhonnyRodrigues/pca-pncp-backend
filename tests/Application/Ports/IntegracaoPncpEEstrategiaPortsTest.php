@@ -177,6 +177,7 @@ final class IntegracaoPncpEEstrategiaPortsTest extends TestCase
                 new DecimalExato('100.00'),
                 new DecimalExato('100.00'),
                 2,
+                1,
                 '1001',
                 '98',
                 'INFORMÁTICA',

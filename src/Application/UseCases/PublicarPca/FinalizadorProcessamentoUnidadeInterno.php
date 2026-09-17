@@ -378,20 +378,19 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         $estadoFinal = $this->derivarEstadoFinal($contexto, $observado);
 
         try {
-            if (!$this->estadosIguais($contexto->getEstadoOperacionalInicial(), $estadoFinal)) {
-                $resultadoEstado = $this->estadoOperacional->registrar(
-                    $contexto->getUnidadeExterna(),
-                    $estadoFinal
-                );
+            // Estado lógico igual não garante que todas as novas versões estejam projetadas.
+            $resultadoEstado = $this->estadoOperacional->registrar(
+                $contexto->getUnidadeExterna(),
+                $estadoFinal
+            );
 
-                if ($resultadoEstado->getSituacao() !== SituacaoPersistenciaLocal::CONCLUIDA) {
-                    return $this->interromperEDesfazer(
-                        $resultadoEstado->getFalha() ?? new FalhaSegura(
-                            'REGISTRO_ESTADO_OPERACIONAL_FALHOU',
-                            'Não foi possível registrar o estado operacional convergente.'
-                        )
-                    );
-                }
+            if ($resultadoEstado->getSituacao() !== SituacaoPersistenciaLocal::CONCLUIDA) {
+                return $this->interromperEDesfazer(
+                    $resultadoEstado->getFalha() ?? new FalhaSegura(
+                        'REGISTRO_ESTADO_OPERACIONAL_FALHOU',
+                        'Não foi possível registrar o estado operacional convergente.'
+                    )
+                );
             }
 
             foreach ($contexto->getPlanos() as $plano) {
@@ -655,24 +654,6 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
             $contexto->getContextoUsuario()->getRepresentante(),
             $contexto->getContextoUsuario()->getLotacao()
         );
-    }
-
-    private function estadosIguais(
-        EstadoOperacionalPublicacao $primeiro,
-        EstadoOperacionalPublicacao $segundo
-    ): bool {
-        if ($primeiro->getEstado() !== $segundo->getEstado()) {
-            return false;
-        }
-
-        $sequencialPrimeiro = $primeiro->getSequencialPca();
-        $sequencialSegundo = $segundo->getSequencialPca();
-
-        if ($sequencialPrimeiro === null || $sequencialSegundo === null) {
-            return $sequencialPrimeiro === $sequencialSegundo;
-        }
-
-        return $sequencialPrimeiro->equals($sequencialSegundo);
     }
 
     private function falhaReconciliavelEDesfazer(

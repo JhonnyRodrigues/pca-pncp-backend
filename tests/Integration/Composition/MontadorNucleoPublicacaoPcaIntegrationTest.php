@@ -59,6 +59,7 @@ final class MontadorNucleoPublicacaoPcaIntegrationTest extends TestCase
                 'oracle:query:lock',
                 'oracle:query:estrategia_corrente',
                 'oracle:query:estrategia_adotada',
+                'oracle:query:estrategia_adotada',
                 'oracle:commit',
                 'pncp:POST:login',
                 'oracle:begin',
@@ -72,6 +73,7 @@ final class MontadorNucleoPublicacaoPcaIntegrationTest extends TestCase
                 'oracle:query:estado_operacional',
                 'pncp:GET:identidade',
                 'pncp:GET:itens',
+                'oracle:query:estado_operacional',
                 'oracle:commit',
             ],
             $cenario->eventos->todos()
@@ -120,13 +122,14 @@ final class MontadorNucleoPublicacaoPcaIntegrationTest extends TestCase
                 'pncp:POST:inserir_itens',
                 'pncp:GET:identidade',
                 'pncp:GET:itens',
+                'oracle:query:estado_operacional',
                 'oracle:query:confirmacao_plano',
                 'oracle:write:confirmar_plano',
                 'oracle:query:confirmacao_plano',
                 'oracle:write:auditoria',
                 'oracle:commit',
             ],
-            array_slice($cenario->eventos->todos(), -11)
+            array_slice($cenario->eventos->todos(), -12)
         );
         $this->assertNotContains('oracle:write:estado_operacional', $cenario->eventos->todos());
     }
@@ -168,10 +171,11 @@ final class MontadorNucleoPublicacaoPcaIntegrationTest extends TestCase
             [
                 'oracle:query:estrategia_corrente',
                 'oracle:query:estrategia_adotada',
+                'oracle:query:estrategia_adotada',
                 'oracle:commit',
                 'pncp:POST:login',
             ],
-            array_slice($cenario->eventos->todos(), 8, 4)
+            array_slice($cenario->eventos->todos(), 8, 5)
         );
         $this->assertSame(
             [

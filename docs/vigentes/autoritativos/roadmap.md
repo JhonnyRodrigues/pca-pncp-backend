@@ -871,7 +871,7 @@ ou tratar integração real como autorização automática de implantação.
 - executar preflight que proíbe produção;
 - comprovar autenticação, paginação, ausência, sequencial e identificadores;
 - testar decimais, escritas incertas e limpeza best-effort;
-- incorporar a evidência real de que `400` no consolidado conhecido exige
+- incorporar a evidência real de que http code `400` no consolidado conhecido exige
   confirmação pela listagem completa e de que `404` encerra a listagem de
   unidades somente após página `200` válida e com página maior que 1;
 - registrar versão do contrato, data e evidências;
@@ -890,9 +890,19 @@ ou tratar integração real como autorização automática de implantação.
 
 #### Sprint 8.4 — Fluxos completos dos dois modos
 
-- demonstrar PUBLICAR, RETIFICAR, EXCLUIR_PCA e NENHUMA_ACAO;
+- demonstrar PUBLICAR, NENHUMA_ACAO, RETIFICAR e EXCLUIR_PCA;
 - cobrir modo individual e consolidado;
 - validar confirmação, estado operacional, auditoria e resultados.
+
+**Estado do PCA:** concluída em 17/09/2026 após quatorze microciclos e um
+corretivo autorizado. A matriz real 4×2 comprovou `PUBLICAR`,
+`NENHUMA_ACAO`, `RETIFICAR` e `EXCLUIR_PCA` nos modos individual e
+consolidado, com checkpoints Oracle bloqueantes, observação PNCP posterior,
+confirmação versionada, projeção operacional uniforme e auditoria. A regressão
+final aprovou os contratos 8.4 com 73 testes/703 asserções e a suíte padrão com
+921/4.214; os contratos anteriores e as suítes de todas as camadas também
+permaneceram verdes. A configuração externa terminou em `PRECHECK`, com ambas
+as permissões de escrita falsas. Nenhuma execução real deve ser repetida.
 
 #### Sprint 8.5 — Falhas, segurança e smoke test do pacote
 

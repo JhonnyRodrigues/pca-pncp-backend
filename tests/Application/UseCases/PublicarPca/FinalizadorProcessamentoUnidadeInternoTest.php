@@ -52,6 +52,35 @@ use Stringable;
 
 final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
 {
+    /** @regra RN-PUB-008 */
+    public function testFalhaAoCompletarProjecaoEmNenhumaAcaoDeveDesfazerSemOutrasPersistencias(): void
+    {
+        $plano = $this->criarPlano('uo-101', '928344', [1001], true);
+        $sequencial = new SequencialPca(77);
+        $contexto = $this->criarContexto(
+            [$plano],
+            EstadoOperacionalPublicacao::publicado($sequencial),
+            PcaObservado::ativo($sequencial, [1001]),
+            ResultadoDecisaoProcessamentoPlano::nenhumaAcao(),
+            []
+        );
+        $dependencias = $this->criarDependencias();
+        $dependencias->estado->expects($this->once())->method('registrar')
+            ->willReturn(ResultadoPersistenciaLocal::falhaSistemica(
+                new FalhaSegura('REGISTRO_ESTADO_OPERACIONAL_NAO_CONFIRMADO', 'Projeção não confirmada.')
+            ));
+        $dependencias->repository->expects($this->never())->method('confirmarSincronizacao');
+        $dependencias->auditoria->expects($this->never())->method('registrar');
+        $dependencias->unidadeTrabalho->expects($this->never())->method('confirmar');
+        $dependencias->unidadeTrabalho->expects($this->once())->method('desfazer')
+            ->willReturn(ResultadoFinalizacaoUnidadeTrabalho::concluida());
+
+        $resultado = $dependencias->finalizador->finalizar($contexto);
+
+        $this->assertNull($resultado->getResultadoUnitario());
+        $this->assertSame('REGISTRO_ESTADO_OPERACIONAL_NAO_CONFIRMADO', $resultado->getFalhaSistemica()?->getCodigo());
+    }
+
     /** @regra RN-PLA-007 @regra RN-PUB-004 */
     public function testNenhumaAcaoConvergenteDeveConfirmarSomentePlanoPendenteECommitar(): void
     {
@@ -68,7 +97,9 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $dependencias = $this->criarDependencias();
         $dependencias->leitor->expects($this->never())->method('observarPcaConhecido');
         $dependencias->leitor->expects($this->never())->method('localizarCandidatos');
-        $dependencias->estado->expects($this->never())->method('registrar');
+        $dependencias->estado->expects($this->once())->method('registrar')
+            ->with($contexto->getUnidadeExterna(), EstadoOperacionalPublicacao::publicado($sequencial))
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
         $dependencias->repository->expects($this->once())
             ->method('confirmarSincronizacao')
             ->with($pendente);
@@ -88,7 +119,7 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
     }
 
     /** @regra RN-PLA-007 @regra RN-PUB-004 */
-    public function testNenhumaAcaoComTodosOsPlanosConfirmadosDeveSomenteCommitar(): void
+    public function testNenhumaAcaoComTodosOsPlanosConfirmadosDeveGarantirProjecaoSemAuditoria(): void
     {
         $sequencial = new SequencialPca(77);
         $confirmado = $this->criarPlano('uo-101', '928344', [1001], true);
@@ -102,7 +133,9 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $dependencias = $this->criarDependencias();
         $dependencias->leitor->expects($this->never())->method('observarPcaConhecido');
         $dependencias->leitor->expects($this->never())->method('localizarCandidatos');
-        $dependencias->estado->expects($this->never())->method('registrar');
+        $dependencias->estado->expects($this->once())->method('registrar')
+            ->with($contexto->getUnidadeExterna(), EstadoOperacionalPublicacao::publicado($sequencial))
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
         $dependencias->repository->expects($this->never())->method('confirmarSincronizacao');
         $dependencias->auditoria->expects($this->never())->method('registrar');
         $dependencias->unidadeTrabalho->expects($this->once())
@@ -520,7 +553,9 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             ->willReturn(ResultadoObservacaoPca::encontrado(
                 PcaObservado::ativo($sequencial, [1002, 1003])
             ));
-        $dependencias->estado->expects($this->never())->method('registrar');
+        $dependencias->estado->expects($this->once())->method('registrar')
+            ->with($contexto->getUnidadeExterna(), EstadoOperacionalPublicacao::publicado($sequencial))
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
         $dependencias->repository->expects($this->once())->method('confirmarSincronizacao');
         $dependencias->auditoria->expects($this->once())
             ->method('registrar')
@@ -657,6 +692,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $dependencias = $this->criarDependencias();
         $dependencias->repository->expects($this->once())->method('confirmarSincronizacao');
         $falha = new FalhaSegura('COMMIT_FALHOU', 'Commit falhou.');
+        $dependencias->estado->expects($this->once())->method('registrar')
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
         $dependencias->unidadeTrabalho->expects($this->once())
             ->method('confirmar')
             ->willReturn(ResultadoFinalizacaoUnidadeTrabalho::falhaSistemica($falha));
@@ -684,6 +721,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $dependencias->repository->expects($this->once())
             ->method('confirmarSincronizacao')
             ->willThrowException(new \RuntimeException('detalhe interno'));
+        $dependencias->estado->expects($this->once())->method('registrar')
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
         $dependencias->auditoria->expects($this->never())->method('registrar');
         $dependencias->unidadeTrabalho->expects($this->never())->method('confirmar');
         $dependencias->unidadeTrabalho->expects($this->once())
@@ -754,6 +793,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
                 PcaObservado::ativo($sequencial, [1001])
             ));
         $dependencias->repository->expects($this->once())->method('confirmarSincronizacao');
+        $dependencias->estado->expects($this->once())->method('registrar')
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
         $dependencias->auditoria->expects($this->never())->method('registrar');
         $dependencias->unidadeTrabalho->expects($this->once())
             ->method('confirmar')
@@ -855,6 +896,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         );
         $dependencias = $this->criarDependencias();
         $confirmados = [];
+        $dependencias->estado->expects($this->once())->method('registrar')
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
         $dependencias->repository->expects($this->exactly(2))
             ->method('confirmarSincronizacao')
             ->willReturnCallback(static function (Plano $plano) use (&$confirmados): void {
@@ -901,6 +944,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             ->willReturn(ResultadoObservacaoPca::encontrado(
                 PcaObservado::ativo($sequencial, [1001, 1003])
             ));
+        $dependencias->estado->expects($this->once())->method('registrar')
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
         $dependencias->repository->expects($this->exactly(2))
             ->method('confirmarSincronizacao');
         $dependencias->auditoria->expects($this->once())
@@ -1027,6 +1072,7 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             new DecimalExato('100.00'),
             new DecimalExato('100.00'),
             2,
+            1,
             (string) $id,
             '98',
             'Grupo 98',

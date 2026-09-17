@@ -24,6 +24,130 @@ use Semae\Pca\Infrastructure\Oracle\EstadoOperacional\OracleEstadoOperacionalPub
 final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
 {
     /** @regra RN-PUB-008 */
+    public function testDeveCompletarPendenciasNosDoisModosSemMudarEstadoLogico(): void
+    {
+        foreach (['INDIVIDUAL', 'CONSOLIDADO'] as $modo) {
+            foreach (['NAO_PUBLICADO', 'PUBLICADO', 'EXCLUIDO'] as $literal) {
+                [$adapter, $conexao, $adodb] = $this->criarContexto();
+                $conexao->iniciarTransacao();
+                $uasg = $modo === 'INDIVIDUAL' ? '928344' : '986700';
+                $sequencial = $literal === 'NAO_PUBLICADO' ? null : 77;
+                $completa = $this->linha($modo, $uasg, $literal, $sequencial);
+                $adodb->resultadosGetAll = [
+                    [$completa, $this->linha($modo, $uasg, null, null)],
+                    [$completa, $completa],
+                    [$completa, $completa],
+                ];
+                $estado = match ($literal) {
+                    'NAO_PUBLICADO' => EstadoOperacionalPublicacao::naoPublicado(),
+                    'PUBLICADO' => EstadoOperacionalPublicacao::publicado(new SequencialPca(77)),
+                    'EXCLUIDO' => EstadoOperacionalPublicacao::excluido(new SequencialPca(77)),
+                };
+                $unidade = $modo === 'INDIVIDUAL'
+                    ? $this->unidadeIndividual() : $this->unidadeConsolidada();
+
+                $this->assertSame(SituacaoPersistenciaLocal::CONCLUIDA, $adapter->registrar($unidade, $estado)->getSituacao());
+                $this->assertStringContainsString(
+                    'AND ESTADO_PUBLICACAO IS NULL AND SEQUENCIAL_PUBLICACAO_PNCP IS NULL',
+                    $adodb->execucoes[0]['sql']
+                );
+                $this->assertSame(SituacaoPersistenciaLocal::CONCLUIDA, $adapter->registrar($unidade, $estado)->getSituacao());
+                $this->assertCount(1, $adodb->execucoes);
+                $this->assertSame(0, $adodb->commits);
+                $this->assertSame(0, $adodb->rollbacks);
+            }
+        }
+    }
+
+    public function testRegistroDeveRecusarDivergenciasAntesDeQualquerUpdate(): void
+    {
+        foreach ([
+            $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 78),
+            $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', null),
+            $this->linha('INDIVIDUAL', '928344', null, 77),
+            $this->linha('INDIVIDUAL', '928344', 'NAO_PUBLICADO', 77),
+            $this->linha('INDIVIDUAL', '928344', 'EXCLUIDO', 77),
+            $this->linha('INDIVIDUAL', '928345', null, null),
+        ] as $invalida) {
+            [$adapter, $conexao, $adodb] = $this->criarContexto();
+            $conexao->iniciarTransacao();
+            $adodb->resultadosGetAll = [[
+                $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 77),
+                $invalida,
+            ]];
+
+            $resultado = $adapter->registrar(
+                $this->unidadeIndividual(),
+                EstadoOperacionalPublicacao::publicado(new SequencialPca(77))
+            );
+
+            $this->assertSame(SituacaoPersistenciaLocal::FALHA_SISTEMICA, $resultado->getSituacao());
+            $this->assertSame('ESTADO_OPERACIONAL_ORACLE_CONFLITANTE', $resultado->getFalha()?->getCodigo());
+            $this->assertSame([], $adodb->execucoes);
+        }
+    }
+
+    /** @regra RN-PUB-007 @regra RN-PUB-008 */
+    public function testRepublicacaoDeveProjetarNovoSequencialEmTodasAsVersoes(): void
+    {
+        [$adapter, $conexao, $adodb] = $this->criarContexto();
+        $conexao->iniciarTransacao();
+        $adodb->resultadosGetAll = [[
+            $this->linha('INDIVIDUAL', '928344', 'EXCLUIDO', 77),
+            $this->linha('INDIVIDUAL', '928344', null, null),
+        ], [
+            $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 88),
+            $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 88),
+        ]];
+
+        $resultado = $adapter->registrar(
+            $this->unidadeIndividual(),
+            EstadoOperacionalPublicacao::publicado(new SequencialPca(88))
+        );
+
+        $this->assertSame(SituacaoPersistenciaLocal::CONCLUIDA, $resultado->getSituacao());
+        $this->assertStringNotContainsString('ESTADO_PUBLICACAO IS NULL', $adodb->execucoes[0]['sql']);
+        $this->assertSame(['PUBLICADO', 88, 2027, 101], array_values($adodb->execucoes[0]['parametros']));
+        $this->assertStringNotContainsString('DATA_PUBLICACAO', $adodb->execucoes[0]['sql']);
+    }
+
+    public function testFalhaOracleNaReleituraDeveImpedirSucessoSemControlarTransacao(): void
+    {
+        [$adapter, $conexao, $adodb] = $this->criarContexto();
+        $conexao->iniciarTransacao();
+        $adodb->resultadosGetAll = [[
+            $this->linha('INDIVIDUAL', '928344', null, null),
+        ]];
+        $adodb->errosGetAll[1] = 3113;
+
+        $resultado = $adapter->registrar(
+            $this->unidadeIndividual(),
+            EstadoOperacionalPublicacao::publicado(new SequencialPca(77))
+        );
+
+        $this->assertSame('REGISTRO_ESTADO_OPERACIONAL_FALHOU', $resultado->getFalha()?->getCodigo());
+        $this->assertCount(1, $adodb->execucoes);
+        $this->assertTrue($conexao->estaEmTransacao());
+        $this->assertSame(0, $adodb->commits);
+        $this->assertSame(0, $adodb->rollbacks);
+    }
+
+    public function testReleituraDeveRecusarPendenciaMesmoComEstadoLogicoCorreto(): void
+    {
+        [$adapter, $conexao, $adodb] = $this->criarContexto();
+        $conexao->iniciarTransacao();
+        $linhas = [
+            $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 77),
+            $this->linha('INDIVIDUAL', '928344', null, null),
+        ];
+        $adodb->resultadosGetAll = [$linhas, $linhas];
+
+        $resultado = $adapter->registrar($this->unidadeIndividual(), EstadoOperacionalPublicacao::publicado(new SequencialPca(77)));
+
+        $this->assertSame('REGISTRO_ESTADO_OPERACIONAL_NAO_CONFIRMADO', $resultado->getFalha()?->getCodigo());
+    }
+
+    /** @regra RN-PUB-008 */
     public function testDeveConsultarEstadoIndividualCoerenteEntreVersoesEIgnorarLinhaNovaNula(): void
     {
         [$adapter, $conexao, $adodb] = $this->criarContexto();
@@ -186,6 +310,9 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
+            $this->linha('INDIVIDUAL', '928344', null, null),
+            $this->linha('INDIVIDUAL', '928344', null, null),
+        ], [
             $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', '77'),
             $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', '77'),
         ]];
@@ -215,7 +342,7 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
                 'param_2' => 2027, 'param_3' => 101],
             $execucao['parametros']
         );
-        $this->assertCount(1, $adodb->consultas);
+        $this->assertCount(2, $adodb->consultas);
         $this->assertTrue($conexao->estaEmTransacao());
         $this->assertSame(0, $adodb->commits);
         $this->assertSame(0, $adodb->rollbacks);
@@ -226,6 +353,8 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
+            $this->linha('CONSOLIDADO', '986700', null, null),
+        ], [
             $this->linha('CONSOLIDADO', '986700', 'NAO_PUBLICADO', null),
         ]];
 
@@ -250,6 +379,8 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
+            $this->linha('INDIVIDUAL', '928344', 'PUBLICADO', 77),
+        ], [
             $this->linha('INDIVIDUAL', '928344', 'EXCLUIDO', 77),
         ]];
 
@@ -270,6 +401,8 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->resultadosGetAll = [[
+            $this->linha('INDIVIDUAL', '928344', 'EXCLUIDO', 77),
+        ], [
             $this->linha('INDIVIDUAL', '928344', 'EXCLUIDO', 77),
         ]];
 
@@ -300,6 +433,9 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         [$adapter, $conexao, $adodb] = $this->criarContexto();
         $conexao->iniciarTransacao();
         $adodb->errosExecute[0] = 3113;
+        $adodb->resultadosGetAll = [[
+            $this->linha('INDIVIDUAL', '928344', null, null),
+        ]];
 
         $registro = $adapter->registrar(
             $this->unidadeIndividual(),

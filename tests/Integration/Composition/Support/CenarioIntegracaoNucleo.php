@@ -89,6 +89,14 @@ final class CenarioIntegracaoNucleo
         return self::criar($eventos, $adodb, $curl, $temporizador);
     }
 
+    public static function controlado(
+        RegistroCronologico $eventos,
+        AdodbControlado $adodb,
+        ExecutorCurlRoteirizado $curl
+    ): self {
+        return self::criar($eventos, $adodb, $curl);
+    }
+
     private static function criar(
         RegistroCronologico $eventos,
         AdodbControlado $adodb,
@@ -236,6 +244,11 @@ final class CenarioIntegracaoNucleo
             'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL',
             'UASG_ADOTADA' => self::UASG,
         ]]);
+        $adodb->programarConsulta('estrategia_adotada', [[
+            'UNIDADE_ORCAMENTARIA' => '101',
+            'ESTRATEGIA_ADOTADA' => 'INDIVIDUAL',
+            'UASG_ADOTADA' => self::UASG,
+        ]]);
         $adodb->programarConsulta('lock', [['ESCOPO' => 'UNIDADE_EXTERNA']]);
         $adodb->programarConsulta('identidades', $identidade);
         $adodb->programarConsulta('plano_vigente', [[
@@ -254,7 +267,7 @@ final class CenarioIntegracaoNucleo
             'QUANTIDADE' => '1',
             'VALOR_TOTAL' => '1000.0000',
             'VALOR_ORCAMENTO_EXERCICIO' => '1000.0000',
-            'CATALOGO' => '1',
+            'CLASSIFICACAO_CATALOGO' => '1',
             'CODIGO_ITEM' => 'CATMAT-' . $idDemanda,
             'GRUPO' => '75',
             'DESCRICAO_GRUPO' => 'Equipamentos de teste',
@@ -266,6 +279,15 @@ final class CenarioIntegracaoNucleo
             'ESTADO_PUBLICACAO' => 'PUBLICADO',
             'SEQUENCIAL_PUBLICACAO_PNCP' => '77',
         ]]);
+
+        if ($confirmacaoEsperada) {
+            $adodb->programarConsulta('estado_operacional', [[
+                'ESTRATEGIA_ADOTADA_PUBLICACAO' => 'INDIVIDUAL',
+                'UASG_ADOTADA' => self::UASG,
+                'ESTADO_PUBLICACAO' => 'PUBLICADO',
+                'SEQUENCIAL_PUBLICACAO_PNCP' => '77',
+            ]]);
+        }
 
         if ($dataConfirmacao === null && $confirmacaoEsperada) {
             $adodb->programarConsulta('confirmacao_plano', [['DATA_CONFIRMACAO' => null]]);
@@ -441,7 +463,7 @@ final class CenarioIntegracaoNucleo
             'SGI', 'PAC_DEMANDAS', 'ID_DEMANDA', 'FK_PLANO', 'SITUACAO',
             'FK_UNIDADE_REQUISITANTE', 'DATA_DESEJADA', 'CATEGORIA', 'DESCRICAO',
             'UNIDADE_MEDIDA', 'QUANTIDADE', 'VALOR_TOTAL', 'VALOR_ORCAMENTO_EXERCICIO',
-            'CATALOGO', 'CODIGO_ITEM', 'GRUPO_CODIGO',
+            'CLASSIFICACAO_CATALOGO', 'CODIGO_ITEM', 'GRUPO_CODIGO',
             [
                 'schema' => 'CEBISIS',
                 'tabela' => 'MT_GRUPOS_MATERIAIS',

@@ -219,7 +219,7 @@ final class OraclePlanoRepository implements PlanoRepository
         $colunaQuantidade = $this->demandas->getColunaQuantidade();
         $colunaValorTotal = $this->demandas->getColunaValorTotal();
         $colunaValorOrcamento = $this->demandas->getColunaValorOrcamentoExercicio();
-        $colunaCatalogo = $this->demandas->getColunaCatalogo();
+        $colunaClassificacaoCatalogo = $this->demandas->getColunaClassificacaoCatalogo();
         $colunaCodigoItem = $this->demandas->getColunaCodigoItem();
         $colunaGrupo = $this->demandas->getColunaGrupo();
         $tabelaGrupoRemoto = $this->demandas->getTabelaGrupoRemotoQualificada();
@@ -244,7 +244,7 @@ final class OraclePlanoRepository implements PlanoRepository
             . "'{$configuracaoDecimal}') AS VALOR_TOTAL, "
             . "TO_CHAR(D.{$colunaValorOrcamento}, '{$mascaraDecimal}', "
             . "'{$configuracaoDecimal}') AS VALOR_ORCAMENTO_EXERCICIO, "
-            . "D.{$colunaCatalogo} AS CATALOGO, "
+            . "D.{$colunaClassificacaoCatalogo} AS CLASSIFICACAO_CATALOGO, "
             . "D.{$colunaCodigoItem} AS CODIGO_ITEM, "
             . "D.{$colunaGrupo} AS GRUPO, "
             . "MGM.{$colunaDescricaoGrupoRemoto} AS DESCRICAO_GRUPO, "

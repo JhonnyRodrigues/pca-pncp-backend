@@ -104,7 +104,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 | [Glossário integrado](vigentes/apoio/glossario.md) | Vigente | Índice semântico da linguagem do projeto |
 | [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Vigente | Usuários, etapas e contexto funcional |
 | [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) | Vigente | Mapas, fluxo, transações e roteiro de estudo |
-| [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md) | Vigente | Preparação e execução segura das probes e gates 5.1, 5.9, 8.2 e 8.3 |
+| [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md) | Vigente | Preparação e execução segura das probes e gates 5.1, 5.9, 8.2, 8.3 e corretivo 8.4.7-C |
 | [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md) | Vigente | Finalidade, classificação, dependências e efeitos externos dos scripts ativos |
 | [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md) | Vigente | Função dos arquivos ativos de código e teste |
 | [DER da publicação](diagramas/DER_PUBLICACAO_PCA.png) | Vigente como apoio visual | Diagrama visual |

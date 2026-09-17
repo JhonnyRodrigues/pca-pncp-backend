@@ -14,6 +14,7 @@ use Semae\Pca\Application\Ports\ContextoUsuarioPort;
 use Semae\Pca\Application\Ports\EstrategiaPublicacaoPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
+use Semae\Pca\Application\Results\ResultadoAdocaoEstrategia;
 use Semae\Pca\Application\Results\ResultadoAutenticacaoPncp;
 use Semae\Pca\Application\Results\ResultadoConsultaEstrategia;
 use Semae\Pca\Application\Results\ResultadoFinalizacaoUnidadeTrabalho;
@@ -364,6 +365,8 @@ final class PublicarPcaUseCaseTest extends TestCase
             ->willReturn(ResultadoConsultaEstrategia::disponivel($estrategia));
         $estrategiaPort->method('consultarAdotada')
             ->willReturn(ResultadoConsultaEstrategia::disponivel($estrategia));
+        $estrategiaPort->method('adotar')
+            ->willReturn(ResultadoAdocaoEstrategia::adotada());
         $resultadoAutenticacao ??= ResultadoAutenticacaoPncp::autenticada(
             new SessaoPncpFakeUseCase()
         );

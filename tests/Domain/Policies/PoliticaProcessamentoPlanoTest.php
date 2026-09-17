@@ -337,6 +337,7 @@ class PoliticaProcessamentoPlanoTest extends TestCase
             new DecimalExato('100.00'),
             new DecimalExato('100.00'),
             2,
+            1,
             (string) $id,
             '98',
             'INFORMÁTICA',

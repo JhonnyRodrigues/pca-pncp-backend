@@ -34,8 +34,8 @@ final class SerializadorPayloadPncpTest extends TestCase
             $ano,
             [
                 'dataDesejada' => new DateTimeImmutable($ano->getValor() . '-07-10 23:45:00-03:00'),
-                'categoria' => 2,
-                'catalogo' => 1,
+                'categoria' => 8,
+                'classificacaoCatalogo' => 2,
                 'descricao' => 'Pintura industrial',
                 'unidadeMedida' => 'UNIDADE',
                 'quantidade' => 2,
@@ -53,7 +53,7 @@ final class SerializadorPayloadPncpTest extends TestCase
             [
                 'dataDesejada' => new DateTimeImmutable($ano->getValor() . '-05-15 00:30:00+14:00'),
                 'categoria' => 1,
-                'catalogo' => 2,
+                'classificacaoCatalogo' => 1,
                 'descricao' => 'Apontador Lápis',
                 'unidadeMedida' => 'Caixa 100 unidades',
                 'quantidade' => 6,
@@ -86,8 +86,8 @@ final class SerializadorPayloadPncpTest extends TestCase
             . '"dataDesejada":"' . $ano->getValor() . '-05-15"'
             . '},{'
             . '"numeroItem":30,'
-            . '"categoriaItemPca":2,'
-            . '"catalogo":1,'
+            . '"categoriaItemPca":8,'
+            . '"catalogo":2,'
             . '"classificacaoCatalogo":"2",'
             . '"classificacaoSuperiorCodigo":"547",'
             . '"classificacaoSuperiorNome":"Serviço de acabamento",'
@@ -255,7 +255,7 @@ final class SerializadorPayloadPncpTest extends TestCase
      *     quantidade?: int,
      *     valorTotal?: string,
      *     valorOrcamentoExercicio?: string,
-     *     catalogo?: int,
+     *     classificacaoCatalogo?: int,
      *     codigoItem?: string,
      *     grupo?: string,
      *     descricaoGrupo?: string
@@ -280,7 +280,8 @@ final class SerializadorPayloadPncpTest extends TestCase
             $dados['quantidade'] ?? 1,
             new DecimalExato($dados['valorTotal'] ?? '100'),
             new DecimalExato($dados['valorOrcamentoExercicio'] ?? '100'),
-            $dados['catalogo'] ?? 2,
+            2,
+            $dados['classificacaoCatalogo'] ?? 1,
             $dados['codigoItem'] ?? 'ITEM-1',
             $dados['grupo'] ?? 'GRUPO-1',
             $dados['descricaoGrupo'] ?? 'Grupo de teste',

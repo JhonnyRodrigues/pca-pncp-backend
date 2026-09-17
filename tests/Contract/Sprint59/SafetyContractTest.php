@@ -254,7 +254,8 @@ final class SafetyContractTest extends TestCase
                     'colunaCategoria' => 'CATEGORIA', 'colunaDescricao' => 'DESCRICAO',
                     'colunaUnidadeMedida' => 'UNIDADE_MEDIDA', 'colunaQuantidade' => 'QUANTIDADE',
                     'colunaValorTotal' => 'VALOR_TOTAL', 'colunaValorOrcamentoExercicio' => 'VALOR_ORCAMENTO',
-                    'colunaCatalogo' => 'CATALOGO', 'colunaCodigoItem' => 'CODIGO_ITEM',
+                    'colunaClassificacaoCatalogo' => 'CLASSIFICACAO_CATALOGO',
+                    'colunaCodigoItem' => 'CODIGO_ITEM',
                     'colunaGrupo' => 'GRUPO_CODIGO',
                     'grupoRemoto' => [
                         'schema' => 'CEBISIS', 'tabela' => 'MT_GRUPOS_MATERIAIS',

@@ -20,6 +20,8 @@ use UnexpectedValueException;
 
 final class MapeadorDadosPlanoOracle
 {
+    private const CATALOGO_OUTROS = 2;
+
     public function __construct(private readonly DateTimeZone $fusoOperacional) {}
 
     /** @param array<string, mixed> $linha */
@@ -62,7 +64,8 @@ final class MapeadorDadosPlanoOracle
                 $this->inteiroPositivo($this->valor($linha, 'QUANTIDADE')),
                 $this->decimalExato($this->valor($linha, 'VALOR_TOTAL')),
                 $this->decimalExato($this->valor($linha, 'VALOR_ORCAMENTO_EXERCICIO')),
-                $this->inteiroPositivo($this->valor($linha, 'CATALOGO')),
+                self::CATALOGO_OUTROS,
+                $this->inteiroPositivo($this->valor($linha, 'CLASSIFICACAO_CATALOGO')),
                 $this->textoObrigatorio($this->valor($linha, 'CODIGO_ITEM')),
                 $this->textoObrigatorio($this->valor($linha, 'GRUPO')),
                 $this->textoObrigatorio($this->valor($linha, 'DESCRICAO_GRUPO')),

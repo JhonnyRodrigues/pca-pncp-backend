@@ -64,6 +64,49 @@ final class ConexaoAdodbEmprestadaTest extends TestCase
         $this->assertSame(['param_0' => '986700'], $adodb->consultas[0]['parametros']);
     }
 
+    public function testDeveConverterLeituraWindows1252ParaUtf8(): void
+    {
+        $adodb = new AdodbEmprestadoFake();
+        $adodb->resultadoGetAll = [[
+            0 => "PROCURADORIA JUR\xCDDICA \x96 SERVI\xC7O",
+            'DESCRICAO' => "PROCURADORIA JUR\xCDDICA \x96 SERVI\xC7O",
+        ]];
+        $conexao = new ConexaoAdodbEmprestada($adodb, 'Windows-1252');
+
+        $linhas = $conexao->buscarTodos('SELECT DESCRICAO FROM PAC_TESTE');
+
+        $this->assertSame([
+            ['DESCRICAO' => 'PROCURADORIA JURÍDICA – SERVIÇO'],
+        ], $linhas);
+        $this->assertTrue(mb_check_encoding($linhas[0]['DESCRICAO'], 'UTF-8'));
+    }
+
+    public function testDeveConverterEscritaUtf8ParaWindows1252SemPerda(): void
+    {
+        $adodb = new AdodbEmprestadoFake();
+        $conexao = new ConexaoAdodbEmprestada($adodb, 'Windows-1252');
+
+        $conexao->executar('UPDATE PAC_TESTE SET MENSAGEM = ?', ['AÇÃO – €']);
+
+        $this->assertSame(
+            "A\xC7\xC3O \x96 \x80",
+            $adodb->execucoes[0]['parametros']['param_0']
+        );
+    }
+
+    public function testDeveBloquearEscritaNaoRepresentavelEmWindows1252(): void
+    {
+        $conexao = new ConexaoAdodbEmprestada(
+            new AdodbEmprestadoFake(),
+            'Windows-1252'
+        );
+
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('não pode ser representado em Windows-1252');
+
+        $conexao->executar('UPDATE PAC_TESTE SET MENSAGEM = ?', ['PCA 😀']);
+    }
+
     public function testDeveControlarInicioCommitERollbackDaTransacao(): void
     {
         $adodb = new AdodbEmprestadoFake();

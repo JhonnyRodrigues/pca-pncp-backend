@@ -167,6 +167,7 @@ permanece dedicada à função dos arquivos.
 | Arquivo | Função |
 | --- | --- |
 | `Oracle/Adodb/ConexaoAdodbEmprestada.php` | Encapsula a sessão ADOdb fornecida pelo host, prepara binds e controla seu estado transacional sem fechar a conexão. |
+| `Oracle/Adodb/ConversorCharsetAdodbOracle.php` | Converte leituras Windows-1252 para UTF-8 e binds no sentido inverso, bloqueando perda de caracteres. |
 | `Oracle/Adodb/FalhaOracleException.php` | Transporta somente a mensagem segura e o eventual código `ORA-*`. |
 
 ### Oracle — unidade de trabalho e locks
@@ -306,7 +307,8 @@ permanece dedicada à função dos arquivos.
 | `CarregadorPerfilPublicacaoPca.php` | Seleciona literalmente o perfil pelo registro externo e valida integralmente seus caminhos antes do carregamento. |
 | `ComposicaoOraclePublicacaoPca.php` | Única receita de produção dos seis adapters Oracle sobre uma mesma `ConexaoAdodbEmprestada`. |
 | `CompositionRootPublicacaoPca.php` | Materializa o perfil carregado, usa a subcomposição Oracle única e compartilha transporte, logger e correlação em um grafo novo por chamada. |
-| `PerfilPublicacaoPca.php` | Trata o array externo como não confiável e materializa ambiente, configurações e os onze mapeamentos Oracle sem defaults implícitos. |
+| `ExecutorPublicacaoPcaScriptcase.php` | Executa internamente o mesmo fluxo protegido do publicador, permitindo ao gate contratual fornecer um Composition Root instrumentado sem ampliar a API conhecida pela Blank. |
+| `PerfilPublicacaoPca.php` | Trata o array externo como não confiável e materializa ambiente, charset ADOdb, configurações e os onze mapeamentos Oracle sem defaults implícitos. |
 
 ## 7. Testes
 
@@ -523,6 +525,25 @@ permanece dedicada à função dos arquivos.
 | `Contract/Sprint83/run-pncp-cleanup.php` | Remove somente o resíduo com sequencial explicitamente autorizado. |
 | `Contract/Sprint83/config.example.php` | Modelo sem segredos da autorização e massa dedicada da Sprint 8.3. |
 
+### Contratos opt-in — Sprint 8.4
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Contract/Sprint84/Sprint84ConfigTest.php` | Valida consentimentos separados, etapa, modo, cardinalidades e hash do checkpoint. |
+| `Contract/Sprint84/Sprint84GateTest.php` | Comprova consultas Oracle somente leitura, cardinalidades e snapshot canônico bloqueante. |
+| `Contract/Sprint84/Sprint84RunnerTest.php` | Exercita PRECHECK, execução, pós-check, invariância e propagação operacional permitida. |
+| `Contract/Sprint84/Sprint84PncpTransportGuardTest.php` | Comprova bloqueio de mutações antes do transporte e permissão de login/GET no gate somente leitura. |
+| `Contract/Sprint84/OracleCheckpointQueriesTest.php` | Protege as onze consultas canônicas e os roteiros manuais contra escrita e lock. |
+| `Contract/Sprint84/Support/Sprint84Runner.php` | Coordena o checkpoint Oracle, a observação PNCP, o fluxo público e as verificações posteriores. |
+| `Contract/Sprint84/Support/OracleCheckpointQueries.php` | Monta as onze consultas parametrizadas a partir do perfil e da configuração autorizados. |
+| `Contract/Sprint84/Support/OracleCheckpointSnapshot.php` | Normaliza resultados e calcula o SHA-256 canônico do estado Oracle. |
+| `Contract/Sprint84/Support/Sprint84DiagnosticReport.php` | Protege segredos e calcula o hash do relatório detalhado da Blank. |
+| `Contract/Sprint84/scriptcase_probe.php` | Expõe o entrypoint protegido dos fluxos completos da Sprint 8.4. |
+| `Contract/Sprint84/run-preflight.php` | Valida localmente configuração, registro e perfil antes de qualquer I/O. |
+| `Contract/Sprint84/checkpoints/*.sql` | Preserva os roteiros somente leitura usados nas conferências manuais autorizadas. |
+| `Contract/Sprint84/blank_scriptcase/teste_adapters_contracts_sprint84.php` | Referência da aplicação Blank usada para executar o gate no Scriptcase. |
+| `Contract/Sprint84/config.example.php` | Modelo sem segredos da configuração externa da Sprint 8.4. |
+
 ### Suporte contratual compartilhado
 
 | Arquivo | Demonstração principal |
@@ -545,6 +566,7 @@ permanece dedicada à função dos arquivos.
 | `phpunit.adapters.contract.xml` | Suíte separada dos contratos de adapters da Sprint 5.9. |
 | `phpunit.oracle82.contract.xml` | Suíte separada da integração Oracle da Sprint 8.2. |
 | `phpunit.pncp83.contract.xml` | Suíte separada dos contratos locais e gates PNCP da Sprint 8.3. |
+| `phpunit.sprint84.contract.xml` | Suíte separada dos contratos e do runner da Sprint 8.4. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
 
 ## 9. Documentação vigente
@@ -562,7 +584,7 @@ permanece dedicada à função dos arquivos.
 | `docs/vigentes/apoio/glossario.md` | Mantém o índice semântico da linguagem de negócio, integração e arquitetura. |
 | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
 | `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |
-| `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | Ensina a preparar, executar e diagnosticar com segurança as probes e gates das Sprints 5.1, 5.9, 8.2 e 8.3. |
+| `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | Ensina a preparar, executar, diagnosticar e encerrar as probes e gates 5.1, 5.9, 8.2, 8.3 e 8.4. |
 | `docs/vigentes/apoio/catalogo_de_comandos_composer.md` | Classifica os scripts Composer e informa finalidade, dependências, efeitos externos e autorização necessária. |
 | `docs/vigentes/apoio/catalogo_de_arquivos.md` | Cataloga a função dos arquivos ativos de código, testes, configuração e documentação vigente. |
 | `docs/diagramas/DER_PUBLICACAO_PCA.png` | Apoia visualmente a compreensão do modelo de dados da publicação do PCA. |

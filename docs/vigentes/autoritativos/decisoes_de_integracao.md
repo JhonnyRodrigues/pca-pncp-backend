@@ -1,7 +1,7 @@
 # Registro de Decisões de Integração
 
-**Classificação documental:** Autoritativo  
-**Status:** Vigente  
+**Classificação documental:** Autoritativo
+**Status:** Vigente
 **Autoridade/Escopo:** decisões DI-001 a DI-010, contratos externos, persistência técnica e operação
 
 ## 1. Finalidade e autoridade
@@ -609,6 +609,26 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 7. PDO_OCI não é fallback.
 8. Quando usar fallback próprio, o backend controla seu ciclo de vida.
 
+##### DI-008 — Charset da conexão emprestada
+
+1. O charset dos textos devolvidos pela conexão ADOdb é obrigatório e
+   explícito em `oracle.charset_adodb` no perfil de publicação.
+2. O SGI vigente usa `NLS_CHARACTERSET = WE8MSWIN1252`, representado no PHP
+   como `Windows-1252`; `NLS_NCHAR_CHARACTERSET = AL16UTF16` não se aplica às
+   colunas `VARCHAR2` atualmente consumidas.
+3. Toda string lida do ADOdb é convertida de `Windows-1252` para UTF-8 antes de
+   alcançar adapters, modelo interno, checkpoint ou serialização PNCP.
+4. Toda string UTF-8 enviada como bind Oracle é convertida para
+   `Windows-1252` imediatamente antes de alcançar o ADOdb.
+5. A conversão de escrita exige ida e volta exatas; caractere não
+   representável bloqueia a operação sem substituição silenciosa.
+6. O PRECHECK e o fluxo real usam a mesma política de conversão, para que o
+   hash represente exatamente os textos que serão publicados.
+7. Quando o ADOdb estiver em modo de busca `BOTH`, os índices numéricos
+   duplicados são removidos da linha operacional e somente os aliases
+   associativos atravessam a Infrastructure; o diagnóstico bruto pode exibir
+   ambas as representações.
+
 ##### DI-008 — Exclusividade
 
 1. A tabela técnica `PAC_CONTROLES_CONCORRENCIA` contém linhas permanentes de
@@ -649,6 +669,20 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 9. UASGs individuais vêm do cadastro ativo de
    `PAC_UNIDADES_ORCAMENTARIAS`; a UASG consolidadora não é validada nesse
    cadastro, pois código e descrição pertencem à configuração corrente.
+10. Novas versões físicas podem conter pares integralmente nulos, pendentes
+    de propagação. Estratégia/UASG são preenchidas em conjunto na adoção
+    anual, antes da autenticação. Estado/sequencial são completados por
+    gravação explícita na finalização transacional, depois de comprovada a
+    convergência externa, inclusive quando o estado lógico não muda.
+11. Se o estado lógico já corresponder ao final, apenas os pares
+    estado/sequencial integralmente nulos são preenchidos; linhas completas
+    não são regravadas. Transições legítimas continuam projetadas em todas as
+    versões do escopo. A releitura deve confirmar cada linha, sem ignorar
+    pendências. Consultas não propagam nem reparam dados silenciosamente.
+12. Completar a projeção não confirma versões intermediárias, não sobrescreve
+    confirmações anteriores e não cria auditoria de negócio por si só. Valores
+    não nulos divergentes ou pares inválidos continuam bloqueando, conforme
+    DI-005 e RN-PUB-008.
 
 ##### DI-008 — Reconstrução
 
@@ -663,6 +697,13 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 6. Planejada e Cancelada não participam.
 7. Plano vazio deve ser reconstruível.
 8. Cada UO participante exige cadastro ativo único e UASG preenchida.
+9. `PAC_DEMANDA.FK_CATEGORIA` fornece `categoriaItemPca` conforme o domínio
+   PNCP de `1` a `8`.
+10. `PAC_DEMANDA.CLASSIFICACAO_CATALOGO` fornece exclusivamente
+    `classificacaoCatalogo`, com `1 = Material` e `2 = Serviço`.
+11. Enquanto não existir coluna física específica, o SGI estabelece
+    `catalogo = 2 (Outros)` para todas as Demandas; o adapter Oracle aplica essa
+    regra explicitamente e não a deriva da categoria ou da classificação.
 
 #### DI-008 — Alternativas rejeitadas
 
@@ -679,6 +720,8 @@ Define o gate para completar a Application antes de iniciar adapters concretos.
 | Tabela própria de instâncias externas | Não há requisito atual para o ciclo rico |
 | Fonte dupla do sequencial | Cria inconsistência e cardinalidade errada |
 | Reconstruir tudo antes do lock | A fotografia pode envelhecer antes da exclusividade |
+| Presumir UTF-8 na conexão ADOdb | O Oracle vigente devolve bytes `WE8MSWIN1252` e produz JSON inválido |
+| Substituir caracteres inválidos no payload | Oculta perda de dados e altera silenciosamente a fotografia publicada |
 
 #### DI-008 — Consequências e limitações
 
@@ -737,6 +780,8 @@ testes contratuais aplicáveis.
 - Aceita em 31/08/2026 após os gates reais da Sprint 5.9 e a auditoria final da
   Infrastructure confirmarem sessão compartilhada, transação, rollback,
   contenção, schema e adapters Oracle vigentes.
+- Revisada em 08/09/2026 após inspeção do schema real para separar categoria,
+  catálogo e classificação e registrar o catálogo global temporário do SGI.
 
 ---
 
@@ -808,17 +853,27 @@ testes contratuais aplicáveis.
 2. A leitura pagina até comprovar o fim.
 3. Na listagem de unidades, `404` encerra a paginação somente quando ocorre em
    página maior que 1 e depois de ao menos uma página `200` válida.
-4. `400` e `404` permanecem inconclusivos nos demais contextos.
-5. A classificação não interpreta mensagens textuais do PNCP.
-6. Convergência nunca é decidida com resultado parcial.
-7. Validar entre páginas:
+4. `404` na primeira página é somente um sinal provisório de ausência anual.
+   Em qualquer ambiente, ele equivale a lista vazia apenas quando duas leituras
+   adicionais confirmam que:
+   - `GET /v1/orgaos/{cnpj}/unidades` respondeu `200` e contém exatamente uma
+     unidade com a UASG esperada e o mesmo CNPJ;
+   - `GET /v1/orgaos/{cnpj}/pca/{ano}/consolidado` respondeu `404`.
+5. UASG ausente ou duplicada no cadastro do órgão e CNPJ divergente produzem
+   conflito; comprovação incompleta permanece inconclusiva e falha de
+   transporte permanece sistêmica.
+6. `400` na primeira página e `404` nos demais contextos permanecem
+   inconclusivos, salvo as combinações expressamente previstas nesta decisão.
+7. A classificação não interpreta mensagens textuais do PNCP.
+8. Convergência nunca é decidida com resultado parcial.
+9. Validar entre páginas:
    - unicidade de `numeroItem`;
    - ausência de páginas repetidas;
    - coerência de CNPJ, ano, UASG e sequencial;
    - limite total de 1000 itens.
-8. Campos JSON desconhecidos são ignorados.
-9. Campos utilizados são obrigatórios e tipados.
-10. JSON malformado, profundo demais ou com UTF-8 inválido é rejeitado.
+10. Campos JSON desconhecidos são ignorados.
+11. Campos utilizados são obrigatórios e tipados.
+12. JSON malformado, profundo demais ou com UTF-8 inválido é rejeitado.
 
 ##### DI-009 — Ausência definitiva
 
@@ -830,6 +885,10 @@ testes contratuais aplicáveis.
    completa comprova ausência definitiva.
 4. Outro sequencial para a mesma UASG gera conflito ou migração assistida.
 5. Respostas divergentes, inconclusivas ou falha de consulta não autorizam recriação.
+6. Quando a listagem não possui sequer uma primeira página válida, a ausência
+   anual somente pode ser usada na observação de sequencial conhecido após a
+   comprovação estrutural descrita na regra de leitura, sem interpretar o corpo
+   textual do `404`.
 
 ##### DI-009 — Escritas
 
@@ -878,6 +937,9 @@ testes contratuais aplicáveis.
 8. Totais autoritativos não são recalculados.
 9. Datas puras usam `YYYY-MM-DD`.
 10. Logs não contêm credenciais, JWT, payload completo, resposta completa ou dumps cURL.
+11. O payload representa `categoriaItemPca`, `catalogo` e
+    `classificacaoCatalogo` como campos independentes; nenhum deles é derivado
+    silenciosamente de outro.
 
 ##### DI-009 — Suíte contratual
 

@@ -16,6 +16,7 @@ use Semae\Pca\Domain\ValueObjects\Uasg;
 use Semae\Pca\Infrastructure\Pncp\Autenticacao\SessaoPncpAutenticada;
 use Semae\Pca\Infrastructure\Pncp\Http\AmbientePncp;
 use Semae\Pca\Infrastructure\Pncp\Http\ConfiguracaoTransportePncp;
+use Semae\Pca\Infrastructure\Pncp\Http\FalhaTransportePncpException;
 use Semae\Pca\Infrastructure\Pncp\Http\RequisicaoHttpPncp;
 use Semae\Pca\Infrastructure\Pncp\Http\RespostaHttpPncp;
 use Semae\Pca\Infrastructure\Pncp\Http\TransporteHttpPncp;
@@ -45,11 +46,10 @@ final class PaginacaoCandidatosPncpTest extends TestCase
         $this->assertCount(2, $transporte->requisicoes);
     }
 
-    #[DataProvider('statusInconclusivoNaPrimeiraPagina')]
-    public function testStatus400Ou404NaPrimeiraPaginaPermaneceInconclusivo(int $status): void
+    public function testStatus400NaPrimeiraPaginaPermaneceInconclusivo(): void
     {
         $transporte = new TransporteCandidatosPncpFake([
-            new RespostaHttpPncp($status, [], '{"message":"texto ignorado"}'),
+            new RespostaHttpPncp(400, [], '{"message":"texto ignorado"}'),
         ]);
 
         $resultado = $this->localizar($transporte, 2, 5);
@@ -58,11 +58,105 @@ final class PaginacaoCandidatosPncpTest extends TestCase
         $this->assertSame([], $resultado->getCandidatos());
     }
 
-    /** @return iterable<string, array{int}> */
-    public static function statusInconclusivoNaPrimeiraPagina(): iterable
+    #[DataProvider('ambientesPncp')]
+    public function testStatus404NaPrimeiraPaginaExigeTresSinaisParaComprovarAusencia(
+        AmbientePncp $ambiente
+    ): void
     {
-        yield '400' => [400];
-        yield '404' => [404];
+        $transporte = new TransporteCandidatosPncpFake([
+            new RespostaHttpPncp(404, [], '{"message":"mensagem deliberadamente ignorada"}'),
+            $this->respostaJson([
+                $this->unidadeCadastrada('999001'),
+                $this->unidadeCadastrada('123456'),
+            ]),
+            new RespostaHttpPncp(404, [], '{"message":"outro texto ignorado"}'),
+        ]);
+
+        $resultado = $this->localizar($transporte, 2, 5, $ambiente);
+
+        $this->assertSame(SituacaoBuscaCandidatosPca::CONCLUIDA, $resultado->getSituacao());
+        $this->assertSame([], $resultado->getCandidatos());
+        $this->assertCount(3, $transporte->requisicoes);
+        $this->assertSame(
+            '/v1/orgaos/12345678000195/unidades',
+            $transporte->requisicoes[1]->getCaminho()
+        );
+        $this->assertSame(
+            '/v1/orgaos/12345678000195/pca/' . date('Y') . '/consolidado',
+            $transporte->requisicoes[2]->getCaminho()
+        );
+    }
+
+    /** @return iterable<string, array{array<int, array<string, mixed>>}> */
+    public static function cadastrosDeUnidadeConflitantes(): iterable
+    {
+        yield 'UASG ausente' => [[
+            self::unidadeCadastradaEstatica('999001'),
+        ]];
+        yield 'UASG duplicada' => [[
+            self::unidadeCadastradaEstatica('123456'),
+            self::unidadeCadastradaEstatica('123456'),
+        ]];
+        yield 'CNPJ divergente' => [[
+            self::unidadeCadastradaEstatica('123456', 'J3ABB3LZ000146'),
+        ]];
+    }
+
+    /** @param array<int, array<string, mixed>> $unidades */
+    #[DataProvider('cadastrosDeUnidadeConflitantes')]
+    public function testCadastroDoOrgaoDivergenteDeveConflitar(array $unidades): void
+    {
+        $transporte = new TransporteCandidatosPncpFake([
+            new RespostaHttpPncp(404, [], ''),
+            $this->respostaJson($unidades),
+        ]);
+
+        $resultado = $this->localizar($transporte, 2, 5);
+
+        $this->assertSame(SituacaoBuscaCandidatosPca::CONFLITO, $resultado->getSituacao());
+        $this->assertSame([], $resultado->getCandidatos());
+        $this->assertCount(2, $transporte->requisicoes);
+    }
+
+    public function testCadastroDoOrgaoMalformadoDeveManterBuscaInconclusiva(): void
+    {
+        $transporte = new TransporteCandidatosPncpFake([
+            new RespostaHttpPncp(404, [], ''),
+            new RespostaHttpPncp(200, [], '{'),
+        ]);
+
+        $resultado = $this->localizar($transporte, 2, 5);
+
+        $this->assertSame(SituacaoBuscaCandidatosPca::INCONCLUSIVA, $resultado->getSituacao());
+        $this->assertCount(2, $transporte->requisicoes);
+    }
+
+    public function testConsolidadoAnualDiferenteDe404NaoComprovaAusencia(): void
+    {
+        $transporte = new TransporteCandidatosPncpFake([
+            new RespostaHttpPncp(404, [], ''),
+            $this->respostaJson([$this->unidadeCadastrada('123456')]),
+            $this->respostaJson(['cnpj' => '12345678000195']),
+        ]);
+
+        $resultado = $this->localizar($transporte, 2, 5);
+
+        $this->assertSame(SituacaoBuscaCandidatosPca::INCONCLUSIVA, $resultado->getSituacao());
+        $this->assertCount(3, $transporte->requisicoes);
+    }
+
+    public function testFalhaDeTransporteNaComprovacaoDeveSerSistemica(): void
+    {
+        $transporte = new TransporteCandidatosPncpFake([
+            new RespostaHttpPncp(404, [], ''),
+            $this->respostaJson([$this->unidadeCadastrada('123456')]),
+            FalhaTransportePncpException::tlsNaoConfirmado(),
+        ]);
+
+        $resultado = $this->localizar($transporte, 2, 5);
+
+        $this->assertSame(SituacaoBuscaCandidatosPca::FALHA_SISTEMICA, $resultado->getSituacao());
+        $this->assertCount(3, $transporte->requisicoes);
     }
 
     /** @return iterable<string, array{AmbientePncp}> */
@@ -314,6 +408,26 @@ final class PaginacaoCandidatosPncpTest extends TestCase
         ], $alteracoes);
     }
 
+    /** @return array<string, mixed> */
+    private function unidadeCadastrada(
+        string $uasg,
+        string $cnpj = '12345678000195'
+    ): array {
+        return self::unidadeCadastradaEstatica($uasg, $cnpj);
+    }
+
+    /** @return array<string, mixed> */
+    private static function unidadeCadastradaEstatica(
+        string $uasg,
+        string $cnpj = '12345678000195'
+    ): array {
+        return [
+            'orgao' => ['cnpj' => $cnpj],
+            'codigoUnidade' => $uasg,
+            'nomeUnidade' => 'Unidade de teste',
+        ];
+    }
+
     /**
      * @param int[] $ids
      * @return array<int, array<string, mixed>>
@@ -340,14 +454,20 @@ final class TransporteCandidatosPncpFake implements TransporteHttpPncp
     /** @var RequisicaoHttpPncp[] */
     public array $requisicoes = [];
 
-    /** @param RespostaHttpPncp[] $respostas */
+    /** @param array<int, RespostaHttpPncp|\Throwable> $respostas */
     public function __construct(private array $respostas) {}
 
     public function enviar(RequisicaoHttpPncp $requisicao): RespostaHttpPncp
     {
         $this->requisicoes[] = $requisicao;
 
-        return array_shift($this->respostas)
+        $resposta = array_shift($this->respostas)
             ?? throw new \RuntimeException('Resposta fake não configurada.');
+
+        if ($resposta instanceof \Throwable) {
+            throw $resposta;
+        }
+
+        return $resposta;
     }
 }

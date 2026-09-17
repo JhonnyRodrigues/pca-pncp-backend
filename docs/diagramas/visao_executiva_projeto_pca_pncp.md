@@ -115,11 +115,14 @@ flowchart TD
 
     E --> O["Nova observação"]
     O --> RC["Reconciliação, se necessária"]
-    RC --> PA["Persistência local<br/>e auditoria"]
+    RC --> PA["Persistência local<br/>projeção operacional e<br/>confirmação da versão vigente"]
     O --> PA
     FS --> PA
 
-    PA --> V
+    PA -->|operação externa confirmada| A["Auditoria"]
+    PA -->|NENHUMA_ACAO| V
+    A --> V
+
     V --> RESP["Response global"]
 ```
 

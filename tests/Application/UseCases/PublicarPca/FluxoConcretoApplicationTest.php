@@ -293,6 +293,7 @@ final class CenarioFluxoConcreto
             new DecimalExato('100.00'),
             new DecimalExato('100.00'),
             2,
+            1,
             (string) $id,
             '98',
             'Grupo 98',

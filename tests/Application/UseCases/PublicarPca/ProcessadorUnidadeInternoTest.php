@@ -17,6 +17,7 @@ use Semae\Pca\Application\Results\ResultadoBuscaCandidatosPca;
 use Semae\Pca\Application\Results\ResultadoConsultaEstadoOperacional;
 use Semae\Pca\Application\Results\ResultadoFinalizacaoUnidadeTrabalho;
 use Semae\Pca\Application\Results\ResultadoInicioUnidadeTrabalho;
+use Semae\Pca\Application\Results\ResultadoPersistenciaLocal;
 use Semae\Pca\Application\UseCases\PublicarPca\DecisorUnidadeSobExclusividade;
 use Semae\Pca\Application\UseCases\PublicarPca\DespachadorComandosUnidade;
 use Semae\Pca\Application\UseCases\PublicarPca\ExecutorComandosUnidade;
@@ -93,6 +94,9 @@ final class ProcessadorUnidadeInternoTest extends TestCase
             ->method('localizarCandidatos')
             ->willReturn(ResultadoBuscaCandidatosPca::concluida([]));
         $leitor->expects($this->never())->method('observarPcaConhecido');
+        $estado->expects($this->once())->method('registrar')
+            ->with($unidade, EstadoOperacionalPublicacao::naoPublicado())
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
         $escritor->expects($this->never())->method('publicar');
         $escritor->expects($this->never())->method('inserirItens');
         $escritor->expects($this->never())->method('excluirItens');

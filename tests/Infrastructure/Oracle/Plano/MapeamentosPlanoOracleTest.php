@@ -55,7 +55,7 @@ final class MapeamentosPlanoOracleTest extends TestCase
             'quantidade',
             'valor_total',
             'valor_orcamento_exercicio',
-            'catalogo',
+            'classificacao_catalogo',
             'codigo_item',
             'grupo_codigo',
             [
@@ -86,7 +86,10 @@ final class MapeamentosPlanoOracleTest extends TestCase
             'VALOR_ORCAMENTO_EXERCICIO',
             $mapeamento->getColunaValorOrcamentoExercicio()
         );
-        $this->assertSame('CATALOGO', $mapeamento->getColunaCatalogo());
+        $this->assertSame(
+            'CLASSIFICACAO_CATALOGO',
+            $mapeamento->getColunaClassificacaoCatalogo()
+        );
         $this->assertSame('CODIGO_ITEM', $mapeamento->getColunaCodigoItem());
         $this->assertSame('GRUPO_CODIGO', $mapeamento->getColunaGrupo());
         $this->assertSame(
@@ -173,7 +176,7 @@ final class MapeamentosPlanoOracleTest extends TestCase
                 [
                     'APP', 'PAC DEMANDAS', 'ID', 'PLANO', 'SITUACAO', 'UNIDADE',
                     'DATA', 'CATEGORIA', 'DESCRICAO', 'MEDIDA', 'QUANTIDADE',
-                    'TOTAL', 'ORCAMENTO', 'CATALOGO', 'ITEM', 'GRUPO',
+                    'TOTAL', 'ORCAMENTO', 'CLASSIFICACAO', 'ITEM', 'GRUPO',
                     [
                         'schema' => 'CEBISIS',
                         'tabela' => 'MT_GRUPOS_MATERIAIS',
@@ -242,7 +245,7 @@ final class MapeamentosPlanoOracleTest extends TestCase
             'QUANTIDADE',
             'VALOR_TOTAL',
             'VALOR_ORCAMENTO_EXERCICIO',
-            'CATALOGO',
+            'CLASSIFICACAO_CATALOGO',
             'CODIGO_ITEM',
             'GRUPO_CODIGO',
             $grupoRemoto,

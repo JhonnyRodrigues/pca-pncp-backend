@@ -337,22 +337,27 @@ registrada explicitamente e não autoriza inferir comportamento.
 
 ## 4.3 Demandas
 
-### RN-DEM-001 — Quantidade, categoria e origem
+### RN-DEM-001 — Quantidade, categoria, classificação e origem
 
 - **Status normativo:** Vigente.
 - **Enunciado normativo:** Uma Demanda DEVE possuir quantidade maior que zero.
-  Sua categoria DEVE ser Material ou Serviço, e sua origem DEVE ser Normal ou
-  Extraordinária.
-- **Origem ou autoridade:** `docs/vigentes/autoritativos/modelo_de_dominio.md`.
+  Sua categoria DEVE pertencer ao domínio de categorias do item PCA vigente
+  (`1` a `8`), sua classificação de catálogo DEVE ser `1 = Material` ou `2 =
+  Serviço`, e sua origem DEVE ser Normal ou Extraordinária.
+- **Origem ou autoridade:** esclarecimento do mantenedor em 08/09/2026 e
+  domínio oficial PNCP.
 - **Contexto e justificativa:** esses valores classificam a necessidade e
   impedem Demandas sem quantidade útil.
-- **Exemplo:** uma Demanda de Serviço, origem Extraordinária e quantidade 1 é
-  válida quanto a esses atributos.
-- **Contraexemplo:** quantidade zero ou categoria não reconhecida.
+- **Exemplo:** uma Demanda da categoria Soluções de TIC, classificada como
+  Material, origem Extraordinária e quantidade 1 é válida quanto a esses
+  atributos.
+- **Contraexemplo:** quantidade zero, categoria `9` ou classificação `3`.
 - **Elementos afetados:** Demanda.
 - **Evidências de teste:** `tests/Domain/Entities/DemandaTest.php`.
 - **Decisões e documentos relacionados:** `docs/vigentes/autoritativos/modelo_de_dominio.md`.
-- **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
+- **Histórico:** criada em 30/07/2026 na consolidação do catálogo; corrigida em
+  08/09/2026 para separar categoria do item PCA e classificação
+  Material/Serviço após validação do schema SGI e do domínio PNCP.
 
 ### RN-DEM-002 — Identidade global da Demanda
 

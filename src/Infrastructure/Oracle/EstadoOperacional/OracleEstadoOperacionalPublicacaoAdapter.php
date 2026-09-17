@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Semae\Pca\Infrastructure\Oracle\EstadoOperacional;
 
 use Semae\Pca\Application\Enums\ModoPublicacao;
-use Semae\Pca\Application\Enums\SituacaoConsultaEstadoOperacional;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
 use Semae\Pca\Application\Results\ResultadoConsultaEstadoOperacional;
 use Semae\Pca\Application\Results\ResultadoPersistenciaLocal;
@@ -68,16 +67,32 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
         }
 
         try {
+            $linhas = $this->conexao->buscarTodos(
+                $this->sqlConsulta($unidade),
+                $this->parametrosEscopo($unidade)
+            );
+            $estadoInicial = $this->interpretar($linhas, $unidade);
+            $somentePendencias = $this->estadosIguais($estadoInicial, $estado);
+
+            if ($somentePendencias && $this->projecaoCompleta($linhas, $estado)) {
+                return ResultadoPersistenciaLocal::concluida();
+            }
+
             $this->conexao->executar(
-                $this->sqlRegistro($unidade),
+                $this->sqlRegistro($unidade, $somentePendencias),
                 $this->parametrosRegistro($unidade, $estado)
             );
 
-            $releitura = $this->consultar($unidade);
+            $releitura = $this->conexao->buscarTodos(
+                $this->sqlConsulta($unidade),
+                $this->parametrosEscopo($unidade)
+            );
+            $estadoRelido = $this->interpretar($releitura, $unidade);
 
             if (
-                $releitura->getSituacao() === SituacaoConsultaEstadoOperacional::DISPONIVEL
-                && $this->estadosIguais($releitura->getEstadoOperacional(), $estado)
+                count($releitura) === count($linhas)
+                && $this->estadosIguais($estadoRelido, $estado)
+                && $this->projecaoCompleta($releitura, $estado)
             ) {
                 return ResultadoPersistenciaLocal::concluida();
             }
@@ -86,12 +101,33 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
                 'REGISTRO_ESTADO_OPERACIONAL_NAO_CONFIRMADO',
                 'A releitura Oracle não confirmou o estado operacional registrado.'
             ));
+        } catch (EstadoOperacionalOracleInvalidoException) {
+            return ResultadoPersistenciaLocal::falhaSistemica(new FalhaSegura(
+                'ESTADO_OPERACIONAL_ORACLE_CONFLITANTE',
+                'A projeção Oracle do estado operacional está ausente ou incoerente.'
+            ));
         } catch (Throwable) {
             return ResultadoPersistenciaLocal::falhaSistemica(new FalhaSegura(
                 'REGISTRO_ESTADO_OPERACIONAL_FALHOU',
                 'Não foi possível registrar o estado operacional.'
             ));
         }
+    }
+
+    /** @param array<int, array<string, mixed>> $linhas */
+    private function projecaoCompleta(array $linhas, EstadoOperacionalPublicacao $estado): bool
+    {
+        foreach ($linhas as $linha) {
+            [$literal, $sequencial] = $this->interpretarParEstado(
+                $linha['ESTADO_PUBLICACAO'] ?? null,
+                $linha['SEQUENCIAL_PUBLICACAO_PNCP'] ?? null
+            );
+            if ($literal !== $estado->getEstado() || $sequencial !== $estado->getSequencialPca()?->getValor()) {
+                return false;
+            }
+        }
+
+        return $linhas !== [];
     }
 
     /**
@@ -229,7 +265,7 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
             . "WHERE p.{$ano} = ?{$filtroUo}";
     }
 
-    private function sqlRegistro(UnidadeExternaPublicacao $unidade): string
+    private function sqlRegistro(UnidadeExternaPublicacao $unidade, bool $somentePendencias): string
     {
         $tabela = $this->mapeamento->getTabelaQualificada();
         $ano = $this->mapeamento->getColunaAnoExecucao();
@@ -241,7 +277,8 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
             : '';
 
         return "UPDATE {$tabela} SET {$estado} = ?, {$sequencial} = ? "
-            . "WHERE {$ano} = ?{$filtroUo}";
+            . "WHERE {$ano} = ?{$filtroUo}"
+            . ($somentePendencias ? " AND {$estado} IS NULL AND {$sequencial} IS NULL" : '');
     }
 
     /** @return array<int, int> */

@@ -1,7 +1,7 @@
 # Glossário Integrado do Projeto PCA/PNCP
 
-**Classificação documental:** Apoio  
-**Status:** Vigente  
+**Classificação documental:** Apoio
+**Status:** Vigente
 **Autoridade/Escopo:** índice semântico da linguagem de negócio, domínio, integração, arquitetura e documentação
 
 ## 1. Finalidade, autoridade e uso
@@ -160,6 +160,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | --- | --- | --- |
 | Controle de concorrência (antes “âncora”) | Linha técnica da tabela PAC_CONTROLES_CONCORRENCIA, sem identidade de negócio, utilizada para serializar execuções por ESCOPO + ANO_EXECUCAO + IDENTIFICADOR_ALVO. Ela funciona como um "ponto de cadeado" persistente: se duas execuções disputarem a mesma publicação, ambas encontrarão essa mesma linha e uma delas será bloqueada via FOR UPDATE NOWAIT. A alteração do termo "âncora" para "controle de concorrência" é apenas semântica e não altera o comportamento do adapter. | `DI-008`; Sprint 5.9 |
 | Ambiente de treinamento | Ambiente oficial protegido, distinto da produção, no qual integrações externas autorizadas podem ser exercitadas com massa dedicada. | `DI-009` |
+| Fixture | cenário de teste pré-montado: conjunto pequeno e controlado de dados de teste, preparado de propósito para simular um cenário específico sem depender dos sistemas reais. |
 | Contrato controlado | Prova contratual executada com condições, fixtures ou doubles controlados; demonstra o comportamento do adapter, mas não substitui a evidência obtida no ambiente externo real. | Arquitetura §9; Roadmap Sprints 5.9 e 6.2 |
 | Fail-closed | Postura que recusa a execução antes da interação externa quando configuração, destino, autorização ou pré-condição não estão comprovados, sem recorrer a valores alternativos silenciosos. | `DI-009`, `DI-010` |
 | Gate real | Condição de avanço comprovada no ambiente efetivo por meio dos adapters concretos; a aprovação em ambiente controlado, isoladamente, não o encerra. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |

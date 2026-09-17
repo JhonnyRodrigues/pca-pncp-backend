@@ -53,6 +53,8 @@ final class MapeadorDadosPlanoOracleTest extends TestCase
         $this->assertSame('America/Sao_Paulo', $demanda->getDataDesejada()->getTimezone()->getName());
         $this->assertSame('1234567890123.4500', $demanda->getValorTotal()->getValor());
         $this->assertSame('1200000000000.0000', $demanda->getValorOrcamentoExercicio()->getValor());
+        $this->assertSame(2, $demanda->getCatalogo());
+        $this->assertSame(1, $demanda->getClassificacaoCatalogo());
 
         $this->assertSame(3, $plano->getSequencialVersao());
         $this->assertSame('2026-08-20 14:35:12', $plano->getDataHomologacao()->format('Y-m-d H:i:s'));
@@ -210,7 +212,7 @@ final class MapeadorDadosPlanoOracleTest extends TestCase
             'QUANTIDADE' => '2',
             'VALOR_TOTAL' => '1234567890123.4500',
             'VALOR_ORCAMENTO_EXERCICIO' => '1200000000000.0000',
-            'CATALOGO' => '1',
+            'CLASSIFICACAO_CATALOGO' => '1',
             'CODIGO_ITEM' => 'CATMAT-123',
             'GRUPO' => '44',
             'DESCRICAO_GRUPO' => 'Equipamentos',

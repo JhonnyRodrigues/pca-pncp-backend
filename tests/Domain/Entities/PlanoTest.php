@@ -215,6 +215,7 @@ class PlanoTest extends TestCase
             new DecimalExato('7100.00'),
             new DecimalExato('7100.00'),
             2,
+            1,
             '98.004.000004',
             '98',
             'INFORMÁTICA',

@@ -98,6 +98,22 @@ final class ExecutorCurlRoteirizado implements ExecutorCurlPncp
     }
 
     /** @return string[] */
+    public function rotasEscritas(): array
+    {
+        return array_values(array_map(
+            static fn (array $chamada): string => $chamada['rota'],
+            array_filter(
+                $this->chamadas,
+                static fn (array $chamada): bool => in_array(
+                    $chamada['metodo'],
+                    ['PUT', 'PATCH', 'DELETE'],
+                    true
+                ) || ($chamada['metodo'] === 'POST' && $chamada['rota'] !== 'login')
+            )
+        ));
+    }
+
+    /** @return string[] */
     public function bearersAposLogin(): array
     {
         $bearers = [];

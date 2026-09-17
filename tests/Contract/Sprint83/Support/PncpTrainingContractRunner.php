@@ -480,6 +480,7 @@ final class PncpTrainingContractRunner
                 new DecimalExato($totals[$index]),
                 new DecimalExato($totals[$index]),
                 $item['catalogo'],
+                $item['categoria'],
                 $item['codigo_item'],
                 $item['grupo'],
                 $item['descricao_grupo'],

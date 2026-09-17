@@ -14,6 +14,9 @@ final class AdodbControlado
     /** @var string[] */
     private array $tiposConsultados = [];
 
+    /** @var array<int, array{tipo: string, sql: string, parametros: array<int|string, mixed>}> */
+    private array $escritas = [];
+
     public int $inicios = 0;
     public int $commits = 0;
     public int $rollbacks = 0;
@@ -55,6 +58,7 @@ final class AdodbControlado
     public function Execute(string $sql, array $parametros = []): bool
     {
         $tipo = $this->classificarEscrita($sql);
+        $this->escritas[] = compact('tipo', 'sql', 'parametros');
         $this->eventos->registrar('oracle:write:' . $tipo);
 
         return true;
@@ -114,6 +118,26 @@ final class AdodbControlado
         ));
     }
 
+    public function quantidadeEscritas(string $tipo): int
+    {
+        return count(array_filter(
+            $this->escritas,
+            static fn (array $escrita): bool => $escrita['tipo'] === $tipo
+        ));
+    }
+
+    /** @return array<int, array<int|string, mixed>> */
+    public function parametrosEscritas(string $tipo): array
+    {
+        return array_values(array_map(
+            static fn (array $escrita): array => $escrita['parametros'],
+            array_filter(
+                $this->escritas,
+                static fn (array $escrita): bool => $escrita['tipo'] === $tipo
+            )
+        ));
+    }
+
     /** @return string[] */
     public function respostasPendentes(): array
     {
@@ -127,6 +151,7 @@ final class AdodbControlado
             str_contains($sql, 'DATA_PUBLICACAO') => 'confirmar_plano',
             str_contains($sql, 'PAC_HISTORICOS') => 'auditoria',
             str_contains($sql, 'ESTADO_PUBLICACAO') => 'estado_operacional',
+            str_contains($sql, 'ESTRATEGIA_ADOTADA_PUBLICACAO') => 'adotar_estrategia',
             default => throw new RuntimeException('Escrita Oracle nÃ£o programada.'),
         };
     }
@@ -143,6 +168,7 @@ final class AdodbControlado
             str_contains($sql, 'ESTRATEGIA_ADOTADA_PUBLICACAO AS ESTRATEGIA_ADOTADA')
                 => 'estrategia_adotada',
             str_contains($sql, 'BASE.CHAVE_UO_PLANO') => 'identidades',
+            str_contains($sql, 'AS CODIGO_UASG') => 'uasgs_individuais',
             str_contains($sql, 'AS VERSAO') => 'plano_vigente',
             str_contains($sql, 'AS ID_DEMANDA') => 'demandas_vigentes',
             str_contains($sql, 'AS DATA_CONFIRMACAO') => 'confirmacao_plano',

@@ -108,7 +108,7 @@ return [
                 'colunaQuantidade' => '',
                 'colunaValorTotal' => '',
                 'colunaValorOrcamentoExercicio' => '',
-                'colunaCatalogo' => '',
+                'colunaClassificacaoCatalogo' => '',
                 'colunaCodigoItem' => '',
                 'colunaGrupo' => '',
                 // Origem remota fixa da descrição do grupo; não use SQL livre.

@@ -156,6 +156,7 @@ final class PublicadorPcaScriptcaseIntegrationTest extends TestCase
                 'teto_retry_after_ms' => 5_000,
             ],
             'oracle' => [
+                'charset_adodb' => 'UTF-8',
                 'timezone' => 'America/Sao_Paulo',
                 'mapeamentos' => $this->mapeamentos(),
             ],
@@ -189,7 +190,8 @@ final class PublicadorPcaScriptcaseIntegrationTest extends TestCase
                 'schema', 'tabela', 'colunaId', 'colunaPlanoOrigem', 'colunaSituacao',
                 'colunaUnidadeRequisitante', 'colunaDataDesejada', 'colunaCategoria',
                 'colunaDescricao', 'colunaUnidadeMedida', 'colunaQuantidade',
-                'colunaValorTotal', 'colunaValorOrcamentoExercicio', 'colunaCatalogo',
+                'colunaValorTotal', 'colunaValorOrcamentoExercicio',
+                'colunaClassificacaoCatalogo',
                 'colunaCodigoItem', 'colunaGrupo', 'grupoRemoto', 'colunaOrigem',
             ]),
             'unidades_orcamentarias' => $this->grupoMapeamento([

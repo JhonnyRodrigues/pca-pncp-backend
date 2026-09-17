@@ -178,28 +178,34 @@ flowchart TD
 
     E --> O["Nova observação"]
     O --> RC["Reconciliação, se necessária"]
-    RC --> PA["Persistência local<br/>e auditoria"]
+    RC --> PA["Persistência local<br/>projeção operacional e<br/>confirmação da versão vigente"]
     O --> PA
     FS --> PA
 
-    PA --> V
+    PA -->|operação externa confirmada| A["Auditoria"]
+    PA -->|NENHUMA_ACAO| V
+    A --> V
+
     V --> RESP["Response global"]
 ```
 
 Em linguagem direta:
 
-1. O Request traz CNPJ e exercício já tipados.
-2. O Use Case inicia a história.
-3. A preparação global resolve o que é comum à execução.
-4. O coordenador percorre as unidades externas.
-5. Cada unidade é preparada sob exclusividade.
-6. O estado desejado é comparado ao estado observado.
-7. O Domain escolhe a ação.
-8. A Application manda executar essa ação por meio de Ports.
-9. Depois de uma escrita, o estado externo é observado novamente; em `NENHUMA_ACAO`, a observação inicial já válida é reutilizada.
-10. A convergência é confirmada ou tratada.
-11. A convergência é persistida localmente e, quando houve alteração externa confirmada, auditada.
-12. O Use Case monta a Response global.
+1. O Request entrega CNPJ e exercício já validados e tipados.
+2. O Use Case inicia a execução e preserva sua identificação de correlação.
+3. A preparação global resolve o usuário, a estratégia anual, as unidades externas e a sessão PNCP compartilhada.
+4. O coordenador percorre cada unidade externa — uma UO no modo individual ou a união das UOs no consolidado.
+5. Cada unidade é aberta sob exclusividade, usando a mesma conexão e transação Oracle.
+6. A Application reconstrói a fotografia vigente, lê o estado operacional local e observa o PCA correspondente no PNCP.
+7. O Domain compara a fotografia desejada com o estado externo observado e escolhe PUBLICAR, RETIFICAR, EXCLUIR_PCA ou NENHUMA_ACAO.
+8. Quando a decisão exige alteração externa, a Application envia o comando tipado ao PNCP por meio das Ports.
+9. Depois da escrita, o PNCP é observado novamente. Em NENHUMA_ACAO, a observação inicial já válida é reutilizada.
+10. Se necessário, a Application realiza uma reconciliação adicional somente por leitura, sem repetir uma escrita incerta.
+11. Somente após comprovar a convergência, o backend persiste o estado operacional — estratégia, UASG, estado e sequencial — em todas as versões físicas do escopo, completando eventuais projeções pendentes.
+12. As confirmações anteriores são preservadas. Somente a versão vigente ainda pendente de cada UO processada recebe a confirmação de sincronização; versões intermediárias permanecem sem confirmação.
+13. Uma auditoria é registrada apenas quando uma operação externa de publicação, retificação ou exclusão integral foi efetivamente concluída e confirmada. NENHUMA_ACAO não cria auditoria.
+14. Projeção operacional, confirmação versionada e auditoria aplicável são concluídas na mesma transação Oracle. Qualquer falha impede o sucesso e aciona o rollback da unidade.
+15. O coordenador preserva o resultado da unidade, decide se pode continuar e, ao final, o Use Case monta a Response global.
 
 ## 4. As classes mínimas para navegar nesse mapa
 

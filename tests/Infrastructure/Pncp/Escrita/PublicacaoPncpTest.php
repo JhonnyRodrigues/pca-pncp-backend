@@ -251,6 +251,7 @@ final class PublicacaoPncpTest extends TestCase
             new DecimalExato('100'),
             new DecimalExato('100'),
             2,
+            1,
             'ITEM-1',
             'GRUPO-1',
             'Grupo de teste',

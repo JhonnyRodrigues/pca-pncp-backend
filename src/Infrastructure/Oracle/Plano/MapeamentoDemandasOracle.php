@@ -23,7 +23,7 @@ final class MapeamentoDemandasOracle
     private readonly string $colunaQuantidade;
     private readonly string $colunaValorTotal;
     private readonly string $colunaValorOrcamentoExercicio;
-    private readonly string $colunaCatalogo;
+    private readonly string $colunaClassificacaoCatalogo;
     private readonly string $colunaCodigoItem;
     private readonly string $colunaGrupo;
     private readonly string $schemaGrupoRemoto;
@@ -56,7 +56,7 @@ final class MapeamentoDemandasOracle
         string $colunaQuantidade,
         string $colunaValorTotal,
         string $colunaValorOrcamentoExercicio,
-        string $colunaCatalogo,
+        string $colunaClassificacaoCatalogo,
         string $colunaCodigoItem,
         string $colunaGrupo,
         array $grupoRemoto,
@@ -76,7 +76,7 @@ final class MapeamentoDemandasOracle
             'coluna da quantidade' => $colunaQuantidade,
             'coluna do valor total' => $colunaValorTotal,
             'coluna do orçamento do exercício' => $colunaValorOrcamentoExercicio,
-            'coluna do catálogo' => $colunaCatalogo,
+            'coluna da classificação do catálogo' => $colunaClassificacaoCatalogo,
             'coluna do código do item' => $colunaCodigoItem,
             'coluna do grupo' => $colunaGrupo,
             'coluna da origem' => $colunaOrigem,
@@ -102,7 +102,7 @@ final class MapeamentoDemandasOracle
             $this->colunaQuantidade,
             $this->colunaValorTotal,
             $this->colunaValorOrcamentoExercicio,
-            $this->colunaCatalogo,
+            $this->colunaClassificacaoCatalogo,
             $this->colunaCodigoItem,
             $this->colunaGrupo,
             $this->colunaOrigem,
@@ -177,9 +177,9 @@ final class MapeamentoDemandasOracle
         return $this->colunaValorOrcamentoExercicio;
     }
 
-    public function getColunaCatalogo(): string
+    public function getColunaClassificacaoCatalogo(): string
     {
-        return $this->colunaCatalogo;
+        return $this->colunaClassificacaoCatalogo;
     }
 
     public function getColunaCodigoItem(): string

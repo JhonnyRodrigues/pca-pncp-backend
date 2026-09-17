@@ -29,6 +29,7 @@ final class PerfilPublicacaoPcaFixture
                 'teto_retry_after_ms' => 5_000,
             ],
             'oracle' => [
+                'charset_adodb' => 'UTF-8',
                 'timezone' => 'America/Sao_Paulo',
                 'mapeamentos' => [
                     'controles_concorrencia' => [
@@ -84,7 +85,7 @@ final class PerfilPublicacaoPcaFixture
                         'colunaQuantidade' => 'QUANTIDADE',
                         'colunaValorTotal' => 'VALOR_TOTAL',
                         'colunaValorOrcamentoExercicio' => 'VALOR_ORCAMENTO_EXERCICIO',
-                        'colunaCatalogo' => 'CATALOGO',
+                        'colunaClassificacaoCatalogo' => 'CLASSIFICACAO_CATALOGO',
                         'colunaCodigoItem' => 'CODIGO_ITEM',
                         'colunaGrupo' => 'GRUPO_CODIGO',
                         'grupoRemoto' => [

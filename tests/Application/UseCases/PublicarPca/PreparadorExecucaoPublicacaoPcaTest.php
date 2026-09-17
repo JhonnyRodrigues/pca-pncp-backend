@@ -77,8 +77,10 @@ final class PreparadorExecucaoPublicacaoPcaTest extends TestCase
             ->method('consultarAdotada')
             ->with($this->identicalTo($request->getAnoExecucao()))
             ->willReturn(ResultadoConsultaEstrategia::disponivel($estrategia));
-        $estrategiaPublicacao->expects($this->never())
-            ->method('adotar');
+        $estrategiaPublicacao->expects($this->once())
+            ->method('adotar')
+            ->with($this->identicalTo($request->getAnoExecucao()), $estrategia)
+            ->willReturn(ResultadoAdocaoEstrategia::adotada());
 
         $unidadeDeTrabalho = $this->createMock(UnidadeDeTrabalhoPort::class);
         $unidadeDeTrabalho->expects($this->once())
@@ -555,6 +557,34 @@ final class PreparadorExecucaoPublicacaoPcaTest extends TestCase
         $this->assertSame($falha, $resultado->getFalha());
     }
 
+    public function testDeveDesfazerQuandoPropagacaoDaEstrategiaAdotadaFalhar(): void
+    {
+        $cenario = $this->criarCenarioBase();
+        $estrategia = EstrategiaPublicacao::individual();
+        $falha = new FalhaSegura(
+            'ADOCAO_ESTRATEGIA_NAO_CONFIRMADA',
+            'A releitura ainda encontrou versão pendente.'
+        );
+
+        $cenario['estrategia']->expects($this->once())
+            ->method('consultarCorrente')
+            ->willReturn(ResultadoConsultaEstrategia::disponivel($estrategia));
+        $cenario['estrategia']->expects($this->once())
+            ->method('consultarAdotada')
+            ->willReturn(ResultadoConsultaEstrategia::disponivel($estrategia));
+        $cenario['estrategia']->expects($this->once())
+            ->method('adotar')
+            ->with($cenario['request']->getAnoExecucao(), $estrategia)
+            ->willReturn(ResultadoAdocaoEstrategia::falha($falha));
+        $this->configurarUnidadeDeTrabalhoDesfeita($cenario['unidadeDeTrabalho']);
+        $cenario['autenticador']->expects($this->never())->method('autenticar');
+
+        $resultado = $this->criarPreparador($cenario)->preparar($cenario['request']);
+
+        $this->assertSame(SituacaoPreparacaoPublicacaoPca::INTERROMPIDA, $resultado->getSituacao());
+        $this->assertSame($falha, $resultado->getFalha());
+    }
+
     public function testDeveDesfazerQuandoConfirmacaoDaEstrategiaFalhar(): void
     {
         $cenario = $this->criarCenarioBase();
@@ -817,7 +847,9 @@ final class PreparadorExecucaoPublicacaoPcaTest extends TestCase
         $port->expects($this->once())
             ->method('consultarAdotada')
             ->willReturn(ResultadoConsultaEstrategia::disponivel($estrategia));
-        $port->expects($this->never())->method('adotar');
+        $port->expects($this->once())
+            ->method('adotar')
+            ->willReturn(ResultadoAdocaoEstrategia::adotada());
     }
 
     private function criarIdentidade(

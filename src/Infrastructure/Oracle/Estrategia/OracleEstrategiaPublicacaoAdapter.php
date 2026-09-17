@@ -101,6 +101,16 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
 
     public function consultarAdotada(AnoExecucao $anoExecucao): ResultadoConsultaEstrategia
     {
+        return $this->consultarAdotadaDetalhada($anoExecucao)['resultado'];
+    }
+
+    /**
+     * @return array{resultado: ResultadoConsultaEstrategia, possuiPendencias: bool}
+     */
+    private function consultarAdotadaDetalhada(
+        AnoExecucao $anoExecucao,
+        bool $permitirPendencias = true
+    ): array {
         try {
             $linhas = $this->conexao->buscarTodos(
                 $this->sqlEstrategiaAdotada(),
@@ -108,23 +118,28 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
             );
 
             if ($linhas === []) {
-                return ResultadoConsultaEstrategia::ausente();
+                return [
+                    'resultado' => ResultadoConsultaEstrategia::ausente(),
+                    'possuiPendencias' => false,
+                ];
             }
 
-            return $this->interpretarEstrategiaAdotada($linhas);
+            return $this->interpretarEstrategiaAdotada($linhas, $permitirPendencias);
         } catch (FalhaOracleException) {
-            return ResultadoConsultaEstrategia::falhaSistemica(new FalhaSegura(
+            $resultado = ResultadoConsultaEstrategia::falhaSistemica(new FalhaSegura(
                 'CONSULTA_ESTRATEGIA_ADOTADA_FALHOU',
                 'Não foi possível consultar a estratégia anual adotada.'
             ));
         } catch (EstrategiaOracleInvalidaException) {
-            return $this->estrategiaAdotadaInvalida();
+            $resultado = $this->estrategiaAdotadaInvalida();
         } catch (Throwable) {
-            return ResultadoConsultaEstrategia::falhaSistemica(new FalhaSegura(
+            $resultado = ResultadoConsultaEstrategia::falhaSistemica(new FalhaSegura(
                 'CONSULTA_ESTRATEGIA_ADOTADA_FALHOU',
                 'Não foi possível consultar a estratégia anual adotada.'
             ));
         }
+
+        return ['resultado' => $resultado, 'possuiPendencias' => false];
     }
 
     public function adotar(
@@ -138,20 +153,26 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
             ));
         }
 
-        $adotada = $this->consultarAdotada($anoExecucao);
+        $consultaAdotada = $this->consultarAdotadaDetalhada($anoExecucao);
+        $adotada = $consultaAdotada['resultado'];
 
         if ($adotada->getSituacao() === SituacaoConsultaEstrategia::DISPONIVEL) {
-            if ($adotada->getEstrategia()?->equals($estrategia) === true) {
-                return ResultadoAdocaoEstrategia::adotada();
+            if ($adotada->getEstrategia()?->equals($estrategia) !== true) {
+                return ResultadoAdocaoEstrategia::falha(new FalhaSegura(
+                    'ESTRATEGIA_ADOTADA_DIVERGENTE',
+                    'A estratégia anual informada diverge da estratégia já adotada.'
+                ));
             }
 
-            return ResultadoAdocaoEstrategia::falha(new FalhaSegura(
-                'ESTRATEGIA_ADOTADA_DIVERGENTE',
-                'A estratégia anual informada diverge da estratégia já adotada.'
-            ));
+            if (!$consultaAdotada['possuiPendencias']) {
+                return ResultadoAdocaoEstrategia::adotada();
+            }
         }
 
-        if ($adotada->getSituacao() !== SituacaoConsultaEstrategia::AUSENTE) {
+        if (
+            $adotada->getSituacao() !== SituacaoConsultaEstrategia::AUSENTE
+            && $adotada->getSituacao() !== SituacaoConsultaEstrategia::DISPONIVEL
+        ) {
             return ResultadoAdocaoEstrategia::falha(
                 $adotada->getFalha() ?? new FalhaSegura(
                     'ADOCAO_ESTRATEGIA_FALHOU',
@@ -178,7 +199,10 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
             ));
         }
 
-        $releitura = $this->consultarAdotada($anoExecucao);
+        $releitura = $this->consultarAdotadaDetalhada(
+            $anoExecucao,
+            false
+        )['resultado'];
 
         if (
             $releitura->getSituacao() === SituacaoConsultaEstrategia::DISPONIVEL
@@ -218,9 +242,12 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
 
     /**
      * @param array<int, array<string, mixed>> $linhas
+     * @return array{resultado: ResultadoConsultaEstrategia, possuiPendencias: bool}
      */
-    private function interpretarEstrategiaAdotada(array $linhas): ResultadoConsultaEstrategia
-    {
+    private function interpretarEstrategiaAdotada(
+        array $linhas,
+        bool $permitirPendencias
+    ): array {
         $linhasVazias = 0;
         $porUo = [];
         $modoUnico = null;
@@ -236,7 +263,7 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
                 continue;
             }
 
-            if ($modo === null || $uasg === null || $linhasVazias > 0) {
+            if ($modo === null || $uasg === null) {
                 throw new EstrategiaOracleInvalidaException();
             }
 
@@ -267,10 +294,13 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         }
 
         if ($linhasVazias === count($linhas)) {
-            return ResultadoConsultaEstrategia::ausente();
+            return [
+                'resultado' => ResultadoConsultaEstrategia::ausente(),
+                'possuiPendencias' => true,
+            ];
         }
 
-        if ($linhasVazias > 0 || $modoUnico === null) {
+        if (($linhasVazias > 0 && !$permitirPendencias) || $modoUnico === null) {
             throw new EstrategiaOracleInvalidaException();
         }
 
@@ -279,20 +309,26 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
                 throw new EstrategiaOracleInvalidaException();
             }
 
-            return ResultadoConsultaEstrategia::disponivel(
-                EstrategiaPublicacao::individual()
-            );
+            return [
+                'resultado' => ResultadoConsultaEstrategia::disponivel(
+                    EstrategiaPublicacao::individual()
+                ),
+                'possuiPendencias' => $linhasVazias > 0,
+            ];
         }
 
         if ($uasgConsolidada === null) {
             throw new EstrategiaOracleInvalidaException();
         }
 
-        return ResultadoConsultaEstrategia::disponivel(
-            EstrategiaPublicacao::consolidada(
-                $this->resolverUasgAdotada($uasgConsolidada)
-            )
-        );
+        return [
+            'resultado' => ResultadoConsultaEstrategia::disponivel(
+                EstrategiaPublicacao::consolidada(
+                    $this->resolverUasgAdotada($uasgConsolidada)
+                )
+            ),
+            'possuiPendencias' => $linhasVazias > 0,
+        ];
     }
 
     private function adotarIndividual(AnoExecucao $anoExecucao): void

@@ -252,6 +252,7 @@ final class CorposPayloadPncpTest extends TestCase
             new DecimalExato('1'),
             new DecimalExato('0.5'),
             2,
+            1,
             'ITEM-1',
             'GRUPO-1',
             'Grupo de teste',

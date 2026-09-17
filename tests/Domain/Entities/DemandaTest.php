@@ -30,6 +30,8 @@ class DemandaTest extends TestCase
         $this->assertSame(SituacaoDemanda::HOMOLOGADA, $demanda->getSituacao());
         $this->assertSame($unidade, $demanda->getUnidadeOrcamentaria());
         $this->assertSame($ano, $demanda->getAnoExecucao());
+        $this->assertSame(1, $demanda->getClassificacaoCatalogo());
+        $this->assertSame(2, $demanda->getCatalogo());
         $this->assertSame('7100.00', $demanda->getValorTotal()->getValor());
         $this->assertSame('7100.00', $demanda->getValorOrcamentoExercicio()->getValor());
     }
@@ -40,6 +42,32 @@ class DemandaTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $this->criarDemanda(categoria: 99);
+    }
+
+    /** @regra RN-DEM-001 */
+    public function testDeveAceitarTodasAsCategoriasPncpVigentes(): void
+    {
+        foreach (range(1, 8) as $categoria) {
+            $this->assertSame(
+                $categoria,
+                $this->criarDemanda(categoria: $categoria)->getCategoria()
+            );
+        }
+    }
+
+    /** @regra RN-DEM-001 */
+    public function testDeveRejeitarClassificacaoCatalogoInvalida(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->criarDemanda(classificacaoCatalogo: 3);
+    }
+
+    public function testDeveRejeitarCatalogoInvalido(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->criarDemanda(catalogo: 3);
     }
 
     /** @regra RN-DEM-001 */
@@ -63,7 +91,9 @@ class DemandaTest extends TestCase
         ?AnoExecucao $ano = null,
         int $categoria = 1,
         int $quantidade = 2,
-        string $origem = 'N'
+        string $origem = 'N',
+        int $classificacaoCatalogo = 1,
+        int $catalogo = 2
     ): Demanda {
         $ano ??= new AnoExecucao((int) date('Y') + 1);
 
@@ -80,7 +110,8 @@ class DemandaTest extends TestCase
             $quantidade,
             new DecimalExato('7100.00'),
             new DecimalExato('7100.00'),
-            2,
+            $catalogo,
+            $classificacaoCatalogo,
             '98.004.000004',
             '98',
             'INFORMÁTICA',

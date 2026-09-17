@@ -1,0 +1,34 @@
+-- Sprint 8.4 / Microciclo 6 / NENHUMA_ACAO individual
+-- Execute separadamente os mesmos 11 SELECTs do checkpoint de publicação:
+--
+-- @@publicar_individual_precheck.sql
+--
+-- As consultas e colunas são idênticas. Para este checkpoint, substitua as
+-- expectativas de estado anteriores pelas seguintes:
+--
+-- 01 estrategia_corrente: 1 linha; valor INDIVIDUAL.
+-- 02 representante: 1 linha; representante ativo do login jsilva, ID 709.
+-- 03 lotacao_usuario: 1 linha; lotação ativa e vigente, ID 1.
+-- 04 unidades_orcamentarias: 2 linhas; UO 1/UASG 204 e UO 3/UASG 207.
+-- 05 todas_versoes: 2 linhas; planos 61 e 62, versão 1, confirmados;
+--    ESTRATEGIA_ADOTADA_PUBLICACAO = INDIVIDUAL,
+--    UASG_ADOTADA = 204/207, ESTADO_PUBLICACAO = PUBLICADO e
+--    SEQUENCIAL_PUBLICACAO_PNCP = 1/2, conforme a UO.
+-- 06 versoes_vigentes: as mesmas 2 linhas e valores de todas_versoes.
+-- 07 fotografia_vigente: 5 linhas; UO 1 = 800/801 e UO 3 = 802/803/804,
+--    sem qualquer alteração de conteúdo.
+-- 08 ciclo_demandas: 5 linhas; mesmos IDs, planos, versões e situações.
+-- 09 projecao_operacional: 2 linhas; mesmos valores operacionais de 05/06.
+-- 10 auditoria: 2 linhas; procedimento 5, sequenciais 1 e 2,
+--    representante 709 e lotação 1.
+-- 11 controles_concorrencia: exatamente 3 âncoras permanentes:
+--    (ESTRATEGIA_ANUAL, 2027, ESTRATEGIA_ANUAL),
+--    (UNIDADE_EXTERNA, 2027, 204) e
+--    (UNIDADE_EXTERNA, 2027, 207).
+--
+-- SHA-256 candidato do snapshot canônico, condicionado à igualdade integral:
+-- f9cfb8abb04aed362b9624637cbe0e9eab7cfb4bd8e68c1cec0126184b06ec5f
+--
+-- Este arquivo usa @@ apenas como referência executável do SQL Developer.
+-- Abra o arquivo incluído para executar e exportar cada SELECT separadamente.
+@@publicar_individual_precheck.sql

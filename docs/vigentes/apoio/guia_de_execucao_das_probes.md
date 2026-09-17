@@ -1,4 +1,4 @@
-# Guia de execução das probes e gates das Sprints 5.1, 5.9, 8.2 e 8.3
+# Guia de execução das probes e gates 5.1, 5.9, 8.2, 8.3 e corretivo 8.4.7-C
 
 **Classificação documental:** Apoio
 
@@ -318,6 +318,7 @@ Se a implantação ainda possui apenas a configuração da 5.9, a reorganizaçã
 | `timeout_*_segundos` | Campos `timeout_*` correspondentes em `pncp` |
 | `pncp.tamanho_pagina` | `pncp.page_size` |
 | `pncp.limite_maximo_paginas` | `pncp.max_pages` |
+| `oracle.charset_adodb` | Novo campo explícito; use o charset efetivamente devolvido pelo ADOdb |
 | `oracle.timezone` | `oracle.timezone` |
 | `oracle.mapeamentos` | `oracle.mappings` completo |
 
@@ -326,6 +327,23 @@ O perfil final também exige `profundidade_maxima_json`,
 modelo da 5.9: obtenha os valores aprovados para a implantação, sem inventar
 defaults. Campos exclusivos da massa de teste — ano, UO, sequencial e mensagem
 de auditoria — ficam em `sprint82.php`, não no perfil.
+
+O SGI vigente confirmou `NLS_CHARACTERSET = WE8MSWIN1252`. Para a conexão
+emprestada que devolve esses bytes sem conversão para UTF-8, configure:
+
+```php
+'oracle' => [
+    'charset_adodb' => 'Windows-1252',
+    'timezone' => 'America/Sao_Paulo',
+    'mapeamentos' => [
+        // mapeamentos aprovados
+    ],
+],
+```
+
+Não use `ISO-8859-1` como aproximação e não aplique substituição silenciosa de
+caracteres. O backend converte leituras para UTF-8 e somente aceita escritas
+cuja conversão inversa seja exata.
 
 O registro tem formato simples:
 
@@ -495,10 +513,10 @@ As classificações resumidas e os riscos de todos os scripts estão no
 
 ## 8. Como interpretar e compartilhar o resultado
 
-Um gate só está aprovado quando o retorno do teste é `confirmado=true` e todas as verificações esperadas para o modo também são verdadeiras. O hash SHA-256 identifica o
+Nas probes das seções anteriores, um gate só está aprovado quando o retorno do teste é `confirmado=true` e todas as verificações esperadas para o modo também são verdadeiras. O hash SHA-256 identifica o
 conteúdo sanitizado recebido, mas não transforma um relatório recusado em aprovação.
 
-Antes de compartilhar o JSON, confirme que ele não contém:
+Antes de compartilhar o JSON dessas probes, confirme que ele não contém:
 
 - senha, token ou cabeçalho `Authorization`;
 - caminho de arquivo, hostname, login ou CNPJ;
@@ -526,3 +544,117 @@ exposição e gere uma nova evidência sanitizada.
 Ao terminar, remova variáveis de debug, reverta autorizações temporárias que não
 devem permanecer, confirme a restauração da massa e arquive somente os
 relatórios sanitizados aprovados.
+
+## 10. Sprint 8.4 — Corretivo 8.4.7-C
+
+O [plano aprovado](../../../.agents/sprints/planos/plano_sprint_8.4.md)
+separa a correção local C1 da conferência/PRECHECK C2 e da convergência real
+C3. Encerrar C1 não autoriza sincronização, acesso externo ou escrita.
+O microciclo 8 permanece pausado até concluir a validação corretiva do 7.
+
+### Configuração por etapa
+
+As chaves de `sprint84.php` permanecem iguais. O arquivo externo continua fora
+do repositório e do webroot; não há nova etapa pública nem rotina de reparo.
+
+| Etapa | `allow_oracle_writes` | `allow_pncp_writes` | Comportamento |
+| --- | --- | --- | --- |
+| PRECHECK | `false` | `false` | Repete os SELECTs e leituras PNCP, sem chamar o publicador. |
+| NENHUMA_ACAO Oracle-only | `true` | `false` | Após convergência comprovada, completa somente pares pendentes, sem mutação PNCP. |
+| PUBLICAR / RETIFICAR / EXCLUIR_PCA | `true` | `true` | Exige plano e autorização específicos para as escritas correspondentes. |
+
+As configurações antigas com consentimentos verdadeiros continuam aceitas,
+mas a guarda compartilhada impede mutações PNCP antes do despacho em
+PRECHECK e NENHUMA_ACAO. Login e GETs continuam permitidos.
+
+### Participação do mantenedor e pausas
+
+1. Após autorização própria de C2, receber os 11 SELECTs completos com
+   colunas/cardinalidades exatas, executá-los separadamente e enviar o JSON
+   sanitizado. Não preparar novas demandas nem executar DML de correção.
+2. Após análise manual, sincronizar e executar somente PRECHECK com escritas
+   falsas e novo UUID v4. O gate não substitui a conferência, nem a conferência
+   substitui o gate: o Oracle será relido e o checkpoint exato comparado.
+3. Pausar após o relatório. Somente após aprovação de C2, armar NENHUMA_ACAO
+   Oracle-only com o hash confirmado, baseline de auditoria 4, ENCONTRADO e
+   limpeza vazia. O fluxo repetirá o precheck antes de executar.
+4. Executar uma vez, salvar o relatório e desarmar PRECHECK com ambas as
+   escritas falsas. Resultado parcial ou falha exige somente leituras e novo
+   plano de recuperação; nunca repetir RETIFICAR ou tentar automaticamente.
+
+No pós-check, cada versão deve apresentar o par operacional comprovado.
+`projecao_operacional_completada` identifica as linhas antes/depois em cada
+uma das três consultas que representam os pares; essas ocorrências não devem
+ser somadas como se fossem linhas físicas distintas.
+Sem pendências, NENHUMA_ACAO exige hash Oracle inalterado. Com pendências,
+somente sua propagação é permitida; confirmações, auditoria e os demais dados
+do snapshot devem permanecer exatamente iguais.
+
+### Diagnóstico e compartilhamento
+
+Diferentemente das probes anteriores da seção 8, a Sprint 8.4 usa diagnóstico
+detalhado na Blank protegida e resultados PRECHECK_CONFIRMADO ou
+FLUXO_CONFIRMADO. O hash apenas identifica o relatório: não autoriza o próximo
+fluxo nem comprova sucesso sozinho.
+
+O relatório preserva consultas, binds, identidades e trocas HTTP para
+depuração, mantendo a proteção existente de senha, token e Authorization.
+Guarde o original em local restrito, fora do repositório/webroot; compartilhe
+somente a cópia sanitizada. Não publique segredos ou relatórios integrais no
+código, na documentação ou em logs públicos.
+
+## 11. Sprint 8.4 — Exclusão integral individual
+
+O roteiro da conferência manual é
+`tests/Contract/Sprint84/checkpoints/excluir_pca_individual_precheck.sql`. Ele
+contém onze consultas independentes, todas somente leitura, para serem
+executadas separadamente após a preparação autorizada no SGI.
+
+No cenário de exclusão integral, o `PRECHECK` aceita fotografia zero porque
+precisa comprovar que nenhuma demanda vigente restou antes da operação. Isso
+não relaxa as demais etapas: `PUBLICAR` e `NENHUMA_ACAO` continuam exigindo
+fotografia positiva, enquanto `EXCLUIR_PCA` exige fotografia exatamente zero.
+
+A existência do roteiro e a compatibilidade local não autorizam preparação ou
+execução real. Antes do PRECHECK, mantenha o arquivo externo com
+`etapa_autorizada = PRECHECK`, `allow_oracle_writes = false` e
+`allow_pncp_writes = false`. Alterações no SGI, sincronização e execução da
+Blank dependem da autorização específica da etapa 8B.
+
+## 12. Sprint 8.4 — Encerramento dos fluxos completos
+
+A matriz real da Sprint 8.4 foi concluída nos modos individual e consolidado.
+Cada decisão (`PUBLICAR`, `NENHUMA_ACAO`, `RETIFICAR` e `EXCLUIR_PCA`) foi
+executada uma única vez após conferência manual e PRECHECK bloqueante. Esses
+fluxos reais não constituem massa reutilizável e não devem ser repetidos.
+
+Os roteiros canônicos permanecem em `tests/Contract/Sprint84/checkpoints/` para
+auditoria do procedimento. Eles são somente leitura e não autorizam nova
+preparação SGI, escrita Oracle ou mutação PNCP.
+
+Ao encerrar qualquer execução autorizada da 8.4, o arquivo externo deve ficar:
+
+```php
+'allow_oracle_writes' => false,
+'allow_pncp_writes' => false,
+'etapa_autorizada' => 'PRECHECK',
+```
+
+Não execute a Blank apenas para comprovar essa alteração. A confirmação do
+mantenedor é registrada como condição operacional de encerramento.
+
+A regressão local final pode ser repetida sem acesso externo com:
+
+```bash
+composer contract:sprint84:tests
+composer contract:tests
+composer contract:adapters:tests
+composer contract:oracle82:tests
+composer contract:pncp83:tests
+composer tests
+composer check-psr4
+```
+
+Os comandos PNCP live, os preflights externos e a Blank não integram essa
+regressão. A Sprint 8.5 é a próxima na ordem do Roadmap, mas depende de plano e
+autorização próprios.

@@ -256,12 +256,13 @@ Ela reúne conceitualmente:
 - quantidade;
 - valor total e orçamento do exercício preservados como `DecimalExato`, sem
   conversão para ponto flutuante;
-- categoria Material ou Serviço;
+- categoria do item PCA pertencente ao domínio vigente de `1` a `8`;
+- catálogo e classificação Material ou Serviço como conceitos independentes;
 - origem Normal ou Extraordinária;
 - data desejada;
 - situação no planejamento.
 
-Quantidade, categoria e origem obedecem a `RN-DEM-001`. Os demais atributos não
+Quantidade, categoria, classificação e origem obedecem a `RN-DEM-001`. Os demais atributos não
 ganham neste documento regras que não estejam registradas no catálogo.
 
 `DecimalExato` é a representação interna mínima exigida pelas DI-008 e DI-009:

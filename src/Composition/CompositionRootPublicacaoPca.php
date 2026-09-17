@@ -11,6 +11,7 @@ use Semae\Pca\Infrastructure\Observabilidade\RelogioSistemaEventosTecnicos;
 use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
 use Semae\Pca\Infrastructure\Pncp\Http\ExecutorCurlNativoPncp;
 use Semae\Pca\Infrastructure\Pncp\Http\TransporteCurlPncp;
+use Semae\Pca\Infrastructure\Pncp\Http\TransporteHttpPncp;
 use Semae\Pca\Infrastructure\Pncp\Leitura\TemporizadorSistemaPncp;
 use Semae\Pca\Presentation\Controllers\PublicarPcaController;
 use Semae\Pca\Presentation\Facades\FachadaPublicarPca;
@@ -19,6 +20,10 @@ use Semae\Pca\Presentation\Presenters\PublicarPcaPresenter;
 final class CompositionRootPublicacaoPca
 {
     private const MODULO_OBSERVABILIDADE = 'publicacao-pca';
+
+    public function __construct(
+        private readonly ?TransporteHttpPncp $transportePncp = null
+    ) {}
 
     /** @param array<string, mixed> $perfil */
     public function montar(
@@ -33,14 +38,17 @@ final class CompositionRootPublicacaoPca
             throw new InvalidArgumentException('O login autenticado é obrigatório.');
         }
 
-        $conexao = new ConexaoAdodbEmprestada($conexaoAdodb);
+        $conexao = new ConexaoAdodbEmprestada(
+            $conexaoAdodb,
+            $perfilTipado->getCharsetAdodb()
+        );
         $oracle = new ComposicaoOraclePublicacaoPca(
             $conexao,
             $perfilTipado,
             $loginAutenticado
         );
         $configuracaoTransporte = $perfilTipado->getConfiguracaoTransporte();
-        $transporte = new TransporteCurlPncp(
+        $transporte = $this->transportePncp ?? new TransporteCurlPncp(
             $configuracaoTransporte,
             new ExecutorCurlNativoPncp()
         );
