@@ -168,20 +168,24 @@ final class OraclePlanoRepository implements PlanoRepository
         $colunaIdLotacao = $this->lotacoes->getColunaId();
         $colunaDescricaoLotacao = $this->lotacoes->getColunaDescricao();
 
-        return "SELECT BASE.CHAVE_UO_PLANO, U.{$colunaIdentidade} AS IDENTIDADE_UO, "
-            . "L.{$colunaIdLotacao} AS ID_LOTACAO, "
-            . "L.{$colunaDescricaoLotacao} AS DESCRICAO_LOTACAO, "
-            . "L.{$colunaDescricaoLotacao} AS DESCRICAO_UO, "
-            . "U.{$colunaCodigoUasg} AS CODIGO_UASG, "
-            . "U.{$colunaDescricaoUasg} AS DESCRICAO_UASG "
-            . "FROM (SELECT DISTINCT P.{$colunaUoPlano} AS CHAVE_UO_PLANO "
-            . "FROM {$tabelaPlanos} P WHERE P.{$colunaAno} = ?) BASE "
-            . "LEFT JOIN {$tabelaUo} U "
-            . "ON U.{$colunaRelacao} = BASE.CHAVE_UO_PLANO "
-            . "AND U.{$colunaAtivo} = ? "
-            . "LEFT JOIN {$tabelaLotacoes} L "
-            . "ON L.{$colunaIdLotacao} = U.{$colunaIdentidade} "
-            . "ORDER BY BASE.CHAVE_UO_PLANO, U.{$colunaIdentidade}";
+        return "SELECT 
+            BASE.CHAVE_UO_PLANO, 
+            U.{$colunaIdentidade} AS IDENTIDADE_UO, 
+            L.{$colunaIdLotacao} AS ID_LOTACAO, 
+            L.{$colunaDescricaoLotacao} AS DESCRICAO_LOTACAO, 
+            L.{$colunaDescricaoLotacao} AS DESCRICAO_UO, 
+            U.{$colunaCodigoUasg} AS CODIGO_UASG, 
+            U.{$colunaDescricaoUasg} AS DESCRICAO_UASG 
+        FROM (
+            SELECT DISTINCT P.{$colunaUoPlano} AS CHAVE_UO_PLANO 
+            FROM {$tabelaPlanos} P 
+            WHERE P.{$colunaAno} = ?
+        ) BASE 
+        LEFT JOIN {$tabelaUo} U ON U.{$colunaRelacao} = BASE.CHAVE_UO_PLANO AND U.{$colunaAtivo} = ? 
+        LEFT JOIN {$tabelaLotacoes} L ON L.{$colunaIdLotacao} = U.{$colunaIdentidade} 
+        ORDER BY 
+            BASE.CHAVE_UO_PLANO, 
+            U.{$colunaIdentidade}";
     }
 
     private function sqlBuscarVersaoVigente(): string
@@ -193,15 +197,20 @@ final class OraclePlanoRepository implements PlanoRepository
         $colunaHomologacao = $this->planos->getColunaDataHomologacao();
         $colunaConfirmacao = $this->planos->getColunaDataConfirmacao();
 
-        return "SELECT p.{$colunaVersao} AS VERSAO, "
-            . "TO_CHAR(p.{$colunaHomologacao}, 'YYYY-MM-DD HH24:MI:SS') AS DATA_HOMOLOGACAO, "
-            . "TO_CHAR(p.{$colunaConfirmacao}, 'YYYY-MM-DD HH24:MI:SS') AS DATA_CONFIRMACAO "
-            . "FROM {$tabelaPlanos} p "
-            . "WHERE p.{$colunaUo} = ? AND p.{$colunaAno} = ? "
-            . "AND p.{$colunaVersao} = (SELECT MAX(pv.{$colunaVersao}) "
-            . "FROM {$tabelaPlanos} pv "
-            . "WHERE pv.{$colunaUo} = p.{$colunaUo} "
-            . "AND pv.{$colunaAno} = p.{$colunaAno})";
+        return "SELECT 
+            p.{$colunaVersao} AS VERSAO, 
+            TO_CHAR(p.{$colunaHomologacao}, 'YYYY-MM-DD HH24:MI:SS') AS DATA_HOMOLOGACAO, 
+            TO_CHAR(p.{$colunaConfirmacao}, 'YYYY-MM-DD HH24:MI:SS') AS DATA_CONFIRMACAO 
+        FROM {$tabelaPlanos} p 
+        WHERE p.{$colunaUo} = ? 
+            AND p.{$colunaAno} = ? 
+            AND p.{$colunaVersao} = (
+                SELECT MAX(pv.{$colunaVersao}) 
+                FROM {$tabelaPlanos} pv 
+                WHERE 
+                    pv.{$colunaUo} = p.{$colunaUo} 
+                    AND pv.{$colunaAno} = p.{$colunaAno}
+            )";
     }
 
     private function sqlBuscarDemandasVigentes(): string
@@ -232,30 +241,31 @@ final class OraclePlanoRepository implements PlanoRepository
         $mascaraDecimal = 'FM9999999999990D0000';
         $configuracaoDecimal = "NLS_NUMERIC_CHARACTERS=''.,''";
 
-        return "SELECT D.{$colunaIdDemanda} AS ID_DEMANDA, "
-            . "D.{$colunaSituacao} AS SITUACAO, "
-            . "D.{$colunaUnidadeRequisitante} AS ID_UNIDADE_REQUISITANTE, "
-            . "TO_CHAR(D.{$colunaDataDesejada}, 'YYYY-MM-DD') AS DATA_DESEJADA, "
-            . "D.{$colunaCategoria} AS CATEGORIA, "
-            . "D.{$colunaDescricao} AS DESCRICAO_DEMANDA, "
-            . "D.{$colunaUnidadeMedida} AS UNIDADE_MEDIDA, "
-            . "D.{$colunaQuantidade} AS QUANTIDADE, "
-            . "TO_CHAR(D.{$colunaValorTotal}, '{$mascaraDecimal}', "
-            . "'{$configuracaoDecimal}') AS VALOR_TOTAL, "
-            . "TO_CHAR(D.{$colunaValorOrcamento}, '{$mascaraDecimal}', "
-            . "'{$configuracaoDecimal}') AS VALOR_ORCAMENTO_EXERCICIO, "
-            . "D.{$colunaClassificacaoCatalogo} AS CLASSIFICACAO_CATALOGO, "
-            . "D.{$colunaCodigoItem} AS CODIGO_ITEM, "
-            . "D.{$colunaGrupo} AS GRUPO, "
-            . "MGM.{$colunaDescricaoGrupoRemoto} AS DESCRICAO_GRUPO, "
-            . "D.{$colunaOrigem} AS ORIGEM "
-            . "FROM {$tabelaDemandas} D "
-            . "JOIN {$tabelaPlanos} origem ON origem.{$colunaIdPlano} = D.{$colunaPlanoOrigem} "
-            . "LEFT JOIN {$tabelaGrupoRemoto} MGM "
-            . "ON MGM.{$colunaCodigoGrupoRemoto} = D.{$colunaGrupo} "
-            . "WHERE origem.{$colunaUoPlano} = ? AND origem.{$colunaAnoPlano} = ? "
-            . "AND D.{$colunaSituacao} IN (?, ?, ?) "
-            . "ORDER BY D.{$colunaIdDemanda}";
+        return "SELECT 
+            D.{$colunaIdDemanda} AS ID_DEMANDA, 
+            D.{$colunaSituacao} AS SITUACAO, 
+            D.{$colunaUnidadeRequisitante} AS ID_UNIDADE_REQUISITANTE, 
+            TO_CHAR(D.{$colunaDataDesejada}, 'YYYY-MM-DD') AS DATA_DESEJADA, 
+            D.{$colunaCategoria} AS CATEGORIA, 
+            D.{$colunaDescricao} AS DESCRICAO_DEMANDA, 
+            D.{$colunaUnidadeMedida} AS UNIDADE_MEDIDA, 
+            D.{$colunaQuantidade} AS QUANTIDADE, 
+            TO_CHAR(D.{$colunaValorTotal}, '{$mascaraDecimal}', '{$configuracaoDecimal}') AS VALOR_TOTAL, 
+            TO_CHAR(D.{$colunaValorOrcamento}, '{$mascaraDecimal}', '{$configuracaoDecimal}') AS VALOR_ORCAMENTO_EXERCICIO, 
+            D.{$colunaClassificacaoCatalogo} AS CLASSIFICACAO_CATALOGO, 
+            D.{$colunaCodigoItem} AS CODIGO_ITEM, 
+            D.{$colunaGrupo} AS GRUPO, 
+            MGM.{$colunaDescricaoGrupoRemoto} AS DESCRICAO_GRUPO, 
+            D.{$colunaOrigem} AS ORIGEM 
+        FROM 
+            {$tabelaDemandas} D 
+            JOIN {$tabelaPlanos} origem ON origem.{$colunaIdPlano} = D.{$colunaPlanoOrigem} 
+            LEFT JOIN {$tabelaGrupoRemoto} MGM ON MGM.{$colunaCodigoGrupoRemoto} = D.{$colunaGrupo} 
+        WHERE 
+            origem.{$colunaUoPlano} = ? 
+            AND origem.{$colunaAnoPlano} = ? 
+            AND D.{$colunaSituacao} IN (?, ?, ?) 
+        ORDER BY D.{$colunaIdDemanda}";
     }
 
     private function sqlLerConfirmacaoExata(): string
@@ -266,10 +276,12 @@ final class OraclePlanoRepository implements PlanoRepository
         $colunaVersao = $this->planos->getColunaVersao();
         $colunaConfirmacao = $this->planos->getColunaDataConfirmacao();
 
-        return "SELECT TO_CHAR(p.{$colunaConfirmacao}, 'YYYY-MM-DD HH24:MI:SS') "
-            . "AS DATA_CONFIRMACAO FROM {$tabelaPlanos} p "
-            . "WHERE p.{$colunaUo} = ? AND p.{$colunaAno} = ? "
-            . "AND p.{$colunaVersao} = ?";
+        return "SELECT TO_CHAR(p.{$colunaConfirmacao}, 'YYYY-MM-DD HH24:MI:SS') AS DATA_CONFIRMACAO 
+        FROM {$tabelaPlanos} p 
+        WHERE 
+            p.{$colunaUo} = ? 
+            AND p.{$colunaAno} = ? 
+            AND p.{$colunaVersao} = ?";
     }
 
     private function sqlConfirmarSincronizacao(): string
@@ -280,9 +292,13 @@ final class OraclePlanoRepository implements PlanoRepository
         $colunaVersao = $this->planos->getColunaVersao();
         $colunaConfirmacao = $this->planos->getColunaDataConfirmacao();
 
-        return "UPDATE {$tabelaPlanos} SET {$colunaConfirmacao} = SYSDATE "
-            . "WHERE {$colunaUo} = ? AND {$colunaAno} = ? "
-            . "AND {$colunaVersao} = ? AND {$colunaConfirmacao} IS NULL";
+        return "UPDATE {$tabelaPlanos} SET 
+            {$colunaConfirmacao} = SYSDATE 
+        WHERE 
+            {$colunaUo} = ? 
+            AND {$colunaAno} = ? 
+            AND {$colunaVersao} = ? 
+            AND {$colunaConfirmacao} IS NULL";
     }
 
     /** @return array{int, int, int} */

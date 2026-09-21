@@ -197,6 +197,41 @@ final class ConexaoAdodbEmprestadaTest extends TestCase
         $this->assertTrue($conexao->estaEmTransacao());
     }
 
+    public function testDeveAtualizarClobIntegralDentroDeTransacaoAtiva(): void
+    {
+        $adodb = new AdodbEmprestadoFake();
+        $conexao = new ConexaoAdodbEmprestada($adodb, 'Windows-1252');
+        $conteudo = str_repeat('{"acao":"publicação"}', 300);
+
+        $conexao->iniciarTransacao();
+        $conexao->atualizarClobPorId(
+            'SGI.SEGURANCA_LOG',
+            'DESCRIPTION',
+            'ID',
+            321,
+            $conteudo
+        );
+
+        $this->assertCount(1, $adodb->atualizacoesClob);
+        $this->assertSame('SGI.SEGURANCA_LOG', $adodb->atualizacoesClob[0]['tabela']);
+        $this->assertSame('DESCRIPTION', $adodb->atualizacoesClob[0]['coluna']);
+        $this->assertSame('ID = 321', $adodb->atualizacoesClob[0]['criterio']);
+        $this->assertSame(
+            mb_convert_encoding($conteudo, 'Windows-1252', 'UTF-8'),
+            $adodb->atualizacoesClob[0]['conteudo']
+        );
+    }
+
+    public function testDeveRecusarAtualizacaoClobForaDeTransacao(): void
+    {
+        $conexao = new ConexaoAdodbEmprestada(new AdodbEmprestadoFake());
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('transação Oracle ativa');
+
+        $conexao->atualizarClobPorId('SGI.SEGURANCA_LOG', 'DESCRIPTION', 'ID', 1, '{}');
+    }
+
     public function testNuncaDeveFecharAConexaoEmprestada(): void
     {
         $adodb = new AdodbEmprestadoFake();
@@ -226,6 +261,9 @@ final class AdodbEmprestadoFake
 
     /** @var array<int, array{sql: string, parametros: array<int|string, mixed>}> */
     public array $consultas = [];
+
+    /** @var array<int, array{tabela: string, coluna: string, conteudo: string, criterio: string}> */
+    public array $atualizacoesClob = [];
 
     /** @var array<int, array<string, mixed>>|false */
     public array|false $resultadoGetAll = [];
@@ -284,6 +322,17 @@ final class AdodbEmprestadoFake
         $this->parametrosSolicitados[] = $nome;
 
         return $nome === false ? '' : ':' . $nome;
+    }
+
+    public function UpdateClob(
+        string $tabela,
+        string $coluna,
+        string $conteudo,
+        string $criterio
+    ): bool {
+        $this->atualizacoesClob[] = compact('tabela', 'coluna', 'conteudo', 'criterio');
+
+        return true;
     }
 
     public function ErrorNo(): int|string

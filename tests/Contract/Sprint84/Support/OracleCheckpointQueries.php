@@ -40,7 +40,7 @@ final class OracleCheckpointQueries
             'estrategia_corrente' => $this->currentStrategy(),
             'representante' => $this->representative(),
             'lotacao_usuario' => $this->userDepartment(),
-            'unidades_orcamentarias' => $this->budgetUnits($year),
+            'unidades_orcamentarias' => $this->budgetUnits($year, count($unitIds)),
             'todas_versoes' => $this->allVersions($year, $unitIds, $versionCount),
             'versoes_vigentes' => $this->currentVersions($year, $unitIds),
             'fotografia_vigente' => $this->currentPhotograph($year, $unitIds, $photographCount),
@@ -128,7 +128,7 @@ final class OracleCheckpointQueries
     }
 
     /** @return array<string, mixed> */
-    private function budgetUnits(int $year): array
+    private function budgetUnits(int $year, int $expected): array
     {
         $plans = $this->profile->getPlanos();
         $units = $this->profile->getUnidadesOrcamentarias();
@@ -160,7 +160,7 @@ final class OracleCheckpointQueries
                 'CODIGO_UASG',
                 'DESCRICAO_UASG',
             ],
-            ['exact' => 2]
+            ['exact' => $expected]
         );
     }
 
@@ -169,7 +169,7 @@ final class OracleCheckpointQueries
     {
         $plans = $this->profile->getPlanos();
         $state = $this->profile->getEstadoOperacional();
-        $filter = $this->twoUnitFilter($plans->getColunaUnidadeOrcamentaria());
+        $filter = $this->unitFilter($plans->getColunaUnidadeOrcamentaria(), count($unitIds));
 
         return $this->query(
             "SELECT p.{$plans->getColunaId()} AS ID_PLANO, "
@@ -200,7 +200,7 @@ final class OracleCheckpointQueries
         $plans = $this->profile->getPlanos();
         $state = $this->profile->getEstadoOperacional();
         $unitColumn = $plans->getColunaUnidadeOrcamentaria();
-        $filter = $this->twoUnitFilter($unitColumn);
+        $filter = $this->unitFilter($unitColumn, count($unitIds));
 
         return $this->query(
             "SELECT p.{$plans->getColunaId()} AS ID_PLANO, "
@@ -224,7 +224,7 @@ final class OracleCheckpointQueries
                 . "ORDER BY p.{$unitColumn}, p.{$plans->getColunaId()}",
             [$year, ...$unitIds],
             $this->versionColumns(),
-            ['exact' => 2]
+            ['exact' => count($unitIds)]
         );
     }
 
@@ -234,7 +234,7 @@ final class OracleCheckpointQueries
         $demands = $this->profile->getDemandas();
         $plans = $this->profile->getPlanos();
         $unitColumn = $plans->getColunaUnidadeOrcamentaria();
-        $filter = $this->twoUnitFilter($unitColumn, 'origem');
+        $filter = $this->unitFilter($unitColumn, count($unitIds), 'origem');
 
         return $this->query(
             "SELECT d.{$demands->getColunaId()} AS ID_DEMANDA, "
@@ -284,7 +284,7 @@ final class OracleCheckpointQueries
         $demands = $this->profile->getDemandas();
         $plans = $this->profile->getPlanos();
         $unitColumn = $plans->getColunaUnidadeOrcamentaria();
-        $filter = $this->twoUnitFilter($unitColumn, 'p');
+        $filter = $this->unitFilter($unitColumn, count($unitIds), 'p');
 
         return $this->query(
             "SELECT d.{$demands->getColunaId()} AS ID_DEMANDA, "
@@ -308,7 +308,10 @@ final class OracleCheckpointQueries
     {
         $plans = $this->profile->getPlanos();
         $state = $this->profile->getEstadoOperacional();
-        $filter = $this->twoUnitFilter($plans->getColunaUnidadeOrcamentaria());
+        $filter = $this->unitFilter(
+            $plans->getColunaUnidadeOrcamentaria(),
+            count($unitIds)
+        );
 
         return $this->query(
             "SELECT p.{$plans->getColunaUnidadeOrcamentaria()} "
@@ -392,9 +395,11 @@ final class OracleCheckpointQueries
         ];
     }
 
-    private function twoUnitFilter(string $column, string $alias = 'p'): string
+    private function unitFilter(string $column, int $count, string $alias = 'p'): string
     {
-        return "{$alias}.{$column} IN (?, ?)";
+        $placeholders = implode(', ', array_fill(0, $count, '?'));
+
+        return "{$alias}.{$column} IN ({$placeholders})";
     }
 
     /**

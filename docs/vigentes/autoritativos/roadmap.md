@@ -908,9 +908,26 @@ as permissões de escrita falsas. Nenhuma execução real deve ser repetida.
 
 - demonstrar contenção, falha reconciliável e interrupção sistêmica;
 - validar sanitização e preservação de resultados conhecidos;
-- testar a aplicação Blank e o pacote autocontido em homologação.
+- testar a aplicação Blank e o pacote autocontido em homologação;
+- exportar eventos separadamente do ViewModel, preservando a API existente,
+  e persistir os envelopes pela fachada pública de registro técnico, após
+  encerramento transacional confirmado, conforme DI-006 e DI-010;
+- adicionar, como último incremento funcional, ajuda ao operador por botão e
+  modal na Blank, com orientações derivadas das regras vigentes e sem I/O.
 
 Referência principal: DI-010 e gates das DI-008 e DI-009.
+
+O [plano aprovado da Sprint 8.5](../../../.agents/sprints/planos/plano_sprint_8.5.md)
+organiza dez microciclos, com autorização independente e pausa ao final de
+cada um. O progresso e a liberação de gates permanecem no
+[estado operacional](../operacional/estado_atual.md).
+
+**Estado do PCA:** concluída em 21/09/2026 após os dez microciclos autorizados.
+Foram comprovados o tratamento seguro de falhas, a exportação e persistência
+integral dos eventos técnicos, a contenção concorrente, o smoke do pacote em
+homologação e a ajuda ao operador. O pacote autocontido final e a Blank foram
+validados sem acesso à produção. A configuração externa terminou desarmada em
+`PRECHECK`, e os gates reais concluídos não devem ser repetidos.
 
 ### Fase 9 — Entrega e operação
 

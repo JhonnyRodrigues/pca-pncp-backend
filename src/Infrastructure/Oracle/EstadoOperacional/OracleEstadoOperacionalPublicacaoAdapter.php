@@ -259,10 +259,13 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
             ? " AND p.{$uo} = ?"
             : '';
 
-        return "SELECT p.{$estrategia} AS ESTRATEGIA_ADOTADA_PUBLICACAO, "
-            . "p.{$uasg} AS UASG_ADOTADA, p.{$estado} AS ESTADO_PUBLICACAO, "
-            . "p.{$sequencial} AS SEQUENCIAL_PUBLICACAO_PNCP FROM {$tabela} p "
-            . "WHERE p.{$ano} = ?{$filtroUo}";
+        return "SELECT 
+            p.{$estrategia} AS ESTRATEGIA_ADOTADA_PUBLICACAO, 
+            p.{$uasg} AS UASG_ADOTADA, 
+            p.{$estado} AS ESTADO_PUBLICACAO, 
+            p.{$sequencial} AS SEQUENCIAL_PUBLICACAO_PNCP 
+        FROM {$tabela} p 
+        WHERE p.{$ano} = ?{$filtroUo}";
     }
 
     private function sqlRegistro(UnidadeExternaPublicacao $unidade, bool $somentePendencias): string
@@ -276,9 +279,11 @@ final class OracleEstadoOperacionalPublicacaoAdapter implements EstadoOperaciona
             ? " AND {$uo} = ?"
             : '';
 
-        return "UPDATE {$tabela} SET {$estado} = ?, {$sequencial} = ? "
-            . "WHERE {$ano} = ?{$filtroUo}"
-            . ($somentePendencias ? " AND {$estado} IS NULL AND {$sequencial} IS NULL" : '');
+        return "UPDATE {$tabela} SET 
+            {$estado} = ?, 
+            {$sequencial} = ? 
+        WHERE {$ano} = ?{$filtroUo}"
+        . ($somentePendencias ? " AND {$estado} IS NULL AND {$sequencial} IS NULL" : '');
     }
 
     /** @return array<int, int> */

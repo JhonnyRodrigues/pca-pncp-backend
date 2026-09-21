@@ -22,6 +22,7 @@ use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoLotacoesOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoPlanosOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoUnidadesOrcamentariasOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\OraclePlanoRepository;
+use Tests\Support\NormalizadorSql;
 
 final class OraclePlanoRepositoryTest extends TestCase
 {
@@ -51,58 +52,59 @@ final class OraclePlanoRepositoryTest extends TestCase
         $this->assertSame('928344', $identidades[0]->getUnidadeOrcamentaria()->getUasg()->getCodigo());
 
         $consulta = $adodb->consultas[0];
+        $sql = NormalizadorSql::normalizar($consulta['sql']);
         $this->assertStringContainsString(
             'SELECT DISTINCT P.FK_UO AS CHAVE_UO_PLANO',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'U.ID_UNIDADE_ORCAMENTARIA AS IDENTIDADE_UO',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'L.COD_LOTACAO AS ID_LOTACAO',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'L.NOME_LOTACAO AS DESCRICAO_LOTACAO',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'L.NOME_LOTACAO AS DESCRICAO_UO',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'U.CODIGO_UASG AS CODIGO_UASG',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'U.DESCRICAO_UASG AS DESCRICAO_UASG',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'LEFT JOIN APP.PAC_UO U '
                 . 'ON U.ID_UNIDADE_ORCAMENTARIA = BASE.CHAVE_UO_PLANO',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'LEFT JOIN APP.RH_LOTACOES L '
                 . 'ON L.COD_LOTACAO = U.ID_UNIDADE_ORCAMENTARIA',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'AND U.ATIVA = :param_1',
-            $consulta['sql']
+            $sql
         );
         $this->assertStringContainsString(
             'ORDER BY BASE.CHAVE_UO_PLANO, U.ID_UNIDADE_ORCAMENTARIA',
-            $consulta['sql']
+            $sql
         );
         $this->assertSame(
             ['param_0' => 2027, 'param_1' => 'S'],
             $consulta['parametros']
         );
-        $this->assertStringNotContainsString('CREATE ', strtoupper($consulta['sql']));
-        $this->assertStringNotContainsString('DROP ', strtoupper($consulta['sql']));
+        $this->assertStringNotContainsString('CREATE ', strtoupper($sql));
+        $this->assertStringNotContainsString('DROP ', strtoupper($sql));
     }
 
     public function testDeveRetornarColecaoVaziaQuandoNaoExistiremPlanosNoExercicio(): void
@@ -231,33 +233,35 @@ final class OraclePlanoRepositoryTest extends TestCase
         );
 
         $consultaPlano = $adodb->consultas[0];
-        $this->assertStringContainsString('p.VERSAO = (SELECT MAX(pv.VERSAO)', $consultaPlano['sql']);
-        $this->assertStringContainsString('pv.FK_UO = p.FK_UO', $consultaPlano['sql']);
-        $this->assertStringContainsString('pv.ANO_EXERCICIO = p.ANO_EXERCICIO', $consultaPlano['sql']);
-        $this->assertStringNotContainsString('pv.DATA_PUBLICACAO', $consultaPlano['sql']);
+        $sqlPlano = NormalizadorSql::normalizar($consultaPlano['sql']);
+        $this->assertStringContainsString('p.VERSAO = (SELECT MAX(pv.VERSAO)', $sqlPlano);
+        $this->assertStringContainsString('pv.FK_UO = p.FK_UO', $sqlPlano);
+        $this->assertStringContainsString('pv.ANO_EXERCICIO = p.ANO_EXERCICIO', $sqlPlano);
+        $this->assertStringNotContainsString('pv.DATA_PUBLICACAO', $sqlPlano);
         $this->assertStringContainsString(
             "TO_CHAR(p.DATA_HOMOLOGACAO, 'YYYY-MM-DD HH24:MI:SS') AS DATA_HOMOLOGACAO",
-            $consultaPlano['sql']
+            $sqlPlano
         );
         $this->assertSame(['param_0' => 101, 'param_1' => 2027], $consultaPlano['parametros']);
 
         $consultaDemandas = $adodb->consultas[1];
+        $sqlDemandas = NormalizadorSql::normalizar($consultaDemandas['sql']);
         $this->assertStringContainsString(
             'JOIN APP.PAC_PLANOS origem ON origem.ID_PLANO = D.FK_PLANO',
-            $consultaDemandas['sql']
+            $sqlDemandas
         );
         $this->assertStringContainsString(
             'LEFT JOIN CEBISIS.MT_GRUPOS_MATERIAIS@READ_ORCL MGM '
                 . 'ON MGM.CODIGO = D.GRUPO_CODIGO',
-            $consultaDemandas['sql']
+            $sqlDemandas
         );
         $this->assertStringContainsString(
             'MGM.DESCRICAO AS DESCRICAO_GRUPO',
-            $consultaDemandas['sql']
+            $sqlDemandas
         );
         $this->assertStringNotContainsString(
             'D.DESCRICAO_GRUPO AS DESCRICAO_GRUPO',
-            $consultaDemandas['sql']
+            $sqlDemandas
         );
         $this->assertStringNotContainsString('TO_CHAR(D.GRUPO_CODIGO', $consultaDemandas['sql']);
         $this->assertStringNotContainsString('TO_NUMBER(MGM.CODIGO', $consultaDemandas['sql']);
@@ -449,14 +453,15 @@ final class OraclePlanoRepositoryTest extends TestCase
         $this->assertCount(2, $adodb->consultas);
         $this->assertCount(1, $adodb->execucoes);
         foreach ($adodb->consultas as $consulta) {
+            $sql = NormalizadorSql::normalizar($consulta['sql']);
             $this->assertStringContainsString(
                 "TO_CHAR(p.DATA_PUBLICACAO, 'YYYY-MM-DD HH24:MI:SS') AS DATA_CONFIRMACAO",
-                $consulta['sql']
+                $sql
             );
             $this->assertStringContainsString(
                 'WHERE p.FK_UO = :param_0 AND p.ANO_EXERCICIO = :param_1 '
                     . 'AND p.VERSAO = :param_2',
-                $consulta['sql']
+                $sql
             );
             $this->assertSame(
                 ['param_0' => 101, 'param_1' => 2027, 'param_2' => 3],
@@ -465,12 +470,13 @@ final class OraclePlanoRepositoryTest extends TestCase
         }
 
         $execucao = $adodb->execucoes[0];
-        $this->assertStringContainsString('UPDATE APP.PAC_PLANOS', $execucao['sql']);
-        $this->assertStringContainsString('SET DATA_PUBLICACAO = SYSDATE', $execucao['sql']);
+        $sql = NormalizadorSql::normalizar($execucao['sql']);
+        $this->assertStringContainsString('UPDATE APP.PAC_PLANOS', $sql);
+        $this->assertStringContainsString('SET DATA_PUBLICACAO = SYSDATE', $sql);
         $this->assertStringContainsString(
             'WHERE FK_UO = :param_0 AND ANO_EXERCICIO = :param_1 '
                 . 'AND VERSAO = :param_2 AND DATA_PUBLICACAO IS NULL',
-            $execucao['sql']
+            $sql
         );
         $this->assertSame(
             ['param_0' => 101, 'param_1' => 2027, 'param_2' => 3],

@@ -433,7 +433,7 @@ completar o UseCase.
 - **Contexto e problema:** `PAC_HISTORICOS` deve registrar fatos de negócio sem
   virar diário de tentativas, falhas técnicas ou decisões ainda não
   confirmadas.
-- **Fontes:** checkpoint complementar, seção 5.
+- **Fontes:** checkpoint complementar, seção 5; plano aprovado da Sprint 8.5.
 
 #### DI-006 — Decisão vigente
 
@@ -465,8 +465,14 @@ completar o UseCase.
     [Especificação de logs estruturados](especificacao_de_logs_estruturados.md).
 14. PSR-3 atende à observabilidade técnica. O backend produz eventos imutáveis
     e os acumula somente em memória durante a execução.
-15. Os eventos técnicos não integram `PublicarPcaResponse` nesta etapa. Uma futura fachada os devolverá separadamente ao hospedeiro, e a aplicação Blank os persistirá com `sc_log_add` depois do encerramento da transação do backend.
-16. O JSON detalhado será mapeado futuramente para `DESCRIPTION`. O valor genérico de `SEGURANCA_LOG.ACTION` pertence ao adaptador da Blank e não é fixado pelo backend nesta etapa.
+15. Os eventos técnicos não integram `PublicarPcaResponse`. O contrato aprovado
+    para a Sprint 8.5 os devolve separadamente ao hospedeiro por
+    `PublicadorPcaScriptcase::executarComEventos(...)`, conforme a DI-010.
+16. A Blank entrega os envelopes a `RegistradorEventosTecnicosScriptcase`
+    somente depois do encerramento confirmado da transação do backend. O
+    registrador persiste cada JSON integral em `SEGURANCA_LOG.DESCRIPTION` por
+    mecanismo próprio de CLOB do ADOdb e define `execute` em `ACTION`; a
+    operação detalhada permanece no campo `action` do JSON.
 17. `SEGURANCA_LOG` permanece separada de `PAC_HISTORICOS`: a primeira recebe observabilidade técnica; a segunda, somente fatos de negócio confirmados.
 18. O logging técnico não cria nem utiliza uma segunda conexão Oracle.
 
@@ -484,8 +490,11 @@ completar o UseCase.
 #### DI-006 — Consequências e limitações
 
 - O rollback do negócio não remove os eventos já acumulados em memória.
-- A persistência técnica só poderá ocorrer depois que a futura fachada devolver os eventos à Blank; uma falha fatal anterior a esse retorno pode perdê-los.
-  Essa limitação é aceita conscientemente na V1.
+- A persistência técnica ocorre após o retorno seguro à Blank. Falha
+  recuperável de exportação ou gravação preserva o resultado de negócio e
+  produz aviso separado; falha fatal anterior à resposta HTTP pode impedir
+  a entrega do resultado e a persistência completa dos eventos. Essa
+  limitação é aceita conscientemente na V1.
 - Mensagens não contêm payload completo, segredos ou texto externo como autoridade.
 - `ID_HISTORICO` permanece chave técnica.
 
@@ -508,6 +517,13 @@ refatorar o modelo de auditoria antes da Infrastructure.
 
 - Aceita como primeira decisão do checkpoint complementar.
 - Remove a classificação anterior de histórico como Entity apenas por possuir ID Oracle.
+- Revisada em 17/09/2026 pelo Microciclo 1 da Sprint 8.5 para aprovar a
+  exportação separada e o registro técnico pela Blank com ação `execute`.
+  A revisão estabelece o contrato; não comprova implementação nem gate real.
+- Revisada em 20/09/2026 pelo Microciclo 6A depois de o gate real demonstrar
+  `ORA-01704` e vazamento de HTML na macro `sc_log_add`. A macro foi substituída
+  no contrato por registrador próprio com CLOB, mesma conexão emprestada e
+  transação técnica posterior e independente da transação de negócio.
 
 ---
 
@@ -1032,7 +1048,7 @@ e da execução dos gates de ambiente e contrato.
 
 - **Status:** Aceita condicionalmente.
 - **Contexto e problema:** o backend deve ser consumido pelo Scriptcase sem transferir wiring, credenciais, conexão ou estrutura interna para a aplicação Blank.
-- **Fontes:** continuação 03, seção 4; plano aprovado da Sprint 8.1.
+- **Fontes:** continuação 03, seção 4; planos aprovados das Sprints 8.1 e 8.5.
 
 #### DI-010 — Decisão vigente
 
@@ -1055,6 +1071,17 @@ e da execução dos gates de ambiente e contrato.
    montagem ao Composition Root e aciona a `FachadaPublicarPca` interna.
 9. O Scriptcase não conhece Controller, Repository concreto, cliente PNCP,
    token ou política transacional.
+10. `PublicadorPcaScriptcase::executar(...)` preserva seus argumentos e o
+    retorno `PublicarPcaViewModel`. A extensão `executarComEventos(...)`
+    recebe os mesmos argumentos e devolve um objeto com `resultado`
+    (o ViewModel existente), `eventos` (envelopes sanitizados) e
+    `avisoRegistroTecnico` (aviso público seguro ou `null`). Não expõe objetos
+    de Infrastructure ao hospedeiro.
+11. Ambos os métodos compartilham o caminho de execução. Obter eventos não
+    executa novamente a publicação. A composição mantém disponíveis a
+    fachada, o acumulador e o estado transacional da mesma chamada, sem
+    compartilhar estado entre execuções ou alterar o contrato de
+    `CompositionRootPublicacaoPca::montar(...)`.
 
 ##### DI-010 — Request, Controller e Presenter
 
@@ -1067,7 +1094,9 @@ e da execução dos gates de ambiente e contrato.
 5. Controller não usa macros, não faz wiring e não contém regra.
 6. Presenter produz ViewModel estruturado.
 7. Presenter não gera JSON, HTML ou macros.
-8. A aplicação Blank apenas renderiza o ViewModel.
+8. Quanto ao resultado de negócio, a Blank apenas adapta e renderiza o
+   ViewModel, sem decidir publicação, retificação ou exclusão. Ela também
+   adapta os eventos técnicos conforme o contrato de observabilidade abaixo.
 
 ##### DI-010 — Configuração
 
@@ -1148,18 +1177,56 @@ e da execução dos gates de ambiente e contrato.
 
 ##### DI-010 — Eventos técnicos na fronteira hospedeira
 
-1. O backend acumula eventos técnicos estruturados somente em memória por meio do logger PSR-3.
-2. Os eventos não integram `PublicarPcaResponse`.
-3. Em etapa futura, a fachada obterá o lote do grafo da execução e o devolverá separadamente ao hospedeiro.
-4. A aplicação Blank `PCA_PUBLICAR_B` adaptará então os eventos ao formato de `sc_log_add` e os persistirá depois do encerramento da transação do backend.
-5. A ação operacional detalhada será gravada no JSON de `DESCRIPTION`. A ação genérica da coluna física `SEGURANCA_LOG.ACTION` será escolhida pela Blank e não é definida pelo backend.
-6. Essa persistência não reutiliza `PAC_HISTORICOS`, não cria uma segunda conexão Oracle no backend e não foi implementada ou demonstrada nesta etapa.
-7. Uma falha fatal antes do retorno à Blank pode impedir a persistência dos eventos acumulados; essa limitação é aceita conscientemente.
-8. Falha inesperada capturada pela fachada gera evento seguro com a ação
-   `EXECUTAR_PUBLICACAO_PCA`, sem transportar o `Throwable`; falha do logger não
-   rompe a fronteira pública.
-9. Falhas anteriores à correlação válida ou à construção do logger não geram
-   evento técnico fabricado.
+Contrato aprovado no Microciclo 1 da Sprint 8.5. A exportação local foi
+implementada no Microciclo 2 e a adaptação versionada da Blank no Microciclo 4;
+os gates reais permanecem pendentes, conforme o
+[estado operacional](../operacional/estado_atual.md).
+
+1. O backend acumula eventos técnicos estruturados somente em memória pelo
+   logger PSR-3; eles não integram `PublicarPcaResponse`.
+2. `executarComEventos(...)` obtém o lote do mesmo grafo após a execução e
+   devolve envelopes ordenados separadamente do resultado. A exportação
+   preserva a correlação e acrescenta `executionTimeMs` somente ao último
+   envelope da cópia, sem alterar os eventos originais.
+3. Falhas anteriores à criação do logger retornam eventos vazios, sem
+   fabricar eventos. Falha na exportação preserva o resultado conhecido e
+   produz `avisoRegistroTecnico` seguro.
+4. A persistência só é permitida após encerramento confirmado da transação
+   Oracle do backend. Se esse encerramento não estiver confirmado, a fronteira
+   deve impedir a gravação e devolver aviso separado. Nunca se confirma uma
+   transação de negócio pendente para registrar logs. Depois do encerramento
+   confirmado, o registrador pode abrir e encerrar uma transação técnica nova
+   e curta na mesma conexão emprestada.
+5. A Blank chama `RegistradorEventosTecnicosScriptcase` uma vez com o lote
+   ordenado. O registrador trata um evento por transação, insere uma linha
+   provisória curta, localiza de forma unívoca o ID gerado pelo trigger
+   `TR_SEGURANCA_LOG` e usa `UpdateClob` para gravar o JSON integral em
+   `SGI.SEGURANCA_LOG.DESCRIPTION`. `ACTION` recebe `execute`; a operação
+   detalhada permanece em `action` no JSON.
+6. A serialização usa escapes Unicode, sem truncar, fragmentar ou converter
+   o JSON para ISO-8859-1. Campos que representam mapas vazios são objetos
+   JSON vazios. O contrato institucional do envelope permanece inalterado.
+7. Falha recuperável de serialização ou gravação interrompe o envio dos
+   eventos restantes, preserva o resultado e gera aviso separado. Registros
+   já confirmados não são desfeitos nem repetidos. A transação técnica
+   corrente é desfeita quando possível.
+8. A persistência técnica não reutiliza `PAC_HISTORICOS` nem cria uma segunda
+   conexão Oracle no backend.
+9. Falha fatal anterior à resposta HTTP pode impedir a entrega do resultado
+   e a persistência completa dos eventos; essa limitação é aceita.
+10. Falha inesperada capturada pela fachada gera evento seguro com a ação
+    `EXECUTAR_PUBLICACAO_PCA`, sem transportar o `Throwable`; falha do logger
+    não rompe a fronteira pública.
+11. Falhas anteriores à correlação válida ou à construção do logger não geram
+    evento técnico fabricado.
+12. A Blank devolve ao navegador somente `{resultado, avisoRegistroTecnico}`,
+    serializando explicitamente os campos públicos do ViewModel e os
+    resultados unitários. Os eventos técnicos permanecem no servidor. Erros
+    de transporte têm mensagens fixas, sem exceções ou respostas brutas e sem
+    repetição automática da publicação.
+13. `sc_log_add` não integra mais o fluxo do PCA. O gate real demonstrou que a
+    instalação hospedeira constrói literal incompatível com o envelope maior
+    que 4.000 bytes e emite erro HTML antes da resposta segura.
 
 ##### DI-010 — Distribuição
 
@@ -1167,6 +1234,12 @@ e da execução dos gates de ambiente e contrato.
 2. Composer não executa em produção.
 3. Perfis e segredos permanecem externos ao artefato.
 4. Scriptcase conhece somente autoloader e `PublicadorPcaScriptcase`.
+
+O Microciclo 5 da Sprint 8.5 implementou localmente a construção isolada pelo
+`composer.lock`, com `src/`, `vendor/` sem dependências de desenvolvimento e
+manifesto de integridade. Testes, probes, perfis, configurações e segredos não
+integram o pacote. A instalação e o smoke em PHP 8.1 permanecem gates de
+homologação.
 
 #### DI-010 — Alternativas rejeitadas
 
@@ -1191,7 +1264,8 @@ e da execução dos gates de ambiente e contrato.
 
 - A aplicação Blank aguarda o resultado final.
 - A fronteira pública permanece pequena e estável.
-- A futura devolução dos eventos técnicos permanece separada da Response de negócio.
+- A devolução dos eventos técnicos permanece separada da Response de negócio
+  e da resposta HTTP ao navegador.
 - Registro, perfis e a variável localizadora precisam ser provisionados fora
   da release; a posição fora do webroot permanece gate operacional.
 - A decisão depende de comportamento real do Scriptcase.
@@ -1206,6 +1280,11 @@ e da execução dos gates de ambiente e contrato.
   comprovados em testes controlados; validar seu provisionamento no ambiente
   hospedeiro real;
 - executar smoke test do pacote autocontido em homologação;
+- comprovar pelo `RegistradorEventosTecnicosScriptcase` a gravação integral de
+  JSON em CLOB, inclusive acentos e evento sintético identificado com mais de
+  4.000 bytes, e o tratamento seguro das falhas recuperáveis de logging;
+- comprovar que a exportação preserva resultados conhecidos e impede a
+  gravação de logs se o encerramento transacional não estiver confirmado;
 - reabrir apenas o contrato incompatível com o ambiente real.
 
 #### DI-010 — Regras de negócio relacionadas
@@ -1225,6 +1304,16 @@ distribuição, sem antecipar essas etapas durante a criação deste documento.
   índice, `PCA_PNCP_PROFILE_REGISTRY_FILE` como localizador provisionado, CNPJ
   no perfil, `PublicadorPcaScriptcase` como API da Blank e preservação do
   `X-Request-ID` fornecido pelo servidor HTTP.
+- Revisada em 17/09/2026 pelo Microciclo 1 da Sprint 8.5 para aprovar
+  `executarComEventos(...)`, preservando a API existente, a separação entre
+  resultado e eventos, a persistência pela Blank e os gates de logs. A
+  revisão contratual não representa implementação ou homologação concluída.
+- Implementação local da exportação concluída em 18/09/2026 no Microciclo 2,
+  preservando a API existente.
+- Adaptação local da Blank concluída em 18/09/2026 no Microciclo 4, sem
+  antecipar a compilação no Scriptcase nem os gates reais de logs e pacote.
+- Construção e verificação local do pacote concluídas em 18/09/2026 no
+  Microciclo 5; instalação e smoke no hospedeiro continuam pendentes.
 
 ## 6. Matriz de decisões substituídas
 

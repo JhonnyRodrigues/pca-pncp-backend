@@ -216,6 +216,19 @@ Oracle e PNCP nem o smoke test do pacote autocontido. Os entrypoints das probes
 continuam pertencendo somente às suítes contratuais e não substituem
 `PublicadorPcaScriptcase`.
 
-A exposição do lote de eventos pela fronteira pública, sua adaptação para
-`sc_log_add` e a renderização real pela Blank permanecem adiadas. Esses limites
-não alteram o ViewModel seguro já entregue pela Sprint 8.1.
+A exposição do lote de eventos pela fronteira pública e a adaptação da Blank
+têm contrato aprovado na Sprint 8.5. O Microciclo 2 implementou
+`executarComEventos(...)` e a guarda
+transacional, preservando o ViewModel seguro entregue pela Sprint 8.1. O
+Microciclo 3 comprovou contenção, reconciliação limitada e interrupção
+sistêmica com adapters concretos sobre ADOdb e cURL controlados. O Microciclo 4
+versionou a adaptação da Blank: ela chama somente fachadas públicas, registra
+os eventos depois do resultado do backend e envia ao navegador apenas o
+resultado seguro e o aviso técnico. O corretivo 6A substituiu a macro
+incompatível com CLOB pelo `RegistradorEventosTecnicosScriptcase`, que usa a
+mesma conexão ADOdb emprestada e uma nova transação técnica por evento. O
+Microciclo 5 acrescentou a construção verificável do pacote
+autocontido e o PRECHECK opt-in que reutiliza o checkpoint canônico da Sprint
+8.4 e inclui a leitura integral dos logs. A instalação e os gates reais
+permanecem pendentes; o progresso está no
+[estado operacional](../operacional/estado_atual.md).

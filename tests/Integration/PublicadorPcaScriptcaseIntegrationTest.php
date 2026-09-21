@@ -98,6 +98,29 @@ final class PublicadorPcaScriptcaseIntegrationTest extends TestCase
         $this->assertSame('usuario.integracao', $adodb->parametrosConsultas[1]['param_0']);
     }
 
+    public function testExecucaoComEventosDeveProcessarUmaVezEManterFronteiraSegura(): void
+    {
+        $adodb = new AdodbInterrompeAntesPncp();
+        $requestId = '550E8400-E29B-41D4-A716-446655440000';
+
+        $saida = (new PublicadorPcaScriptcase())->executarComEventos(
+            $adodb,
+            'usuario.integracao',
+            self::SERVIDOR,
+            (int) date('Y'),
+            $requestId
+        );
+
+        $this->assertInterrupcaoContexto($saida->getResultado(), $requestId);
+        $this->assertSame([], $saida->getEventos());
+        $this->assertNull($saida->getAvisoRegistroTecnico());
+        $this->assertSame(1, $adodb->consultas);
+        $this->assertSame(3, $adodb->binds);
+        $this->assertSame(0, $adodb->transacoes);
+        $this->assertSame(0, $adodb->escritas);
+        $this->assertFalse($adodb->fechada);
+    }
+
     private function executar(
         AdodbInterrompeAntesPncp $adodb,
         int $ano,

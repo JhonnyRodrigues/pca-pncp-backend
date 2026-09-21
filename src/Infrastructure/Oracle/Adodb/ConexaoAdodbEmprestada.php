@@ -143,10 +143,71 @@ final class ConexaoAdodbEmprestada
         return array_values($this->conversorCharset->converterResultadoGetAll($linhas));
     }
 
+    public function atualizarClobPorId(
+        string $tabela,
+        string $colunaClob,
+        string $colunaId,
+        int $id,
+        string $conteudo
+    ): void {
+        $this->exigirTransacaoAtiva();
+
+        if ($id <= 0) {
+            throw new InvalidArgumentException('O ID destinado ao CLOB deve ser positivo.');
+        }
+
+        $this->validarTabelaQualificada($tabela);
+        $this->validarIdentificador($colunaClob);
+        $this->validarIdentificador($colunaId);
+
+        if (!method_exists($this->adodb, 'UpdateClob')) {
+            throw new FalhaOracleException(
+                'A conexão ADOdb não oferece gravação de CLOB.',
+                null
+            );
+        }
+
+        try {
+            $resultado = $this->adodb->UpdateClob(
+                $tabela,
+                $colunaClob,
+                $this->conversorCharset->converterEscrita($conteudo),
+                $colunaId . ' = ' . $id
+            );
+        } catch (UnexpectedValueException $exception) {
+            throw $exception;
+        } catch (Throwable) {
+            throw $this->falha('Falha ao gravar conteúdo CLOB no Oracle.');
+        }
+
+        if ($resultado === false) {
+            throw $this->falha('Falha ao gravar conteúdo CLOB no Oracle.');
+        }
+    }
+
     private function exigirTransacaoAtiva(): void
     {
         if (!$this->emTransacao) {
             throw new LogicException('Não existe transação Oracle ativa.');
+        }
+    }
+
+    private function validarTabelaQualificada(string $tabela): void
+    {
+        $partes = explode('.', $tabela);
+        if (count($partes) !== 2) {
+            throw new InvalidArgumentException('A tabela Oracle qualificada é inválida.');
+        }
+
+        foreach ($partes as $parte) {
+            $this->validarIdentificador($parte);
+        }
+    }
+
+    private function validarIdentificador(string $identificador): void
+    {
+        if (preg_match('/^[A-Za-z][A-Za-z0-9_$#]*$/D', $identificador) !== 1) {
+            throw new InvalidArgumentException('Identificador Oracle inválido.');
         }
     }
 

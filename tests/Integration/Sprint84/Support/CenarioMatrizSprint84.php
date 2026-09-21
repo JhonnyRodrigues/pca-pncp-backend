@@ -13,6 +13,8 @@ use Tests\Integration\Composition\Support\RegistroCronologico;
 
 final class CenarioMatrizSprint84
 {
+    private const FALHA_CONTENCAO_PRIMEIRA_UNIDADE = 'CONTENCAO_PRIMEIRA_UNIDADE';
+    private const FALHA_SISTEMICA_SEGUNDA_UNIDADE = 'FALHA_SISTEMICA_SEGUNDA_UNIDADE';
     private const ANO = 2027;
     private const CNPJ = '12345678000195';
     private const BASE_PNCP = 'https://treina.pncp.gov.br/api/pncp';
@@ -38,12 +40,41 @@ final class CenarioMatrizSprint84
         DecisaoProcessamentoPlano $decisao,
         bool $projecaoPendente = false
     ): self {
+        return self::criarCenario($modo, $decisao, $projecaoPendente, null);
+    }
+
+    public static function comContencaoNaPrimeiraUnidade(): self
+    {
+        return self::criarCenario(
+            'INDIVIDUAL',
+            DecisaoProcessamentoPlano::NENHUMA_ACAO,
+            false,
+            self::FALHA_CONTENCAO_PRIMEIRA_UNIDADE
+        );
+    }
+
+    public static function comFalhaSistemicaNaSegundaUnidade(): self
+    {
+        return self::criarCenario(
+            'INDIVIDUAL',
+            DecisaoProcessamentoPlano::NENHUMA_ACAO,
+            false,
+            self::FALHA_SISTEMICA_SEGUNDA_UNIDADE
+        );
+    }
+
+    private static function criarCenario(
+        string $modo,
+        DecisaoProcessamentoPlano $decisao,
+        bool $projecaoPendente,
+        ?string $falha
+    ): self {
         $eventos = new RegistroCronologico();
         $adodb = new AdodbControlado($eventos);
         $curl = new ExecutorCurlRoteirizado($eventos);
 
-        self::programarOracle($adodb, $modo, $decisao, $projecaoPendente);
-        self::programarPncp($curl, $modo, $decisao);
+        self::programarOracle($adodb, $modo, $decisao, $projecaoPendente, $falha);
+        self::programarPncp($curl, $modo, $decisao, $falha);
 
         return new self(
             $modo,
@@ -85,7 +116,8 @@ final class CenarioMatrizSprint84
         AdodbControlado $adodb,
         string $modo,
         DecisaoProcessamentoPlano $decisao,
-        bool $projecaoPendente
+        bool $projecaoPendente,
+        ?string $falha
     ): void {
         $identidades = self::identidades();
         $adodb->programarConsulta('contexto_representante', [[
@@ -103,7 +135,23 @@ final class CenarioMatrizSprint84
 
         if ($modo === 'INDIVIDUAL') {
             foreach (array_keys(self::UASGS) as $uo) {
-                self::programarUnidadeOracle($adodb, $modo, $decisao, [$uo], $projecaoPendente);
+                if ($falha === self::FALHA_CONTENCAO_PRIMEIRA_UNIDADE && $uo === 101) {
+                    $adodb->programarFalhaConsulta(
+                        'lock',
+                        54,
+                        'ORA-00054: recurso ocupado'
+                    );
+                    continue;
+                }
+
+                self::programarUnidadeOracle(
+                    $adodb,
+                    $modo,
+                    $decisao,
+                    [$uo],
+                    $projecaoPendente,
+                    $falha === self::FALHA_SISTEMICA_SEGUNDA_UNIDADE && $uo === 202
+                );
             }
             return;
         }
@@ -153,7 +201,8 @@ final class CenarioMatrizSprint84
         string $modo,
         DecisaoProcessamentoPlano $decisao,
         array $uos,
-        bool $projecaoPendente
+        bool $projecaoPendente,
+        bool $interromperAposPrimeiraObservacao = false
     ): void {
         $adodb->programarConsulta('lock', [['ESCOPO' => 'UNIDADE_EXTERNA']]);
         $adodb->programarConsulta('identidades', self::identidades());
@@ -180,6 +229,10 @@ final class CenarioMatrizSprint84
             'estado_operacional',
             self::estadoOracle($modo, $decisao, $uos, false, $projecaoPendente)
         );
+
+        if ($interromperAposPrimeiraObservacao) {
+            return;
+        }
 
         $adodb->programarConsulta(
             'estado_operacional',
@@ -208,7 +261,8 @@ final class CenarioMatrizSprint84
     private static function programarPncp(
         ExecutorCurlRoteirizado $curl,
         string $modo,
-        DecisaoProcessamentoPlano $decisao
+        DecisaoProcessamentoPlano $decisao,
+        ?string $falha
     ): void {
         $curl->programar(
             'POST',
@@ -221,6 +275,20 @@ final class CenarioMatrizSprint84
 
         if ($modo === 'INDIVIDUAL') {
             foreach (array_keys(self::UASGS) as $uo) {
+                if ($falha === self::FALHA_CONTENCAO_PRIMEIRA_UNIDADE && $uo === 101) {
+                    continue;
+                }
+
+                if ($falha === self::FALHA_SISTEMICA_SEGUNDA_UNIDADE && $uo === 202) {
+                    $curl->programarFalha(
+                        'GET',
+                        self::basePca(self::SEQUENCIAIS[$uo]) . '/consolidado',
+                        'identidade',
+                        7
+                    );
+                    continue;
+                }
+
                 self::programarUnidadePncp(
                     $curl,
                     self::UASGS[$uo],

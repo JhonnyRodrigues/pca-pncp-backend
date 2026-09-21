@@ -10,6 +10,7 @@ use ReflectionMethod;
 use RuntimeException;
 use Semae\Pca\Presentation\ViewModels\PublicarPcaViewModel;
 use Semae\Pca\PublicadorPcaScriptcase;
+use Semae\Pca\ResultadoPublicacaoPcaScriptcase;
 
 final class PublicadorPcaScriptcaseTest extends TestCase
 {
@@ -70,6 +71,25 @@ final class PublicadorPcaScriptcaseTest extends TestCase
         ));
         $this->assertSame(PublicarPcaViewModel::class, (string) $metodo->getReturnType());
         $this->assertNull((new \ReflectionClass(PublicadorPcaScriptcase::class))->getConstructor());
+
+        $metodoComEventos = new ReflectionMethod(
+            PublicadorPcaScriptcase::class,
+            'executarComEventos'
+        );
+        $this->assertSame([
+            'conexaoAdodb',
+            'loginAutenticado',
+            'serverName',
+            'anoExecucao',
+            'requestId',
+        ], array_map(
+            static fn ($parametro): string => $parametro->getName(),
+            $metodoComEventos->getParameters()
+        ));
+        $this->assertSame(
+            ResultadoPublicacaoPcaScriptcase::class,
+            (string) $metodoComEventos->getReturnType()
+        );
     }
 
     #[DataProvider('requestIdsInvalidos')]
@@ -101,6 +121,47 @@ final class PublicadorPcaScriptcaseTest extends TestCase
             'sufixo com quebra' => ["550e8400-e29b-41d4-a716-446655440000\n"],
             'chaves externas' => ['{550e8400-e29b-41d4-a716-446655440000}'],
         ];
+    }
+
+    #[DataProvider('requestIdsInvalidos')]
+    public function testExportacaoSemCorrelacaoValidaNaoDeveLerRegistroNemFabricarEventos(?string $requestId): void
+    {
+        $marcador = $this->caminhoTemporario('registro-eventos-lido.txt');
+        $registro = $this->escreverPhpBruto(
+            'registro-eventos.php',
+            "file_put_contents(" . var_export($marcador, true) . ", 'lido');\nreturn [];"
+        );
+        putenv(self::VARIAVEL_REGISTRO . '=' . $registro);
+
+        $saida = (new PublicadorPcaScriptcase())->executarComEventos(
+            new \stdClass(),
+            'usuario.teste',
+            self::SERVIDOR,
+            (int) date('Y'),
+            $requestId
+        );
+
+        $this->assertInterrupcaoRequestIdInvalido($saida->getResultado());
+        $this->assertSame([], $saida->getEventos());
+        $this->assertNull($saida->getAvisoRegistroTecnico());
+        $this->assertFileDoesNotExist($marcador);
+    }
+
+    public function testFalhaAntesDoLoggerDevePreservarCorrelacaoSemFabricarEventos(): void
+    {
+        putenv(self::VARIAVEL_REGISTRO);
+
+        $saida = (new PublicadorPcaScriptcase())->executarComEventos(
+            new \stdClass(),
+            'usuario.teste',
+            self::SERVIDOR,
+            (int) date('Y'),
+            self::REQUEST_ID
+        );
+
+        $this->assertInterrupcaoInesperada($saida->getResultado(), self::REQUEST_ID);
+        $this->assertSame([], $saida->getEventos());
+        $this->assertNull($saida->getAvisoRegistroTecnico());
     }
 
     public function testRequestIdValidoDeveSerPreservadoQuandoRegistroEstaAusente(): void

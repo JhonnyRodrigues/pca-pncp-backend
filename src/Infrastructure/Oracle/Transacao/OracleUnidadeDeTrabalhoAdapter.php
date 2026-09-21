@@ -183,11 +183,17 @@ final class OracleUnidadeDeTrabalhoAdapter implements UnidadeDeTrabalhoPort
         $ano = $this->mapeamento->getColunaAnoExecucao();
         $alvo = $this->mapeamento->getColunaIdentificadorAlvo();
 
-        return "INSERT INTO {$tabela} ({$escopo}, {$ano}, {$alvo}) "
-            . 'SELECT ?, ?, ? FROM DUAL WHERE NOT EXISTS ('
-            . "SELECT 1 FROM {$tabela} "
-            . "WHERE {$escopo} = ? AND {$ano} = ? AND {$alvo} = ?"
-            . ')';
+        return "INSERT INTO {$tabela} (
+            {$escopo}, 
+            {$ano}, 
+            {$alvo}
+        ) " . 'SELECT ?, ?, ? FROM DUAL WHERE NOT EXISTS ('
+            . "SELECT 1 FROM {$tabela} 
+            WHERE 
+                {$escopo} = ? 
+                AND {$ano} = ? 
+                AND {$alvo} = ?"
+        . ')';
     }
 
     private function sqlAquisicao(): string
@@ -197,9 +203,13 @@ final class OracleUnidadeDeTrabalhoAdapter implements UnidadeDeTrabalhoPort
         $ano = $this->mapeamento->getColunaAnoExecucao();
         $alvo = $this->mapeamento->getColunaIdentificadorAlvo();
 
-        return "SELECT {$escopo} FROM {$tabela} "
-            . "WHERE {$escopo} = ? AND {$ano} = ? AND {$alvo} = ? "
-            . 'FOR UPDATE NOWAIT';
+        return "SELECT {$escopo} 
+        FROM {$tabela} 
+        WHERE 
+            {$escopo} = ? 
+            AND {$ano} = ? 
+            AND {$alvo} = ? "
+        . 'FOR UPDATE NOWAIT';
     }
 
     private function desfazerTransacaoAtiva(): bool

@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 17/09/2026
+**Atualizado em:** 21/09/2026
 
 ## Limites de autoridade
 
@@ -32,7 +32,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 8.4.
+- A última sprint concluída é a Sprint 8.5.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.
@@ -166,8 +166,8 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   direção das dependências, ausência de segredos reais e `git diff --check`.
   O Composer não apresentou erro estrutural e manteve somente o aviso existente
   de licença não declarada. Nenhum teste live ou acesso externo ocorreu. O
-  Microciclo 14 e a Sprint 8.4 estão concluídos; a Sprint 8.5 é a próxima na
-  ordem e permanece sem autorização.
+  Microciclo 14 e a Sprint 8.4 estão concluídos. O avanço da Sprint 8.5 está
+  registrado abaixo, sem autorizar repetição das execuções da Sprint 8.4.
 - A Sprint 5.9 — Suíte de contratos dos adapters está concluída.
 - A suíte controlada e os runners opt-in foram implementados. O gate PNCP foi
   aprovado no treinamento, incluindo publicação, operações de itens, exclusão
@@ -194,8 +194,148 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 8.3 — Suíte PNCP de treinamento está concluída após os seis
   microciclos autorizados e o corretivo de paginação e ausência.
 - A Sprint 8.4 — Fluxos completos dos dois modos está concluída.
-- A Sprint 8.5 — Falhas, segurança e smoke test do pacote é a próxima na ordem,
-  mas ainda não possui autorização de planejamento ou implementação.
+- A Sprint 8.5 — Falhas, segurança e smoke test do pacote está concluída,
+  conforme o [plano aprovado](../../../.agents/sprints/planos/plano_sprint_8.5.md).
+  O Microciclo 1 foi concluído em 17/09/2026 com o registro do plano e a revisão
+  contratual de exportação, logs e tratamento de falhas. O Microciclo 2 foi
+  concluído em 18/09/2026 com a exportação compatível dos eventos pela API
+  pública. O Microciclo 3 foi concluído na mesma data com falhas integradas
+  sobre adapters concretos e fronteiras físicas controladas. O Microciclo 4
+  versionou e adaptou a Blank. O Microciclo 5 gerou e verificou o pacote autocontido e preparou
+  os contratos, as consultas e o PRECHECK da Sprint 8.5. O gate real revelou a
+  incompatibilidade da macro com o CLOB maior que 4.000 bytes; o corretivo 6A
+  implementou o registrador próprio, e o Microciclo 6 comprovou em homologação
+  a gravação integral de 11.179 bytes.
+- O Microciclo 7 comprovou a contenção real no validaSGI; o Microciclo 8
+  concluiu o smoke e a limpeza segura da massa; o Microciclo 9 entregou e
+  validou a ajuda ao operador; e o Microciclo 10 reconstruiu o pacote, executou
+  as regressões e encerrou a sprint. A configuração externa permanece
+  desarmada em `PRECHECK`. Nenhum gate real deve ser repetido.
+
+## Evidências do Microciclo 5 da Sprint 8.5
+
+- O construtor em `tools/package/build.php` usa o lock em
+  diretório isolado, instala somente dependências de produção, gera autoload
+  autoritativo e registra hashes no manifesto. O artefato gerado e ignorado
+  pelo Git fica em `build/pca-pncp-backend` e é conferido por
+  `tools/package/verify.php`.
+- O corretivo do Microciclo 5 retirou a sprint dos nomes das ferramentas,
+  removeu o teste que apenas inspecionava seu texto e preservou os contratos
+  comportamentais de configuração, consultas, PRECHECK e segurança. O
+  [catálogo de diretórios](../apoio/catalogo_de_diretorios.md) registra a
+  organização atual e a diferença entre ferramenta mantida e artefato gerado.
+- O pacote validado possui 194 arquivos no total: 193 arquivos de conteúdo
+  protegidos por hash e o próprio `PACKAGE-MANIFEST.json`. Contém apenas
+  `src/`, `vendor/` e o manifesto, sem testes, probes, configuração, perfil,
+  segredo, Composer executável ou dependências de desenvolvimento. A fachada
+  pública foi carregada pelo autoload do próprio pacote fora do diretório raiz
+  do checkout.
+- A configuração opt-in separa `PRECHECK`, `LOGS`, `CONTENCAO` e `SMOKE`,
+  mantém mutações PNCP proibidas e protege os sequenciais legados 16/17/18, o
+  PCA 36 excluído e o plano 103 sem confirmação.
+- A preparação original reaproveitava as onze consultas e o hash canônico da
+  Sprint 8.4 e acrescentava a consulta integral do CLOB. Esse desenho continua
+  disponível para os gates que dependem da massa, mas foi substituído no
+  Microciclo 6 pelo checkpoint reduzido descrito no estado corrente abaixo.
+- Os contratos 8.5 aprovaram 19 testes/190 asserções; a suíte padrão,
+  944/4.464. Os contratos 5.1, 5.9, 8.2, 8.3 e 8.4 aprovaram 24/51, 54/149,
+  12/43, 14/62 e 73/703. Lint, Composer e PSR-4 estrito com 1.827 classes
+  também passaram em PHP 8.4.7.
+- A construção simula a plataforma PHP 8.1 ao instalar as dependências: o
+  projeto exige `^8.1` e a única dependência de produção exige PHP `>=8.0.0`.
+  A execução no PHP 8.1 de homologação será comprovada pelo smoke do pacote.
+- Nenhum Oracle, PNCP ou Scriptcase real foi acessado e nenhum commit foi
+  criado. O gate de logs do Microciclo 6 depende de autorização própria.
+
+## Evidências do Microciclo 4 da Sprint 8.5
+
+- `integracao/scriptcase/PCA_PUBLICAR_B/onExecute.php` carrega o autoload e
+  chama somente a fachada pública com conexão emprestada, login, nome do
+  servidor, ano inteiro e request ID recebido do hospedeiro.
+- A resposta ao navegador contém somente o ViewModel serializado campo a campo
+  e eventual aviso técnico. Os eventos são gravados individualmente por
+  `sc_log_add('execute', $json)` após o retorno seguro; a primeira falha
+  recuperável interrompe os registros restantes e preserva o resultado.
+- A interface usa os anos do servidor, corrige a associação dos botões, impede
+  submissões simultâneas, não espera artificialmente nem repete a publicação.
+  Dados dinâmicos são inseridos como texto, incluindo resultados, contagens e
+  correlação.
+- O CNPJ exibido no link de consulta pública em produção não é argumento da
+  execução. Controller antigo, credenciais locais e inferência de ambiente por
+  hostname foram removidos da integração.
+- Os testes focados aprovaram 38 testes/558 asserções; a suíte padrão,
+  944/4.464. Os contratos locais 5.1, 5.9, 8.2, 8.3 e 8.4 aprovaram 24/51,
+  54/149, 12/43, 14/62 e 73/703. Lint PHP, sintaxe do JavaScript extraído e
+  PSR-4 estrito com 1.822 classes também passaram em PHP 8.4.7 e Node.js
+  24.16.0.
+- A compilação no Scriptcase, a gravação real no CLOB e a verificação funcional
+  no navegador permanecem para os gates previstos. Nenhum Oracle, PNCP,
+  Scriptcase real, pacote instalado ou commit foi acessado. O Microciclo 5
+  depende de autorização própria.
+
+## Evidências do Microciclo 3 da Sprint 8.5
+
+- Uma contenção Oracle `ORA-00054` na primeira unidade é traduzida para
+  `BLOQUEADO`; a unidade seguinte é processada e o conjunto termina como
+  `CONCLUIDA_COM_PENDENCIAS`, sem escrita PNCP ou auditoria de negócio.
+- A escrita incerta mantém uma única chamada para cada operação remota e faz
+  somente uma reconciliação adicional. Sem convergência observável, desfaz a
+  transação e retorna `FALHA_RECONCILIAVEL`.
+- Uma falha sistêmica do transporte na segunda unidade desfaz sua transação,
+  interrompe a varredura e preserva o resultado conhecido da primeira, sem
+  fabricar resultado para a unidade interrompida.
+- Os cenários percorrem os adapters Oracle e PNCP concretos. Somente ADOdb e a
+  execução cURL são roteirizados; não há Oracle, rede ou PNCP reais.
+- A suíte focada aprovou 3 testes/44 asserções; as integrações afetadas,
+  16/313; a suíte padrão, 938/4.391. Os contratos locais 5.1, 5.9, 8.2, 8.3 e
+  8.4 aprovaram 24/51, 54/149, 12/43, 14/62 e 73/703. O lint dos quatro
+  arquivos PHP do incremento e o autoload PSR-4 estrito com 1.821 classes
+  também foram aprovados em PHP 8.4.7.
+- Nenhum recurso externo real, configuração, Blank, pacote ou commit foi
+  acessado. O Microciclo 4 depende de autorização própria.
+
+## Evidências do Microciclo 2 da Sprint 8.5
+
+- `PublicadorPcaScriptcase::executar(...)` preserva a assinatura e o ViewModel
+  existente. `executarComEventos(...)` recebe os mesmos cinco argumentos e
+  devolve `ResultadoPublicacaoPcaScriptcase`, com resultado, envelopes e aviso
+  técnico separados.
+- O Composition Root preserva `montar(...)` e oferece a composição interna da
+  mesma chamada com fachada, acumulador e conexão. A obtenção dos eventos não
+  repete o processamento e cada chamada cria um grafo isolado.
+- A exportação preserva ordem e sanitização e acrescenta `executionTimeMs`
+  somente ao último envelope da cópia, sem alterar os eventos originais.
+- Transação Oracle ainda ativa impede a disponibilização dos eventos. Falha na
+  exportação também devolve eventos vazios; nos dois casos, o ViewModel é
+  preservado com aviso público fixo, sem tentar commit, rollback ou nova
+  publicação.
+- A suíte focada aprovou 38 testes/608 asserções; Composition, Integration,
+  Observabilidade e contrato público aprovaram 70/959; a suíte padrão aprovou
+  935/4.347, e os contratos 8.4 permaneceram verdes com 73/703. O lint dos nove
+  arquivos PHP envolvidos, o autoload PSR-4 estrito com 1.820 classes e
+  `git diff --check` foram aprovados em PHP 8.4.7.
+- Nenhum acesso Oracle ou PNCP real, configuração externa, Blank, pacote ou
+  commit foi executado. O Microciclo 3 depende de autorização própria.
+
+## Evidências do Microciclo 1 da Sprint 8.5
+
+- O mantenedor aprovou dez microciclos com pausas independentes, incluindo
+  eventos separados do ViewModel, logs pela Blank e ajuda ao operador.
+- DI-006, DI-010 e fluxo registram o contrato de `executarComEventos(...)`,
+  preservando `executar(...)`, sem incluir eventos em `PublicarPcaResponse`
+  ou na resposta ao navegador.
+- O resultado de consulta de metadados fornecido pelo mantenedor informa
+  `SGI.SEGURANCA_LOG.ACTION` como `VARCHAR2(30 BYTE)` e `DESCRIPTION` como
+  `CLOB`. Isso não comprova a gravação pela macro: o gate de logs deverá
+  verificar JSON integral, acentos e conteúdo maior que 4.000 bytes.
+- Os novos gates ficam restritos à homologação: logs, contenção e smoke sobre
+  o consolidado 2026 já excluído, sem mutação PNCP e sem repetir gates da 8.4.
+  Cada execução depende de autorização e PRECHECK próprios.
+- A validação deste incremento é documental: consistência dos contratos,
+  12 referências locais adicionadas sem alvo ausente, escopo do diff e
+  `git diff --check` aprovados. Testes de código não se aplicam a este
+  incremento. Nenhum código PHP, teste, configuração externa, dado Oracle ou
+  recurso PNCP foi alterado; nenhum commit foi criado.
 
 ## Evidências do microciclo corretivo da Sprint 8.3
 
@@ -813,7 +953,414 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
 - O registro e os perfis reais devem permanecer fora da release e do webroot;
   o servidor deve provisionar `PCA_PNCP_PROFILE_REGISTRY_FILE` com o caminho
   absoluto do índice antes da implantação.
-- A exposição dos eventos pela fachada e sua persistência pela Blank com
-  `sc_log_add` permanecem adiadas para a futura fronteira Scriptcase.
+- A exposição dos eventos pela fachada e sua persistência pela Blank por meio
+  do `RegistradorEventosTecnicosScriptcase` têm contrato e implementação local
+  aprovados na Sprint 8.5; a comprovação real do corretivo permanece pendente.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos
   eventos acumulados em memória; essa limitação foi aceita conscientemente.
+
+## Preparação corrente do Microciclo 6 da Sprint 8.5
+
+- Os gates reais dos Microciclos 6 a 8 foram destinados ao validaSGI, conectado
+  ao Oracle de homologação. O DEV permanece somente para desenvolvimento,
+  compilação e ensaio.
+- A fotografia de homologação contém planos de 2026 candidatos a publicação.
+  Por segurança, o gate de logs não usa essa massa, não chama
+  `PublicadorPcaScriptcase` e não acessa o PNCP.
+- O PRECHECK do gate de logs possui duas consultas somente leitura: estrutura
+  física de `SGI.SEGURANCA_LOG` e ausência do identificador sintético. A
+  configuração externa foi criada em `PRECHECK`, com todas as permissões de
+  escrita falsas.
+- A Blank de teste aceita somente `PRECHECK` e `LOGS`. A segunda etapa continua
+  bloqueada até que um novo identificador e o hash canônico do PRECHECK real
+  sejam fixados para a execução do registrador próprio.
+- A conferência manual no Oracle de homologação foi aprovada em 18/09/2026:
+  `ACTION` foi confirmado como `VARCHAR2(30 BYTE)`, `DESCRIPTION` como `CLOB`
+  e nenhuma linha possuía o identificador
+  `SPRINT85-LOGS-HML-20260918-JSILVA-01`. Essa leitura não substitui o
+  PRECHECK ADOdb do validaSGI, que ainda deve produzir o hash canônico.
+- A validação local desta adaptação aprovou 26 testes e 240 asserções, além do
+  lint dos arquivos PHP e da inspeção de whitespace. O Microciclo 6 permanece
+  em andamento até a comprovação real do CLOB e a pausa obrigatória.
+- Para evitar o envio do checkout ao validaSGI, foi gerado e verificado o
+  artefato temporário `build/pca-pncp-log-gate`. Ele contém o pacote principal
+  validado e somente o runtime necessário à probe, totalizando 206 arquivos
+  com manifesto. Não contém configuração, segredo, documentação, ferramentas,
+  `.git`, PHPUnit ou outras suítes de teste. A Blank passou a carregar esse
+  artefato pelo caminho relativo da própria aplicação.
+- Em 19/09/2026, o PRECHECK real executado pela conexão ADOdb do validaSGI
+  retornou `PRECHECK_LOGS_CONFIRMADO`. Repetiu as duas cardinalidades manuais,
+  confirmou zero ocorrências do identificador e calculou o SHA-256 canônico
+  `f52668437c192e37eca8757e1250aebb2d87a318961efc03a8e03637536868bd`,
+  sem escrita Oracle, acesso PNCP ou escrita de log.
+- A configuração externa local foi validada para a etapa `LOGS`, com somente
+  `allow_log_writes = true` e o hash fixado. Ela ainda precisa ser copiada para
+  o validaSGI antes da chamada única. O gate real e o pós-check permanecem
+  pendentes; não repetir diante de resposta incerta.
+- A primeira tentativa de `LOGS` foi interrompida antes da macro com
+  `CORRELACAO_INVALIDA`. O relatório confirmou `log_writes = false`, portanto
+  não houve resposta incerta nem registro a repetir. Esse código demonstra
+  somente que o valor lido em `HTTP_X_REQUEST_ID` não satisfez o UUID v4; não
+  permite concluir que o servidor deixou de enviar correlação. A Blank de
+  teste ganhou diagnóstico somente leitura de `HTTP_X_REQUEST_ID` e
+  `HTTP_X_CORRELATION_ID`, sem fabricar identidade. A Blank real não mudou.
+- Após o servidor passar a fornecer o UUID v4 esperado, a chamada única de
+  `LOGS` alcançou `sc_log_add` e a verificação posterior falhou com
+  `PRECHECK_CARDINALIDADE_DIVERGENTE`. `log_writes = true` registra tentativa,
+  não confirmação de persistência. O estado passou a ser incerto: é proibido
+  repetir a URL e somente o pós-check identificado pode determinar se existem
+  zero, uma ou várias linhas.
+- A configuração externa local foi imediatamente desarmada para `PRECHECK`,
+  com todas as permissões de escrita falsas. A cópia remota ainda deve ser
+  substituída antes de qualquer outra interação com a Blank.
+- O pós-check manual executado depois dessa tentativa retornou zero linhas.
+  Portanto, não existe persistência identificável na
+  `SGI.SEGURANCA_LOG` consultada, e a etapa `LOGS` continua proibida de ser
+  repetida. O primeiro diagnóstico somente leitura confirmou o banco `SGIHML`,
+  serviço `sgihml`, schema e usuário `SGI`, uma única tabela válida com esse
+  nome e nenhum sinônimo. A busca do identificador sem restringir a ação e a
+  busca histórica por `execute` também retornaram vazias. A estrutura completa
+  possui nove colunas, incluindo `INSERTED_DATE`, `USERNAME`, `APPLICATION`,
+  `DESCRIPTION` como CLOB e `DESCRIPTION2` como BLOB. Esse diagnóstico levou à
+  conferência do esquema de log vinculado à Blank no Scriptcase.
+- A causa do pós-check vazio foi confirmada fora do backend: a nova aplicação
+  `teste_contracts_sprint85` ainda não estava vinculada ao módulo de logs do
+  Scriptcase. Depois da habilitação, uma verificação do hospedeiro registrou
+  linha em `SGI.SEGURANCA_LOG`. A chamada seguinte de `PRECHECK` foi recusada
+  antes de I/O com `CONFIG_HASH_INVALIDO`, pois o checksum do arquivo havia
+  sido colocado no campo reservado ao checkpoint Oracle. A configuração
+  externa local voltou ao estado seguro: etapa `PRECHECK`, hash `null` e todos
+  os consentimentos de escrita falsos; ela deve substituir a cópia remota.
+- Depois da correção e do novo deploy, o PRECHECK real voltou a confirmar as
+  cardinalidades 2 e 0, o `X-Request-ID` como UUID v4 e o checkpoint canônico
+  `f52668437c192e37eca8757e1250aebb2d87a318961efc03a8e03637536868bd`,
+  sem escrita Oracle, acesso PNCP ou escrita de log. A configuração externa
+  local foi validada para a chamada única de `LOGS`, mantendo somente
+  `allow_log_writes = true`.
+- A chamada única de `LOGS` após a habilitação do módulo alcançou a macro,
+  mas o Scriptcase emitiu uma página HTML com `ORA-01704: literal de string
+  extenso demais` antes do relatório JSON
+  `PRECHECK_CARDINALIDADE_DIVERGENTE`. Assim, esta instalação não comprovou a
+  gravação integral do evento maior que 4.000 bytes e também não conteve a
+  mensagem técnica na fronteira HTTP. Conforme a condição de bloqueio do
+  plano, o Microciclo 6 está bloqueado e a macro não pode ser substituída
+  silenciosamente por SQL direto. A configuração externa local foi desarmada
+  novamente para `PRECHECK`, hash `null` e todos os consentimentos falsos; a
+  cópia remota deve ser substituída e a etapa `LOGS` não deve ser repetida.
+- O mantenedor autorizou o Microciclo 6A corretivo antes do Microciclo 7. A
+  direção aceita substitui `sc_log_add` somente para os eventos técnicos do
+  PCA por uma fachada pública concreta e um adapter Oracle de CLOB, mantendo a
+  mesma conexão emprestada e separando a nova transação técnica da transação
+  de negócio já encerrada. A implementação depende primeiro da confirmação
+  somente leitura de `UpdateClob`, da geração do ID e das regras físicas da
+  tabela.
+- O diagnóstico do validaSGI confirmou `UpdateClob`, `BeginTrans`,
+  `CommitTrans` e `RollbackTrans` na conexão ADOdb. `SEGURANCA_LOG.ID` é chave
+  primária obrigatória, sem default ou identity, e existe o trigger habilitado
+  `TR_SEGURANCA_LOG` antes de cada insert. A fonte confirmou que, quando
+  `:NEW.ID` é nulo, o trigger atribui `ID_LOG.NEXTVAL`; por isso o registrador
+  omite o ID no insert inicial e usa a chave gerada para atualizar o CLOB. A
+  amostra também revelou quatro registros
+  automáticos `access`, sem descrição, criados ao abrir a Blank; esse evento
+  automático deve ser desabilitado porque não pertence ao contrato técnico do
+  PCA e deixa de ser necessário com o registrador próprio.
+- O corretivo 6A foi concluído localmente. A fachada pública
+  `RegistradorEventosTecnicosScriptcase` delega à composição, e o adapter
+  Oracle insere um marcador curto, recupera a única chave gerada pelo trigger e
+  usa `UpdateClob` para gravar o JSON integral. Cada evento usa uma transação
+  técnica própria, iniciada somente depois do retorno seguro da publicação.
+- A regressão local aprovou 25 testes/142 asserções no recorte afetado,
+  951/4.500 na suíte padrão e 27/250 nos contratos 8.5. Os contratos 5.1, 5.9,
+  8.2, 8.3 e 8.4 também permaneceram verdes com 24/51, 54/149, 12/43, 14/62 e
+  73/703. O PSR-4 estrito carregou 1.838 classes e o lint dos arquivos afetados
+  passou.
+- O pacote principal reconstruído contém 197 arquivos e carrega as duas
+  fachadas públicas. O artefato `build/pca-pncp-log-gate` contém 209 arquivos,
+  carrega os quatro entrypoints e não contém configurações nem segredos.
+- A nova prova real foi isolada pelo identificador
+  `SPRINT85-LOGS-HML-20260921-JSILVA-02`. Antes de qualquer escrita, a
+  configuração externa deve ficar em `PRECHECK`, com hash nulo e todos os
+  consentimentos falsos, e o SQL manual deve confirmar zero ocorrências. O
+  Microciclo 7 permanece bloqueado até a conclusão e a pausa do Microciclo 6.
+- A configuração externa local foi atualizada para esse novo identificador,
+  permaneceu desarmada e passou no lint PHP. A cópia remota ainda precisa ser
+  substituída antes do novo PRECHECK.
+- O novo PRECHECK manual e o PRECHECK pela conexão ADOdb do validaSGI foram
+  aprovados em 21/09/2026. Ambos confirmaram as duas colunas físicas e zero
+  ocorrências de `SPRINT85-LOGS-HML-20260921-JSILVA-02`; a Blank também
+  confirmou `X-Request-ID` UUID v4 e os quatro métodos ADOdb necessários. O
+  hash canônico permaneceu
+  `f52668437c192e37eca8757e1250aebb2d87a318961efc03a8e03637536868bd`.
+- A configuração externa local foi validada para a chamada única de `LOGS`,
+  com somente `allow_log_writes = true`; escritas Oracle de negócio e PNCP
+  permanecem falsas. Ela deve substituir a cópia remota antes da chamada. Uma
+  resposta incerta proíbe repetição e exige o pós-check identificado.
+- O Microciclo 6 foi concluído em 21/09/2026. A chamada única retornou
+  `LOGS_CONFIRMADOS` e encontrou exatamente uma linha `execute`, com 11.179
+  bytes. O SHA-256 enviado e o persistido coincidiram em
+  `d48fcf1daf915e5064d2b3df4b00b3805e9085c5b35393cfdcd494a429c3f326`.
+  A releitura automática confirmou acentos e mapas vazios.
+- O pós-check independente confirmou a mesma linha, o identificador correto,
+  11.179 caracteres ASCII, escapes de acentuação, mapas vazios e JSON válido.
+  Não houve acesso nem escrita PNCP e não houve escrita Oracle de negócio.
+- A configuração externa local foi desarmada após a prova: `PRECHECK`, hash
+  nulo e todos os consentimentos de escrita falsos. A cópia remota deve ser
+  substituída por esse estado seguro; a URL `LOGS` não deve ser repetida.
+- A pausa obrigatória do Microciclo 6 foi cumprida. O Microciclo 7 recebeu
+  autorização independente e conserva checkpoint próprio e novo PRECHECK.
+
+## Preparação corrente do Microciclo 7 da Sprint 8.5
+
+- O mantenedor autorizou o Microciclo 7 em 21/09/2026. Nenhuma chamada real de
+  contenção foi executada nesta preparação.
+- A Blank `teste_contencao_sprint85` aceita somente `PRECHECK`, `CONTENCAO` e
+  `DISPONIBILIDADE`. Seu runtime fica no artefato temporário
+  `build/pca-pncp-containment-gate`, separado do gate encerrado de logs.
+- O roteiro `contencao_precheck.sql` contém doze SELECTs materializados para a
+  fotografia de homologação atual: 112 planos e 112 demandas ativas nas UOs
+  3, 94 e 149, nenhuma auditoria de negócio e duas âncoras. O identificador técnico novo é
+  `SPRINT85-CONTENCAO-HML-20260921-JSILVA-01` e deve estar ausente.
+- O gate exige que uma sessão Oracle externa retenha exatamente a âncora
+  `UNIDADE_EXTERNA/2026/930281`. Uma sonda `FOR UPDATE NOWAIT` na conexão da
+  Blank precisa receber `ORA-00054` antes de chamar o fluxo público.
+- Como a autenticação PNCP antecede o lock no fluxo vigente, o transporte de
+  teste permite somente `POST /v1/usuarios/login`; qualquer outra operação
+  mutante é bloqueada antes do envio. O snapshot Oracle completo deve ser
+  idêntico antes e depois, inclusive a ausência de auditoria de negócio.
+- O pacote principal foi reconstruído e validado com 197 arquivos. O artefato
+  de contenção foi validado com 212 arquivos, entrypoints carregáveis e sem
+  configuração ou segredo. A configuração externa modelo permanece em
+  `PRECHECK`, hash nulo e todos os consentimentos falsos.
+- Após confirmação do mantenedor, o perfil de homologação recebeu o mesmo
+  CNPJ, credenciais PNCP de treinamento e mapeamentos Oracle do perfil DEV. O
+  CA bundle público foi colocado ao lado do perfil e passou a usar caminho
+  relativo a `__DIR__`, compatível com a cópia do conjunto para o Linux. O
+  preflight local confirmou ambiente `HOMOLOGACAO`, charset `Windows-1252`, 11
+  grupos de mapeamento e as 12 consultas somente leitura, sem I/O externo.
+- As configurações externas foram centralizadas em
+  `/var/www/configuracoes/pca-pncp`, fora da DocumentRoot `/var/www/html`. A
+  pasta deve conter somente `sprint85.php`, `registro.php`,
+  `perfil-homologacao.php` e `ca-bundle.crt`, ser legível pelo usuário do
+  PHP/Apache e permanecer inacessível por HTTP. O `registro.php` autoriza
+  somente o host validaSGI e referencia o perfil por `__DIR__`.
+- Em 21/09/2026, o mantenedor confirmou a instalação dos quatro arquivos em
+  `/var/www/configuracoes/pca-pncp` no validaSGI. A tentativa de acesso por URL
+  retornou “The requested URL was not found on this server”, confirmando que a
+  pasta externa não é publicada pela DocumentRoot.
+- A conferência manual seguinte recusou a fotografia preparada. As consultas
+  4 a 11 divergiram do cenário fixado: foram encontradas as UOs 3, 94 e 149;
+  apenas três versões da UO 3; uma versão vigente; três demandas ativas; zero
+  auditorias correspondentes e zero controles de concorrência. Somente a
+  ausência do identificador técnico na consulta 12 permaneceu conforme.
+- O checkpoint não será recalculado para aceitar silenciosamente esse estado.
+  A Blank, o lock e a etapa `CONTENCAO` permanecem proibidos até a escolha e a
+  preparação explícita de uma nova massa de homologação, seguida por nova
+  conferência manual das doze consultas.
+- O mantenedor confirmou que a divergência ocorreu após a replicação semanal
+  de produção para homologação e autorizou preparar uma nova massa. O primeiro
+  passo versionado é o diagnóstico somente leitura em
+  `database/seeds/sprint85_contencao_hml/01_diagnostico_pre_seed.sql`: ele
+  confirma o ambiente, procura duas UOs sem planos de 2026, mede colisões e
+  inventaria colunas, constraints, dependências e triggers. O DML do seed será
+  produzido somente após essa evidência, sem alterar dados replicados.
+- O diagnóstico confirmou `SGIHML`, exercício 2026 válido, configuração
+  consolidada e uma única UO livre (1). A fotografia replicada possui planos e
+  demandas ativas nas UOs 3, 94 e 149; os identificadores antigos também estão
+  ocupados por dados atuais. Para a contenção, o mantenedor autorizou manipular
+  HML e sugeriu aproveitar as UOs 3 e 94. Como o modo consolidado descobre todas
+  as UOs do exercício, o checkpoint seguro deverá incluir também a UO 149. Uma
+  consulta adicional verificará a projeção operacional antes de preparar o
+  seed mínimo dos controles. Essa escolha vale para o Microciclo 7 e não atende
+  ainda à massa vazia e excluída exigida pelo smoke do Microciclo 8.
+- A consulta adicional confirmou 112 planos de 2026, todos sem estratégia,
+  UASG, estado ou sequencial. Foi preparado um seed mínimo e reversível,
+  exclusivo de `SGIHML`: ele exige as cardinalidades 3/38/71 das UOs 3/94/149,
+  preserva as 112 demandas ativas, projeta somente
+  `CONSOLIDADO/930281` nos planos e cria os controles `ESTRATEGIA_ANUAL` e
+  `UNIDADE_EXTERNA/930281`. Precheck, post-check e limpeza bloqueante ficam na
+  mesma pasta. Nenhum desses DMLs foi executado.
+- O precheck bloqueante do seed foi aprovado manualmente no `SGIHML`: UO 3
+  com 3 planos/demandas ativas, UO 94 com 38 e UO 149 com 71; os 112 planos
+  permanecem sem estratégia, UASG, estado ou sequencial, e não existe controle
+  de concorrência para 2026. A fotografia corresponde exatamente às guardas de
+  `03_aplicar_seed.sql`; o DML ainda não foi executado.
+- O mantenedor executou `03_aplicar_seed.sql`; o cliente informou
+  `Updated Rows = -1`, comportamento esperado para um bloco PL/SQL sem uma
+  contagem agregada de linhas. A leitura independente já encontrou exatamente
+  os controles `ESTRATEGIA_ANUAL/2026/ESTRATEGIA_ANUAL` e
+  `UNIDADE_EXTERNA/2026/930281`. A aplicação permanece pendente da conferência
+  das três consultas de `04_postcheck_seed.sql`, especialmente a projeção dos
+  112 planos e a preservação das demandas.
+- O post-check confirmou integralmente o seed: 112 planos conformes e zero
+  divergentes; exatamente os controles `ESTRATEGIA_ANUAL` e
+  `UNIDADE_EXTERNA/930281`; e a massa preservada nas cardinalidades 3/3/3,
+  38/38/38 e 71/71/71 para as UOs 3, 94 e 149. A limpeza permanece disponível,
+  mas não deve ser executada antes do encerramento do gate de contenção. O
+  próximo passo é conferir as doze consultas atualizadas e fixar seu novo hash
+  pelo PRECHECK da Blank.
+- A conferência manual das doze consultas atualizadas foi aprovada a partir de
+  `docs/investigacoes/sprint85_fotografia_oracle_microciclo7.json`. As
+  cardinalidades foram `2, 1, 1, 3, 112, 3, 112, 112, 112, 0, 2, 0`; as
+  consultas 10 e 12 vazias confirmam, respectivamente, ausência de auditoria de
+  negócio para o exercício e ausência do identificador técnico novo. A
+  projeção contém somente `CONSOLIDADO/930281`, sem estado ou sequencial, e os
+  dois controles são exatamente os esperados. O próximo passo continua sendo o
+  PRECHECK da Blank para obter o hash canônico pela conexão ADOdb; a etapa
+  `CONTENCAO` ainda não está autorizada para execução.
+- O PRECHECK da Blank no validaSGI confirmou novamente as doze cardinalidades
+  e produziu o hash canônico ADOdb
+  `1a64c049431e093f784095dd66c31aef757415aaed7309f053adc0cab691a77e`.
+  O relatório confirmou ausência de escrita Oracle, acesso ou escrita PNCP e
+  escrita de log. A configuração externa local foi preparada para
+  `CONTENCAO`, com esse hash e somente `allow_log_writes = true`; ela ainda
+  precisa substituir a cópia remota antes da retenção manual da âncora.
+- A sessão Oracle A reteve exatamente a âncora
+  `UNIDADE_EXTERNA/2026/930281`. A chamada única da etapa `CONTENCAO` retornou
+  `CONTENCAO_CONFIRMADA`, situação global `CONCLUIDA_COM_PENDENCIAS` e unidade
+  consolidada `BLOQUEADO/UNIDADE_TRABALHO_BLOQUEADA`. Os hashes antes e depois
+  permaneceram iguais a
+  `1a64c049431e093f784095dd66c31aef757415aaed7309f053adc0cab691a77e`,
+  confirmando preservação do snapshot e da auditoria de negócio. O transporte
+  realizou somente o login PNCP com HTTP 200, sem escrita PNCP, e registrou um
+  evento técnico.
+- Depois do `ROLLBACK` na mesma sessão Oracle A, a etapa `DISPONIBILIDADE`
+  retornou `ANCORA_DISPONIVEL`, sem escrita Oracle, acesso PNCP ou log. O
+  Microciclo 7 está concluído. A configuração externa local foi desarmada para
+  `PRECHECK`, hash nulo e todos os consentimentos falsos; essa cópia segura deve
+  substituir a configuração remota. A limpeza da massa e qualquer preparação
+  do smoke ficam adiadas até a autorização independente do Microciclo 8.
+
+## Preparação corrente do Microciclo 8 da Sprint 8.5
+
+- O mantenedor autorizou o Microciclo 8 em 21/09/2026. Nenhum DML do smoke e
+  nenhuma chamada da Blank real foram executados nesta preparação.
+- A fotografia aprovada possui 112 planos sem confirmação e 112 demandas
+  participantes: 106 em situação 2 e seis em situação 3, nos IDs 795, 799,
+  815, 824, 857 e 867. As versões vigentes são os planos 143, 124 e 224; o
+  plano intermediário 103 permanece sem confirmação.
+- A camada `database/seeds/sprint85_smoke_hml` prepara, somente em SGIHML, uma
+  fotografia vazia com os 112 planos em
+  `CONSOLIDADO/930281/EXCLUIDO/36`. Precheck, aplicação, post-check e limpeza
+  possuem cardinalidades bloqueantes; a limpeza restaura as situações e aceita
+  confirmação somente nas três versões vigentes.
+- `smoke-config.example.php` e `checkpoints/smoke_precheck.sql` registram as
+  três UOs, fotografia zero, ciclo de 112 demandas, projeção de 112 planos,
+  auditoria zero, dois controles e identificador técnico novo. A configuração
+  externa local permanece em `PRECHECK`, hash nulo e todos os consentimentos
+  falsos. O próximo passo é a conferência manual de `01_precheck_seed.sql`.
+- A preparação local aprovou 43 testes e 379 asserções dos contratos 8.5. A
+  suíte padrão permaneceu verde com 951 testes e 4.500 asserções, e o PSR-4
+  estrito carregou 1.843 classes. O pacote principal foi reconstruído e
+  verificado com 197 arquivos, sem dependências de desenvolvimento,
+  configurações ou segredos, e com as duas fachadas públicas carregáveis.
+- O preflight da configuração externa do smoke confirmou etapa `PRECHECK`,
+  ambiente `HOMOLOGACAO` e doze consultas somente leitura sem acessar Oracle
+  ou PNCP. A configuração local está pronta, mas não deve substituir a cópia
+  remota antes da aprovação do precheck manual do seed.
+- O precheck manual do seed do smoke foi aprovado no `SGIHML`: 112 planos
+  conformes e sem confirmação; 112 demandas, sendo 106 em situação 2 e seis
+  em situação 3 nos IDs 795, 799, 815, 824, 857 e 867; versões vigentes 143,
+  124 e 224 sem confirmação; dois controles; nenhuma auditoria de negócio; e
+  plano intermediário 103 sem confirmação. A massa satisfaz integralmente as
+  guardas de `02_aplicar_seed.sql`.
+- O mantenedor executou `02_aplicar_seed.sql` com sucesso. O post-check
+  confirmou 112 planos em `CONSOLIDADO/930281/EXCLUIDO/36`, zero divergentes e
+  zero confirmações; 112 demandas canceladas e nenhuma participante; os dois
+  controles esperados; e o plano 103 ainda sem confirmação. A limpeza
+  reversível permanece disponível, mas não deve ser executada antes das
+  evidências do smoke. O próximo passo é conferir as doze consultas de
+  `checkpoints/smoke_precheck.sql`.
+- A conferência manual das doze consultas do smoke foi aprovada com as
+  cardinalidades `2, 1, 1, 3, 112, 3, 0, 112, 112, 0, 2, 0`. As consultas 7,
+  10 e 12 vazias confirmam fotografia vigente vazia, ausência de auditoria de
+  negócio e ausência do identificador técnico novo. As 112 linhas do ciclo
+  estão na situação 4, as 112 projeções permanecem em
+  `CONSOLIDADO/930281/EXCLUIDO/36` e os controles são exatamente os dois
+  esperados. Falta repetir o PRECHECK pela conexão ADOdb da Blank de teste.
+- O PRECHECK ADOdb confirmou as mesmas doze cardinalidades e produziu o hash
+  canônico `f0c17e5e43f8aa5fc89cff3c211838ed5e64f8d0d39c2487afe2ec6d3fd6013c`,
+  sem escrita Oracle, acesso PNCP ou log. A configuração externa local foi
+  armada para `SMOKE`, com escrita Oracle interna e logs permitidos, escrita
+  PNCP falsa e o hash fixado; o preflight desse estado foi aprovado.
+- O pós-check somente leitura foi materializado em `smoke_postcheck.sql` para
+  conferir projeção, as três confirmações vigentes, plano 103, demandas,
+  auditoria, controles e os eventos técnicos localizados pela correlação da
+  resposta. Seus sete SELECTs passaram na validação local.
+- A aplicação real e o pacote foram instalados no validaSGI. Uma abertura
+  manual por POST de navegação foi recusada com `ENTRADA_HTTP_INVALIDA`, antes
+  de chamar a fachada. A Blank foi corrigida para tratar como publicação
+  somente POST com `Content-Type: application/json`; POSTs de menu agora
+  renderizam a interface. As mensagens fixas da resposta também passaram a ser
+  construídas em UTF-8 a partir de fonte ASCII, evitando caracteres de
+  substituição após a compilação Scriptcase. O teste focado aprovou 7 testes e
+  81 asserções, e o lint PHP passou.
+- O `export PCA_PNCP_PROFILE_REGISTRY_FILE=...` executado em um terminal não é
+  herdado pelo Apache já iniciado. Antes da chamada única do smoke, o caminho
+  `/var/www/configuracoes/pca-pncp/registro.php` ainda precisa ser provisionado
+  de forma persistente ao processo PHP e a Blank corrigida precisa ser
+  recompilada.
+- Após a correção, os contratos da Sprint 8.5 aprovaram 47 testes e 432
+  asserções; a suíte padrão aprovou 953 testes e 4.513 asserções; e o autoload
+  PSR-4 estrito carregou 1.843 classes.
+- O mantenedor recompilou a Blank, confirmou que o POST do menu renderiza a
+  interface e fez a chamada única do smoke para 2026. O servidor respondeu HTTP
+  500 com `INTERROMPIDA/FALHA_INESPERADA` e sem correlação na resposta. O
+  pós-check eliminou a incerteza funcional: os 112 planos e as 112 demandas
+  foram preservados; os planos vigentes 143, 124 e 224 foram confirmados; o
+  plano 103 continuou sem confirmação; não houve auditoria; e os dois controles
+  permaneceram. Quatro eventos integrais com a correlação
+  `ad5d9e3f-3ed2-45da-a3e6-aedf5ef83641` comprovam autenticação, busca com zero
+  candidatos e persistência da convergência. O backend concluiu o smoke; a
+  falha ocorreu depois, na fronteira de resposta da Blank, e a chamada não deve
+  ser repetida.
+- A Blank foi corrigida para interpretar qualquer corpo JSON público válido,
+  inclusive quando o HTTP não for 2xx, e para preservar um UUID de correlação
+  válido no fallback externo. Resta comparar os arquivos implantados e eliminar
+  eventual pacote ou bytecode antigo antes de validar a interface sem repetir o
+  smoke.
+- O mantenedor instalou o conteúdo integral de `build/pca-pncp-backend`
+  diretamente em `/var/www/html/PCA_PUBLICAR_B/backend`. Manifesto, `src/` e
+  `vendor/` estão presentes, e os SHA-256 das duas fachadas públicas, do DTO de
+  saída, dos dois ViewModels e do executor coincidem com o pacote local. A causa
+  técnica do HTTP 500 anterior não foi atribuída a cache; o estado funcional e
+  os eventos são as evidências aceitas do smoke.
+- A configuração externa foi desarmada e seu preflight confirmou `PRECHECK`,
+  todas as escritas falsas e ausência de I/O. A limpeza da camada do smoke foi
+  executada com sucesso: 112 planos sem estado, sequencial ou confirmação; 106
+  demandas em situação 2 e seis em situação 3; versões vigentes 143, 124 e 224
+  sem confirmação; plano 103 preservado; auditoria vazia; e os dois controles
+  da contenção ainda presentes. A última etapa é remover a preparação da
+  contenção e conferir o novo pós-check somente leitura.
+- A limpeza da contenção foi executada e o pós-check final confirmou 112 planos
+  sem estratégia, UASG, estado, sequencial ou confirmação; 106 demandas em
+  situação 2 e seis em situação 3; nenhum controle para 2026; plano 103 sem
+  confirmação; e auditoria de negócio vazia. O Microciclo 8 está concluído, a
+  configuração externa continua desarmada e a chamada do smoke não deve ser
+  repetida.
+- A pausa obrigatória ao fim do Microciclo 8 foi cumprida antes da autorização
+  independente do Microciclo 9.
+- O mantenedor autorizou o Microciclo 9. A implementação adicionou o
+  botão `Ajuda` ao lado de `Publicar` e um modal SweetAlert estático com as nove
+  seções operacionais previstas. A ajuda possui rolagem responsiva, fechamento
+  por teclado, devolução explícita do foco e bloqueio durante processamento;
+  não faz requisições, não registra eventos e não altera dados. O mantenedor
+  atualizou a Blank e confirmou no navegador que o botão funciona. O lint PHP e
+  o teste focado passaram novamente com 9 testes/115 asserções; os contratos
+  8.5, com 48/461. A suíte padrão anteriormente aprovada permanece em
+  954/4.540. O Microciclo 9 está concluído e aplica-se a pausa obrigatória antes
+  do Microciclo 10.
+- O mantenedor autorizou o Microciclo 10. O pacote autocontido final foi
+  reconstruído e validado com 196 arquivos de conteúdo mais o manifesto, sem
+  dependências de desenvolvimento, configurações ou segredos. As duas fachadas
+  públicas são carregáveis. O SHA-256 do manifesto é
+  `4de4c0bd063d8388e42b85a2746caed3d5d315113dd85fa34d368bd5a773e187`.
+  A versão final separada do `onExecute` tem SHA-256
+  `7a78f42ccc198407b3b4549c677ccfcd3fe0850cc1b4ab5542bd265724f171ee`;
+  o mantenedor confirmou o funcionamento do botão de ajuda na Blank instalada.
+  A regressão final aprovou a suíte padrão com 954 testes/4.542 asserções e os
+  contratos 5.1, 5.9, 8.2, 8.3, 8.4 e 8.5 com 24/51, 54/149, 12/43, 14/62,
+  73/703 e 48/461. O lint aprovou 404 arquivos PHP; o PSR-4 estrito gerou 1.843
+  classes; e os requisitos da plataforma foram atendidos no PHP 8.4.7. Nenhum
+  gate real foi repetido, nenhum recurso de produção foi acessado e nenhum
+  commit foi criado. A Sprint 8.5 está concluída; o próximo trabalho pertence à
+  Fase 9 e exige planejamento e autorização próprios.

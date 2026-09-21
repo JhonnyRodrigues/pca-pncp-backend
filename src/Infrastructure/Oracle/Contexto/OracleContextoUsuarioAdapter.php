@@ -106,8 +106,13 @@ final class OracleContextoUsuarioAdapter implements ContextoUsuarioPort
         $nome = $this->representantes->getColunaNome();
         $ativo = $this->representantes->getColunaAtivo();
 
-        return "SELECT f.{$id} AS ID_REPRESENTANTE, f.{$nome} AS NOME_REPRESENTANTE "
-            . "FROM {$tabela} f WHERE UPPER(f.{$login}) = UPPER(?) AND f.{$ativo} = ?";
+        return "SELECT 
+            f.{$id} AS ID_REPRESENTANTE, 
+            f.{$nome} AS NOME_REPRESENTANTE
+        FROM {$tabela} f 
+        WHERE 
+            UPPER(f.{$login}) = UPPER(?) 
+            AND f.{$ativo} = ?";
     }
 
     private function sqlLotacao(): string
@@ -121,10 +126,16 @@ final class OracleContextoUsuarioAdapter implements ContextoUsuarioPort
         $nome = $this->lotacoes->getColunaNomeLotacao();
         $ativo = $this->lotacoes->getColunaAtivoLotacao();
 
-        return "SELECT l.{$id} AS ID_LOTACAO, l.{$nome} AS NOME_LOTACAO "
-            . "FROM {$tabelaVinculos} fl JOIN {$tabelaLotacoes} l "
-            . "ON l.{$id} = fl.{$lotacaoVinculo} "
-            . "WHERE fl.{$funcionario} = ? AND fl.{$fim} IS NULL AND l.{$ativo} = ?";
+        return "SELECT 
+            l.{$id} AS ID_LOTACAO, 
+            l.{$nome} AS NOME_LOTACAO
+        FROM 
+            {$tabelaVinculos} fl 
+            JOIN {$tabelaLotacoes} l ON l.{$id} = fl.{$lotacaoVinculo} 
+        WHERE 
+            fl.{$funcionario} = ? 
+            AND fl.{$fim} IS NULL 
+            AND l.{$ativo} = ?";
     }
 
     private function naoResolvido(

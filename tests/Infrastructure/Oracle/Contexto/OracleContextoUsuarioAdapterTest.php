@@ -10,6 +10,7 @@ use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
 use Semae\Pca\Infrastructure\Oracle\Contexto\MapeamentoLotacoesUsuarioOracle;
 use Semae\Pca\Infrastructure\Oracle\Contexto\MapeamentoRepresentantesOracle;
 use Semae\Pca\Infrastructure\Oracle\Contexto\OracleContextoUsuarioAdapter;
+use Tests\Support\NormalizadorSql;
 
 final class OracleContextoUsuarioAdapterTest extends TestCase
 {
@@ -31,23 +32,25 @@ final class OracleContextoUsuarioAdapterTest extends TestCase
         $this->assertSame('Coordenadoria de Tecnologia', $resultado->getContexto()?->getLotacao()->getNome());
 
         $representante = $adodb->consultas[0];
-        $this->assertStringContainsString('FROM SGI.RH_FUNCIONARIOS f', $representante['sql']);
+        $sqlRepresentante = NormalizadorSql::normalizar($representante['sql']);
+        $this->assertStringContainsString('FROM SGI.RH_FUNCIONARIOS f', $sqlRepresentante);
         $this->assertStringContainsString(
             'UPPER(f.NOME_USUARIO) = UPPER(:param_0)',
-            $representante['sql']
+            $sqlRepresentante
         );
-        $this->assertStringContainsString('f.ATIVO = :param_1', $representante['sql']);
+        $this->assertStringContainsString('f.ATIVO = :param_1', $sqlRepresentante);
         $this->assertSame(['param_0' => 'Maria.Silva', 'param_1' => 1], $representante['parametros']);
 
         $lotacao = $adodb->consultas[1];
-        $this->assertStringContainsString('FROM SGI.RH_FUNCIONARIOS_LOTACOES fl', $lotacao['sql']);
+        $sqlLotacao = NormalizadorSql::normalizar($lotacao['sql']);
+        $this->assertStringContainsString('FROM SGI.RH_FUNCIONARIOS_LOTACOES fl', $sqlLotacao);
         $this->assertStringContainsString(
             'JOIN SGI.RH_LOTACOES l ON l.COD_LOTACAO = fl.COD_LOTACAO',
-            $lotacao['sql']
+            $sqlLotacao
         );
-        $this->assertStringContainsString('fl.COD_FUNCIONARIO = :param_0', $lotacao['sql']);
-        $this->assertStringContainsString('fl.DT_FIM_LOTACAO IS NULL', $lotacao['sql']);
-        $this->assertStringContainsString('l.ATIVO = :param_1', $lotacao['sql']);
+        $this->assertStringContainsString('fl.COD_FUNCIONARIO = :param_0', $sqlLotacao);
+        $this->assertStringContainsString('fl.DT_FIM_LOTACAO IS NULL', $sqlLotacao);
+        $this->assertStringContainsString('l.ATIVO = :param_1', $sqlLotacao);
         $this->assertSame(['param_0' => 709, 'param_1' => 1], $lotacao['parametros']);
         $this->assertStringNotContainsString('PAC_UO', implode(' ', array_column($adodb->consultas, 'sql')));
         $this->assertStringNotContainsString('UASG', implode(' ', array_column($adodb->consultas, 'sql')));

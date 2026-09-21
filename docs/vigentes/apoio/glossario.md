@@ -126,28 +126,46 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | --- | --- | --- |
 | Adapter | Implementação concreta de uma Port para um mecanismo externo; a implementação concreta de um Repository também exerce esse papel, mesmo quando conserva o sufixo `Repository`. | Arquitetura §§5 e 8 |
 | Application | Camada de casos de uso, orquestração e contratos necessários ao fluxo. | Arquitetura §4.2; `DI-007` |
+| Aplicação hospedeira | Sistema que inicia e sustenta a execução do backend; neste projeto, a Blank do Scriptcase fornece conexão, login e dados HTTP. | Fluxo §2; `DI-010` |
+| Autoload | Mecanismo que localiza e carrega classes PHP quando elas são usadas, evitando arquivos `require` espalhados pelo código. | Arquitetura §7; `DI-010` |
+| Bootstrap | Passos iniciais necessários para tornar a aplicação executável, como carregar o autoload e preparar o entrypoint. | Arquitetura §7; `DI-010` |
+| Classe `final` | Classe que não pode ser herdada. É usada quando sua responsabilidade deve permanecer fechada, sem variações por subclasses. | Arquitetura §§3 e 8 |
+| Clean Architecture | Organização em camadas na qual as regras internas não dependem dos mecanismos externos; as dependências apontam para o núcleo. | Arquitetura §§3 e 4 |
 | Composition Root | Ponto do backend que cria o grafo e injeta dependências concretas. | Arquitetura §7; `DI-010` |
 | Montador do núcleo | Componente intermediário que recebe Ports e logger já construídos e compõe a topologia da Application, sem selecionar perfil ou administrar recursos externos. | Roadmap Sprint 6.1 |
 | Conexão emprestada | Conexão criada e administrada pela aplicação hospedeira, reutilizada pelo backend sem transferência de seu ciclo de vida; o backend não a fecha. | `DI-008`; Roadmap Sprint 5.2 |
+| Construtor de objeto — `__construct` | Método chamado ao criar um objeto. Recebe dependências e dados necessários para deixar a instância válida; não é o construtor do pacote de implantação. | Arquitetura §§3 e 7 |
+| Contrato | Forma estável pela qual um componente pode ser usado: operações, entradas, saídas e comportamentos observáveis esperados. Pode ser expresso por interface, DTO, método público ou especificação externa. | Arquitetura §§5 e 8 |
 | Controller | Componente que adapta a entrada pública para o caso de uso. | Arquitetura §§4.4 e 8; `DI-010` |
+| DDD | Abordagem que modela o software a partir da linguagem, das regras e das fronteiras do negócio. Neste projeto orienta Domain, Aggregates, Entities e Value Objects. | Modelo; Arquitetura §8 |
+| Dependência | Colaborador de que um componente precisa para cumprir sua responsabilidade, como uma Port, logger ou relógio. | Arquitetura §§3 e 5 |
+| Enum | Tipo com um conjunto fechado de valores nomeados, usado para impedir estados textuais arbitrários. | Modelo §3; Arquitetura §8 |
+| Grafo de dependências | Conjunto de objetos ligados pelas dependências necessárias a uma execução. O Composition Root monta um grafo novo por chamada. | Arquitetura §7; `DI-010` |
+| Imutabilidade | Propriedade de um objeto cujo estado não muda depois da criação; uma alteração conceitual produz outro valor ou resultado. | Modelo §3; Arquitetura §8 |
+| Injeção de dependências | Entrega explícita dos colaboradores a um objeto, geralmente pelo construtor, em vez de o próprio objeto procurá-los ou criá-los escondidamente. | Arquitetura §§3, 5 e 7 |
 | Domain | Camada que representa o negócio, protege invariantes e decide por políticas puras. | Modelo; Arquitetura §4.1 |
 | Double de teste | Substituto controlado usado para demonstrar como um consumidor utiliza um contrato. | Arquitetura §9; `DI-007` |
 | Entrypoint Scriptcase | Única API do backend conhecida pela Blank; recebe recursos naturais do host, seleciona o perfil externo e aciona o grafo interno. | Arquitetura §7; `DI-010` |
+| Fachada pública do backend | Papel exercido por `PublicadorPcaScriptcase`: oferece ao hospedeiro uma API pequena e segura, escondendo configuração, Composition Root e camadas internas. | Arquitetura §7; `DI-010` |
 | Fachada da Presentation | Fronteira interna que converte a execução em ViewModel seguro e impede a passagem de exceções ao consumidor. | Arquitetura §7; `DI-010` |
 | Infrastructure | Camada dos adapters concretos de persistência, transporte e recursos externos. | Arquitetura §4.3 |
 | Integração controlada do núcleo | Prova interna que monta adapters concretos sobre fronteiras programáveis e sem I/O real para verificar composição, compartilhamento de sessão e encerramento transacional. Não substitui gate real nem constitui o Composition Root final. | Roadmap Sprint 6.2; Arquitetura §9 |
 | Mapeamento físico explícito | Descrição injetada e validada dos nomes físicos e literais usados pelo adapter, sem incorporá-los aos contratos internos nem assumir valores implícitos. | `DI-008`; Arquitetura §4.3 |
 | Mapeador de dados | Tradutor dos valores retornados por um mecanismo externo para tipos internos, sem definir nomes físicos nem decidir regras de negócio. | Arquitetura §4.3 |
+| Namespace | Nome hierárquico que organiza classes PHP e evita colisões entre nomes iguais; o PSR-4 o relaciona aos diretórios. | Arquitetura §3 |
 | Port | Contrato interno pertencente à camada que necessita da capacidade. | Arquitetura §5; `DI-007` |
+| PSR-4 | Convenção que relaciona namespace e caminho de arquivo para o autoload localizar classes PHP. | Arquitetura §3; catálogo de arquivos |
 | Presentation | Camada que protege a entrada pública e apresenta o resultado. | Arquitetura §4.4; `DI-010` |
 | Presenter | Componente que transforma a Response em ViewModel estruturado. | Arquitetura §§4.4 e 8; `DI-010` |
 | Repository | Port especializada em reconstrução e persistência de um Aggregate; sua implementação concreta também é um Adapter. | Arquitetura §§5 e 8; `DI-007` |
 | Request | Contrato de entrada de um caso de uso. | Arquitetura §8; `DI-010` |
 | Response | Contrato de saída de um caso de uso. | Arquitetura §8; `DI-010` |
+| SOLID | Conjunto de princípios para manter responsabilidades claras, dependências direcionadas e componentes substituíveis. É um meio de reduzir acoplamento, não uma exigência de criar mais classes. | Arquitetura §§3 e 5 |
 | Sessão compartilhada | Mesma sessão Oracle e sua transação reutilizadas pelos adapters que participam da unidade, preservando contenção, visibilidade e atomicidade locais. | `DI-004`, `DI-008` |
 | Registro externo de perfis | Índice provisionado fora da release que associa literalmente `SERVER_NAME` ao caminho absoluto de um perfil, sem duplicar sua configuração. | `DI-010` |
 | Sessão opaca | Capacidade autenticada do PNCP usada sem interpretar nem expor o token que a representa e descartada ao fim da execução. | `DI-009`, `DI-010` |
 | Teste contratual | Teste que demonstra compatibilidade com um contrato interno ou externo. | Arquitetura §9; `DI-007`, `DI-009` |
+| TDD | Ciclo de desenvolvimento no qual primeiro se demonstra a falta do comportamento com um teste, depois se implementa o mínimo e por fim se melhora o código: Red, Green e Refactor. | Arquitetura §9 |
 | Tradução de erro externo | Conversão de falhas do mecanismo externo em resultados internos tipados e seguros, sem fazer sua representação física atravessar a Port. | `DI-008`, `DI-009`; Arquitetura §4.3 |
 | Unidade de trabalho | Abstração usada para coordenar atomicidade local e conclusão de uma unidade. | `DI-004`, `DI-007` |
 | UseCase | Componente da Application que orquestra uma intenção usando Domain e Ports. | Arquitetura §§4.2 e 8 |
@@ -160,26 +178,79 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | --- | --- | --- |
 | Controle de concorrência (antes “âncora”) | Linha técnica da tabela PAC_CONTROLES_CONCORRENCIA, sem identidade de negócio, utilizada para serializar execuções por ESCOPO + ANO_EXECUCAO + IDENTIFICADOR_ALVO. Ela funciona como um "ponto de cadeado" persistente: se duas execuções disputarem a mesma publicação, ambas encontrarão essa mesma linha e uma delas será bloqueada via FOR UPDATE NOWAIT. A alteração do termo "âncora" para "controle de concorrência" é apenas semântica e não altera o comportamento do adapter. | `DI-008`; Sprint 5.9 |
 | Ambiente de treinamento | Ambiente oficial protegido, distinto da produção, no qual integrações externas autorizadas podem ser exercitadas com massa dedicada. | `DI-009` |
-| Fixture | cenário de teste pré-montado: conjunto pequeno e controlado de dados de teste, preparado de propósito para simular um cenário específico sem depender dos sistemas reais. |
+| Cardinalidade esperada | Quantidade exata ou mínima de linhas que uma consulta deve retornar para satisfazer um checkpoint. Divergência interrompe o gate. | Fluxo §11; Roadmap Sprint 8.4 |
+| Checkpoint Oracle | Fotografia verificável do estado Oracle, formada por consultas, colunas e cardinalidades conhecidas e identificada por hash canônico. | Roadmap Sprints 8.4 e 8.5 |
+| Contrato de gate | Verificação executável das pré-condições, permissões e resultados esperados de um gate. Preparar ou aprovar o contrato não autoriza a execução real. | `DI-008` a `DI-010`; Roadmap Sprint 8.5 |
+| Fixture | Cenário pré-montado com dados pequenos e controlados, preparado para simular uma situação específica sem depender dos sistemas reais. | Arquitetura §9 |
 | Contrato controlado | Prova contratual executada com condições, fixtures ou doubles controlados; demonstra o comportamento do adapter, mas não substitui a evidência obtida no ambiente externo real. | Arquitetura §9; Roadmap Sprints 5.9 e 6.2 |
 | Fail-closed | Postura que recusa a execução antes da interação externa quando configuração, destino, autorização ou pré-condição não estão comprovados, sem recorrer a valores alternativos silenciosos. | `DI-009`, `DI-010` |
 | Gate real | Condição de avanço comprovada no ambiente efetivo por meio dos adapters concretos; a aprovação em ambiente controlado, isoladamente, não o encerra. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |
+| Hash canônico | Resumo criptográfico calculado depois que os dados são organizados e normalizados por uma regra única. O mesmo estado produz o mesmo SHA-256; uma divergência relevante produz outro valor. | Roadmap Sprints 8.4 e 8.5 |
 | Limpeza best-effort | Tentativa de remover os artefatos criados pelo teste sem presumir que a remoção sempre será possível; qualquer resíduo possível deve permanecer diagnosticado. | `DI-009` |
 | Massa dedicada | Conjunto de registros expressamente reservado à execução contratual, usado para evitar escritas sobre dados operacionais arbitrários e permitir rastreamento e limpeza. | `DI-009` |
 | Preflight | Verificação anterior à interação externa que confirma configuração, destino, autorização de escrita e demais pré-condições exigidas; sua falha impede a execução. | `DI-009`, `DI-010` |
+| Probe | Ponto de execução restrito usado para investigar ou comprovar um contrato no ambiente real. Não é a API normal da aplicação. | Fluxo §11; guia de execução das probes |
+| Regressão | Reexecução de testes já existentes para verificar que uma mudança nova não quebrou comportamentos anteriormente aprovados. | Arquitetura §9 |
 | Relatório sanitizado | Evidência de execução limitada a estados, códigos, mensagens seguras e identificadores não sensíveis, sem credenciais, sessões, headers, corpos ou payloads integrais. | Logs; `DI-006`, `DI-009` |
 | Resíduo | Artefato externo que pode ter permanecido após uma execução interrompida, incerta ou cuja limpeza não foi comprovada. | `DI-009` |
+| Runner | Coordenador de um cenário contratual: executa etapas na ordem, aplica guardas e reúne o relatório. Não pertence ao fluxo normal de produção. | Roadmap Sprints 5.9, 8.3 e 8.4 |
+| Snapshot | Representação dos resultados de um conjunto de consultas em um instante lógico, normalizada para comparação e cálculo de hash. | Roadmap Sprints 8.4 e 8.5 |
 | Suíte opt-in | Conjunto de testes excluído da execução padrão e iniciado apenas por comando e configuração explícitos. Pode realizar interação externa autorizada em ambiente protegido e nunca deve ser acionado implicitamente. | `DI-009`; Fluxo §11; Roadmap Sprint 5.9 |
+| Teste de integração | Teste que verifica a colaboração entre componentes reais, mantendo fronteiras externas controladas quando não se deseja I/O real. | Arquitetura §9 |
+| Teste unitário | Teste focado no comportamento de uma unidade pequena, usando colaboradores simples ou doubles quando necessário. | Arquitetura §9 |
 
-## 7. Termos de documentação e planejamento
+### 6.2 Termos técnicos de execução e integração
 
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
-| ADR-lite | Registro conciso de contexto, decisão, alternativas, consequências e gates. | `DI`; Docs |
+| ADOdb | Biblioteca usada pelo Scriptcase para oferecer a conexão Oracle ao backend. O backend a recebe pronta e não administra seu ciclo de vida. | `DI-008`, `DI-010` |
+| Bind ou parâmetro vinculado | Valor enviado separadamente do texto SQL por um placeholder. Evita concatenar dados na consulta e preserva tipagem e tratamento pelo driver. | `DI-008`; Fluxo §9 |
+| CA bundle | Arquivo com uma coleção de certificados públicos confiáveis. O cURL/OpenSSL usa essa coleção para verificar se o certificado HTTPS apresentado pelo PNCP pertence a uma cadeia confiável. Ele não contém senha, token ou chave privada. Neste projeto, ele foi copiado integralmente do bundle já usado em DEV, sem gerar certificados novos. | `DI-009`, `DI-010` |
+| CLOB | Tipo Oracle para texto grande. `SEGURANCA_LOG.DESCRIPTION` usa CLOB para armazenar o JSON integral dos eventos técnicos. | `DI-006`, `DI-010` |
+| Commit | Confirmação de uma transação, tornando permanentes suas alterações locais. | `DI-004`, `DI-008` |
+| Configuração externa | Configuração mantida fora da release e do webroot, com parâmetros e possíveis segredos específicos do ambiente. | `DI-010` |
+| Correlação ou Request ID | UUID v4 que identifica a mesma execução através das camadas, resultados e eventos técnicos. | Logs; `DI-010` |
+| DML | Comandos SQL que alteram dados, como `INSERT`, `UPDATE`, `DELETE` e `MERGE`. Um PRECHECK não executa DML. | `DI-008`; Fluxo §11 |
+| Envelope de evento | Estrutura completa de um evento técnico, com campos institucionais, contexto sanitizado e metadados. | Logs; `DI-006` |
+| I/O | Entrada ou saída que interage com algo fora do cálculo em memória, como banco, rede, arquivo ou resposta HTTP. | Arquitetura §§4 e 9 |
+| JSON | Formato textual usado para transportar estruturas de dados. Na Blank, o resultado HTTP e cada evento técnico são serializados em JSON. | `DI-006`, `DI-010` |
+| caminho portátil | `__DIR__` indica em PHP o diretório do arquivo atual. Ele permite localizar arquivos vizinhos sem fixar um caminho específico do Windows ou Linux. | `DI-010` |
+| Lint | Verificação automática de sintaxe e, conforme a ferramenta, de convenções básicas sem executar o fluxo funcional. | Arquitetura §9 |
+| Macro Scriptcase | Comando reconhecido e transformado pelo Scriptcase, como `sc_log_add`; pode não funcionar como uma função PHP comum fora desse ambiente. | `DI-010`; Roadmap Sprint 8.5 |
+| Payload | Conteúdo enviado ou recebido por uma requisição, separado dos headers e do status do transporte. | `DI-009`; Logs |
+| Rollback | Cancelamento das alterações ainda não confirmadas de uma transação. | `DI-004`, `DI-008` |
+| Runtime | Ambiente efetivo no qual o código roda, incluindo versão do PHP, extensões, sistema operacional e comportamento das bibliotecas. | `DI-008` a `DI-010` |
+| Sanitização | Remoção, substituição ou limitação de dados que não podem atravessar uma fronteira, como credenciais, SQL, stack trace ou payload sensível. | Logs; `DI-006`, `DI-010` |
+| Serialização | Conversão de um objeto ou estrutura em uma representação transportável ou persistível, como JSON. | Logs; `DI-009`, `DI-010` |
+| Transação | Fronteira que agrupa operações Oracle para que sejam confirmadas juntas por commit ou desfeitas por rollback. | `DI-004`, `DI-008` |
+| TLS | Protocolo que protege a conexão de rede e autentica o servidor por meio de certificados. | `DI-009` |
+| Variável de ambiente | Valor provisionado pelo sistema operacional ou servidor para informar caminhos e configurações sem incorporá-los ao código. | `DI-010` |
+
+## 7. Termos de entrega e implantação
+
+| Termo | Definição curta | Fonte |
+| --- | --- | --- |
+| Artefato | Resultado concreto preparado por uma etapa do projeto, como um pacote, manifesto, relatório ou arquivo versionado. O termo não informa sozinho se o conteúdo é executável. | Roadmap; Docs |
+| Composer | Ferramenta usada durante o desenvolvimento e a construção para resolver dependências PHP e gerar o autoload. Não é executada no servidor de produção. | `DI-010` |
+| `composer.lock` | Arquivo que fixa as versões exatas das dependências resolvidas, permitindo reconstruir o mesmo conjunto em outra máquina. | `DI-010`; Roadmap Sprint 8.5 |
+| Construtor de pacote — package builder | Script de preparação que reúne o código permitido, instala dependências de produção e gera o manifesto. Não é um construtor `__construct` de classe. | `DI-010`; Roadmap Sprint 8.5 |
+| Deploy ou implantação | Ato de colocar uma release em um ambiente e torná-la disponível para execução. Copiar arquivos é uma parte possível da implantação. | Roadmap Fase 9 |
+| DocumentRoot ou webroot | Diretório cujos arquivos podem ser publicados pelo servidor HTTP. Configurações sensíveis ou específicas do ambiente devem permanecer fora dele. | `DI-010`; Roadmap Fase 9 |
+| Manifesto de integridade | Arquivo que descreve o pacote e registra hashes de seu conteúdo para permitir conferência posterior. | Roadmap Sprint 8.5 |
+| Pacote autocontido | (artefato final de uma build) É a pasta de entrega com o código e todas as dependências necessárias em `vendor/`, executável sem checkout e sem Composer no servidor. Configurações e segredos continuam externos. O processo de build pega o código-fonte bruto do repositório, baixa e resolve as dependências (como a pasta vendor/ via Composer), compila ou minifica arquivos (se houver frontend) e gera esse pacote autocontido e pronto para ser executado. | `DI-010`; Roadmap Sprint 8.5 |
+| Release | Conjunto versionado e preparado para implantação. Pode incluir um pacote executável e instruções, sem significar que já foi implantado. | `DI-010`; Roadmap Fase 9 |
+| Smoke test | Validação preliminar pós-deploy que confirma se a build está estável e se os caminhos críticos produzem o resultado esperado antes de liberar o ambiente para testes mais profundos. Não substitui a suíte completa de testes. | `DI-010`; Roadmap Sprint 8.5 |
+| `vendor/` | Diretório gerado pelo Composer com dependências e arquivos de autoload. No pacote, contém somente dependências de produção. | `DI-010` |
+
+## 8. Termos de documentação e planejamento
+
+| Termo | Definição curta | Fonte |
+| --- | --- | --- |
+| ADR-lite | Registro conciso que documenta o contexto, a decisão tomada, as alternativas avaliadas, suas consequências e os critérios de aprovação (gates). | `DI`; Docs |
 | Apoio | Documento que explica e contextualiza sem criar norma concorrente. | Docs |
 | Autoritativo | Documento que constitui fonte oficial para seu escopo declarado. | Docs |
-| Checkpoint | Registro incremental que preserva continuidade e precedência do planejamento. | Agentes |
-| Decisão de Integração — DI | Escolha registrada sobre contratos externos, arquitetura de integração ou operação. | `DI`; Docs |
+| Checkpoint de planejamento | Registro incremental que preserva continuidade e precedência do planejamento entre sessões. Não é o checkpoint Oracle. | Agentes |
+| DI — Decisão de Integração | Registro formal da escolha técnica sobre contratos de dados externos, padrões de arquitetura e modelos operacionais para a comunicação entre sistemas. | `DI`; Docs |
 | Fluxo de implementação | Documento vigente que descreve colaboração dinâmica entre camadas e portas. | Docs; seção 17 dos checkpoints |
 | Gate | Condição de validação baseada em evidências que libera um avanço específico do projeto. Um gate existe quando uma decisão depende de hipóteses ainda não comprovadas. Enquanto permanecer aberto, os avanços que dependem dessa evidência permanecem bloqueados. | `DI`; Roadmap; checkpoints |
 | Histórico | Documento substituído preservado para auditoria e aprendizado. | Docs |
@@ -189,7 +260,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Síntese | Fonte independente de conferência que não substitui o checkpoint correspondente. | Agentes |
 | Status documental | Situação atual de um documento, distinta de sua classificação. | Docs |
 
-## 8. Distinções essenciais
+## 9. Distinções essenciais
 
 | Não confundir | Distinção | Fonte |
 | --- | --- | --- |
@@ -204,5 +275,11 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Contrato controlado × gate real | Evidência determinística em condições controladas versus comprovação com os adapters concretos no ambiente externo efetivo. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |
 | Conexão emprestada × conexão própria | Recurso cujo ciclo de vida pertence à aplicação hospedeira versus recurso criado e administrado pelo próprio backend. | `DI-008` |
 | Entrypoint × Fachada × Controller × Composition Root | Bootstrap público do host, proteção da Presentation, adaptação da chamada e wiring. | Arquitetura §§7 e 8; `DI-010` |
+| Fachada pública do backend × fachada da Presentation | `PublicadorPcaScriptcase` é a API consumida pela Blank e prepara a execução; `FachadaPublicarPca` é interna à Presentation e protege o resultado contra falhas e exceções. | Arquitetura §7; `DI-010` |
+| Construtor de objeto × construtor de pacote | `__construct` deixa uma instância válida em memória; o construtor de pacote prepara arquivos para entrega. | Arquitetura §7; `DI-010` |
+| Artefato × pacote × release × deploy | Artefato é qualquer resultado concreto; pacote é a pasta executável; release é o conjunto preparado para entrega; deploy instala a release em um ambiente. | `DI-010`; Roadmap Fase 9 |
+| Manifesto × pacote | O manifesto descreve e protege a integridade; o pacote contém o código que será executado. | Roadmap Sprint 8.5 |
+| Checkpoint de planejamento × checkpoint Oracle | O primeiro preserva decisões e continuidade documental; o segundo fotografa dados Oracle para bloquear execução sobre estado divergente. | Agentes; Roadmap Sprints 8.4 e 8.5 |
+| Preflight × gate real × smoke test | Preflight valida condições antes de I/O; gate real comprova uma condição no ambiente efetivo; smoke test verifica rapidamente o caminho principal já instalado. | `DI-009`, `DI-010`; Roadmap |
 | Auditoria × observabilidade | Fato de negócio confirmado versus diagnóstico técnico. | `DI-006` |
 | Regra × decisão × fluxo | Norma de negócio, escolha arquitetural e colaboração dinâmica. | Docs; `RN`; `DI` |

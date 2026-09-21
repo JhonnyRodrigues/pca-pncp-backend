@@ -446,10 +446,12 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         $valor = $this->configuracao->getColunaValor();
         $descricao = $this->configuracao->getColunaDescricao();
 
-        return "SELECT c.{$chave} AS CHAVE_CONFIGURACAO, "
-            . "c.{$valor} AS VALOR_CONFIGURACAO, "
-            . "c.{$descricao} AS DESCRICAO_CONFIGURACAO FROM {$tabela} c "
-            . "WHERE c.{$chave} IN (?, ?)";
+        return "SELECT 
+            c.{$chave} AS CHAVE_CONFIGURACAO, 
+            c.{$valor} AS VALOR_CONFIGURACAO, 
+            c.{$descricao} AS DESCRICAO_CONFIGURACAO 
+        FROM {$tabela} c 
+        WHERE c.{$chave} IN (?, ?)";
     }
 
     private function sqlEstrategiaAdotada(): string
@@ -460,9 +462,12 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         $estrategia = $this->planos->getColunaEstrategiaAdotada();
         $uasg = $this->planos->getColunaUasgAdotada();
 
-        return "SELECT p.{$uo} AS UNIDADE_ORCAMENTARIA, "
-            . "p.{$estrategia} AS ESTRATEGIA_ADOTADA, p.{$uasg} AS UASG_ADOTADA "
-            . "FROM {$tabela} p WHERE p.{$ano} = ?";
+        return "SELECT 
+            p.{$uo} AS UNIDADE_ORCAMENTARIA, 
+            p.{$estrategia} AS ESTRATEGIA_ADOTADA, 
+            p.{$uasg} AS UASG_ADOTADA 
+        FROM {$tabela} p 
+        WHERE p.{$ano} = ?";
     }
 
     private function sqlUasgsIndividuais(): string
@@ -476,11 +481,16 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         $descricao = $this->unidadesOrcamentarias->getColunaDescricaoUasg();
         $ativo = $this->unidadesOrcamentarias->getColunaAtivo();
 
-        return "SELECT p.{$uoPlano} AS UNIDADE_ORCAMENTARIA, "
-            . "u.{$codigo} AS CODIGO_UASG, u.{$descricao} AS DESCRICAO_UASG "
-            . "FROM (SELECT DISTINCT {$uoPlano} FROM {$tabelaPlanos} WHERE {$ano} = ?) p "
-            . "LEFT JOIN {$tabelaUasg} u ON u.{$uoCadastro} = p.{$uoPlano} "
-            . "AND u.{$ativo} = ?";
+        return "SELECT 
+            p.{$uoPlano} AS UNIDADE_ORCAMENTARIA, 
+            u.{$codigo} AS CODIGO_UASG, 
+            u.{$descricao} AS DESCRICAO_UASG 
+        FROM (
+            SELECT DISTINCT {$uoPlano} 
+            FROM {$tabelaPlanos} 
+            WHERE {$ano} = ?
+        ) p 
+        LEFT JOIN {$tabelaUasg} u ON u.{$uoCadastro} = p.{$uoPlano} AND u.{$ativo} = ?";
     }
 
     private function sqlAdocaoIndividual(): string
@@ -502,9 +512,11 @@ final class OracleEstrategiaPublicacaoAdapter implements EstrategiaPublicacaoPor
         $uasg = $this->planos->getColunaUasgAdotada();
         $filtroUo = $porUo ? " AND {$uo} = ?" : '';
 
-        return "UPDATE {$tabela} SET {$modo} = ?, {$uasg} = ? "
-            . "WHERE {$ano} = ?{$filtroUo} "
-            . "AND {$modo} IS NULL AND {$uasg} IS NULL";
+        return "UPDATE {$tabela} SET 
+            {$modo} = ?, {$uasg} = ? 
+        WHERE {$ano} = ?{$filtroUo} 
+            AND {$modo} IS NULL 
+            AND {$uasg} IS NULL";
     }
 
     private function textoObrigatorio(mixed $valor): string

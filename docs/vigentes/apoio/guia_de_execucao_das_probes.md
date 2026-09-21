@@ -656,5 +656,242 @@ composer check-psr4
 ```
 
 Os comandos PNCP live, os preflights externos e a Blank não integram essa
-regressão. A Sprint 8.5 é a próxima na ordem do Roadmap, mas depende de plano e
-autorização próprios.
+regressão. As execuções reais da Sprint 8.4 permanecem encerradas e não devem
+ser repetidas.
+
+## 13. Sprint 8.5 — Pacote e preparação dos gates
+
+O pacote é construído na máquina de desenvolvimento; Composer não será
+executado no servidor Scriptcase. A construção usa o `composer.lock` em um
+diretório isolado e instala somente dependências de produção:
+
+```bash
+composer package:sprint85
+composer package:sprint85:verify
+```
+
+O resultado local fica em `build/pca-pncp-backend`, diretório ignorado pelo
+Git. O pacote contém somente `src/`, `vendor/` e
+`PACKAGE-MANIFEST.json`. O manifesto registra o hash do lock usado e o hash de
+cada arquivo. Uma alteração posterior no código ou no lock exige nova
+construção e nova verificação.
+
+Na homologação, o conteúdo desse diretório deve ocupar a pasta remota
+`backend/`, pois a Blank carrega `backend/vendor/autoload.php`. O nome local
+identifica o projeto; o nome remoto atende ao caminho de integração já
+contratado.
+
+Antes de preparar um gate, copie
+`tests/Contract/Sprint85/config.example.php` para um caminho absoluto fora do
+repositório e do webroot. Configure esse caminho e mantenha também o registro
+de perfis fora da release:
+
+```bash
+export PCA_SPRINT85_CONFIG_FILE=/c/caminho/externo/sprint85.php
+export PCA_PNCP_PROFILE_REGISTRY_FILE=/c/caminho/externo/registro.php
+```
+
+No PowerShell, use `$env:PCA_SPRINT85_CONFIG_FILE` e
+`$env:PCA_PNCP_PROFILE_REGISTRY_FILE`. O arquivo aceita somente as etapas
+`PRECHECK`, `LOGS`, `CONTENCAO` e `SMOKE`. Mutações PNCP permanecem falsas em
+todas elas. O PRECHECK mantém os três consentimentos de escrita falsos; o
+smoke permite somente DML Oracle interno e logs técnicos.
+
+Valide localmente a configuração e gere o roteiro da conferência manual:
+
+```bash
+composer contract:sprint85:tests
+composer contract:sprint85:preflight
+composer contract:sprint85:queries -- LOGIN_SGI
+```
+
+O último comando apresenta as doze consultas gerais parametrizadas para os
+gates que dependem da massa de PCA. O gate de logs usa o roteiro reduzido e
+independente da massa descrito na seção 13.1.
+
+Os entrypoints em `tests/Contract/Sprint85/scriptcase_probe.php` recebem a
+conexão ADOdb emprestada. O PRECHECK não acessa PNCP, não chama o publicador,
+não grava logs e não fecha a conexão. Divergência de coluna, cardinalidade ou
+hash interrompe o gate.
+
+A existência do pacote, da configuração e do PRECHECK não autoriza os gates.
+Cada gate real mantém sua autorização e sua pausa próprias. Não instale o
+pacote nem execute a probe somente para verificar se continuam funcionando.
+
+### 13.1 Gate de logs no validaSGI
+
+O gate real do Microciclo 6 usa o validaSGI e o Oracle de homologação. Ele não
+usa as doze consultas preparadas originalmente para a massa do DEV. O arquivo
+`tests/Contract/Sprint85/checkpoints/logs_precheck.sql` possui apenas:
+
+1. a conferência de `ACTION` como `VARCHAR2(30)` e `DESCRIPTION` como `CLOB`;
+2. a comprovação de que o identificador sintético ainda não existe.
+
+A configuração externa exclusiva usa
+`PCA_SPRINT85_LOG_GATE_CONFIG_FILE`; o modelo versionado é
+`tests/Contract/Sprint85/log-gate-config.example.php`. Mantenha inicialmente:
+
+```php
+'allow_oracle_writes' => false,
+'allow_pncp_writes' => false,
+'allow_log_writes' => false,
+'charset_adodb' => 'Windows-1252',
+'etapa_autorizada' => 'PRECHECK',
+'oracle_checkpoint_sha256' => null,
+```
+
+Gere e verifique o artefato temporário do gate:
+
+```bash
+composer package:sprint85:log-gate
+composer package:sprint85:log-gate:verify
+```
+
+O resultado fica em `build/pca-pncp-log-gate/`, com o pacote principal dentro
+de `backend/` e apenas o suporte necessário dentro de `gate/`. Copie essa pasta
+inteira pelo FileZilla para a pasta da aplicação Blank de teste no validaSGI,
+preservando o nome `pca-pncp-log-gate`. Não copie o checkout do projeto. A
+configuração externa continua separada e não integra o artefato.
+
+Depois de conferir os dois SELECTs, execute somente `PRECHECK` no validaSGI e
+guarde seu SHA-256. Para a chamada única de `LOGS`, troque somente
+`allow_log_writes` para `true`, a etapa para `LOGS` e fixe o hash retornado. A
+Blank não carrega o perfil PNCP: precisa somente do host literal e do charset
+ADOdb aprovado. Ela repete o PRECHECK, chama o mesmo adapter Oracle usado pelo
+registrador público, grava o conteúdo integral com `UpdateClob` e relê o CLOB.
+O roteiro `logs_postcheck.sql` permite uma segunda conferência somente leitura.
+Resultado incerto ou falha não deve ser repetido com o mesmo identificador.
+
+Se o pós-check retornar zero linhas depois da chamada única, mantenha o gate
+desarmado e execute, um SELECT por vez,
+`tests/Contract/Sprint85/checkpoints/logs_diagnostico_persistencia.sql`. O
+roteiro identifica a conexão consultada, descreve todas as colunas da tabela,
+lista objetos e sinônimos homônimos e procura o identificador sem restringir a
+ação. Em paralelo, confira a conexão Oracle vinculada à Blank. Essa conferência
+não autoriza uma nova tentativa de gravação.
+
+Se o registrador emitir HTML de erro ou não preservar o evento integral com
+mais de 4.000 bytes, desarme a configuração e interrompa o gate. Esses
+resultados caracterizam uma incompatibilidade bloqueante. Não reduza nem
+fragmente o evento e não troque o mecanismo sem uma nova decisão de integração.
+
+### 13.2 Gate de contenção no validaSGI
+
+O Microciclo 7 usa uma Blank e um artefato próprios. Essa separação evita que
+o gate encerrado de logs aceite etapas de publicação. Gere e verifique o novo
+artefato com:
+
+```bash
+composer package:sprint85
+composer package:sprint85:verify
+composer package:sprint85:containment-gate
+composer package:sprint85:containment-gate:verify
+```
+
+Copie `build/pca-pncp-containment-gate/` inteiro para a pasta da aplicação
+Blank no validaSGI, preservando esse nome. Use o conteúdo de
+`tests/Contract/Sprint85/blank_scriptcase/teste_contencao_sprint85.php` no
+evento `onExecute` e compile a aplicação. As configurações externas ficam em
+`/var/www/configuracoes/pca-pncp`, fora da DocumentRoot `/var/www/html` e do
+artefato. O usuário do PHP/Apache precisa conseguir ler essa pasta, mas ela não
+deve ser acessível por HTTP.
+
+Comece pela configuração de
+`tests/Contract/Sprint85/containment-config.example.php`: etapa `PRECHECK`,
+hash nulo e os três consentimentos falsos. Execute separadamente os doze
+SELECTs de `checkpoints/contencao_precheck.sql`. Confira as colunas declaradas,
+as cardinalidades 2, 1, 1, 3, 112, 3, 112, 112, 112, 0, 2 e 0, nessa ordem,
+e guarde
+o resultado. Divergência interrompe o gate sem ajuste automático de dados.
+
+Depois da conferência manual, chame somente:
+
+```text
+https://validasgi.semaepiracicaba.sp.gov.br/teste_contencao_sprint85/index.php?etapa=PRECHECK
+```
+
+O resultado esperado é `PRECHECK_CONTENCAO_CONFIRMADO`. Fixe no arquivo
+externo o SHA-256 retornado, troque a etapa para `CONTENCAO` e habilite somente
+`allow_log_writes`. Oracle de negócio e mutações PNCP permanecem falsos.
+
+Mantenha exatamente quatro arquivos nessa pasta externa: `sprint85.php`,
+`registro.php`, `perfil-homologacao.php` e `ca-bundle.crt`. O `registro.php`
+autoriza somente o host validaSGI e referencia o perfil por `__DIR__`; não envie
+os perfis DEV ou produção. O perfil também localiza o CA bundle por `__DIR__`,
+portanto os quatro arquivos precisam permanecer juntos. Antes do PRECHECK,
+confirme que tentativas de acesso por URL a esses arquivos não retornam seu
+conteúdo.
+
+Na sessão Oracle A, execute o SELECT de
+`checkpoints/contencao_reter_ancora.sql` sem executar ainda o `ROLLBACK`. Ele
+deve retornar exatamente a âncora `UNIDADE_EXTERNA/2026/930281`. Com essa
+sessão aberta, chame uma única vez a etapa `CONTENCAO` pela Blank, que usa uma
+segunda sessão. A sonda da Blank exige `ORA-00054` antes de iniciar o fluxo.
+
+O fluxo autentica no PNCP antes de tentar seu próprio lock. Por isso o
+transporte do gate permite somente `POST /v1/usuarios/login` e bloqueia qualquer
+mutação antes do envio. O resultado aceito contém `BLOQUEADO`,
+`CONCLUIDA_COM_PENDENCIAS`, snapshots Oracle iguais e nenhuma nova auditoria de
+negócio. Os eventos técnicos são gravados somente depois dessas verificações.
+
+Por fim, execute `ROLLBACK` na mesma sessão Oracle A e chame a etapa
+`DISPONIBILIDADE`. O resultado esperado é `ANCORA_DISPONIVEL`; a sonda adquire
+e libera seu próprio lock por rollback. Resposta incerta não autoriza repetir a
+etapa `CONTENCAO`.
+
+### 13.3 Smoke do pacote no validaSGI
+
+O Microciclo 8 usa a aplicação real `PCA_PUBLICAR_B` e o pacote principal em
+`backend/`. A massa precisa representar um PCA consolidado já excluído, com
+fotografia vazia. A preparação reversível está em
+`database/seeds/sprint85_smoke_hml/` e só aceita `SGIHML/sgihml`.
+
+Execute primeiro, uma consulta por vez, `01_precheck_seed.sql`. Depois da
+conferência, execute `02_aplicar_seed.sql` como script completo e valide as
+quatro consultas de `03_postcheck_seed.sql`. Em seguida, execute as doze
+consultas de `tests/Contract/Sprint85/checkpoints/smoke_precheck.sql`; as
+cardinalidades esperadas são `2, 1, 1, 3, 112, 3, 0, 112, 112, 0, 2, 0`.
+
+Use `tests/Contract/Sprint85/smoke-config.example.php` como configuração externa
+desarmada e repita o PRECHECK pela conexão ADOdb da Blank de teste. Fixe o hash
+somente depois de comparar o resultado com a fotografia manual. O estado
+externo inesperado permanece seguro: com fotografia local vazia e estado
+`EXCLUIDO/36`, um candidato PNCP sem vínculo bloqueia a unidade antes de
+qualquer escrita.
+
+Reconstrua e verifique `build/pca-pncp-backend`, copie seu conteúdo para a
+pasta `backend/` da aplicação `PCA_PUBLICAR_B`, use o `onExecute.php`
+versionado e compile a Blank. A chamada do botão para 2026 deve ocorrer uma
+única vez. O resultado esperado é `CONCLUIDA`, com um resultado consolidado
+`SEM_ALTERACAO`, zero inclusões e exclusões, correlação visível e nenhum aviso
+de registro técnico.
+
+O servidor HTTP deve fornecer de forma persistente ao processo PHP a variável
+`PCA_PNCP_PROFILE_REGISTRY_FILE=/var/www/configuracoes/pca-pncp/registro.php`.
+Executar `export` em um terminal isolado altera somente aquele shell e seus
+processos filhos; isso não reconfigura um Apache que já está em execução. A
+forma exata de provisionamento pertence à configuração do Apache ou do PHP-FPM
+do validaSGI e exige a recarga apropriada do serviço.
+
+A abertura da Blank por um menu Scriptcase pode chegar como `POST` de
+navegação. Somente um `POST` cujo `Content-Type` comece com
+`application/json` representa uma solicitação de publicação. Os demais métodos
+e POSTs renderizam a interface; o JavaScript do botão envia o JSON com o ano.
+
+Guarde a resposta HTTP e confira no navegador a renderização das contagens, da
+UASG, da decisão e da correlação. Depois, use a correlação devolvida para
+consultar o log técnico integral. Confira também que o PCA 36 continua
+excluído, os planos permanecem projetados, somente as versões vigentes podem
+receber confirmação e nenhuma auditoria de negócio foi criada. Não repita o
+smoke se a resposta for incerta.
+
+Se a resposta for incerta e não trouxer correlação, execute uma consulta por
+vez de `checkpoints/smoke_resposta_incerta_postcheck.sql`. Esse roteiro procura
+os eventos do dia por aplicação e operador e permite descobrir a correlação sem
+refazer a chamada. Só diagnostique a causa depois de classificar os efeitos já
+ocorridos.
+
+Depois de guardar as evidências, `04_limpar_seed.sql` remove somente a camada
+do smoke. Se também for necessário retirar a preparação da contenção, execute
+depois `sprint85_contencao_hml/05_limpar_seed.sql`; a ordem inversa é recusada
+pelas guardas.

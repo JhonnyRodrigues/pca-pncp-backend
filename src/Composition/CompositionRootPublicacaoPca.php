@@ -32,6 +32,21 @@ final class CompositionRootPublicacaoPca
         array $perfil,
         CorrelacaoExecucao $correlacao
     ): FachadaPublicarPca {
+        return $this->montarExecucao(
+            $conexaoAdodb,
+            $loginAutenticado,
+            $perfil,
+            $correlacao
+        )->getFachada();
+    }
+
+    /** @param array<string, mixed> $perfil */
+    public function montarExecucao(
+        object $conexaoAdodb,
+        string $loginAutenticado,
+        array $perfil,
+        CorrelacaoExecucao $correlacao
+    ): ComposicaoExecucaoPublicacaoPca {
         $perfilTipado = new PerfilPublicacaoPca($perfil);
 
         if (trim($loginAutenticado) === '') {
@@ -81,10 +96,14 @@ final class CompositionRootPublicacaoPca
         );
         $presenter = new PublicarPcaPresenter();
 
-        return new FachadaPublicarPca(
-            new PublicarPcaController($montadorNucleo->montar(), $presenter),
-            $presenter,
-            $logger
+        return new ComposicaoExecucaoPublicacaoPca(
+            new FachadaPublicarPca(
+                new PublicarPcaController($montadorNucleo->montar(), $presenter),
+                $presenter,
+                $logger
+            ),
+            $logger,
+            $conexao
         );
     }
 }

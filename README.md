@@ -73,17 +73,18 @@ conjunto.
 
 ## Arquitetura
 
-O projeto adota Clean Architecture, DDD, SOLID, injeção de dependências e TDD.
-A direção das dependências aponta para o núcleo:
+O projeto adota DDD, Clean Architecture, SOLID, injeção de dependências e TDD.
 
 ```text
-Presentation
-      ↓
-Application
-      ↓
-Domain
-
-Infrastructure implementa contratos definidos nas camadas internas.
+Blank
+  ↓ conhece somente
+API (PublicadorPcaScriptcase)
+  ↓
+Composition Root
+  ↓
+Presentation → Application → Domain
+                  ↑
+            Infrastructure
 ```
 
 Responsabilidades conceituais:
@@ -92,6 +93,25 @@ Responsabilidades conceituais:
 - **Application:** casos de uso, orquestração e contratos necessários ao fluxo;
 - **Infrastructure:** adapters de persistência, transporte e recursos externos;
 - **Presentation:** fronteira de entrada e apresentação do resultado.
+
+As setas contínuas mostram o fluxo principal, em direção ao núcleo. As setas
+tracejadas mostram a montagem das dependências, a implementação de contratos e
+o retorno específico da integração com o Scriptcase:
+
+```mermaid
+flowchart TD
+    blank["Scriptcase (Blank)"] --> publicador["Fronteira pública<br/>PublicadorPcaScriptcase"]
+    publicador --> executor["Executor e Composition Root"]
+    executor --> presentation["Presentation<br/>entrada, fachada e ViewModel"]
+    presentation --> application["Application<br/>casos de uso e portas"]
+    application --> domain["Domain<br/>regras e invariantes"]
+
+    executor -. "monta e injeta" .-> infrastructure["Infrastructure<br/>Oracle, PNCP e recursos externos"]
+    infrastructure -. "implementa portas definidas em" .-> application
+
+    publicador -. "executarComEventos retorna" .-> resultado["ResultadoPublicacaoPcaScriptcase<br/>resultado, eventos e aviso técnico"]
+    resultado -. "é entregue à" .-> blank
+```
 
 Essa é a arquitetura-alvo. O grau de implementação de cada camada permanece
 registrado no [estado operacional vigente](docs/vigentes/operacional/estado_atual.md).

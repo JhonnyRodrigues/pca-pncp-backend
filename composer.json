@@ -1,6 +1,6 @@
 {
     "name": "semae/pca",
-    "description": "backend para publicação e retificação de planos PCA no PNCP",
+    "description": "Backend em PHP para publicação e sincronização do Plano de Contratações Anual (PCA) com o Portal Nacional de Contratações Públicas (PNCP).",
     "type": "project",
 
     "require": {
@@ -51,6 +51,15 @@
         "contract:pncp83:cleanup":"php tests/Contract/Sprint83/run-pncp-cleanup.php",
         "contract:sprint84:tests":"vendor/bin/phpunit --configuration phpunit.sprint84.contract.xml",
         "contract:sprint84:preflight":"php tests/Contract/Sprint84/run-preflight.php",
+        "contract:sprint85:tests":"vendor/bin/phpunit --configuration phpunit.sprint85.contract.xml",
+        "contract:sprint85:preflight":"php tests/Contract/Sprint85/run-preflight.php",
+        "contract:sprint85:queries":"php tests/Contract/Sprint85/render-manual-queries.php",
+        "package:sprint85":"php tools/package/build.php",
+        "package:sprint85:verify":"php tools/package/verify.php",
+        "package:sprint85:log-gate":"php tools/package/build-log-gate.php",
+        "package:sprint85:log-gate:verify":"php tools/package/verify-log-gate.php",
+        "package:sprint85:containment-gate":"php tools/package/build-containment-gate.php",
+        "package:sprint85:containment-gate:verify":"php tools/package/verify-containment-gate.php",
         "contract:preflight":"php tests/Contract/Sprint51/run-preflight.php",
         "contract:preflight:pncp":"php tests/Contract/Sprint51/run-preflight.php pncp",
         "contract:preflight:oracle":"php tests/Contract/Sprint51/run-preflight.php oracle",

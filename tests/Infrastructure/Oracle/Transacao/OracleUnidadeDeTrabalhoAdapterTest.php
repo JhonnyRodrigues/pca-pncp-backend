@@ -18,6 +18,7 @@ use Semae\Pca\Domain\ValueObjects\Uasg;
 use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
 use Semae\Pca\Infrastructure\Oracle\Transacao\MapeamentoControlesConcorrenciaOracle;
 use Semae\Pca\Infrastructure\Oracle\Transacao\OracleUnidadeDeTrabalhoAdapter;
+use Tests\Support\NormalizadorSql;
 
 final class OracleUnidadeDeTrabalhoAdapterTest extends TestCase
 {
@@ -38,6 +39,7 @@ final class OracleUnidadeDeTrabalhoAdapterTest extends TestCase
             'INSERT INTO SGI.PAC_CONTROLES_CONCORRENCIA',
             $adodb->execucoes[0]['sql']
         );
+        $sqlProvisionamento = NormalizadorSql::normalizar($adodb->execucoes[0]['sql']);
         $this->assertSame(
             'INSERT INTO SGI.PAC_CONTROLES_CONCORRENCIA '
             . '(ESCOPO, ANO_EXECUCAO, IDENTIFICADOR_ALVO) '
@@ -45,22 +47,23 @@ final class OracleUnidadeDeTrabalhoAdapterTest extends TestCase
             . 'SELECT 1 FROM SGI.PAC_CONTROLES_CONCORRENCIA '
             . 'WHERE ESCOPO = :param_3 AND ANO_EXECUCAO = :param_4 '
             . 'AND IDENTIFICADOR_ALVO = :param_5)',
-            $adodb->execucoes[0]['sql']
+            $sqlProvisionamento
         );
-        $this->assertStringContainsString('WHERE NOT EXISTS', $adodb->execucoes[0]['sql']);
-        $this->assertStringNotContainsString('CREATE', $adodb->execucoes[0]['sql']);
-        $this->assertStringNotContainsString('ALTER', $adodb->execucoes[0]['sql']);
+        $this->assertStringContainsString('WHERE NOT EXISTS', $sqlProvisionamento);
+        $this->assertStringNotContainsString('CREATE', $sqlProvisionamento);
+        $this->assertStringNotContainsString('ALTER', $sqlProvisionamento);
         $this->assertSame(
             ['ESTRATEGIA_ANUAL', $ano->getValor(), 'ESTRATEGIA_ANUAL', 'ESTRATEGIA_ANUAL', $ano->getValor(), 'ESTRATEGIA_ANUAL'],
             array_values($adodb->execucoes[0]['parametros'])
         );
         $this->assertStringContainsString('FOR UPDATE NOWAIT', $adodb->consultas[0]['sql']);
+        $sqlAquisicao = NormalizadorSql::normalizar($adodb->consultas[0]['sql']);
         $this->assertSame(
             'SELECT ESCOPO FROM SGI.PAC_CONTROLES_CONCORRENCIA '
             . 'WHERE ESCOPO = :param_0 AND ANO_EXECUCAO = :param_1 '
             . 'AND IDENTIFICADOR_ALVO = :param_2 '
             . 'FOR UPDATE NOWAIT',
-            $adodb->consultas[0]['sql']
+            $sqlAquisicao
         );
         $this->assertSame(
             ['ESTRATEGIA_ANUAL', $ano->getValor(), 'ESTRATEGIA_ANUAL'],

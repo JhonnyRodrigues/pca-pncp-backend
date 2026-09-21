@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true">
+    <testsuites>
+        <testsuite name="Sprint 8.5 - falhas, preparação e Blank">
+            <directory>tests/Contract/Sprint85</directory>
+            <directory>tests/Integration/Sprint85</directory>
+            <directory>tests/Integration/Scriptcase</directory>
+        </testsuite>
+    </testsuites>
+    <groups>
+        <exclude>
+            <group>sprint85-live</group>
+        </exclude>
+    </groups>
+</phpunit>

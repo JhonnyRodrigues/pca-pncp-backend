@@ -47,6 +47,7 @@ As classificações usadas são:
 | `composer contract:adapters:tests` | Contratos locais da Sprint 5.9; exclui o grupo PNCP live. | Sem Oracle, PNCP ou Scriptcase real. | Não exige autorização externa. Valida adapters, segurança, relatórios e exercícios controlados. |
 | `composer contract:oracle82:tests` | Contratos locais da Sprint 8.2 para a subcomposição Oracle final. | Não abre conexão Oracle nem chama PNCP. | Não exige configuração externa para os testes locais. Valida composição, runner, falhas e proteções. |
 | `composer contract:pncp83:tests` | Contratos locais da Sprint 8.3 para a subcomposição PNCP; exclui os grupos nominal e incerto live. | Não acessa o PNCP e não escreve dados externos. | Não exige arquivos reais. Valida configuração, runner, paginação, incerteza, limpeza e sanitização com transporte em memória. |
+| `composer contract:sprint85:tests` | Contratos locais da Sprint 8.5 para Blank, falhas e preparação dos gates; exclui o grupo live. | Não acessa Oracle, PNCP ou Scriptcase real. | Valida consentimentos, massa protegida, consultas somente leitura e integrações controladas. A verificação do pacote possui comando próprio. |
 
 ## 5. Preflights sem acesso externo
 
@@ -60,6 +61,8 @@ As classificações usadas são:
 | `composer contract:adapters:preflight:pncp` | Preflight PNCP da Sprint 5.9. | Sem rede e sem escrita. | Exige a seção PNCP da configuração 5.9. Deve preceder gate ou limpeza dessa sprint. |
 | `composer contract:oracle82:preflight` | Preflight da Sprint 8.2 para configuração, registro e perfil da composição Oracle. | Não acessa Oracle nem PNCP. | Exige `PCA_SPRINT82_CONFIG_FILE` e `PCA_PNCP_PROFILE_REGISTRY_FILE`; valida ambiente, servidor e autorização antes da Blank. |
 | `composer contract:pncp83:preflight` | Preflight da Sprint 8.3 para configuração, registro, perfil e massa PNCP dedicada. | Não abre rede, não autentica e não modifica o PNCP. | Exige `PCA_SPRINT83_CONFIG_FILE` e `PCA_PNCP_PROFILE_REGISTRY_FILE`. Deve ser executado antes de qualquer modo real da 8.3. |
+| `composer contract:sprint85:preflight` | Preflight local da Sprint 8.5 para configuração, perfil e contrato das doze consultas. | Lê arquivos externos; não acessa Oracle, PNCP ou Scriptcase. | Exige `PCA_SPRINT85_CONFIG_FILE` e `PCA_PNCP_PROFILE_REGISTRY_FILE`. Confirma somente a preparação local. |
+| `composer contract:sprint85:queries -- LOGIN_SGI` | Renderiza SQL, binds, colunas e cardinalidades para conferência manual. | Lê configuração e perfil externos; não executa as consultas. | Deve ser usado antes de cada gate real, com o login do operador autorizado. |
 
 Preflight aprovado significa apenas que a configuração passou pelas proteções
 locais. Ele não confirma credenciais, disponibilidade, contrato remoto ou
@@ -77,14 +80,25 @@ ausência de resíduos.
 Esses comandos ficam fora da suíte padrão. Não os execute como regressão de
 rotina, em paralelo ou apenas para verificar se “continua tudo verde”.
 
-## 7. Limpeza e recuperação
+## 7. Construção do pacote
+
+| Comando | Natureza e finalidade | I/O externo e efeitos | Dependências, autorização e resultado esperado |
+| --- | --- | --- | --- |
+| `composer package:sprint85` | Gera `build/pca-pncp-backend` a partir do lock, com código, dependências de produção e manifesto. | Pode baixar `psr/log`; escreve somente em `build/`. Não acessa Oracle, PNCP ou Scriptcase. | Exige Composer apenas na máquina de construção. O artefato final não contém Composer, testes, probes ou configuração. |
+| `composer package:sprint85:verify` | Confere topologia, hashes, ausência de conteúdo proibido e autoload da fachada. | Lê somente o pacote local e o lock do checkout. | Espera `PACOTE_VALIDADO`; qualquer divergência exige nova construção. |
+| `composer package:sprint85:log-gate` | Monta `build/pca-pncp-log-gate` para o Microciclo 6, reutilizando o pacote principal e acrescentando somente o runtime da probe. | Escreve somente em `build/`; não acessa Oracle, PNCP ou Scriptcase. | Exige que `build/pca-pncp-backend` esteja presente e validado. Não inclui configuração ou segredo. |
+| `composer package:sprint85:log-gate:verify` | Confere hashes, topologia, pacote principal incorporado e carregamento dos três entrypoints do gate. | Lê somente os artefatos locais e o lock. | Espera `ARTEFATO_GATE_VALIDADO` antes do envio por FileZilla. |
+| `composer package:sprint85:containment-gate` | Monta `build/pca-pncp-containment-gate` para o Microciclo 7, com o pacote principal e o runtime mínimo da contenção. | Escreve somente em `build/`; não acessa Oracle, PNCP ou Scriptcase. | Exige o pacote principal validado e não inclui configuração nem segredo. |
+| `composer package:sprint85:containment-gate:verify` | Confere hashes, topologia e os três entrypoints de PRECHECK, contenção e disponibilidade. | Lê somente os artefatos locais e o lock. | Espera `ARTEFATO_CONTENCAO_VALIDADO` antes do envio por FileZilla. |
+
+## 8. Limpeza e recuperação
 
 | Comando | Natureza e finalidade | I/O externo e efeitos | Dependências, autorização e resultado esperado |
 | --- | --- | --- | --- |
 | `composer contract:adapters:pncp:cleanup` | Recuperação PNCP da Sprint 5.9. | Pode consultar e excluir um PCA real da massa dedicada; não publica. | Exige preflight PNCP e `owned_residue_sequence` positivo, conhecido e autorizado. Só conclui com ausência confirmada; nunca adivinhe o sequencial. |
 | `composer contract:pncp83:cleanup` | Recuperação PNCP da Sprint 8.3. | Pode consultar e excluir integralmente o PCA real indicado; não cria publicação. | Exige preflight e `residuo_sequencial_autorizado` positivo, previamente atribuído à massa e explicitamente autorizado. Após sucesso, remova o valor da configuração e repita o preflight. |
 
-## 8. Relação com as pastas de testes
+## 9. Relação com as pastas de testes
 
 As pastas:
 

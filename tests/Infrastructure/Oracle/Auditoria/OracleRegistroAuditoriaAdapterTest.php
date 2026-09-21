@@ -31,6 +31,7 @@ use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoLotacoesOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoPlanosOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\MapeamentoUnidadesOrcamentariasOracle;
 use Semae\Pca\Infrastructure\Oracle\Plano\OraclePlanoRepository;
+use Tests\Support\NormalizadorSql;
 
 final class OracleRegistroAuditoriaAdapterTest extends TestCase
 {
@@ -51,14 +52,15 @@ final class OracleRegistroAuditoriaAdapterTest extends TestCase
             $this->assertSame(SituacaoPersistenciaLocal::CONCLUIDA, $resultado->getSituacao());
             $this->assertCount(1, $adodb->execucoes);
             $execucao = $adodb->execucoes[0];
-            $this->assertStringContainsString('INSERT INTO APP.PAC_HISTORICOS', $execucao['sql']);
+            $sql = NormalizadorSql::normalizar($execucao['sql']);
+            $this->assertStringContainsString('INSERT INTO APP.PAC_HISTORICOS', $sql);
             $this->assertStringContainsString(
                 '(DATA_HISTORICO, FK_PROCEDIMENTO, MENSAGEM, FK_REPRESENTANTE, FK_LOTACAO)',
-                $execucao['sql']
+                $sql
             );
             $this->assertStringContainsString(
                 'VALUES (SYSDATE, :param_0, :param_1, :param_2, :param_3)',
-                $execucao['sql']
+                $sql
             );
             $this->assertSame(
                 ['param_0' => $codigo, 'param_1' => $intencao->getMensagem(),

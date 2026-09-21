@@ -4,6 +4,7 @@
 *.deb
 
 /vendor/
+/build/
 .phpunit.result.cache
 
 /docs/investigacoes/*

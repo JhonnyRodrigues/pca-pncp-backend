@@ -20,6 +20,7 @@ use Semae\Pca\Domain\ValueObjects\Uasg;
 use Semae\Pca\Infrastructure\Oracle\Adodb\ConexaoAdodbEmprestada;
 use Semae\Pca\Infrastructure\Oracle\EstadoOperacional\MapeamentoEstadoOperacionalOracle;
 use Semae\Pca\Infrastructure\Oracle\EstadoOperacional\OracleEstadoOperacionalPublicacaoAdapter;
+use Tests\Support\NormalizadorSql;
 
 final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
 {
@@ -325,17 +326,18 @@ final class OracleEstadoOperacionalPublicacaoAdapterTest extends TestCase
         $this->assertSame(SituacaoPersistenciaLocal::CONCLUIDA, $resultado->getSituacao());
         $this->assertCount(1, $adodb->execucoes);
         $execucao = $adodb->execucoes[0];
+        $sql = NormalizadorSql::normalizar($execucao['sql']);
         $this->assertStringContainsString(
             'SET ESTADO_PUBLICACAO = :param_0, '
                 . 'SEQUENCIAL_PUBLICACAO_PNCP = :param_1',
-            $execucao['sql']
+            $sql
         );
-        $this->assertStringNotContainsString('SET ESTRATEGIA_ADOTADA_PUBLICACAO', $execucao['sql']);
-        $this->assertStringNotContainsString('SET UASG_ADOTADA', $execucao['sql']);
-        $this->assertStringContainsString('ANO_EXERCICIO = :param_2', $execucao['sql']);
+        $this->assertStringNotContainsString('SET ESTRATEGIA_ADOTADA_PUBLICACAO', $sql);
+        $this->assertStringNotContainsString('SET UASG_ADOTADA', $sql);
+        $this->assertStringContainsString('ANO_EXERCICIO = :param_2', $sql);
         $this->assertStringContainsString(
             'FK_UNIDADE_ORCAMENTARIA = :param_3',
-            $execucao['sql']
+            $sql
         );
         $this->assertSame(
             ['param_0' => 'PUBLICADO', 'param_1' => 77,

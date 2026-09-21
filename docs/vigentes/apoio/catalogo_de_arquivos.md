@@ -4,6 +4,8 @@
 **Status:** Vigente  
 **Autoridade/Escopo:** índice do código ativo; não define comportamento
 
+Responde: “Qual é a responsabilidade deste arquivo?”.
+
 Este catálogo cobre código de produção, testes, configuração e a referência ao
 estado operacional. `vendor/`, documentação histórica e investigações não
 fazem parte do fluxo executável.
@@ -11,6 +13,9 @@ fazem parte do fluxo executável.
 Para saber como executar e classificar os scripts, consulte o
 [catálogo de comandos Composer](catalogo_de_comandos_composer.md). Esta página
 permanece dedicada à função dos arquivos.
+
+Para entender primeiro a função das pastas e depois chegar a um arquivo,
+consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 
 ## 1. Domain
 
@@ -222,6 +227,12 @@ permanece dedicada à função dos arquivos.
 | `Oracle/Auditoria/MapeamentoHistoricosOracle.php` | Declara tabela e colunas físicas dos fatos em `PAC_HISTORICOS`. |
 | `Oracle/Auditoria/OracleRegistroAuditoriaAdapter.php` | Insere fatos append-only com instante Oracle na transação compartilhada. |
 
+### Oracle — observabilidade técnica
+
+| Arquivo | Função |
+| --- | --- |
+| `Oracle/Observabilidade/OracleRegistroEventoTecnicoAdapter.php` | Persiste um envelope técnico integral em `SGI.SEGURANCA_LOG`: insere um marcador curto, atualiza o CLOB por ID com `UpdateClob` e encerra uma transação técnica própria. |
+
 ### PNCP — transporte HTTP
 
 | Arquivo | Função |
@@ -285,7 +296,10 @@ permanece dedicada à função dos arquivos.
 
 | Arquivo | Função |
 | --- | --- |
-| `PublicadorPcaScriptcase.php` | Única API conhecida pela Blank; valida o request ID, seleciona e carrega o perfil pelo registro externo, materializa o CNPJ, solicita o grafo e devolve ViewModel seguro. |
+| `PublicadorPcaScriptcase.php` | Única API conhecida pela Blank; valida o request ID, seleciona e carrega o perfil externo, materializa o CNPJ e aciona um grafo novo por chamada. Preserva a operação que devolve o ViewModel e oferece uma variante que também devolve, separadamente, eventos sanitizados e eventual aviso técnico. |
+| `ResultadoPublicacaoPcaScriptcase.php` | Saída imutável da variante com eventos: ViewModel existente, envelopes escalares e aviso técnico seguro. |
+| `RegistradorEventosTecnicosScriptcase.php` | Fachada pública que recebe o lote já exportado e solicita seu registro técnico sem expor SQL ou detalhes internos à Blank. |
+| `integracao/scriptcase/PCA_PUBLICAR_B/onExecute.php` | Adaptação versionada da Blank: distingue a navegação do menu do POST JSON de publicação, valida a entrada, chama as fachadas públicas, renderiza o resultado seguro e oferece ajuda estática ao operador sem acessar o backend. |
 
 ## 5. Presentation
 
@@ -306,8 +320,10 @@ permanece dedicada à função dos arquivos.
 | `MontadorNucleoPublicacaoPca.php` | Recebe as nove Ports e o logger e monta explicitamente o grafo interno de `PublicarPcaUseCase`, sem Presentation ou seleção de adapters concretos. |
 | `CarregadorPerfilPublicacaoPca.php` | Seleciona literalmente o perfil pelo registro externo e valida integralmente seus caminhos antes do carregamento. |
 | `ComposicaoOraclePublicacaoPca.php` | Única receita de produção dos seis adapters Oracle sobre uma mesma `ConexaoAdodbEmprestada`. |
-| `CompositionRootPublicacaoPca.php` | Materializa o perfil carregado, usa a subcomposição Oracle única e compartilha transporte, logger e correlação em um grafo novo por chamada. |
-| `ExecutorPublicacaoPcaScriptcase.php` | Executa internamente o mesmo fluxo protegido do publicador, permitindo ao gate contratual fornecer um Composition Root instrumentado sem ampliar a API conhecida pela Blank. |
+| `ComposicaoExecucaoPublicacaoPca.php` | Mantém fachada, acumulador e conexão da mesma chamada; exporta eventos somente após encerramento transacional e preserva o resultado diante de falha técnica. |
+| `CompositionRootPublicacaoPca.php` | Materializa o perfil carregado, usa a subcomposição Oracle única e compartilha transporte, logger, conexão e correlação em um grafo novo por chamada. |
+| `ExecutorPublicacaoPcaScriptcase.php` | Executa uma vez o fluxo protegido e adapta sua saída para o ViewModel existente ou para o resultado separado com eventos. |
+| `ExecutorRegistroEventosTecnicosScriptcase.php` | Carrega o charset do perfil externo, monta o adapter de CLOB sobre a conexão emprestada, preserva eventos já registrados e converte a primeira falha em aviso seguro. |
 | `PerfilPublicacaoPca.php` | Trata o array externo como não confiável e materializa ambiente, charset ADOdb, configurações e os onze mapeamentos Oracle sem defaults implícitos. |
 
 ## 7. Testes
@@ -391,7 +407,8 @@ permanece dedicada à função dos arquivos.
 | Arquivo | Demonstração principal |
 | --- | --- |
 | `Composition/MontadorNucleoPublicacaoPcaTest.php` | Contrato de montagem do UseCase a partir das nove Ports vigentes e do logger PSR-3. |
-| `Composition/CompositionRootPublicacaoPcaTest.php` | Validação integral do perfil, grafo novo, recursos compartilhados, ausência de I/O na montagem e preservação da conexão emprestada. |
+| `Composition/ComposicaoExecucaoPublicacaoPcaTest.php` | Exportação sanitizada e imutável, bloqueio por transação ativa e preservação do resultado diante de falha de exportação. |
+| `Composition/CompositionRootPublicacaoPcaTest.php` | Validação integral do perfil, grafo novo, recursos compartilhados, montagem exportável sem I/O e preservação da conexão emprestada. |
 
 ### Integration — Composition
 
@@ -399,12 +416,20 @@ permanece dedicada à função dos arquivos.
 | --- | --- |
 | `Integration/Composition/MontadorNucleoPublicacaoPcaIntegrationTest.php` | Exercita os nove adapters concretos pelo montador em convergência, retificação e falha final reconciliável, sem recursos externos reais. |
 | `Integration/Composition/Support/CenarioIntegracaoNucleo.php` | Constrói as configurações fictícias, os adapters concretos e os roteiros Oracle e PNCP dos cenários controlados. |
-| `Integration/Composition/Support/AdodbControlado.php` | Responde consultas por fila estrita e registra transações, consultas, escritas e tentativas de fechamento sem acessar Oracle. |
-| `Integration/Composition/Support/ExecutorCurlRoteirizado.php` | Exige método e URL, alimenta os callbacks do transporte concreto e impede qualquer chamada de rede. |
+| `Integration/Composition/Support/AdodbControlado.php` | Responde consultas e falhas Oracle por fila estrita e registra transações, consultas, escritas e tentativas de fechamento sem acessar Oracle. |
+| `Integration/Composition/Support/ExecutorCurlRoteirizado.php` | Exige método e URL, alimenta os callbacks ou devolve falha cURL controlada ao transporte concreto e impede qualquer chamada de rede. |
 | `Integration/Composition/Support/RegistroCronologico.php` | Reúne eventos Oracle e PNCP sanitizados na ordem em que foram observados. |
 | `Integration/Composition/Support/TemporizadorControlado.php` | Registra a espera de retry solicitada pelo leitor sem suspender a execução do teste. |
-| `Integration/PublicadorPcaScriptcaseIntegrationTest.php` | Percorre o entrypoint, perfil, Composition Root, Presentation e Application até uma saída local controlada anterior ao PNCP, preservando duas correlações externas sem rede real. |
-| `PublicadorPcaScriptcaseTest.php` | Contrato público mínimo, request ID, localizador externo, seleção literal, perfil e CNPJ em comportamento fail-closed. |
+| `Integration/PublicadorPcaScriptcaseIntegrationTest.php` | Percorre entrypoint, perfil, Composition Root, Presentation e Application e comprova que a variante com eventos processa a solicitação uma única vez, sem rede real. |
+| `Integration/Scriptcase/PcaPublicarBlankTest.php` | Protege o contrato da Blank para entrada, fachada, logs integrais, resposta pública, submissão única, renderização segura e ajuda estática ao operador. |
+| `Integration/Sprint85/FalhasIntegradasTest.php` | Comprova contenção com continuidade, reconciliação única sem repetição da escrita e interrupção sistêmica com preservação dos resultados conhecidos. |
+| `PublicadorPcaScriptcaseTest.php` | Contratos públicos compatíveis, request ID, ausência de eventos fabricados, localizador externo, seleção literal, perfil e CNPJ em comportamento fail-closed. |
+
+### Suporte compartilhado dos testes
+
+| Arquivo | Função |
+| --- | --- |
+| `Support/NormalizadorSql.php` | Remove diferenças de espaçamento das SQLs capturadas para que os testes verifiquem sua estrutura sem impor apresentação em uma única linha. |
 
 ### Infrastructure — Oracle
 
@@ -452,6 +477,8 @@ permanece dedicada à função dos arquivos.
 | Arquivo | Demonstração principal |
 | --- | --- |
 | `Infrastructure/Observabilidade/AcumuladorEventosTecnicosTest.php` | Envelope, catálogos de ações, sanitização, ordem, imutabilidade e lote com duração. |
+| `Infrastructure/Oracle/Observabilidade/OracleRegistroEventoTecnicoAdapterTest.php` | JSON integral maior que 4.000 bytes, escapes Unicode, mapas vazios, transação por evento e rollback seguro. |
+| `RegistradorEventosTecnicosScriptcaseTest.php` | Fachada pública, ordem dos eventos, isolamento das transações e interrupção no primeiro erro. |
 
 ### Contratos opt-in — Sprint 5.1
 
@@ -544,6 +571,62 @@ permanece dedicada à função dos arquivos.
 | `Contract/Sprint84/blank_scriptcase/teste_adapters_contracts_sprint84.php` | Referência da aplicação Blank usada para executar o gate no Scriptcase. |
 | `Contract/Sprint84/config.example.php` | Modelo sem segredos da configuração externa da Sprint 8.4. |
 
+### Contratos opt-in — Sprint 8.5
+
+| Arquivo | Demonstração principal |
+| --- | --- |
+| `Contract/Sprint85/Sprint85ConfigTest.php` | Consentimentos por etapa, modo consolidado, hash e preservação da massa conhecida. |
+| `Contract/Sprint85/Sprint85PreparationTest.php` | Doze consultas completas somente leitura, leitura integral do CLOB e recusa antes de I/O. |
+| `Contract/Sprint85/Sprint85LogGateTest.php` | Protege a configuração, as duas consultas independentes da massa e o evento sintético maior que 4.000 bytes. |
+| `Contract/Sprint85/Sprint85ContainmentGateTest.php` | Comprova ordem do lock, resultado bloqueado, preservação do snapshot, acesso PNCP restrito e registro posterior dos eventos. |
+| `Contract/Sprint85/Sprint85OracleLockProbeTest.php` | Distingue a contenção real por `ORA-00054` de uma âncora livre e verifica o rollback da sonda. |
+| `Contract/Sprint85/Sprint85ContainmentArtifactsTest.php` | Protege as doze consultas materializadas, a Blank restrita, a configuração desarmada e o empacotamento próprio. |
+| `Contract/Sprint85/Support/Sprint85Config.php` | Carrega a configuração externa exata e restringe perfil, etapa, consentimentos e massa. |
+| `Contract/Sprint85/Support/Sprint85OracleQueries.php` | Reutiliza as onze consultas canônicas e acrescenta a consulta identificada dos logs técnicos. |
+| `Contract/Sprint85/Support/Sprint85Precheck.php` | Executa o checkpoint somente leitura, compara o hash fixado e impede SQL mutante ou lock. |
+| `Contract/Sprint85/Support/Sprint85LogGateConfig.php` | Restringe o gate de logs a PRECHECK ou LOGS no host validaSGI, fixa o charset ADOdb e exige o hash antes da escrita. |
+| `Contract/Sprint85/Support/Sprint85LogGateQueries.php` | Define o PRECHECK reduzido da estrutura do log e a releitura integral do CLOB. |
+| `Contract/Sprint85/Support/Sprint85SyntheticLog.php` | Produz o envelope identificado, com escapes Unicode, mapas vazios e mais de 4.000 bytes. |
+| `Contract/Sprint85/Support/Sprint85LogGate.php` | Coordena PRECHECK, preparação e verificação do evento sem chamar o publicador. |
+| `Contract/Sprint85/Support/Sprint85ContainmentGate.php` | Coordena checkpoint, prova do lock externo, fluxo público protegido, comparação posterior e logs técnicos. |
+| `Contract/Sprint85/Support/Sprint85OracleLockProbe.php` | Testa a âncora consolidada com `FOR UPDATE NOWAIT` e sempre desfaz sua transação local. |
+| `Contract/Sprint85/scriptcase_probe.php` | Expõe o PRECHECK geral preparado originalmente para os gates dependentes da massa. |
+| `Contract/Sprint85/scriptcase_log_gate_probe.php` | Expõe somente os três entrypoints necessários ao artefato temporário do Microciclo 6. |
+| `Contract/Sprint85/scriptcase_containment_probe.php` | Expõe os entrypoints seguros de PRECHECK, contenção e disponibilidade do Microciclo 7. |
+| `Contract/Sprint85/run-preflight.php` | Valida configuração, perfil e contrato das consultas sem acessar recursos externos. |
+| `Contract/Sprint85/render-manual-queries.php` | Renderiza SQL, binds, colunas e cardinalidades para conferência manual. |
+| `Contract/Sprint85/config.example.php` | Modelo sem segredos da configuração externa dos quatro gates. |
+| `Contract/Sprint85/log-gate-config.example.php` | Modelo sem segredos e independente da massa de PCA para o Microciclo 6 no validaSGI. |
+| `Contract/Sprint85/containment-config.example.php` | Configuração desarmada e sem segredos da fotografia de homologação usada no Microciclo 7. |
+| `Contract/Sprint85/smoke-config.example.php` | Configuração desarmada do PRECHECK do smoke, com as três UOs e fotografia vazia. |
+| `Contract/Sprint85/checkpoints/smoke_precheck.sql` | Materializa as doze consultas somente leitura da massa excluída usada no smoke. |
+| `Contract/Sprint85/checkpoints/smoke_postcheck.sql` | Confere projeção, confirmações, plano 103, demandas, auditoria, controles e logs após a chamada única do smoke. |
+| `Contract/Sprint85/checkpoints/smoke_resposta_incerta_postcheck.sql` | Reconstitui por consultas somente leitura o efeito de um smoke cuja resposta não trouxe correlação, incluindo eventos recentes por aplicação e operador. |
+| `Contract/Sprint85/checkpoints/logs_precheck.sql` | Dois SELECTs materializados para conferir estrutura e ausência do identificador antes do gate. |
+| `Contract/Sprint85/checkpoints/logs_postcheck.sql` | Releitura manual integral do CLOB depois da chamada única da macro. |
+| `Contract/Sprint85/checkpoints/logs_diagnostico_persistencia.sql` | Consultas somente leitura para investigar um pós-check vazio sem repetir a macro. |
+| `Contract/Sprint85/blank_scriptcase/teste_contracts_sprint85.php` | Blank protegida que libera somente PRECHECK e LOGS, sem publicador ou acesso PNCP. |
+| `Contract/Sprint85/checkpoints/contencao_precheck.sql` | Doze SELECTs concretos, com colunas e cardinalidades, para a fotografia manual anterior ao gate de contenção. |
+| `Contract/Sprint85/checkpoints/contencao_reter_ancora.sql` | Comando operacional da sessão A para reter a âncora e liberá-la por rollback depois da chamada. |
+| `Contract/Sprint85/blank_scriptcase/teste_contencao_sprint85.php` | Blank separada que limita o Microciclo 7 a PRECHECK, CONTENCAO e DISPONIBILIDADE. |
+
+### Massa descartável de homologação — Sprint 8.5
+
+| Arquivo | Função |
+| --- | --- |
+| `database/seeds/sprint85_contencao_hml/README.md` | Define a preparação em etapas e impede que o seed de HML seja aplicado sobre dados replicados ou em produção. |
+| `database/seeds/sprint85_contencao_hml/01_diagnostico_pre_seed.sql` | Diagnóstico somente leitura do ambiente, UOs candidatas, colisões, estrutura e dependências necessárias para gerar o seed de contenção. |
+| `database/seeds/sprint85_contencao_hml/02_precheck_seed.sql` | Confere ambiente, cardinalidades, projeção vazia e ausência de controles antes do DML. |
+| `database/seeds/sprint85_contencao_hml/03_aplicar_seed.sql` | Prepara de forma bloqueante a estratégia consolidada dos 112 planos e os dois controles técnicos. |
+| `database/seeds/sprint85_contencao_hml/04_postcheck_seed.sql` | Confirma a projeção, os controles e a preservação da massa replicada. |
+| `database/seeds/sprint85_contencao_hml/05_limpar_seed.sql` | Reverte somente o estado exato criado pelo seed e recusa qualquer fotografia divergente. |
+| `database/seeds/sprint85_contencao_hml/06_postcheck_limpeza.sql` | Confirma por seis SELECTs que a preparação da contenção foi removida e a massa replicada foi preservada. |
+| `database/seeds/sprint85_smoke_hml/README.md` | Explica a preparação reversível da fotografia vazia com PCA excluído para o smoke. |
+| `database/seeds/sprint85_smoke_hml/01_precheck_seed.sql` | Confere planos, situações originais das demandas, versões vigentes, controles, auditoria e plano 103 antes do seed. |
+| `database/seeds/sprint85_smoke_hml/02_aplicar_seed.sql` | Marca as 112 demandas como canceladas e projeta os 112 planos como `EXCLUIDO/36`, somente em SGIHML. |
+| `database/seeds/sprint85_smoke_hml/03_postcheck_seed.sql` | Confirma fotografia vazia, projeção excluída, controles e preservação do plano 103. |
+| `database/seeds/sprint85_smoke_hml/04_limpar_seed.sql` | Restaura situações, confirmações e projeção anteriores, recusando qualquer divergência. |
+
 ### Suporte contratual compartilhado
 
 | Arquivo | Demonstração principal |
@@ -561,13 +644,35 @@ permanece dedicada à função dos arquivos.
 | --- | --- |
 | `composer.json` | Dependências, PSR-4 e comandos ativos. |
 | `composer.lock` | Versões resolvidas das dependências. |
+| `tools/package/build.php` | Constrói em `build/` o pacote isolado com código, dependências de produção e manifesto de integridade. |
+| `tools/package/verify.php` | Verifica hashes, topologia, conteúdo permitido e autoload do pacote gerado. |
+| `tools/package/build-log-gate.php` | Monta o artefato temporário do gate de logs a partir do pacote principal já validado e de uma lista fechada de arquivos da probe. |
+| `tools/package/verify-log-gate.php` | Confere o manifesto, a topologia e os entrypoints carregáveis do artefato temporário. |
+| `tools/package/build-containment-gate.php` | Monta o artefato temporário do gate de contenção a partir do pacote principal validado e de uma lista fechada de suporte. |
+| `tools/package/verify-containment-gate.php` | Confere manifesto, topologia, hashes e entrypoints do artefato de contenção. |
 | `phpunit.xml` | Bootstrap da suíte padrão, com exclusão explícita dos contratos opt-in. |
 | `phpunit.contract.xml` | Suíte contratual legada da Sprint 5.1. |
 | `phpunit.adapters.contract.xml` | Suíte separada dos contratos de adapters da Sprint 5.9. |
 | `phpunit.oracle82.contract.xml` | Suíte separada da integração Oracle da Sprint 8.2. |
 | `phpunit.pncp83.contract.xml` | Suíte separada dos contratos locais e gates PNCP da Sprint 8.3. |
 | `phpunit.sprint84.contract.xml` | Suíte separada dos contratos e do runner da Sprint 8.4. |
+| `phpunit.sprint85.contract.xml` | Suíte separada dos contratos locais e futuros gates opt-in da Sprint 8.5. |
 | `README.md` | Entrada cognitiva e comandos de preparação. |
+
+### Migrações do banco de dados
+
+| Arquivo | Função |
+| --- | --- |
+| `database/README.md` | Define a organização e o procedimento manual provisório das migrações Oracle. |
+| `database/migrations/V202609181815__configuracao_publicacao_pca.sql` | Insere os dois dados de referência da publicação consolidada, aceita estado já conforme e recusa divergência com rollback. |
+| `database/checks/V202609181815__configuracao_publicacao_pca_precheck.sql` | Classifica cada configuração como ausente, conforme ou divergente antes da migração. |
+| `database/checks/V202609181815__configuracao_publicacao_pca_postcheck.sql` | Exige duas configurações conformes depois da migração. |
+| `database/migrations/V202609181816__unidades_orcamentarias_pca.sql` | Insere quatro unidades orçamentárias, aceita estado já conforme e recusa conflitos de identidade, UASG ou lotação. |
+| `database/checks/V202609181816__unidades_orcamentarias_pca_precheck.sql` | Classifica as quatro unidades como ausentes, conformes, divergentes ou sem lotação correspondente. |
+| `database/checks/V202609181816__unidades_orcamentarias_pca_postcheck.sql` | Exige quatro unidades e lotações conformes depois da migração. |
+| `database/seeds/README.md` | Delimita seeds descartáveis de DEV/HML e impede seu uso para configuração obrigatória, produção ou segredos. |
+| `database/deployments/README.md` | Define o conteúdo seguro do registro manual provisório de implantações. |
+| `database/deployments/homologacao.md` | Registra migrações aplicadas ou requisitos já satisfeitos no banco de homologação. |
 
 ## 9. Documentação vigente
 
@@ -584,6 +689,7 @@ permanece dedicada à função dos arquivos.
 | `docs/vigentes/apoio/glossario.md` | Mantém o índice semântico da linguagem de negócio, integração e arquitetura. |
 | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
 | `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |
+| `docs/vigentes/apoio/catalogo_de_diretorios.md` | Explica a finalidade das pastas e orienta onde localizar ou criar cada tipo de artefato. |
 | `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | Ensina a preparar, executar, diagnosticar e encerrar as probes e gates 5.1, 5.9, 8.2, 8.3 e 8.4. |
 | `docs/vigentes/apoio/catalogo_de_comandos_composer.md` | Classifica os scripts Composer e informa finalidade, dependências, efeitos externos e autorização necessária. |
 | `docs/vigentes/apoio/catalogo_de_arquivos.md` | Cataloga a função dos arquivos ativos de código, testes, configuração e documentação vigente. |

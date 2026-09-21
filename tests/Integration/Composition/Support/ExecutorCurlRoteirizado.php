@@ -10,7 +10,19 @@ use Semae\Pca\Infrastructure\Pncp\Http\ResultadoExecucaoCurlPncp;
 
 final class ExecutorCurlRoteirizado implements ExecutorCurlPncp
 {
-    /** @var array<int, array{metodo: string, url: string, rota: string, status: int, headers: string[], corpo: string}> */
+    /**
+     * @var array<int, array{
+     *     metodo: string,
+     *     url: string,
+     *     rota: string,
+     *     status: int,
+     *     headers: string[],
+     *     corpo: string,
+     *     executado: bool,
+     *     errno: int,
+     *     tls: int
+     * }>
+     */
     private array $fila = [];
 
     /** @var array<int, array{metodo: string, rota: string, headers: string[], corpo: ?string}> */
@@ -27,7 +39,28 @@ final class ExecutorCurlRoteirizado implements ExecutorCurlPncp
         array $headers,
         string $corpo
     ): void {
-        $this->fila[] = compact('metodo', 'url', 'rota', 'status', 'headers', 'corpo');
+        $this->fila[] = [
+            ...compact('metodo', 'url', 'rota', 'status', 'headers', 'corpo'),
+            'executado' => true,
+            'errno' => 0,
+            'tls' => 0,
+        ];
+    }
+
+    public function programarFalha(
+        string $metodo,
+        string $url,
+        string $rota,
+        int $errno
+    ): void {
+        $this->fila[] = [
+            ...compact('metodo', 'url', 'rota', 'errno'),
+            'status' => 0,
+            'headers' => [],
+            'corpo' => '',
+            'executado' => false,
+            'tls' => 0,
+        ];
     }
 
     /** @param array<int, mixed> $opcoes */
@@ -61,6 +94,15 @@ final class ExecutorCurlRoteirizado implements ExecutorCurlPncp
             throw new RuntimeException('Callbacks cURL obrigatÃ³rios ausentes.');
         }
 
+        if (!$programada['executado'] || $programada['errno'] !== 0) {
+            return new ResultadoExecucaoCurlPncp(
+                $programada['executado'],
+                $programada['errno'],
+                $programada['status'],
+                $programada['tls']
+            );
+        }
+
         $cabecalho(null, "HTTP/1.1 {$programada['status']} Controlled\r\n");
 
         foreach ($programada['headers'] as $header) {
@@ -73,7 +115,12 @@ final class ExecutorCurlRoteirizado implements ExecutorCurlPncp
             $escrita(null, $programada['corpo']);
         }
 
-        return new ResultadoExecucaoCurlPncp(true, 0, $programada['status'], 0);
+        return new ResultadoExecucaoCurlPncp(
+            true,
+            0,
+            $programada['status'],
+            $programada['tls']
+        );
     }
 
     public function quantidadeChamadas(string $metodo, string $rota): int

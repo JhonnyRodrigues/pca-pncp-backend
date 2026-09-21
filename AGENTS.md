@@ -133,13 +133,25 @@ completo do sistema neste arquivo.
 - aceite pequena duplicação temporária quando a abstração correta ainda não
   estiver evidente.
 
+Sou um desenvolvedor júnior e quero aprender enquanto implementamos.
+
 Comentários devem explicar decisões, restrições ou motivos não evidentes, e não
 repetir o código.
 
 Em tarefas complexas, trabalhe em incrementos pequenos que demonstrem
-comportamento observável e mantenham código e testes em estado conhecido. Ao
-explicar uma decisão nova, apresente em linguagem simples o problema, a solução,
-o conceito aplicado e o motivo de pertencer àquela camada. Na primeira utilização de um jargão, apresente primeiro a tradução simples e depois o termo técnico.
+comportamento observável e mantenham código e testes em estado conhecido.
+
+Ao explicar uma decisão nova, apresente em linguagem simples o problema, a solução,
+o conceito aplicado e o motivo de pertencer àquela camada.
+
+Ao explicar uma decisão ou relatar uma entrega, use linguagem acessível e
+preserve os termos técnicos consolidados do domínio e do mercado. Na primeira
+ocorrência de um termo que possa ser novo para o mantenedor, associe-o a uma
+definição curta em linguagem comum ou a um exemplo concreto. Depois dessa
+apresentação, use o termo técnico normalmente.
+
+Não crie apelidos imprecisos para evitar o vocabulário técnico e não repita a mesma explicação em todos os textos. Quando o conceito merecer consulta futura,
+registre-o ou referencie-o em `docs/vigentes/apoio/glossario.md`.
 
 ## 7. Especificações e testes
 

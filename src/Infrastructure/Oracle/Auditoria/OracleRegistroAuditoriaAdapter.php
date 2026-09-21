@@ -64,9 +64,14 @@ final class OracleRegistroAuditoriaAdapter implements RegistroAuditoriaPort
         $representante = $this->mapeamento->getColunaRepresentante();
         $lotacao = $this->mapeamento->getColunaLotacao();
 
-        return "INSERT INTO {$tabela} "
-            . "({$instante}, {$procedimento}, {$mensagem}, {$representante}, {$lotacao}) "
-            . 'VALUES (SYSDATE, ?, ?, ?, ?)';
+        return "INSERT INTO {$tabela} (
+            {$instante}, 
+            {$procedimento}, 
+            {$mensagem}, 
+            {$representante}, 
+            {$lotacao}
+        )" 
+        . ' VALUES (SYSDATE, ?, ?, ?, ?)';
     }
 
     private function possuiDadosValidos(IntencaoRegistroHistorico $intencao): bool

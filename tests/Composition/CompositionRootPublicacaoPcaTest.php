@@ -7,6 +7,7 @@ namespace Tests\Composition;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Semae\Pca\Application\ValueObjects\CorrelacaoExecucao;
+use Semae\Pca\Composition\ComposicaoExecucaoPublicacaoPca;
 use Semae\Pca\Composition\CompositionRootPublicacaoPca;
 use Semae\Pca\Composition\PerfilPublicacaoPca;
 use Semae\Pca\Infrastructure\Pncp\Http\RequisicaoHttpPncp;
@@ -33,6 +34,27 @@ final class CompositionRootPublicacaoPcaTest extends TestCase
         $this->assertInstanceOf(FachadaPublicarPca::class, $fachada);
         $this->assertSame(0, $transporte->chamadas);
         $this->assertSame(0, $adodb->chamadas);
+    }
+
+    public function testDeveMontarExecucaoExportavelSemIo(): void
+    {
+        $adodb = new AdodbSemIoCompositionRoot();
+        $transporte = new TransporteCompartilhadoSemIoCompositionRoot();
+
+        $execucao = (new CompositionRootPublicacaoPca(
+            transportePncp: $transporte
+        ))->montarExecucao(
+            $adodb,
+            'usuario.teste',
+            $this->perfilValido(),
+            new CorrelacaoExecucao('550e8400-e29b-41d4-a716-446655440000')
+        );
+
+        $this->assertInstanceOf(ComposicaoExecucaoPublicacaoPca::class, $execucao);
+        $this->assertInstanceOf(FachadaPublicarPca::class, $execucao->getFachada());
+        $this->assertSame(0, $transporte->chamadas);
+        $this->assertSame(0, $adodb->chamadas);
+        $this->assertFalse($adodb->fechada);
     }
 
     public function testDeveCriarGrafoNovoSemExecutarIoOuFecharConexao(): void

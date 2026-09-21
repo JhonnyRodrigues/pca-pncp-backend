@@ -1,0 +1,117 @@
+-- Restaura somente a camada preparada para o smoke.
+-- Pode ser usada antes ou depois da chamada da Blank, somente em SGIHML.
+
+DECLARE
+    V_QUANTIDADE PLS_INTEGER;
+
+    PROCEDURE EXIGIR(
+        P_CONTEXTO IN VARCHAR2,
+        P_ENCONTRADO IN PLS_INTEGER,
+        P_ESPERADO IN PLS_INTEGER
+    ) IS
+    BEGIN
+        IF P_ENCONTRADO <> P_ESPERADO THEN
+            RAISE_APPLICATION_ERROR(
+                -20881,
+                'SPRINT85_SMOKE_LIMPEZA_RECUSADA: ' || P_CONTEXTO
+                || ' esperava ' || P_ESPERADO
+                || ' e encontrou ' || P_ENCONTRADO || '.'
+            );
+        END IF;
+    END EXIGIR;
+BEGIN
+    IF SYS_CONTEXT('USERENV', 'DB_NAME') <> 'SGIHML'
+       OR LOWER(SYS_CONTEXT('USERENV', 'SERVICE_NAME')) <> 'sgihml'
+       OR SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') <> 'SGI'
+    THEN
+        RAISE_APPLICATION_ERROR(-20880, 'SPRINT85_SMOKE_LIMPEZA_RECUSADA: ambiente invalido.');
+    END IF;
+
+    SELECT COUNT(*) INTO V_QUANTIDADE
+      FROM SGI.PAC_PLANOS p
+     WHERE p.ANO_EXERCICIO = 2026
+       AND p.ESTRATEGIA_ADOTADA_PUBLICACAO = 'CONSOLIDADO'
+       AND p.UASG_ADOTADA = '930281'
+       AND p.ESTADO_PUBLICACAO = 'EXCLUIDO'
+       AND p.SEQUENCIAL_PUBLICACAO_PNCP = 36;
+    EXIGIR('projecao excluida intacta', V_QUANTIDADE, 112);
+
+    SELECT COUNT(*) INTO V_QUANTIDADE
+      FROM SGI.PAC_PLANOS p
+     WHERE p.ANO_EXERCICIO = 2026
+       AND p.DATA_PUBLICACAO IS NOT NULL
+       AND p.ID_PLANO NOT IN (124, 143, 224);
+    EXIGIR('ausencia de confirmacoes inesperadas', V_QUANTIDADE, 0);
+
+    SELECT COUNT(*) INTO V_QUANTIDADE
+      FROM SGI.PAC_PLANOS p
+     WHERE p.ID_PLANO = 103
+       AND p.ANO_EXERCICIO = 2026
+       AND p.DATA_PUBLICACAO IS NULL;
+    EXIGIR('plano intermediario 103 preservado', V_QUANTIDADE, 1);
+
+    SELECT COUNT(*) INTO V_QUANTIDADE
+      FROM SGI.PAC_DEMANDA d
+      JOIN SGI.PAC_PLANOS p ON p.ID_PLANO = d.FK_PLANO
+     WHERE p.ANO_EXERCICIO = 2026
+       AND d.SITUACAO = 4;
+    EXIGIR('demandas da fotografia vazia', V_QUANTIDADE, 112);
+
+    UPDATE SGI.PAC_PLANOS p
+       SET p.DATA_PUBLICACAO = NULL
+     WHERE p.ANO_EXERCICIO = 2026
+       AND p.ID_PLANO IN (124, 143, 224)
+       AND p.DATA_PUBLICACAO IS NOT NULL;
+
+    IF SQL%ROWCOUNT < 0 OR SQL%ROWCOUNT > 3 THEN
+        RAISE_APPLICATION_ERROR(-20882, 'SPRINT85_SMOKE_LIMPEZA_RECUSADA: confirmacoes inesperadas.');
+    END IF;
+
+    UPDATE SGI.PAC_PLANOS p
+       SET p.ESTADO_PUBLICACAO = NULL,
+           p.SEQUENCIAL_PUBLICACAO_PNCP = NULL
+     WHERE p.ANO_EXERCICIO = 2026
+       AND p.ESTRATEGIA_ADOTADA_PUBLICACAO = 'CONSOLIDADO'
+       AND p.UASG_ADOTADA = '930281'
+       AND p.ESTADO_PUBLICACAO = 'EXCLUIDO'
+       AND p.SEQUENCIAL_PUBLICACAO_PNCP = 36;
+    EXIGIR('projecao do smoke removida', SQL%ROWCOUNT, 112);
+
+    UPDATE SGI.PAC_DEMANDA d
+       SET d.SITUACAO = 2
+     WHERE d.SITUACAO = 4
+       AND EXISTS (
+           SELECT 1 FROM SGI.PAC_PLANOS p
+            WHERE p.ID_PLANO = d.FK_PLANO
+              AND p.ANO_EXERCICIO = 2026
+       );
+    EXIGIR('demandas restauradas inicialmente', SQL%ROWCOUNT, 112);
+
+    UPDATE SGI.PAC_DEMANDA d
+       SET d.SITUACAO = 3
+     WHERE d.ID_DEMANDA IN (795, 799, 815, 824, 857, 867)
+       AND d.SITUACAO = 2;
+    EXIGIR('demandas em situacao 3 restauradas', SQL%ROWCOUNT, 6);
+
+    SELECT COUNT(*) INTO V_QUANTIDADE
+      FROM SGI.PAC_DEMANDA d
+      JOIN SGI.PAC_PLANOS p ON p.ID_PLANO = d.FK_PLANO
+     WHERE p.ANO_EXERCICIO = 2026
+       AND d.SITUACAO = 2;
+    EXIGIR('demandas finais em situacao 2', V_QUANTIDADE, 106);
+
+    SELECT COUNT(*) INTO V_QUANTIDADE
+      FROM SGI.PAC_DEMANDA d
+      JOIN SGI.PAC_PLANOS p ON p.ID_PLANO = d.FK_PLANO
+     WHERE p.ANO_EXERCICIO = 2026
+       AND d.SITUACAO = 3
+       AND d.ID_DEMANDA IN (795, 799, 815, 824, 857, 867);
+    EXIGIR('demandas finais em situacao 3', V_QUANTIDADE, 6);
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/

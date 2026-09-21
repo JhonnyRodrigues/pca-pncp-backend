@@ -10,6 +10,7 @@ use Semae\Pca\Domain\ValueObjects\Cnpj;
 use Semae\Pca\Presentation\Facades\FachadaPublicarPca;
 use Semae\Pca\Presentation\Inputs\EntradaPublicarPca;
 use Semae\Pca\Presentation\ViewModels\PublicarPcaViewModel;
+use Semae\Pca\ResultadoPublicacaoPcaScriptcase;
 use Throwable;
 
 final class ExecutorPublicacaoPcaScriptcase
@@ -30,8 +31,47 @@ final class ExecutorPublicacaoPcaScriptcase
         int $anoExecucao,
         ?string $requestId
     ): PublicarPcaViewModel {
+        return $this->executarInternamente(
+            $conexaoAdodb,
+            $loginAutenticado,
+            $serverName,
+            $anoExecucao,
+            $requestId,
+            false
+        )->getResultado();
+    }
+
+    public function executarComEventos(
+        object $conexaoAdodb,
+        string $loginAutenticado,
+        string $serverName,
+        int $anoExecucao,
+        ?string $requestId
+    ): ResultadoPublicacaoPcaScriptcase {
+        return $this->executarInternamente(
+            $conexaoAdodb,
+            $loginAutenticado,
+            $serverName,
+            $anoExecucao,
+            $requestId,
+            true
+        );
+    }
+
+    private function executarInternamente(
+        object $conexaoAdodb,
+        string $loginAutenticado,
+        string $serverName,
+        int $anoExecucao,
+        ?string $requestId,
+        bool $exportarEventos
+    ): ResultadoPublicacaoPcaScriptcase {
         if ($requestId === null || preg_match(self::UUID_V4, $requestId) !== 1) {
-            return FachadaPublicarPca::interrompidaPorRequestIdInvalido();
+            return new ResultadoPublicacaoPcaScriptcase(
+                FachadaPublicarPca::interrompidaPorRequestIdInvalido(),
+                [],
+                null
+            );
         }
 
         $correlacao = new CorrelacaoExecucao($requestId);
@@ -46,16 +86,23 @@ final class ExecutorPublicacaoPcaScriptcase
 
             $cnpj = new Cnpj($cnpjBruto);
             $entrada = new EntradaPublicarPca($cnpj->getValor(), $anoExecucao);
-            $fachada = $this->compositionRoot->montar(
+            $composicao = $this->compositionRoot->montarExecucao(
                 $conexaoAdodb,
                 $loginAutenticado,
                 $perfil,
                 $correlacao
             );
+            $resultado = $composicao->getFachada()->executar($entrada, $correlacao);
 
-            return $fachada->executar($entrada, $correlacao);
+            return $exportarEventos
+                ? $composicao->exportar($resultado)
+                : new ResultadoPublicacaoPcaScriptcase($resultado, [], null);
         } catch (Throwable) {
-            return FachadaPublicarPca::interrompidaPorFalhaInesperada($correlacao);
+            return new ResultadoPublicacaoPcaScriptcase(
+                FachadaPublicarPca::interrompidaPorFalhaInesperada($correlacao),
+                [],
+                null
+            );
         }
     }
 }

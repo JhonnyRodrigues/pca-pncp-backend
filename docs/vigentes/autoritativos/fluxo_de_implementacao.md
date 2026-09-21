@@ -154,6 +154,13 @@ O Request não recebe ambiente, endereço externo, credenciais, identidade do
 usuário ou detalhes dos mecanismos integrados. O hospedeiro não monta o
 UseCase nem conhece adapters concretos.
 
+O contrato aprovado para a Sprint 8.5 preserva `executar(...)` e acrescenta
+`executarComEventos(...)` com os mesmos argumentos. Os dois métodos
+compartilham o caminho de execução; a nova saída reúne `resultado` (ViewModel),
+`eventos` (envelopes sanitizados) e `avisoRegistroTecnico`. A composição mantém
+a fachada, o acumulador e o estado transacional da mesma chamada disponíveis
+para essa exportação, sem duplicar o processamento (`DI-010`).
+
 Request ID ausente ou inválido produz `INTERROMPIDA/REQUEST_ID_INVALIDO`, com
 correlação `null`, sem consultar o registro e sem evento técnico. Qualquer outra
 falha na inicialização e composição global (`bootstrap`) produz
@@ -558,22 +565,55 @@ falha inesperada capturada pela fachada gera a ação
 anterior à correlação válida ou à construção do logger não fabrica evento
 técnico, e uma falha do logger não altera o ViewModel seguro.
 
-Nesta etapa, os eventos não integram `PublicarPcaResponse`, e sua exposição
-pela fachada ou persistência pelo Scriptcase não estão implementadas. Em etapa
-futura, a fachada os devolverá separadamente ao hospedeiro; depois do
-encerramento da transação do backend, a Blank `PCA_PUBLICAR_B` os adaptará para
-`sc_log_add`. O JSON detalhado, inclusive sua ação operacional, será destinado
-a `DESCRIPTION`; o valor genérico de `SEGURANCA_LOG.ACTION` será decidido pela
-Blank nessa fronteira.
+Os eventos não integram `PublicarPcaResponse`. O contrato aprovado para a
+Sprint 8.5 exige sua devolução separada ao hospedeiro por
+`executarComEventos(...)`, após a execução. A cópia preserva a ordem e a
+correlação e acrescenta `executionTimeMs` apenas ao último envelope. Falhas
+anteriores à criação do logger não fabricam eventos; falha de exportação
+preserva o resultado conhecido e devolve aviso seguro.
+
+Antes de permitir a persistência, a fronteira verifica se o encerramento da
+transação Oracle está confirmado. Sem essa confirmação, impede a gravação
+e devolve aviso separado; não confirma uma transação de negócio pendente nem
+tenta compensação ou nova publicação para registrar eventos.
+
+Depois do retorno seguro, a Blank entrega o lote ordenado a
+`RegistradorEventosTecnicosScriptcase`. Para cada evento, o registrador abre
+uma transação técnica curta na mesma conexão emprestada, insere uma linha com
+marcador provisório, obtém o ID preenchido pelo trigger e grava o envelope
+integral no CLOB `DESCRIPTION` por `UpdateClob`. Depois confirma somente essa
+transação. A ação detalhada permanece no JSON, e
+`SEGURANCA_LOG.ACTION` recebe `execute`. A serialização usa escapes Unicode,
+preserva mapas vazios como objetos JSON e não trunca, fragmenta ou converte o
+texto para ISO-8859-1.
+
+Falha recuperável de serialização ou gravação interrompe os registros
+restantes, preserva o resultado e gera aviso separado. Registros já tentados
+não são repetidos; a transação técnica corrente é desfeita quando possível.
+Ao navegador segue
+somente `{resultado, avisoRegistroTecnico}`, sem eventos técnicos, exceções ou
+respostas brutas. Falha de transporte não provoca nova publicação automática.
+
+Esse contrato foi aprovado no Microciclo 1 da Sprint 8.5, e a exportação local
+foi implementada no Microciclo 2. O Microciclo 3 comprovou localmente a
+contenção, a reconciliação limitada e a interrupção sistêmica sobre adapters
+concretos com fronteiras físicas controladas. O Microciclo 4 versionou a
+adaptação da Blank, incluindo validação da entrada, serialização explícita da
+saída e a primeira integração de logs. O gate do Microciclo 6 demonstrou que
+`sc_log_add` não suporta o CLOB exigido nesta instalação; o Microciclo 6A
+substitui a macro pelo registrador próprio descrito acima. O Microciclo 5 gerou o pacote
+autocontido e preparou o suporte opt-in, as consultas completas e o PRECHECK
+bloqueante. A instalação e os gates reais permanecem pendentes; seu progresso pertence ao
+[estado operacional](../operacional/estado_atual.md).
 
 Auditoria e observabilidade não são intercambiáveis: a primeira afirma fatos
 de negócio confirmados; a segunda registra o funcionamento e os problemas da
 execução (`RN-AUD-001` e `DI-006`).
 
 Por isso, `SEGURANCA_LOG` permanece separada de `PAC_HISTORICOS`, e o backend
-não abre uma segunda conexão Oracle para logging. Como a persistência futura só
-ocorrerá após o retorno à Blank, uma falha fatal anterior pode causar a perda
-dos eventos acumulados. Essa limitação é aceita conscientemente.
+não abre uma segunda conexão Oracle para logging. Uma falha fatal anterior à
+resposta HTTP pode impedir a entrega do resultado e a persistência completa
+dos eventos. Essa limitação é aceita conscientemente.
 
 ## 11. Gates e limitações vigentes
 

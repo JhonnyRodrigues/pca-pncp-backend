@@ -8,7 +8,14 @@ use RuntimeException;
 
 final class AdodbControlado
 {
-    /** @var array<int, array{tipo: string, linhas: array<int, array<string, mixed>>}> */
+    /**
+     * @var array<int, array{
+     *     tipo: string,
+     *     linhas?: array<int, array<string, mixed>>,
+     *     erroNumero?: int,
+     *     erroMensagem?: string
+     * }>
+     */
     private array $filaConsultas = [];
 
     /** @var string[] */
@@ -22,12 +29,23 @@ final class AdodbControlado
     public int $rollbacks = 0;
     public int $fechamentos = 0;
 
+    private int $erroNumero = 0;
+    private string $erroMensagem = '';
+
     public function __construct(private readonly RegistroCronologico $eventos) {}
 
     /** @param array<int, array<string, mixed>> $linhas */
     public function programarConsulta(string $tipo, array $linhas): void
     {
         $this->filaConsultas[] = ['tipo' => $tipo, 'linhas' => $linhas];
+    }
+
+    public function programarFalhaConsulta(
+        string $tipo,
+        int $erroNumero,
+        string $erroMensagem
+    ): void {
+        $this->filaConsultas[] = compact('tipo', 'erroNumero', 'erroMensagem');
     }
 
     public function BeginTrans(): bool
@@ -68,7 +86,7 @@ final class AdodbControlado
      * @param array<int|string, mixed> $parametros
      * @return array<int, array<string, mixed>>
      */
-    public function GetAll(string $sql, array $parametros = []): array
+    public function GetAll(string $sql, array $parametros = []): array|false
     {
         $tipo = $this->classificarConsulta($sql);
         $programada = array_shift($this->filaConsultas);
@@ -84,7 +102,17 @@ final class AdodbControlado
         $this->tiposConsultados[] = $tipo;
         $this->eventos->registrar('oracle:query:' . $tipo);
 
-        return $programada['linhas'];
+        if (isset($programada['erroNumero'], $programada['erroMensagem'])) {
+            $this->erroNumero = $programada['erroNumero'];
+            $this->erroMensagem = $programada['erroMensagem'];
+
+            return false;
+        }
+
+        $this->erroNumero = 0;
+        $this->erroMensagem = '';
+
+        return $programada['linhas'] ?? [];
     }
 
     public function Param(false|string $nome): string
@@ -94,12 +122,12 @@ final class AdodbControlado
 
     public function ErrorNo(): int
     {
-        return 0;
+        return $this->erroNumero;
     }
 
     public function ErrorMsg(): string
     {
-        return '';
+        return $this->erroMensagem;
     }
 
     public function Close(): bool

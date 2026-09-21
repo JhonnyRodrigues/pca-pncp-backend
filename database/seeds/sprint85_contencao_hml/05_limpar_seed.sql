@@ -1,0 +1,87 @@
+-- Limpeza reversivel do seed minimo da contencao.
+-- Use depois dos gates ou antes da proxima replicacao, nunca em producao.
+-- Execute como script completo. Qualquer divergencia causa rollback.
+
+DECLARE
+    V_QUANTIDADE PLS_INTEGER;
+
+    PROCEDURE EXIGIR(
+        P_CONTEXTO IN VARCHAR2,
+        P_ENCONTRADO IN PLS_INTEGER,
+        P_ESPERADO IN PLS_INTEGER
+    ) IS
+    BEGIN
+        IF P_ENCONTRADO <> P_ESPERADO THEN
+            RAISE_APPLICATION_ERROR(
+                -20861,
+                'SPRINT85_LIMPEZA_RECUSADA: ' || P_CONTEXTO
+                || ' esperava ' || P_ESPERADO
+                || ' e encontrou ' || P_ENCONTRADO || '.'
+            );
+        END IF;
+    END EXIGIR;
+BEGIN
+    IF SYS_CONTEXT('USERENV', 'DB_NAME') <> 'SGIHML'
+       OR LOWER(SYS_CONTEXT('USERENV', 'SERVICE_NAME')) <> 'sgihml'
+       OR SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA') <> 'SGI'
+    THEN
+        RAISE_APPLICATION_ERROR(-20860, 'SPRINT85_LIMPEZA_RECUSADA: ambiente invalido.');
+    END IF;
+
+    SELECT COUNT(*)
+      INTO V_QUANTIDADE
+      FROM SGI.PAC_PLANOS p
+     WHERE p.ANO_EXERCICIO = 2026;
+    EXIGIR('total de planos', V_QUANTIDADE, 112);
+
+    SELECT COUNT(*)
+      INTO V_QUANTIDADE
+      FROM SGI.PAC_PLANOS p
+     WHERE p.ANO_EXERCICIO = 2026
+       AND p.ESTRATEGIA_ADOTADA_PUBLICACAO = 'CONSOLIDADO'
+       AND p.UASG_ADOTADA = '930281'
+       AND p.ESTADO_PUBLICACAO IS NULL
+       AND p.SEQUENCIAL_PUBLICACAO_PNCP IS NULL;
+    EXIGIR('projecao preparada intacta', V_QUANTIDADE, 112);
+
+    SELECT COUNT(*)
+      INTO V_QUANTIDADE
+      FROM SGI.PAC_CONTROLES_CONCORRENCIA c
+     WHERE c.ANO_EXECUCAO = 2026
+       AND ((c.ESCOPO = 'ESTRATEGIA_ANUAL'
+             AND c.IDENTIFICADOR_ALVO = 'ESTRATEGIA_ANUAL')
+         OR (c.ESCOPO = 'UNIDADE_EXTERNA'
+             AND c.IDENTIFICADOR_ALVO = '930281'));
+    EXIGIR('controles intactos', V_QUANTIDADE, 2);
+
+    SELECT COUNT(*)
+      INTO V_QUANTIDADE
+      FROM SGI.PAC_CONTROLES_CONCORRENCIA c
+     WHERE c.ANO_EXECUCAO = 2026;
+    EXIGIR('ausencia de controles adicionais', V_QUANTIDADE, 2);
+
+    UPDATE SGI.PAC_PLANOS p
+       SET p.ESTRATEGIA_ADOTADA_PUBLICACAO = NULL,
+           p.UASG_ADOTADA = NULL
+     WHERE p.ANO_EXERCICIO = 2026
+       AND p.ESTRATEGIA_ADOTADA_PUBLICACAO = 'CONSOLIDADO'
+       AND p.UASG_ADOTADA = '930281'
+       AND p.ESTADO_PUBLICACAO IS NULL
+       AND p.SEQUENCIAL_PUBLICACAO_PNCP IS NULL;
+    EXIGIR('planos restaurados', SQL%ROWCOUNT, 112);
+
+    DELETE FROM SGI.PAC_CONTROLES_CONCORRENCIA c
+     WHERE c.ANO_EXECUCAO = 2026
+       AND ((c.ESCOPO = 'ESTRATEGIA_ANUAL'
+             AND c.IDENTIFICADOR_ALVO = 'ESTRATEGIA_ANUAL')
+         OR (c.ESCOPO = 'UNIDADE_EXTERNA'
+             AND c.IDENTIFICADOR_ALVO = '930281'));
+    EXIGIR('controles removidos', SQL%ROWCOUNT, 2);
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
