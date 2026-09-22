@@ -63,10 +63,11 @@ aparece neste índice sem link até que o documento exista.
 9. [Roadmap de implementação](vigentes/autoritativos/roadmap.md)
 10. [Estado operacional do projeto](vigentes/operacional/estado_atual.md)
 11. [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md)
-12. [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md)
-13. [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md)
-14. [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md)
-15. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
+12. [Guia de configuração de produção](vigentes/apoio/guia_de_configuracao_de_producao.md)
+13. [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md)
+14. [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md)
+15. [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md)
+16. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
 
 ### 4.1 Princípio de autoridade
 
@@ -105,6 +106,7 @@ Quando dois documentos parecerem contraditórios, prevalece:
 | [Glossário integrado](vigentes/apoio/glossario.md) | Vigente | Índice semântico da linguagem do projeto |
 | [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Vigente | Usuários, etapas e contexto funcional |
 | [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) | Vigente | Mapas, fluxo, transações e roteiro de estudo |
+| [Guia de configuração de produção](vigentes/apoio/guia_de_configuracao_de_producao.md) | Vigente | Preparação e provisionamento seguro do registro, perfil e CA bundle de produção |
 | [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md) | Vigente | Preparação e execução segura das probes e gates 5.1, 5.9, 8.2, 8.3 e corretivo 8.4.7-C |
 | [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md) | Vigente | Finalidade, classificação, dependências e efeitos externos dos scripts ativos |
 | [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md) | Vigente | Finalidade das pastas e orientação para localizar ou criar artefatos |

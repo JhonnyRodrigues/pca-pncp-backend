@@ -210,10 +210,11 @@ desse Root sem I/O e exercitou sua subcomposição Oracle real em transações,
 rollback e contenção. O roteiro de reprodução está no
 [guia de execução das probes](guia_de_execucao_das_probes.md).
 
-Ainda não foram executados a Blank de produção, o provisionamento de produção de
-`PCA_PNCP_PROFILE_REGISTRY_FILE`, o fluxo público integral até o UseCase sobre
-Oracle e PNCP nem o smoke test do pacote autocontido. Os entrypoints das probes
-continuam pertencendo somente às suítes contratuais e não substituem
+O provisionamento de produção de `PCA_PNCP_PROFILE_REGISTRY_FILE`, registro,
+perfil e CA bundle foi concluído na Sprint 9.1, sem executar a aplicação. Ainda
+não foram executados a Blank de produção, o fluxo público integral até o UseCase
+sobre Oracle e PNCP nem o smoke test do pacote autocontido. Os entrypoints das
+probes continuam pertencendo somente às suítes contratuais e não substituem
 `PublicadorPcaScriptcase`.
 
 A exposição do lote de eventos pela fronteira pública e a adaptação da Blank

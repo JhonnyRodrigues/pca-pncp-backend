@@ -947,17 +947,42 @@ rollback de release, monitoramento e procedimentos de recuperação validados.
 **Riscos:** implantar sem reconciliação do legado, registrar segredos ou tratar
 falha distribuída como rollback simples.
 
+**Decisão de escopo em 22/09/2026:** a Sprint 9.2 permanece neste roadmap como
+parte do guia original, mas não será executada neste ciclo por decisão expressa
+do mantenedor, que priorizou o prazo de entrega. Ela não constitui pendência,
+não bloqueia as sprints seguintes e dispensa, nesta Fase 9, o monitoramento como
+critério de saída. Os logs técnicos, a correlação, a sanitização e a separação
+da auditoria de negócio já implementados permanecem inalterados.
+
 #### Sprint 9.1 — Configuração e segredos
 
 - provisionar perfil de produção fora do artefato e do webroot;
 - validar permissões, CA bundle, timeouts e parâmetros aprovados;
 - falhar fechado em configuração ausente ou incoerente.
 
+O [plano aprovado da Sprint 9.1](../../../.agents/sprints/planos/plano_sprint_9.1.md)
+separa a preparação documental local do provisionamento externo. A etapa local
+não acessa produção; o avanço exige pausa e autorização específica, conforme o
+[estado operacional](../operacional/estado_atual.md).
+
+**Estado do PCA:** concluída em 22/09/2026. Registro, perfil e CA bundle foram
+provisionados fora do webroot e da release, com leitura mínima pelo Apache/PHP.
+O perfil `PRODUCAO`, seus parâmetros e o localizador persistente foram validados
+sem executar Oracle, PNCP, Blank, release ou smoke. Em razão da decisão de
+escopo registrada nesta fase, a Sprint 9.3 é a próxima e exige planejamento
+próprio.
+
 #### Sprint 9.2 — Observabilidade e segurança operacional
 
 - definir correlação, métricas, alertas e retenção;
 - proteger credenciais, JWT, payloads e dados sensíveis;
 - distinguir logs técnicos de auditoria de negócio.
+
+**Estado da Sprint 9.2:** não será executada neste roadmap por decisão de
+escopo do mantenedor. A decisão não remove nem reabre as proteções e os eventos
+técnicos entregues anteriormente, não cria trabalho pendente e não impede o
+avanço para a Sprint 9.3. A validação de monitoramento citada na Sprint 9.5
+também fica dispensada neste ciclo; seus demais itens permanecem aplicáveis.
 
 #### Sprint 9.3 — Empacotamento e implantação
 

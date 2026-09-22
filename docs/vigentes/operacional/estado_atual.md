@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 21/09/2026
+**Atualizado em:** 22/09/2026
 
 ## Limites de autoridade
 
@@ -32,7 +32,10 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 8.5.
+- A última sprint concluída é a Sprint 9.1.
+- A Sprint 9.2 permanece no roadmap como guia, mas não será executada neste
+  ciclo por decisão de escopo do mantenedor. Ela não é pendência nem bloqueio.
+- A Sprint 9.3 — Empacotamento e implantação é a próxima para planejamento.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.
@@ -211,6 +214,58 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   validou a ajuda ao operador; e o Microciclo 10 reconstruiu o pacote, executou
   as regressões e encerrou a sprint. A configuração externa permanece
   desarmada em `PRECHECK`. Nenhum gate real deve ser repetido.
+- A Sprint 9.1 — Configuração e segredos de produção está concluída conforme o
+  [plano aprovado](../../../.agents/sprints/planos/plano_sprint_9.1.md). A pausa
+  foi cumprida antes do provisionamento manual autorizado em produção. A Sprint
+  9.3 é a próxima na ordem e exige planejamento próprio.
+
+## Evidências da Sprint 9.1
+
+- A Sprint não introduz classe, teste, pasta, dependência, probe, contrato ou
+  ferramenta. O carregador e o perfil existentes já recusam configuração
+  ausente ou incoerente antes de I/O.
+- O perfil de homologação foi consultado de forma sanitizada como referência de
+  estrutura e parâmetros. Login, senha, CNPJ integral e valores dos mapeamentos
+  físicos não foram expostos.
+- A produção usa `registro.php`, `perfil-producao.php` e
+  `ca-bundle.crt` em `/var/www/configuracoes/pca-pncp/`, fora da release e do
+  webroot. O CA bundle de referência possui SHA-256
+  `b7a69ed0ce1e25aa4a278dd9ef1b7d4dc1fee893be19c20cfd7e866679de61cc`.
+- O registro contém somente o hostname literal
+  `sgi.semaepiracicaba.sp.gov.br`; o perfil declara `PRODUCAO`; e o CA bundle
+  contém 152 certificados públicos, sem chave privada.
+- A política aprovada aplica o princípio do menor privilégio: diretório `2750`
+  com `setgid`, arquivos `640`, propriedade `administrator:www-data`, escrita
+  administrativa, leitura pelo PHP e nenhum acesso para os demais usuários.
+- O [guia de configuração de produção](../apoio/guia_de_configuracao_de_producao.md)
+  documenta também como distinguir `mod_php` de PHP-FPM e provisionar
+  `PCA_PNCP_PROFILE_REGISTRY_FILE` de forma persistente. Um `export` de terminal
+  não substitui a configuração do processo Apache/PHP.
+- O servidor usa Debian 12 e Apache com `mod_php` e `env_module`. O
+  `DocumentRoot` é `/var/www/html`. O localizador foi configurado no
+  `VirtualHost` HTTPS, passou no `configtest`, foi recarregado e permaneceu
+  ativo.
+- Os arquivos PHP passaram no lint. A validação sanitizada executada como
+  `www-data` confirmou configuração de produção válida e legível, sem exibir
+  CNPJ ou credenciais.
+- Nenhum Oracle, PNCP, pacote, fluxo da Blank ou smoke de produção foi
+  executado. Esses avanços permanecem condicionados às Sprints seguintes.
+
+## Decisão de escopo da Sprint 9.2
+
+- Em 22/09/2026, o mantenedor decidiu não executar a Sprint 9.2 — Observabilidade
+  e segurança operacional neste roadmap, priorizando o prazo de entrega. A
+  sprint permanece registrada como parte do guia, sem ser considerada concluída,
+  pendente ou bloqueante.
+- Os eventos técnicos estruturados, a correlação, a sanitização de dados
+  sensíveis e a separação de `SGI.SEGURANCA_LOG` e `PAC_HISTORICOS` já
+  implementados permanecem vigentes. Nenhum comportamento existente será
+  removido ou reaberto por essa decisão.
+- Embora exista Grafana institucional, este ciclo não entregará dashboard,
+  métricas, alertas, integração com fonte de dados ou política de retenção. O
+  monitoramento foi dispensado como critério de saída desta Fase 9.
+- A Sprint 9.3 — Empacotamento e implantação é a próxima e deve receber plano e
+  autorização próprios antes de qualquer alteração.
 
 ## Evidências do Microciclo 5 da Sprint 8.5
 

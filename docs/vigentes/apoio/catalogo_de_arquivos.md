@@ -689,6 +689,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `docs/vigentes/apoio/glossario.md` | Mantém o índice semântico da linguagem de negócio, integração e arquitetura. |
 | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
 | `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |
+| `docs/vigentes/apoio/guia_de_configuracao_de_producao.md` | Orienta o provisionamento externo do registro, perfil e CA bundle de produção, inclusive permissões e configuração persistente no Apache/PHP. |
 | `docs/vigentes/apoio/catalogo_de_diretorios.md` | Explica a finalidade das pastas e orienta onde localizar ou criar cada tipo de artefato. |
 | `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | Ensina a preparar, executar, diagnosticar e encerrar as probes e gates 5.1, 5.9, 8.2, 8.3 e 8.4. |
 | `docs/vigentes/apoio/catalogo_de_comandos_composer.md` | Classifica os scripts Composer e informa finalidade, dependências, efeitos externos e autorização necessária. |
