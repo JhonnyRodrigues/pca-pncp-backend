@@ -3,7 +3,7 @@
 ## Metadados do checkpoint
 
 | Campo | Valor |
-|---|---|
+| --- | --- |
 | Roadmap-alvo | V2 |
 | Sequência do checkpoint | 03 |
 | Escopo | Fechamento das DI-008, DI-009 e DI-010 |
@@ -52,7 +52,7 @@ Em caso de conflito, esta continuação prevalece apenas sobre:
 ### Estado consolidado
 
 | Decisão | Estado |
-|---|---|
+| --- | --- |
 | DI-008 — Mecanismo Oracle | Aceita condicionalmente |
 | DI-009 — Transporte HTTP | Aceita condicionalmente |
 | DI-010 — Composition Root e Scriptcase | Aceita condicionalmente |
@@ -842,17 +842,17 @@ seguinte gate de governança, sem renumerar as etapas originais:
   proporcional à tarefa;
 - distinguir instruções, checkpoints, sínteses e prompts históricos.
 
-4. Criar `docs/vigentes/autoritativos/fluxo_de_implementacao.md`
+1. Criar `docs/vigentes/autoritativos/fluxo_de_implementacao.md`
    (planejado, ainda não criado).
-5. Consolidar
+2. Consolidar
    `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md` e
    arquivá-lo.
-6. Preservar a V1 em `docs/historico/roadmap_v1_legado.md`.
-7. Criar a V2 ativa em `docs/vigentes/autoritativos/roadmap.md`
+3. Preservar a V1 em `docs/historico/roadmap_v1_legado.md`.
+4. Criar a V2 ativa em `docs/vigentes/autoritativos/roadmap.md`
    (planejado, ainda não criado).
-8. Executar a sprint de refatoração arquitetural com TDD.
-9. Completar a Application com mocks.
-10. Somente então iniciar Infrastructure.
+5. Executar a sprint de refatoração arquitetural com TDD.
+6. Completar a Application com mocks.
+7. Somente então iniciar Infrastructure.
 
 ### Restrições de retomada
 

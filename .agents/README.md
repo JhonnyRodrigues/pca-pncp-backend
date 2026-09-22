@@ -27,7 +27,7 @@ representam o estado atual por si mesmos.
 ## 2. Classificação
 
 | Artefato | Classificação e autoridade |
-|---|---|
+| --- | --- |
 | [`AGENTS.md`](AGENTS.md) | Instrução operacional vigente e permanente para agentes neste repositório |
 | [`planejamento/checkpoints/`](planejamento/checkpoints/) | Registros históricos incrementais com autoridade de precedência e continuidade sobre o planejamento |
 | [`planejamento/sinteses/`](planejamento/sinteses/) | Fontes históricas independentes de conferência; não substituem os checkpoints |

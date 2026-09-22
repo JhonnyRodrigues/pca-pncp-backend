@@ -25,6 +25,7 @@ resultado.
 
 A profundidade deve ser proporcional à complexidade e ao valor pedagógico da
 alteração. Quando aplicável, o feedback deve explicar:
+
 - qual problema estava sendo resolvido;
 - quais conceitos do negócio e elementos da linguagem ubíqua participaram;
 - quais documentos autoritativos ou de apoio foram consultados;
@@ -39,6 +40,7 @@ alteração. Quando aplicável, o feedback deve explicar:
 - quais aprendizados arquiteturais ou de modelagem surgiram durante a tarefa.
 
 Esse feedback é adaptativo:
+
 - não existe formato obrigatório de relatório;
 - tarefas pequenas podem receber explicações breves;
 - tarefas documentais devem destacar somente decisões e aprendizados
@@ -139,12 +141,14 @@ arquitetura ao longo do tempo.
 Ao apresentar propostas arquiteturais, estruturas de diretórios,
 abstrações, contratos, nomenclaturas ou padrões de modelagem,
 o agente deve distinguir explicitamente:
+
 - exigência documental;
 - decisão arquitetural;
 - decisão de modelagem;
 - preferência ou convenção adotada.
 
 O agente deve distinguir explicitamente entre:
+
 - exigências documentais;
 - princípios arquiteturais obrigatórios;
 - decisões de modelagem adotadas;
@@ -156,6 +160,7 @@ que se trata de uma escolha de modelagem, justificando a alternativa
 recomendada para este projeto.
 
 Sempre que introduzir um conceito menos familiar, o agente deve explicar:
+
 - o que é;
 - qual problema procura resolver;
 - de qual escola ou literatura arquitetural se origina;
@@ -163,6 +168,7 @@ Sempre que introduzir um conceito menos familiar, o agente deve explicar:
 - por que a solução escolhida foi considerada mais adequada ao projeto.
 
 Exemplos incluem, mas não se limitam a:
+
 - Policy;
 - Domain Service;
 - Fact;
@@ -188,6 +194,7 @@ continuamente do agente.
 ## 2. Antes de atuar
 
 Leia, nesta ordem:
+
 1. `README.md`, para compreender o projeto e sua finalidade;
 2. `.agents/AGENTS.md`, para conhecer estas instruções;
 3. `.agents/README.md`, para interpretar os artefatos de agentes;
@@ -200,6 +207,7 @@ fontes normativas ou instruções operacionais. Eles só podem ser usados confor
 a classificação definida nos respectivos índices.
 
 Antes de alterar qualquer arquivo:
+
 - inspecione o estado atual do Git;
 - leia os arquivos relacionados;
 - identifique alterações locais existentes e preserve-as;
@@ -211,7 +219,7 @@ Antes de alterar qualquer arquivo:
 Respeite a autoridade documental definida em `docs/README.md`:
 
 | Assunto | Fonte |
-|---|---|
+| --- | --- |
 | Visão, onboarding e finalidade didática | `README.md` |
 | Regras de negócio | catálogo autoritativo de regras |
 | Conceitos, identidades, relações e invariantes | modelo de domínio autoritativo |
@@ -235,6 +243,7 @@ O projeto adota PHP 8.1, Clean Architecture, Domain-Driven Design, SOLID,
 injeção de dependências, PSR-4, PSR-12, PSR-3 e TDD.
 
 A direção principal das dependências é:
+
 ```text
 Scriptcase
     ↓
@@ -275,6 +284,7 @@ coordena intenções, confirmações e auditoria e produz resultados tipados.
 
 Pertencem à Application os contratos necessários para capacidades operacionais,
 como:
+
 - autenticação, leitura e escrita PNCP;
 - estratégia corrente e adotada;
 - unidade de trabalho e exclusividade;
@@ -321,6 +331,7 @@ pública.
   adaptação física.
 
 Ao propor alteração relevante no Domain, explique:
+
 - qual conceito está sendo representado;
 - quais regras e invariantes estão envolvidas;
 - por que a responsabilidade pertence ao Domain;
@@ -329,6 +340,7 @@ Ao propor alteração relevante no Domain, explique:
 ## 6. Planejamento e escopo
 
 Antes de uma tarefa complexa, ambígua, multiarquivo ou arquitetural:
+
 - identifique objetivo, contexto, restrições e critérios de conclusão;
 - examine padrões, contratos e testes existentes;
 - consulte as fontes documentais aplicáveis;
@@ -344,6 +356,7 @@ entregas progressivas e revisáveis em vez de alterações extensas realizadas d
 uma única vez.
 
 Cada incremento deve buscar deixar claro:
+
 - qual capacidade está sendo construída;
 - qual problema está sendo resolvido;
 - quais artefatos surgiram;
@@ -358,6 +371,7 @@ Quando existir roadmap vigente, respeite a próxima etapa autorizada. Enquanto
 ele não existir, siga o plano aprovado da tarefa e os checkpoints aplicáveis.
 
 Em qualquer caso:
+
 - implemente somente o escopo solicitado;
 - não antecipe etapas futuras;
 - não inicie Infrastructure sem autorização e sem cumprir os gates;
@@ -393,6 +407,7 @@ Tarefas exclusivamente documentais não exigem testes de código. Nelas, valide
 links, referências, precedência, consistência semântica e escopo do diff.
 
 Sempre que aplicável:
+
 - execute primeiro as validações afetadas e depois a suíte relacionada;
 - verifique PSR-12, tipagem, imports e contratos;
 - revise regressões, casos-limite, tratamento de erros e acoplamento;
@@ -401,6 +416,7 @@ Sempre que aplicável:
 ## 8. Estilo de implementação
 
 Priorize:
+
 - simplicidade;
 - baixo acoplamento;
 - alta coesão;
@@ -415,15 +431,16 @@ código.
 ## 9. Comunicação ao concluir
 
 Apresente a entrega de forma proporcional à tarefa, informando:
+
 - resultado principal;
 - arquivos alterados;
 - regras ou decisões relevantes, quando aplicáveis;
 - validações executadas e seus resultados;
 - limitações, riscos ou pendências reais.- classificação das principais decisões tomadas:
-    - exigência documental;
-    - decisão arquitetural;
-    - decisão de modelagem;
-    - convenção de implementação.
+  - exigência documental;
+  - decisão arquitetural;
+  - decisão de modelagem;
+  - convenção de implementação.
 
 Não force justificativas sobre classes, Domain ou testes quando a tarefa não
 envolver esses elementos. Quando houver valor pedagógico, aplique a finalidade

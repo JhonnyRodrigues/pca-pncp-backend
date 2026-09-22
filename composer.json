@@ -54,6 +54,8 @@
         "contract:sprint85:tests":"vendor/bin/phpunit --configuration phpunit.sprint85.contract.xml",
         "contract:sprint85:preflight":"php tests/Contract/Sprint85/run-preflight.php",
         "contract:sprint85:queries":"php tests/Contract/Sprint85/render-manual-queries.php",
+        "package:build":"php tools/package/build.php",
+        "package:verify":"php tools/package/verify.php",
         "package:sprint85":"php tools/package/build.php",
         "package:sprint85:verify":"php tools/package/verify.php",
         "package:sprint85:log-gate":"php tools/package/build-log-gate.php",

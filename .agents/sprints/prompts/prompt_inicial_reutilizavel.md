@@ -7,7 +7,7 @@ Leia integralmente, nesta ordem:
 3. `.agents/handoff_planejamento_roadmap_v2_complementar_di006_di008.md`
 4. `.agents/handoff_planejamento_roadmap_v2_continuacao_03_di008_di010.md`
 5. todos os documentos atuais da pasta `docs/`
-- os documentos vigentes indicados na ordem de leitura de docs/README.md
+6. os documentos vigentes indicados na ordem de leitura de docs/README.md
 
 Antes de iniciar qualquer implementação, identifique explicitamente:
 

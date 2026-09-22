@@ -318,7 +318,7 @@ final ocorre depois que o Controller existe.
 
 ## 6. Detalhamento de fases já discutido
 
-## 6.1 Fase 0 - Preparação
+### 6.1 Fase 0 - Preparação
 
 Status do PCA: concluída, sujeita apenas a consolidação editorial.
 
@@ -363,7 +363,7 @@ um tutorial completo de instalação.
 Documentos de regras de negócio pertencem conceitualmente à Fase 1, não à
 preparação técnica.
 
-## 6.2 Fase 1 - Descoberta e documentação do negócio
+### 6.2 Fase 1 - Descoberta e documentação do negócio
 
 Formato aprovado para a fase:
 
@@ -399,7 +399,7 @@ apropriada.
 O PNCP aparece na descoberta apenas como contexto e intenção. Endpoints,
 autenticação, sincronização e falhas são fechados no gate da Application.
 
-## 6.3 Catálogo de regras de negócio
+### 6.3 Catálogo de regras de negócio
 
 Arquivo canônico aprovado:
 
@@ -503,7 +503,7 @@ Application. Isso deve aparecer:
 - na tabela de acompanhamento como trabalho de convergência;
 - no apêndice histórico como aprendizado.
 
-## 6.4 Fase 2 - Domain
+### 6.4 Fase 2 - Domain
 
 Princípio aprovado:
 
@@ -527,7 +527,7 @@ Erros e correções históricas, como a classificação inicial de
 A classificação atual de `HistoricoProcedimento` ainda esta em revisão e depende
 da DI-006.
 
-## 6.5 Fase 3 - Contratos requeridos pelo Domain
+### 6.5 Fase 3 - Contratos requeridos pelo Domain
 
 Decisões de ownership:
 
@@ -554,7 +554,7 @@ Necessidades devem ser demonstradas por:
 O histórico real de portas criadas na camada errada deve aparecer no apêndice,
 não na sequência recomendada.
 
-## 6.6 Fase 4 - Application
+### 6.6 Fase 4 - Application
 
 ### Estágio básico já existente
 
@@ -783,7 +783,7 @@ Status previstos:
 ### Sequência de decisões
 
 | ID | Tema | Estado |
-|---|---|---|
+| --- | --- | --- |
 | DI-001 | Contrato de publicação e sincronização do PNCP | Aceita |
 | DI-002 | Fonte da verdade e reconciliação com Oracle | Aceita |
 | DI-003 | Modos de publicação e unidade de processamento | Aceita |
@@ -909,19 +909,19 @@ negócio documentada.
 ### 10.7 Fontes oficiais consultadas
 
 - Inserir Plano:
-  https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/inserir_plano_de_contratacoes.html
+  <https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/inserir_plano_de_contratacoes.html>
 - Inserir Itens:
-  https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/inserir_itens_de_plano_de_contratacao.html
+  <https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/inserir_itens_de_plano_de_contratacao.html>
 - Retificar Itens:
-  https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/retificar_parcialmente_itens_de_um_plano_de_contratacao.html
+  <https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/retificar_parcialmente_itens_de_um_plano_de_contratacao.html>
 - Excluir Item:
-  https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/excluir_item_de_plano_de_contratacao.html
+  <https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/excluir_item_de_plano_de_contratacao.html>
 - Excluir Itens:
-  https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/excluir_itens_de_um_plano_de_contratacao.html
+  <https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/excluir_itens_de_um_plano_de_contratacao.html>
 - Excluir Plano:
-  https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/excluir_plano_de_contratacoes.html
+  <https://pncp.gov.br/manual/pt-br/latest/plano_de_contratacao/excluir_plano_de_contratacoes.html>
 - Manual completo v2.5:
-  https://pncp.gov.br/manual/pt-br/latest/singlehtml/
+  <https://pncp.gov.br/manual/pt-br/latest/singlehtml/>
 
 ---
 
@@ -1060,7 +1060,7 @@ automaticamente um PCA legado em execução posterior.
 ### 11.8 Matriz conceitual
 
 | Estado desejado SGI | Estado PNCP | Evidência local | Resultado |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Com itens | Ausente | Nunca publicado | PUBLICAR |
 | Com itens | Ausente | Publicação ativa conhecida | CONFLITO |
 | Com itens | Presente e convergente | Coerente | NENHUMA_ACAO |
@@ -1622,7 +1622,7 @@ Não assumir a resposta.
 
 ## 16. Decisões ainda pendentes depois da DI-006
 
-## 16.1 DI-007 - Portas necessárias na Application
+### 16.1 DI-007 - Portas necessárias na Application
 
 Somente depois de DI-001 a DI-006.
 
@@ -1659,7 +1659,7 @@ Também fechar:
 - comando de confirmação para o Repository;
 - retorno por unidade de processamento.
 
-## 16.2 DI-008 - Mecanismo Oracle
+### 16.2 DI-008 - Mecanismo Oracle
 
 Decidir:
 
@@ -1679,7 +1679,7 @@ Decidir:
 O usuário informou anteriormente ter instalado as extensões ausentes no PHP do
 WSL. Confirmar novamente no momento técnico, não presumir.
 
-## 16.3 DI-009 - Transporte HTTP
+### 16.3 DI-009 - Transporte HTTP
 
 Decidir:
 
@@ -1697,7 +1697,7 @@ Decidir:
 
 Usar somente documentação oficial vigente do PNCP.
 
-## 16.4 DI-010 - Composition Root e Scriptcase
+### 16.4 DI-010 - Composition Root e Scriptcase
 
 Decidir:
 
@@ -1798,38 +1798,38 @@ seguinte gate de governança, sem renumerar as etapas originais:
   proporcional à tarefa;
 - distinguir instruções, checkpoints, sínteses e prompts históricos.
 
-4. Criar
+1. Criar
    `docs/vigentes/autoritativos/fluxo_de_implementacao.md`. **Concluído.**
    - partir do modelo revisado;
    - descrever a colaboração entre Presentation, Application, Domain e portas;
    - referenciar RN para comportamento e DI para contratos externos;
    - não conter cronograma, sprints ou tecnologia concreta.
-5. Consolidar o contexto de planejamento, hoje preservado em
+2. Consolidar o contexto de planejamento, hoje preservado em
    `docs/historico/contexto_do_planejamento_do_projeto_backend.md`. **Concluído.**
    - distribuir o conteúdo útil entre os documentos apropriados;
    - revisar novamente modelo e fluxo se a consolidação acrescentar contexto;
    - arquivar somente depois de confirmar que nada útil foi perdido;
    - tratar a consolidação como gate de coerência anterior ao roadmap.
-6. Preservar a V1 em
+3. Preservar a V1 em
    `docs/historico/roadmap_v1_legado.md`. **Concluído.**
    - caminho histórico canônico confirmado;
    - corpo histórico preservado integralmente, sem alterações semânticas
      posteriores ao arquivamento;
    - nenhuma correção retroativa aplicada à V1 histórica.
-7. Criar a V2 ativa em
+4. Criar a V2 ativa em
    `docs/vigentes/autoritativos/roadmap.md`. **Concluído.**
    - usar regras, modelo, DI e fluxo consolidados como entradas;
    - apresentar a sequência prescritiva e didática;
    - manter acompanhamento do PCA, mapeamento V1 -> V2 e apêndice histórico;
    - representar decisões condicionais como gates, não como fatos comprovados.
-8. Executar a sprint de refatoração arquitetural com TDD. **Concluído em 04/08/2026 após reauditoria final.**
+5. Executar a sprint de refatoração arquitetural com TDD. **Concluído em 04/08/2026 após reauditoria final.**
    - as desconformidades encontradas pela auditoria independente foram
      corrigidas e validadas;
    - licença permanece como ressalva transversal não bloqueante, e a
      representação decimal continua destinada à Sprint 5.6;
    - a conclusão não autoriza nem inicia a Sprint 4.8.
-9. Completar a Application com mocks.
-10. Somente então iniciar Infrastructure.
+6. Completar a Application com mocks.
+7. Somente então iniciar Infrastructure.
 
 ### Critérios de saída documentais
 

@@ -4,8 +4,8 @@ Contrato oficial adotado
     • Manual PNCP vigente: versão 2.5.
     • Integração REST/HTTP com JSON.
     • Ambientes oficiais:
-        ◦ homologação: https://treina.pncp.gov.br/api/pncp;
-        ◦ produção: https://pncp.gov.br/api/pncp.
+        ◦ homologação: <https://treina.pncp.gov.br/api/pncp>;
+        ◦ produção: <https://pncp.gov.br/api/pncp>.
     • Autenticação por login e senha, com JWT retornado no header Authorization.
     • Validade documentada do token: uma hora.
     • CNPJ alfanumérico de 14 posições aceito em todos os campos das APIs.

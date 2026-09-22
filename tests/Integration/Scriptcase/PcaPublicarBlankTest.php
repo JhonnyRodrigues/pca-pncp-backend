@@ -22,7 +22,10 @@ final class PcaPublicarBlankTest extends TestCase
 
     public function testDeveChamarSomenteAFachadaPublicaComDadosDoHospedeiro(): void
     {
-        $this->assertStringContainsString('/backend/vendor/autoload.php', $this->codigo);
+        $this->assertStringContainsString(
+            '/pca-pncp-backend/vendor/autoload.php',
+            $this->codigo
+        );
         $this->assertStringContainsString('new \Semae\Pca\PublicadorPcaScriptcase()', $this->codigo);
         $this->assertStringContainsString('->executarComEventos(', $this->codigo);
         $this->assertStringContainsString('$this->Db', $this->codigo);

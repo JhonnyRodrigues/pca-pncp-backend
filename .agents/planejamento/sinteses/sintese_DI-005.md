@@ -1,4 +1,5 @@
-Síntese proposta para a DI-005
+Síntese proposta para a DI-005:
+
     1. Plano representa uma fotografia imutável do estado carregado; não será mutado nem recriado ao final do UseCase.
     2. O Domain continua responsável pelas decisões de processamento, mas a confirmação é uma ordem explícita da Application para o PlanoRepository.
     3. O Repository apenas persiste a confirmação já autorizada; não consulta PNCP nem decide se há convergência.

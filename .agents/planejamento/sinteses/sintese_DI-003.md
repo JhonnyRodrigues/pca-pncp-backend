@@ -1,4 +1,5 @@
-Síntese proposta para a DI-003
+Síntese proposta para a DI-003:
+
     1. PUBLICAR_EM_UNICA_UASG e UASG_CONSOLIDADORA vêm de PAC_CONFIGURACOES, acessada por porta da Application.
     2. Configuração ausente ou inválida bloqueia a execução antes de qualquer comunicação com o PNCP; não existe valor padrão.
     3. Modo NÃO: unidade de processamento é AnoExecucao + UnidadeOrcamentaria; cada UO possui transação e resultado independentes.
@@ -11,5 +12,4 @@ Síntese proposta para a DI-003
     10. ID_DEMANDA é globalmente único e continua candidato a numeroItem, sujeito a teste contratual no ambiente de homologação do PNCP.
     11. O agrupamento pertence à Application e não modifica a identidade nem a composição dos Aggregates Plano.
     12. No modo consolidado, falhas parciais entre operações de itens pertencem à unidade inteira e serão detalhadas na próxima decisão sobre transações e falhas parciais.
-Asked 1 question
-A DI-003 está aprovada. Entramos em DI-004 — Transações e falhas parciais.
+

@@ -1,4 +1,5 @@
-Síntese proposta para a DI-004
+Síntese proposta para a DI-004:
+
     1. Configuração e autenticação ocorrem antes das unidades; cada unidade lógica é serializada por uma chave exclusiva.
     2. Por unidade, a transação Oracle começa antes da releitura local e permanece aberta durante consulta, escrita, confirmação no PNCP e persistência local.
     3. Essa transação garante atomicidade apenas no Oracle; não é uma transação distribuída com o PNCP.

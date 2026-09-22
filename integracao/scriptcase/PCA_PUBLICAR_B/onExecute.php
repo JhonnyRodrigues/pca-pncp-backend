@@ -127,7 +127,8 @@ if ($requisicaoPublicacao) {
             throw new \InvalidArgumentException('Entrada HTTP inválida.');
         }
 
-        $autoload = $this->Ini->path_aplicacao . '/backend/vendor/autoload.php';
+        $autoload = $this->Ini->path_aplicacao
+            . '/pca-pncp-backend/vendor/autoload.php';
 
         if (!is_file($autoload)) {
             throw new \RuntimeException('Bootstrap indisponível.');
@@ -210,7 +211,7 @@ if ($requisicaoPublicacao) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Publicação do PCA no PNCP</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> o scriptcase já importa essa library -->
     <style>
         body {
             margin: 0;

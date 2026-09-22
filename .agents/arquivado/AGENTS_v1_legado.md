@@ -65,7 +65,6 @@ Nunca sacrificar a arquitetura para reduzir quantidade de código.
 
 Sempre preferir soluções consistentes com Clean Architecture.
 
-
 ---
 
 ## Regras importantes

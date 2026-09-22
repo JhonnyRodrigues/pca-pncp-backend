@@ -56,7 +56,7 @@ formalidade.
 A autoridade por assunto é definida em `docs/README.md`. Em termos gerais:
 
 | Assunto | Fonte autoritativa |
-|---|---|
+| --- | --- |
 | Visão e finalidade do projeto | `README.md` |
 | Ordem de construção | roadmap vigente |
 | Regras de negócio | catálogo autoritativo de regras |

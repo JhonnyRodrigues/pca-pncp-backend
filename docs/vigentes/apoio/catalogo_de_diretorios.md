@@ -136,7 +136,7 @@ expor a organização interna ao Scriptcase.
 
 Essa separação deixa claro que a Blank **consome** o backend, mas não faz parte
 de `src/`. No servidor, ela carrega o autoloader instalado em
-`backend/vendor/autoload.php`.
+`pca-pncp-backend/vendor/autoload.php`.
 
 ## 4. Testes e contratos — `tests/`
 

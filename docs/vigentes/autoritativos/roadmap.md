@@ -990,6 +990,14 @@ também fica dispensada neste ciclo; seus demais itens permanecem aplicáveis.
 - impedir Composer em produção;
 - documentar instalação, atualização e rollback do release.
 
+O [plano aprovado da Sprint 9.3](../../../.agents/sprints/planos/plano_sprint_9.3.md)
+adota implantação inicial manual por SFTP em
+`/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/`. A integração com o Gitea foi
+adiada como melhoria futura não bloqueante. A preparação local não autoriza a
+implantação: existe pausa obrigatória antes de qualquer alteração em produção.
+Essa preparação foi concluída em 22/09/2026; a sprint permanece aberta até a
+implantação autorizada da release.
+
 #### Sprint 9.4 — Migração assistida e recuperação
 
 - reconciliar publicações legadas de forma consciente;

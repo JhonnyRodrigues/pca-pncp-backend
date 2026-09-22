@@ -279,5 +279,6 @@ permissão, parâmetro, hash, sintaxe ou topologia permanecer incerto. A
 visibilidade efetiva da variável pelo runtime do backend será confirmada na
 Sprint de implantação; a Sprint 9.1 não cria probe nem executa a aplicação.
 
-Monitoramento e retenção pertencem à Sprint 9.2; implantação e rollback da
-release, à 9.3; reconciliação do legado, à 9.4; smoke e prontidão final, à 9.5.
+A implantação e o rollback da release seguem o
+[guia de implantação e rollback](guia_de_implantacao_e_rollback.md).
+Reconciliação do legado pertence à Sprint 9.4; smoke e prontidão final, à 9.5.

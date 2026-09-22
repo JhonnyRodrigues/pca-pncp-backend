@@ -299,7 +299,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `PublicadorPcaScriptcase.php` | Única API conhecida pela Blank; valida o request ID, seleciona e carrega o perfil externo, materializa o CNPJ e aciona um grafo novo por chamada. Preserva a operação que devolve o ViewModel e oferece uma variante que também devolve, separadamente, eventos sanitizados e eventual aviso técnico. |
 | `ResultadoPublicacaoPcaScriptcase.php` | Saída imutável da variante com eventos: ViewModel existente, envelopes escalares e aviso técnico seguro. |
 | `RegistradorEventosTecnicosScriptcase.php` | Fachada pública que recebe o lote já exportado e solicita seu registro técnico sem expor SQL ou detalhes internos à Blank. |
-| `integracao/scriptcase/PCA_PUBLICAR_B/onExecute.php` | Adaptação versionada da Blank: distingue a navegação do menu do POST JSON de publicação, valida a entrada, chama as fachadas públicas, renderiza o resultado seguro e oferece ajuda estática ao operador sem acessar o backend. |
+| `integracao/scriptcase/PCA_PUBLICAR_B/onExecute.php` | Adaptação versionada da Blank: distingue a navegação do menu do POST JSON de publicação, carrega a entrada ao backend (`pca-pncp-backend/vendor/autoload.php`), chama as fachadas públicas, renderiza o resultado seguro e oferece ajuda estática ao operador. |
 
 ## 5. Presentation
 
@@ -690,6 +690,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
 | `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |
 | `docs/vigentes/apoio/guia_de_configuracao_de_producao.md` | Orienta o provisionamento externo do registro, perfil e CA bundle de produção, inclusive permissões e configuração persistente no Apache/PHP. |
+| `docs/vigentes/apoio/guia_de_implantacao_e_rollback.md` | Orienta construção, transferência SFTP, implantação inicial, atualização e rollback da release autocontida. |
 | `docs/vigentes/apoio/catalogo_de_diretorios.md` | Explica a finalidade das pastas e orienta onde localizar ou criar cada tipo de artefato. |
 | `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | Ensina a preparar, executar, diagnosticar e encerrar as probes e gates 5.1, 5.9, 8.2, 8.3 e 8.4. |
 | `docs/vigentes/apoio/catalogo_de_comandos_composer.md` | Classifica os scripts Composer e informa finalidade, dependências, efeitos externos e autorização necessária. |

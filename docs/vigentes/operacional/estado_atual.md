@@ -35,7 +35,9 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A última sprint concluída é a Sprint 9.1.
 - A Sprint 9.2 permanece no roadmap como guia, mas não será executada neste
   ciclo por decisão de escopo do mantenedor. Ela não é pendência nem bloqueio.
-- A Sprint 9.3 — Empacotamento e implantação é a próxima para planejamento.
+- A Sprint 9.3 — Empacotamento e implantação concluiu a preparação local e está
+  na pausa obrigatória anterior à produção. A sprint permanece aberta e
+  produção não está autorizada.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.
@@ -264,8 +266,35 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - Embora exista Grafana institucional, este ciclo não entregará dashboard,
   métricas, alertas, integração com fonte de dados ou política de retenção. O
   monitoramento foi dispensado como critério de saída desta Fase 9.
-- A Sprint 9.3 — Empacotamento e implantação é a próxima e deve receber plano e
-  autorização próprios antes de qualquer alteração.
+- A Sprint 9.3 — Empacotamento e implantação possui plano e autorização para a
+  preparação local. Qualquer alteração em produção exige autorização própria.
+
+## Preparação corrente da Sprint 9.3
+
+- O plano foi aprovado para uma implantação inicial manual. O backend será
+  instalado em `/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/` e a Blank
+  carregará o autoload dessa pasta.
+- A transferência será feita temporariamente pelo mantenedor com FileZilla e
+  SFTP. A integração com o Gitea institucional foi adiada como melhoria futura
+  não bloqueante devido ao prazo de entrega.
+- A aplicação anterior será descontinuada e não constitui o rollback desta
+  implantação inicial. Se a nova aplicação falhar, ela deverá ser retirada do
+  menu e sua release desativada antes de qualquer publicação.
+- A preparação local não autoriza acesso a produção, Oracle ou PNCP. As
+  validações locais terminaram e a pausa obrigatória está ativa. Depois do
+  commit, a release final será formada e exigirá autorização específica para
+  produção.
+- O ciclo TDD focado passou com 9 testes e 115 asserções. A suíte local passou
+  com 954 testes e 4.542 asserções; o lint aprovou 402 arquivos PHP; o autoload
+  PSR-4 estrito gerou 1.843 classes; e o Composer permaneceu válido, com apenas
+  o aviso anterior de licença não declarada.
+- O pacote candidato foi construído e validado com 196 arquivos de conteúdo e
+  197 no total, sem dependências de desenvolvimento, configurações ou segredos.
+  As duas fachadas públicas são carregáveis. O SHA-256 do manifesto candidato é
+  `6c55a1566e795d2765d4048ea38570d923312b163bfd2e47621ab2461bc89b18`.
+- Nenhum acesso externo foi realizado. O `.tar.gz` final deve ser construído
+  depois do commit da Sprint 9.3, para que seu nome identifique exatamente o
+  código versionado que ele contém.
 
 ## Evidências do Microciclo 5 da Sprint 8.5
 

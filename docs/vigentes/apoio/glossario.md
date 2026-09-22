@@ -269,20 +269,36 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
 | Artefato | Resultado concreto preparado por uma etapa do projeto, como um pacote, manifesto, relatório ou arquivo versionado. O termo não informa sozinho se o conteúdo é executável. | Roadmap; Docs |
+| Branch | Linha de desenvolvimento do Git que permite evoluir versões do repositório separadamente, como `develop` e `main`. | Guia de implantação |
 | Build | Processo que transforma código-fonte e dependências em um artefato verificável e pronto para uma finalidade, como teste ou implantação. Também pode nomear o resultado desse processo. | `DI-010`; Roadmap Sprints 8.5 e 9.3 |
 | Cache | Cópia temporária de dados ou arquivos reutilizada para acelerar operações posteriores. Pode ser descartada e não deve ser tratada como fonte autoritativa. | Catálogo de diretórios; Roadmap Sprint 8.5 |
+| Checksum | Valor curto calculado a partir do conteúdo de um arquivo para detectar alterações. Neste projeto, usa-se SHA-256 para comparar o pacote antes e depois da transferência. | Guia de implantação |
+| CI/CD | Práticas de integração contínua e entrega ou implantação contínua que automatizam validações e a preparação ou publicação de versões. | Guia de implantação |
 | Commit do Git | Registro identificado no histórico do repositório que reúne uma fotografia das alterações versionadas do código-fonte. É diferente do commit que confirma uma transação de banco. | `AGENTS.md` §3 |
 | Composer | Ferramenta usada durante o desenvolvimento e a construção para resolver dependências PHP e gerar o autoload. Não é executada no servidor de produção. | `DI-010` |
 | `composer.lock` | Arquivo que fixa as versões exatas das dependências resolvidas, permitindo reconstruir o mesmo conjunto em outra máquina. | `DI-010`; Roadmap Sprint 8.5 |
 | Construtor de pacote — package builder | Script de preparação que reúne o código permitido, instala dependências de produção e gera o manifesto. Não é um construtor `__construct` de classe. | `DI-010`; Roadmap Sprint 8.5 |
 | Deploy ou implantação | Ato de colocar uma release em um ambiente e torná-la disponível para execução. Copiar arquivos é uma parte possível da implantação. | Roadmap Fase 9 |
+| Deploy atômico | Estratégia em que a versão ativa muda de uma release completa para outra sem expor mistura ou estado intermediário aos consumidores. | Guia de implantação |
 | DocumentRoot ou webroot | Diretório cujos arquivos podem ser publicados pelo servidor HTTP. Configurações sensíveis ou específicas do ambiente devem permanecer fora dele. | `DI-010`; Roadmap Fase 9 |
-| Manifesto de integridade | Arquivo que descreve o pacote e registra hashes de seu conteúdo para permitir conferência posterior. | Roadmap Sprint 8.5 |
+| FileZilla | Programa cliente (roda na máquina local e pede serviços a outro computador, chamado servidor). Essa ferramenta permite transferir arquivos por diferentes protocolos. Neste projeto, será usado como cliente SFTP; ele não é o protocolo. | Guia de implantação |
+| Gitea | Plataforma de hospedagem de repositórios Git que também pode integrar automações de CI/CD. Seu uso institucional não torna o deploy automático sem configuração específica do repositório. | Guia de implantação |
+| Implantação inicial | Primeira instalação da aplicação em um ambiente, quando ainda não existe uma release ativa para substituir. | Guia de implantação |
+| Implantação manual | Implantação cujas etapas são iniciadas e conferidas por uma pessoa, como enviar o pacote por SFTP e executar os comandos do runbook. | Guia de implantação |
+| Manifesto de integridade | Arquivo que descreve o pacote e registra hashes de seu conteúdo para permitir conferência posterior. Detecção de Corrupção de Dados: Arquivos podem sofrer perdas de pacotes ou corrupção durante downloads ou transferências de rede. O manifesto identifica imediatamente qual arquivo foi corrompido. Segurança contra Ataques de Substituição: Em repositórios de software, invasores podem tentar interceptar e trocar um arquivo legítimo por uma versão maliciosa (malware). Se o manifesto original estiver protegido, o sistema receptor rejeitará o arquivo alterado porque os hashes não vão coincidir. | Roadmap Sprint 8.5 |
 | Pacote autocontido | (artefato final de uma build) É a pasta de entrega com o código e todas as dependências necessárias em `vendor/`, executável sem checkout e sem Composer no servidor. Configurações e segredos continuam externos. O processo de build pega o código-fonte bruto do repositório, baixa e resolve as dependências (como a pasta vendor/ via Composer), compila ou minifica arquivos (se houver frontend) e gera esse pacote autocontido e pronto para ser executado. | `DI-010`; Roadmap Sprint 8.5 |
+| Pipeline | Sequência automatizada de etapas, como testar, construir, verificar e implantar uma release. | Guia de implantação |
 | Princípio do menor privilégio | Prática de conceder a cada usuário ou processo somente os acessos necessários. Na configuração do PCA, o administrador escreve, o PHP apenas lê e os demais usuários não acessam os arquivos. | Roadmap Sprint 9.1 |
+| Promoção entre ambientes | Avanço controlado da mesma release entre ambientes, por exemplo de homologação para produção, após as validações exigidas. | Guia de implantação |
+| Push | Envio de commits de um repositório Git local para um repositório remoto. Não equivale, por si só, a um deploy. | Guia de implantação |
 | Release | Conjunto versionado e preparado para implantação. Pode incluir um pacote executável e instruções, sem significar que já foi implantado. | `DI-010`; Roadmap Fase 9 |
+| Release candidata | Release preparada para validação antes de ser ativada como versão corrente de um ambiente. | Guia de implantação |
+| Rollback de release | Retorno à release executável anterior quando uma implantação falha. Não desfaz efeitos de negócio ou transações externas já confirmadas. | Guia de implantação |
 | Runbook | Procedimento operacional passo a passo para executar e conferir uma atividade recorrente ou sensível, como configurar, implantar ou recuperar um serviço. | Roadmap Fase 9 |
+| Runner de CI/CD | Processo ou agente que executa os passos automatizados de um pipeline. É diferente do runner de contratos usado pelos testes deste projeto. | Guia de implantação |
+| SFTP | Protocolo de transferência de arquivos sobre SSH, com canal criptografado e autenticação do servidor e do usuário. | Guia de implantação |
 | Smoke test | Validação preliminar pós-deploy que confirma se a build está estável e se os caminhos críticos produzem o resultado esperado antes de liberar o ambiente para testes mais profundos. Não substitui a suíte completa de testes. | `DI-010`; Roadmap Sprint 8.5 |
+| Upload | Transferência de um arquivo da máquina local para um servidor ou serviço remoto. O termo não informa qual protocolo foi usado. | Guia de implantação |
 | `vendor/` | Diretório gerado pelo Composer com dependências e arquivos de autoload. No pacote, contém somente dependências de produção. | `DI-010` |
 
 ## 9. Termos de documentação e planejamento
@@ -330,4 +346,9 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Dashboard × fonte de dados | Dashboard apresenta informações; fonte de dados armazena ou fornece as informações consultadas. | Estado |
 | Alerta × incidente | Alerta é uma notificação baseada em uma condição; incidente é uma degradação ou interrupção real que exige resposta. | Roadmap Fase 9 |
 | Commit do Git × commit de transação | O primeiro registra uma fotografia no histórico do código; o segundo confirma alterações de uma transação no banco de dados. | `AGENTS.md` §3; `DI-004`, `DI-008` |
+| FileZilla × SFTP | FileZilla é um programa cliente; SFTP é o protocolo de transferência segura que o programa utiliza neste projeto. | Guia de implantação |
+| Implantação inicial × atualização | A primeira instala onde ainda não há release ativa; a segunda substitui uma release existente e exige caminho de retorno à anterior. | Guia de implantação |
+| Implantação manual × automatizada | Na manual, uma pessoa inicia e confere as etapas do runbook; na automatizada, um pipeline executa etapas predefinidas com os mesmos controles. | Guia de implantação |
+| Rollback de release × rollback de transação | O primeiro troca arquivos executáveis por uma versão anterior; o segundo cancela mudanças ainda não confirmadas em uma transação. Nenhum deles desfaz automaticamente efeitos já confirmados no PNCP. | Guia de implantação; `DI-004`, `DI-008` |
+| Runner de CI/CD × runner de contrato | O primeiro executa etapas de um pipeline de entrega; o segundo coordena um cenário de teste contratual protegido. | Guia de implantação; Roadmap Sprints 5.9, 8.3 e 8.4 |
 | Regra × decisão × fluxo | Norma de negócio, escolha arquitetural e colaboração dinâmica. | Docs; `RN`; `DI` |
