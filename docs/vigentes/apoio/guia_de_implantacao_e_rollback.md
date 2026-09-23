@@ -80,11 +80,37 @@ Scriptcase, portanto ele não faz parte do pacote do backend.
 
 ## 3. Transferir arquivos
 
-### 3.1 Usando protocolo SFTP
+### 3.1 Destino
 
-SFTP é o protocolo que transfere arquivos por um canal SSH criptografado. A ferramenta FileZilla é apenas um programa cliente que usa esse protocolo.
+Antes da primeira transferência, conceda ao usuário de implantação acesso
+direto ao diretório, sem alterar seu proprietário e grupo:
 
-### 3.2 Usando o protocolo SSH
+```bash
+sudo setfacl -m u:administrator:rwx /var/www/html/PCA_PUBLICAR_B
+```
+
+Intenção: autorizar especificamente o usuário `administrator` a criar, renomear e
+remover entradas nesse diretório, mantendo o proprietário e grupo atual. Não conceda escrita irrestrita com `chmod 777` ou
+`chmod o+w`.
+
+Confira a permissão na sessão do usuário `administrator`:
+
+```bash
+if test -w /var/www/html/PCA_PUBLICAR_B; then
+  echo "administrator pode escrever"
+else
+  echo "ERRO: administrator sem permissão de escrita"
+fi
+```
+
+Prossiga somente quando o comando confirmar a permissão. Envie então o
+arquivo `.tar.gz` diretamente para: `/var/www/html/PCA_PUBLICAR_B/`
+
+### 3.2a Opção de upload usando protocolo SFTP
+
+SFTP é o protocolo que transfere arquivos por um canal SSH criptografado. A ferramenta FileZilla é um bom programa cliente que usa esse protocolo.
+
+### 3.2b Opção de upload usando o protocolo SSH
 
 Instale o pacote da ferramenta para conexão remota via protocolo SSH (secure shell)
 
@@ -104,13 +130,7 @@ Para transferir pastas inteiras com todos os arquivos internos, adicionar a tag 
 scp -r /caminho/da/pasta_local usuario@ip_do_servidor:/caminho/do/destino/
 ```
 
-### 3.3 Destino e validação
-
-Envie o arquivo `.tar.gz` para:
-
-```text
-/var/www/html/PCA_PUBLICAR_B/
-```
+### 3.3 Validação
 
 Depois do envio, verifique no servidor se houve alterações no checksum:
 
@@ -152,8 +172,8 @@ Aplique propriedade e permissões:
 
 ```bash
 sudo chown -R administrator:www-data /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend
-sudo find /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend -type d -exec chmod 2750 {} +
-sudo find /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend -type f -exec chmod 0640 {} +
+find /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend -type d -exec chmod 2750 {} +
+find /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend -type f -exec chmod 0640 {} +
 ```
 
 Intenção: permitir administração somente pelo usuário `administrator`, leitura do grupo `www-data` pelo Apache/PHP, sem conceder escrita, e nenhum acesso aos demais usuários. O `2` de `2750` preserva o grupo nos novos diretórios.
