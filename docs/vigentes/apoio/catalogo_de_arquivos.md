@@ -421,6 +421,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `Integration/Composition/Support/RegistroCronologico.php` | Reúne eventos Oracle e PNCP sanitizados na ordem em que foram observados. |
 | `Integration/Composition/Support/TemporizadorControlado.php` | Registra a espera de retry solicitada pelo leitor sem suspender a execução do teste. |
 | `Integration/PublicadorPcaScriptcaseIntegrationTest.php` | Percorre entrypoint, perfil, Composition Root, Presentation e Application e comprova que a variante com eventos processa a solicitação uma única vez, sem rede real. |
+| `Integration/PackageReleaseToolTest.php` | Protege os aliases da release, a criação segura do `.tar.gz`, a recusa de sobrescrita e a exigência de worktree limpo. |
 | `Integration/Scriptcase/PcaPublicarBlankTest.php` | Protege o contrato da Blank para entrada, fachada, logs integrais, resposta pública, submissão única, renderização segura e ajuda estática ao operador. |
 | `Integration/Sprint85/FalhasIntegradasTest.php` | Comprova contenção com continuidade, reconciliação única sem repetição da escrita e interrupção sistêmica com preservação dos resultados conhecidos. |
 | `PublicadorPcaScriptcaseTest.php` | Contratos públicos compatíveis, request ID, ausência de eventos fabricados, localizador externo, seleção literal, perfil e CNPJ em comportamento fail-closed. |
@@ -646,6 +647,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `composer.lock` | Versões resolvidas das dependências. |
 | `tools/package/build.php` | Constrói em `build/` o pacote isolado com código, dependências de produção e manifesto de integridade. |
 | `tools/package/verify.php` | Verifica hashes, topologia, conteúdo permitido e autoload do pacote gerado. |
+| `tools/package/archive.php` | Exige commit limpo, compacta o pacote validado com data de geração e commit no nome, confere sua topologia e calcula o SHA-256. |
 | `tools/package/build-log-gate.php` | Monta o artefato temporário do gate de logs a partir do pacote principal já validado e de uma lista fechada de arquivos da probe. |
 | `tools/package/verify-log-gate.php` | Confere o manifesto, a topologia e os entrypoints carregáveis do artefato temporário. |
 | `tools/package/build-containment-gate.php` | Monta o artefato temporário do gate de contenção a partir do pacote principal validado e de uma lista fechada de suporte. |

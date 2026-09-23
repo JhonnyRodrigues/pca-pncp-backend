@@ -1,7 +1,6 @@
 # Sprint 9.3 — Empacotamento e implantação
 
-**Status:** preparação local concluída em 22/09/2026; pausa obrigatória antes
-de produção.
+**Status:** concluída em 22/09/2026 após implantação inicial autorizada.
 
 ## Objetivo e fontes
 
@@ -41,6 +40,10 @@ decisão do mantenedor registrada neste plano.
 5. Executar teste focado, suíte local, lint, validação do Composer, construção,
    verificação do pacote e inspeção do diff.
 
+Em ampliação autorizada pelo mantenedor durante a implantação inicial manual,
+acrescentar `package:archive` para compactação e checksum e `package:release`
+para orquestrar construção, verificação e compactação em um único comando.
+
 ## Pausa obrigatória antes de produção
 
 A preparação local não autoriza acesso ao servidor. Depois de um commit que
@@ -52,10 +55,11 @@ autorização explícita e segue o
 ## Artefatos e justificativas
 
 - Nenhuma classe nova: não existe nova regra nem responsabilidade de runtime.
-- Nenhum teste novo: o teste de integração da Blank já protege o caminho do
-  autoload; somente sua expectativa precisa acompanhar o destino aprovado.
-- Nenhuma ferramenta nova: `tools/package/build.php` e
-  `tools/package/verify.php` já constroem e verificam o pacote necessário.
+- `PackageReleaseToolTest.php`: necessário para proteger os novos aliases, a
+  topologia do `.tar.gz`, a recusa de sobrescrita e o worktree limpo.
+- `tools/package/archive.php`: necessário porque a identificação pelo commit,
+  a compactação portátil, a prevenção de colisões e o SHA-256 formavam uma
+  sequência manual repetitiva e sujeita a erro.
 - Nenhuma pasta nova: os documentos entram nas estruturas vigentes.
 - `plano_sprint_9.3.md`: preserva escopo, limites e autorização desta sprint.
 - `guia_de_implantacao_e_rollback.md`: transforma decisões operacionais em um
@@ -68,7 +72,7 @@ autorização explícita e segue o
 - Composer não é necessário em produção;
 - caminho da Blank corresponde ao destino aprovado;
 - instalação, atualização e rollback estão documentados;
-- produção permanece intocada até autorização específica.
+- produção é alterada somente após autorização específica.
 
 ## Evidências da preparação local
 
@@ -82,5 +86,17 @@ autorização explícita e segue o
   197 no total, sem dependências de desenvolvimento, configurações ou segredos.
   As duas fachadas públicas são carregáveis. O SHA-256 do manifesto candidato é
   `6c55a1566e795d2765d4048ea38570d923312b163bfd2e47621ab2461bc89b18`.
-- Nenhum acesso a produção, Scriptcase, Oracle ou PNCP foi realizado. O pacote
-  final identificado por commit ainda não foi compactado nem transferido.
+- A release `137f933` foi compactada e transferida com SHA-256
+  `ca1600244391efbc6acc3150e0868da5e3787cdbac87fa2352df9495691ae97c`.
+  O backend foi extraído em produção com a topologia esperada. O PHP CLI como
+  `www-data` carregou as duas fachadas, mas informou que o OCI8 não encontrou
+  `libmql1.so`; isso não valida o runtime Apache nem a conexão Oracle.
+- A ampliação da automação passou por TDD com 3 testes e 35 asserções. A suíte
+  completa passou com 957 testes e 4.577 asserções; o lint aprovou 404 arquivos
+  PHP; e o PSR-4 estrito gerou 1.844 classes.
+- O `.tar.gz` e a Blank anterior foram removidos do webroot. A nova versão da
+  Blank foi compilada e publicada, e o mantenedor confirmou que a tela
+  `PCA_PUBLICAR_B` abriu normalmente pelo menu do SGI.
+- A abertura da tela encerra a verificação de implantação desta sprint sem
+  constituir smoke funcional. O botão **Publicar** não foi acionado; nenhuma
+  publicação, conexão Oracle ou chamada PNCP foi executada nesta sprint.

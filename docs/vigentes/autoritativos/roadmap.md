@@ -969,8 +969,8 @@ não acessa produção; o avanço exige pausa e autorização específica, confo
 provisionados fora do webroot e da release, com leitura mínima pelo Apache/PHP.
 O perfil `PRODUCAO`, seus parâmetros e o localizador persistente foram validados
 sem executar Oracle, PNCP, Blank, release ou smoke. Em razão da decisão de
-escopo registrada nesta fase, a Sprint 9.3 é a próxima e exige planejamento
-próprio.
+escopo registrada nesta fase, a Sprint 9.2 não impediu o avanço das sprints
+seguintes. A Sprint 9.3 foi concluída e a Sprint 9.4 é a próxima.
 
 #### Sprint 9.2 — Observabilidade e segurança operacional
 
@@ -981,7 +981,7 @@ próprio.
 **Estado da Sprint 9.2:** não será executada neste roadmap por decisão de
 escopo do mantenedor. A decisão não remove nem reabre as proteções e os eventos
 técnicos entregues anteriormente, não cria trabalho pendente e não impede o
-avanço para a Sprint 9.3. A validação de monitoramento citada na Sprint 9.5
+avanço das sprints seguintes. A validação de monitoramento citada na Sprint 9.5
 também fica dispensada neste ciclo; seus demais itens permanecem aplicáveis.
 
 #### Sprint 9.3 — Empacotamento e implantação
@@ -995,8 +995,16 @@ adota implantação inicial manual por SFTP em
 `/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/`. A integração com o Gitea foi
 adiada como melhoria futura não bloqueante. A preparação local não autoriza a
 implantação: existe pausa obrigatória antes de qualquer alteração em produção.
-Essa preparação foi concluída em 22/09/2026; a sprint permanece aberta até a
-implantação autorizada da release.
+Essa preparação foi concluída em 22/09/2026 e a implantação avançou somente
+após autorização específica.
+
+**Estado do PCA:** Sprint 9.3 concluída em 22/09/2026. A release `137f933` foi
+instalada sem Composer em
+`/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/`; o artefato de transferência e
+a Blank anterior foram removidos do webroot; e a nova Blank foi compilada,
+publicada e aberta pelo menu do SGI. O botão **Publicar** não foi acionado e a
+abertura da interface não substitui o smoke funcional da Sprint 9.5. A Sprint
+9.4 é a próxima e exige planejamento próprio.
 
 #### Sprint 9.4 — Migração assistida e recuperação
 

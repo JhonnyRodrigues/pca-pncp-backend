@@ -175,16 +175,15 @@ deve ser limpa antes dela.
 
 | Diretório | Finalidade |
 | --- | --- |
-| `tools/package/` | Contém `build.php`, que gera o pacote, e `verify.php`, que confere o resultado produzido. |
-| `build/pca-pncp-backend/` | Pacote autocontido destinado à instalação dentro da pasta remota `backend/`. Contém somente `src/`, `vendor/` e o manifesto. |
-| `build/pca-pncp-log-gate/` | Artefato temporário do Microciclo 6 para o validaSGI; contém o pacote principal em `backend/` e o runtime mínimo da probe em `gate/`. |
-| `build/pca-pncp-containment-gate/` | Artefato temporário do Microciclo 7 para o validaSGI; contém o pacote principal e apenas o runtime do gate de contenção. |
+| `tools/package/` | Contém `build.php`, que gera o pacote, `verify.php`, que o confere, e `archive.php`, que cria a release compactada identificada pelo commit. |
+| `build/pca-pncp-backend/` | Pacote autocontido destinado à pasta remota `pca-pncp-backend/`. Contém somente `src/`, `vendor/` e o manifesto. |
+| `build/pca-pncp-backend_DATA_COMMIT.tar.gz` | Release compactada pronta para transferência, identificada pela data local de geração e pelo commit, e acompanhada de SHA-256. |
+| `build/pca-pncp-log-gate/` | Artefato temporário da sprint 8.5_Microciclo_6 para o ambiente de homologação; contém o pacote principal em `backend/` e o runtime mínimo da probe em `gate/`. |
+| `build/pca-pncp-containment-gate/` | Artefato temporário da sprint 8.5_Microciclo 7 para o ambiente de homologação; contém o pacote principal e apenas o runtime do gate de contenção. |
 | `build/composer-cache/` | Cache local usado durante a construção para evitar downloads desnecessários. |
 | `vendor/` | Dependências da cópia de desenvolvimento; não deve ser confundido com o `vendor/` que vai dentro do pacote. |
 
-`tools/` contém código-ferramenta. `build/` contém o resultado descartável
-dessas ferramentas. Essa diferença é a mesma existente entre uma forma e o
-objeto produzido por ela: a ferramenta é mantida; o pacote pode ser apagado e
+`tools/` contém código-ferramenta. `build/` contém o resultado descartável dessas ferramentas. Essa diferença é a mesma existente entre uma forma e o objeto produzido por ela: a ferramenta é mantida; o pacote pode ser apagado e
 reconstruído.
 
 ## 6. Documentação — `docs/`

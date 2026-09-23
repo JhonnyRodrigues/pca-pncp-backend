@@ -4,7 +4,7 @@
 
 **Status:** Vigente
 
-**Escopo:** construção da release, transferência SFTP, implantação inicial,
+**Escopo:** construção da release, transferência SFTP/SSH, implantação inicial,
 atualização e rollback do backend PCA/PNCP
 
 ## 1. Limites e topologia
@@ -30,14 +30,19 @@ smoke test funcional da Sprint 9.5.
 
 ## 2. Preparar a release na máquina de desenvolvimento
 
-Execute depois de criar o commit que identificará a release:
+Depois de criar o commit que identificará a release, execute:
 
 ```powershell
 composer package:build
 ```
 
-Intenção: gerar `build/pca-pncp-backend` com `src/`, dependências de produção em
-`vendor/` e o manifesto de integridade.
+Intenção: gerar a pasta do pacote em `build/pca-pncp-backend`, com:
+
+* código-fonte em `src/`,
+* dependências de produção em `vendor/`
+* e o manifesto de integridade em `PACKAGE-MANIFEST.json`.
+
+Execute a verificação:
 
 ```powershell
 composer package:verify
@@ -46,36 +51,72 @@ composer package:verify
 Intenção: conferir hashes, conteúdo permitido e carregamento das fachadas
 públicas. Prossiga somente com o retorno `PACOTE_VALIDADO`.
 
+Transforme o pacote validado em um único arquivo pronto para transferência:
+
 ```powershell
-$releaseId = git rev-parse --short HEAD
-tar.exe -czf "build/pca-pncp-backend-$releaseId.tar.gz" -C build pca-pncp-backend
-Get-FileHash "build/pca-pncp-backend-$releaseId.tar.gz" -Algorithm SHA256
+composer package:archive
 ```
 
-Intenção: identificar a release pelo commit do Git, criar um único arquivo para
-transferência e calcular seu **checksum**, o resumo usado para detectar qualquer
-alteração durante o envio. Registre o nome e o SHA-256 exibido.
+Intenção: exigir um worktree sem alterações, identificar a release pelo commit
+do Git, criar o `.tar.gz`, conferir sua topologia e calcular seu **checksum**.
+O comando recusa sobrescrever uma release com o mesmo nome. Registre o caminho
+e o SHA-256 exibidos. O nome segue o padrão
+`pca-pncp-backend_YYYYMMDD_COMMIT.tar.gz`; a saída `gerado_em` preserva também
+a hora e o fuso da geração.
+
+Para executar as três etapas anteriores em sequência, use:
+
+```powershell
+composer package:release
+```
+
+Intenção: orquestrar `package:build`, `package:verify` e `package:archive` sem
+duplicar suas responsabilidades. Esse é o comando preferencial para preparar
+uma nova release a partir de um commit limpo.
 
 Não envie o checkout, `composer.json`, testes, ferramentas, perfis ou segredos.
-O código do evento `onExecute` é instalado e compilado pela interface do
-Scriptcase; ele não faz parte do pacote do backend.
+O código da aplicação Blank/evento `onExecute` é instalado e compilado pela interface do
+Scriptcase, portanto ele não faz parte do pacote do backend.
 
-## 3. Transferir por SFTP
+## 3. Transferir arquivos
 
-No FileZilla, use o protocolo SFTP e envie o `.tar.gz` para:
+### 3.1 Usando protocolo SFTP
+
+SFTP é o protocolo que transfere arquivos por um canal SSH criptografado. A ferramenta FileZilla é apenas um programa cliente que usa esse protocolo.
+
+### 3.2 Usando o protocolo SSH
+
+Instale o pacote da ferramenta para conexão remota via protocolo SSH (secure shell)
+
+```bash
+apt install openssh-client
+```
+
+O comando scp (Secure Copy) permite transferir arquivos entre sua máquina local e um servidor remoto de forma segura, via SSH, e vice-versa:
+
+```bash
+scp /caminho/do/arquivo_local.txt usuario@ip_do_servidor:/caminho/do/destino/
+```
+
+Para transferir pastas inteiras com todos os arquivos internos, adicionar a tag -r (recursivo):
+
+```bash
+scp -r /caminho/da/pasta_local usuario@ip_do_servidor:/caminho/do/destino/
+```
+
+### 3.3 Destino e validação
+
+Envie o arquivo `.tar.gz` para:
 
 ```text
 /var/www/html/PCA_PUBLICAR_B/
 ```
 
-SFTP é o protocolo que transfere arquivos por um canal SSH criptografado. O
-FileZilla é apenas o programa cliente que usa esse protocolo.
-
-Depois do envio, no servidor:
+Depois do envio, verifique no servidor se houve alterações no checksum:
 
 ```bash
 cd /var/www/html/PCA_PUBLICAR_B
-sha256sum pca-pncp-backend-RELEASE_ID.tar.gz
+sha256sum pca-pncp-backend_DATA_COMMIT.tar.gz
 ```
 
 Intenção: entrar no diretório exato e confirmar que o SHA-256 é idêntico ao
@@ -88,16 +129,20 @@ Pare se o nome, o caminho ou o hash forem diferentes.
 Confirme primeiro que o destino ainda não existe:
 
 ```bash
-test ! -e /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend
+if [ -e /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend ]; then
+  echo "ERRO: destino já existe"
+else
+  echo "Destino livre"
+fi
 ```
 
 Intenção: evitar a mistura acidental da nova release com arquivos existentes.
-O comando termina sem saída quando o destino está livre.
+Prossiga somente quando o comando informar `Destino livre`.
 
 Extraia o pacote:
 
 ```bash
-sudo tar -xzf pca-pncp-backend-RELEASE_ID.tar.gz -C /var/www/html/PCA_PUBLICAR_B
+sudo tar -xzf pca-pncp-backend_DATA_COMMIT.tar.gz -C /var/www/html/PCA_PUBLICAR_B
 ```
 
 Intenção: criar a pasta final diretamente a partir do artefato verificado, sem
@@ -111,14 +156,17 @@ sudo find /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend -type d -exec chmod 2750
 sudo find /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend -type f -exec chmod 0640 {} +
 ```
 
-Intenção: permitir administração por `administrator`, leitura pelo Apache/PHP
-do grupo `www-data` e nenhum acesso aos demais usuários. O `2` de `2750`
-preserva o grupo nos novos diretórios.
+Intenção: permitir administração somente pelo usuário `administrator`, leitura do grupo `www-data` pelo Apache/PHP, sem conceder escrita, e nenhum acesso aos demais usuários. O `2` de `2750` preserva o grupo nos novos diretórios.
 
-Confira a topologia e o autoload como o usuário do PHP:
+Confira a topologia do nível principal do diretório:
 
 ```bash
 sudo find /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend -mindepth 1 -maxdepth 1 -printf '%f\n'
+```
+
+e conferir o autoload como o usuário do PHP:
+
+```bash
 sudo -u www-data php -r '
 require "/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/vendor/autoload.php";
 $ok = class_exists("Semae\\Pca\\PublicadorPcaScriptcase")
@@ -128,8 +176,7 @@ exit($ok ? 0 : 1);
 '
 ```
 
-Intenção: conferir somente `PACKAGE-MANIFEST.json`, `src` e `vendor` no topo e
-comprovar que o mesmo usuário do Apache consegue carregar as duas fachadas.
+Intenção: conferir somente arquivo `PACKAGE-MANIFEST.json`, diretórios `src` e `vendor` no topo e comprovar que o mesmo usuário do Apache consegue carregar as duas fachadas.
 Pare se o primeiro comando listar qualquer outro item.
 
 Por fim, atualize o evento `onExecute` da Blank com o arquivo versionado,
@@ -164,7 +211,7 @@ Para atualizar, extraia primeiro em uma pasta candidata separada:
 ```bash
 cd /var/www/html/PCA_PUBLICAR_B
 sudo mkdir pca-pncp-backend-candidata-RELEASE_ID
-sudo tar -xzf pca-pncp-backend-RELEASE_ID.tar.gz \
+sudo tar -xzf pca-pncp-backend_DATA_COMMIT.tar.gz \
   -C pca-pncp-backend-candidata-RELEASE_ID --strip-components=1
 ```
 

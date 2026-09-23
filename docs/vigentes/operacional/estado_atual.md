@@ -32,12 +32,12 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 9.1.
+- A última sprint concluída é a Sprint 9.3.
 - A Sprint 9.2 permanece no roadmap como guia, mas não será executada neste
   ciclo por decisão de escopo do mantenedor. Ela não é pendência nem bloqueio.
-- A Sprint 9.3 — Empacotamento e implantação concluiu a preparação local e está
-  na pausa obrigatória anterior à produção. A sprint permanece aberta e
-  produção não está autorizada.
+- A Sprint 9.3 — Empacotamento e implantação está concluída.
+- A Sprint 9.4 — Migração assistida e recuperação é a próxima para
+  planejamento.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.
@@ -266,24 +266,24 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - Embora exista Grafana institucional, este ciclo não entregará dashboard,
   métricas, alertas, integração com fonte de dados ou política de retenção. O
   monitoramento foi dispensado como critério de saída desta Fase 9.
-- A Sprint 9.3 — Empacotamento e implantação possui plano e autorização para a
-  preparação local. Qualquer alteração em produção exige autorização própria.
+- A Sprint 9.3 — Empacotamento e implantação possui plano aprovado. A
+  implantação inicial em produção foi autorizada pelo mantenedor.
 
-## Preparação corrente da Sprint 9.3
+## Evidências da Sprint 9.3
 
-- O plano foi aprovado para uma implantação inicial manual. O backend será
+- O plano foi aprovado para uma implantação inicial manual. O backend foi
   instalado em `/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/` e a Blank
-  carregará o autoload dessa pasta.
-- A transferência será feita temporariamente pelo mantenedor com FileZilla e
-  SFTP. A integração com o Gitea institucional foi adiada como melhoria futura
-  não bloqueante devido ao prazo de entrega.
-- A aplicação anterior será descontinuada e não constitui o rollback desta
-  implantação inicial. Se a nova aplicação falhar, ela deverá ser retirada do
-  menu e sua release desativada antes de qualquer publicação.
-- A preparação local não autoriza acesso a produção, Oracle ou PNCP. As
-  validações locais terminaram e a pausa obrigatória está ativa. Depois do
-  commit, a release final será formada e exigirá autorização específica para
-  produção.
+  carrega o autoload dessa pasta.
+- A transferência manual foi feita pelo mantenedor por canal SSH com o usuário
+  institucional `devteam`. A integração com o Gitea foi adiada como melhoria
+  futura não bloqueante devido ao prazo de entrega.
+- A aplicação anterior foi removida e não constitui o rollback desta
+  implantação inicial. O runbook preserva o procedimento de desativação da
+  nova release e o rollback aplicável às atualizações futuras.
+- Após a autorização específica, a release `137f933` foi transferida com
+  SHA-256 `ca1600244391efbc6acc3150e0868da5e3787cdbac87fa2352df9495691ae97c`,
+  idêntico ao valor local, e extraída em
+  `/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/`.
 - O ciclo TDD focado passou com 9 testes e 115 asserções. A suíte local passou
   com 954 testes e 4.542 asserções; o lint aprovou 402 arquivos PHP; o autoload
   PSR-4 estrito gerou 1.843 classes; e o Composer permaneceu válido, com apenas
@@ -292,9 +292,22 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   197 no total, sem dependências de desenvolvimento, configurações ou segredos.
   As duas fachadas públicas são carregáveis. O SHA-256 do manifesto candidato é
   `6c55a1566e795d2765d4048ea38570d923312b163bfd2e47621ab2461bc89b18`.
-- Nenhum acesso externo foi realizado. O `.tar.gz` final deve ser construído
-  depois do commit da Sprint 9.3, para que seu nome identifique exatamente o
-  código versionado que ele contém.
+- O diretório instalado contém somente `PACKAGE-MANIFEST.json`, `src` e
+  `vendor`. O PHP CLI executado como `www-data` carregou as duas fachadas
+  públicas. Houve warning de inicialização do OCI8 por ausência de
+  `libmql1.so`; essa evidência não valida o runtime Apache nem a conexão Oracle.
+- A ampliação autorizada acrescentou `package:archive` e `package:release`. O
+  teste focado passou com 3 testes e 35 asserções; a suíte completa, com 957
+  testes e 4.577 asserções; o lint, com 404 arquivos; e o PSR-4 estrito, com
+  1.844 classes.
+- O `.tar.gz` foi removido do webroot. A nova versão da Blank foi compilada e
+  publicada, e o mantenedor confirmou que a tela `PCA_PUBLICAR_B` abriu
+  normalmente pelo menu do SGI.
+- A abertura da tela conclui a verificação de implantação, mas não constitui
+  smoke funcional. O botão **Publicar** não foi acionado; nenhuma publicação,
+  conexão Oracle ou chamada PNCP foi executada nesta sprint.
+- A Sprint 9.3 foi concluída em 22/09/2026. A Sprint 9.4 — Migração assistida e
+  recuperação é a próxima e exige plano e autorização próprios.
 
 ## Evidências do Microciclo 5 da Sprint 8.5
 

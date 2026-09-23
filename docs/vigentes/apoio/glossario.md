@@ -269,6 +269,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
 | Artefato | Resultado concreto preparado por uma etapa do projeto, como um pacote, manifesto, relatório ou arquivo versionado. O termo não informa sozinho se o conteúdo é executável. | Roadmap; Docs |
+| Arquivo compactado | Arquivo que reúne outros arquivos e diretórios em uma representação única, normalmente reduzida por compressão. A extensão `.tar.gz` combina o empacotamento `tar` com a compressão gzip. | Guia de implantação |
 | Branch | Linha de desenvolvimento do Git que permite evoluir versões do repositório separadamente, como `develop` e `main`. | Guia de implantação |
 | Build | Processo que transforma código-fonte e dependências em um artefato verificável e pronto para uma finalidade, como teste ou implantação. Também pode nomear o resultado desse processo. | `DI-010`; Roadmap Sprints 8.5 e 9.3 |
 | Cache | Cópia temporária de dados ou arquivos reutilizada para acelerar operações posteriores. Pode ser descartada e não deve ser tratada como fonte autoritativa. | Catálogo de diretórios; Roadmap Sprint 8.5 |
@@ -300,6 +301,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Smoke test | Validação preliminar pós-deploy que confirma se a build está estável e se os caminhos críticos produzem o resultado esperado antes de liberar o ambiente para testes mais profundos. Não substitui a suíte completa de testes. | `DI-010`; Roadmap Sprint 8.5 |
 | Upload | Transferência de um arquivo da máquina local para um servidor ou serviço remoto. O termo não informa qual protocolo foi usado. | Guia de implantação |
 | `vendor/` | Diretório gerado pelo Composer com dependências e arquivos de autoload. No pacote, contém somente dependências de produção. | `DI-010` |
+| Worktree | Conjunto de arquivos atualmente presentes na cópia de trabalho do Git. Um worktree limpo não possui alterações versionadas ou arquivos novos ainda não commitados. | Guia de implantação |
 
 ## 9. Termos de documentação e planejamento
 

@@ -211,7 +211,7 @@ if ($requisicaoPublicacao) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Publicação do PCA no PNCP</title>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> o scriptcase já importa essa library -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             margin: 0;
