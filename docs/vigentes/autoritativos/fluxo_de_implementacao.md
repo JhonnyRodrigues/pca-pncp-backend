@@ -556,6 +556,11 @@ dicionário de campos, erro seguro, sanitização e imutabilidade obedecem à
 [Especificação de logs estruturados](especificacao_de_logs_estruturados.md)
 (`DI-006`, `DI-009` e `DI-010`).
 
+Nos eventos emitidos depois da decisão, `context.decisao` identifica
+explicitamente `PUBLICAR`, `RETIFICAR`, `EXCLUIR_PCA` ou `NENHUMA_ACAO`.
+`action` continua descrevendo a etapa técnica, e somente `PAC_HISTORICOS`
+afirma fatos de negócio auditáveis.
+
 O backend produz os eventos por PSR-3 e os mantém ordenados somente em memória.
 O lote para exportação é preparado sem modificar os eventos originais.
 
@@ -586,6 +591,12 @@ transação. A ação detalhada permanece no JSON, e
 `SEGURANCA_LOG.ACTION` recebe `execute`. A serialização usa escapes Unicode,
 preserva mapas vazios como objetos JSON e não trunca, fragmenta ou converte o
 texto para ISO-8859-1.
+
+A Blank serializa explicitamente o resultado conhecido antes de iniciar o
+registro técnico. A adaptação dos resultados unitários usa chamada direta,
+sem callback identificado apenas por texto, porque o compilador do hospedeiro
+pode renomear funções. Uma falha inesperada do registrador é contida e se torna
+aviso seguro, sem substituir o resultado funcional já preparado.
 
 Falha recuperável de serialização ou gravação interrompe os registros
 restantes, preserva o resultado e gera aviso separado. Registros já tentados

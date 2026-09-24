@@ -29,4 +29,5 @@ Quando o precheck aceitar o estado, mas a migração ainda não tiver sido
 executada, use `PRECHECK_CONFIRMADO`. Essa situação não significa aplicação e
 deve continuar com DML igual a `Não`.
 
-Quando o precheck retornar linhas DIVERGENTE significam apenas “o estado final ainda não existe”
+Uma linha `DIVERGENTE` bloqueia a migration. Ela não deve ser interpretada como
+estado ausente nem corrigida pelo operador durante a execução do script.

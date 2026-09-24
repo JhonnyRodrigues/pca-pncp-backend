@@ -36,6 +36,13 @@ mapas sem conteúdo permanecem vazios e `ipAddress` pode ser `null`.
 | `metadata` | objeto | Medidas e classificações sanitizadas ou mapa vazio. |
 | `ipAddress` | string ou `null` | IP confiável quando disponível e válido. |
 
+Depois que o Domain determina uma decisão para a unidade, os eventos técnicos
+que carregam seu contexto incluem `context.decisao` com exatamente um dos
+valores `PUBLICAR`, `RETIFICAR`, `EXCLUIR_PCA` ou `NENHUMA_ACAO`. Esse campo
+explica qual decisão orientou o processamento; ele não substitui `action`, que
+continua identificando a operação técnica do evento, nem cria auditoria de
+negócio.
+
 ## 3. Erro seguro
 
 `action` identifica a operação e nunca é substituída pelo código da falha. Em
@@ -60,6 +67,19 @@ serializáveis.
 
 A correlação necessária ao diagnóstico deve usar os campos próprios do
 envelope e dados técnicos seguros, sem transportar conteúdo externo integral.
+
+Quando uma publicação aceita pelo PNCP trouxer `Location` incompatível com o
+contrato conhecido, o evento `PUBLICAR_PCA_PNCP` pode incluir apenas em
+`metadata`:
+
+- `locationCategoria`: classificação estável como `AUSENTE`, `MULTIPLO`,
+  `VAZIO`, `RELATIVO_FORA_DO_CONTRATO`,
+  `ABSOLUTO_HOST_OFICIAL_FORA_DO_CONTRATO` ou
+  `ABSOLUTO_FORA_DO_CONTRATO`;
+- `quantidadeLocations`: quantidade de valores recebidos no header.
+
+Essa classificação auxilia o diagnóstico sem registrar URL, host não
+autorizado, CNPJ, query string ou o valor bruto de qualquer header.
 
 O backend não gera, normaliza ou substitui `correlationId`. A Blank encaminha o
 `X-Request-ID` já gerado pelo servidor HTTP, e o acumulador aceita somente UUID

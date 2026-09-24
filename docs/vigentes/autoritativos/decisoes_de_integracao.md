@@ -924,7 +924,7 @@ testes contratuais aplicáveis.
 7. Não há compensação automática.
 8. Operações usam lotes, sem particionamento acima de 1000 na V1.
 
-##### DI-009 — Compatibilidade do `Location` na homologação
+##### DI-009 — Compatibilidade do `Location` por ambiente
 
 1. A base canônica de transporte permanece
    `https://treina.pncp.gov.br/api/pncp`, conforme o manual vigente; leitura,
@@ -933,12 +933,20 @@ testes contratuais aplicáveis.
 2. O gate real da Sprint 5.9 comprovou que a homologação pode responder a uma
    publicação aceita com `Location` absoluto iniciado por
    `https://treina.pncp.gov.br/pncp-api`.
-3. O parser pode reconhecer esse segundo prefixo somente em `HOMOLOGACAO`,
+3. O parser pode reconhecer esse segundo prefixo em `HOMOLOGACAO`,
    preservando HTTPS, host oficial, caminho do recurso, CNPJ, ano, sequencial
    positivo e ausência de query string ou fragmento.
-4. Produção não herda esse prefixo alternativo sem evidência própria. URL livre
-   ou prefixo configurável externamente permanece proibido.
-5. O corpo da resposta não é fonte alternativa do sequencial.
+4. A recuperação assistida da Sprint 9.4 comprovou evidência própria de
+   produção: três publicações responderam HTTP 201, criaram os candidatos
+   exatos e não tiveram o sequencial extraído pelo prefixo então aceito. Por
+   isso, o parser também reconhece em `PRODUCAO` o prefixo oficial exato
+   `https://pncp.gov.br/pncp-api`, com as mesmas validações do item anterior.
+5. URL livre, host alternativo e prefixo configurável externamente permanecem
+   proibidos. O prefixo de treinamento não é aceito em produção e vice-versa.
+6. O corpo da resposta não é fonte alternativa do sequencial.
+7. Se um `Location` ainda for incompatível, o evento técnico pode registrar
+   somente sua categoria sanitizada e a quantidade de valores recebidos. O
+   valor bruto, CNPJ, query string e demais dados do header não são registrados.
 
 ##### DI-009 — Justificativas, decimais e segurança
 
@@ -1021,6 +1029,11 @@ testes contratuais aplicáveis.
 - a regressão de encerramento da Sprint 8.3 manteve contratos locais, adapters,
   composição, apresentação e integração verdes, sem incompatibilidade ou novo
   contrato relevante; esta evidência não altera semanticamente a decisão;
+- em 24/09/2026, a Sprint 9.4 comprovou em produção três respostas HTTP 201 com
+  efeito criado e candidatos exatos, embora o OpenAPI oficial 3.0.1/versão 1.0
+  consultado naquele dia não declarasse HTTP 201 nem o header `Location` para
+  `incluirPlano`; a correção local passou a reconhecer o prefixo oficial
+  estrito `https://pncp.gov.br/pncp-api`, sem ampliar hosts ou relaxar o caminho;
 - reabrir somente o contrato incompatível com a evidência real.
 
 #### DI-009 — Regras de negócio relacionadas
@@ -1041,6 +1054,9 @@ e da execução dos gates de ambiente e contrato.
   somente se houver incompatibilidade externa concreta.
 - Revisada em 31/08/2026 para adotar a justificativa institucional fixa na
   exclusão integral, sem alterar o contrato HTTP ou os adapters PNCP.
+- Revisada em 24/09/2026 a partir da evidência real da Sprint 9.4 para aceitar
+  o segundo prefixo oficial estrito de `Location` em produção e diagnosticar
+  incompatibilidades futuras sem registrar o header bruto.
 
 ---
 
@@ -1202,7 +1218,9 @@ os gates reais permanecem pendentes, conforme o
    provisória curta, localiza de forma unívoca o ID gerado pelo trigger
    `TR_SEGURANCA_LOG` e usa `UpdateClob` para gravar o JSON integral em
    `SGI.SEGURANCA_LOG.DESCRIPTION`. `ACTION` recebe `execute`; a operação
-   detalhada permanece em `action` no JSON.
+   detalhada permanece em `action` no JSON. Depois da decisão, os eventos que
+   possuem contexto da unidade incluem `context.decisao`; o campo não substitui
+   `action` nem converte o log técnico em auditoria.
 6. A serialização usa escapes Unicode, sem truncar, fragmentar ou converter
    o JSON para ISO-8859-1. Campos que representam mapas vazios são objetos
    JSON vazios. O contrato institucional do envelope permanece inalterado.
@@ -1223,7 +1241,10 @@ os gates reais permanecem pendentes, conforme o
     serializando explicitamente os campos públicos do ViewModel e os
     resultados unitários. Os eventos técnicos permanecem no servidor. Erros
     de transporte têm mensagens fixas, sem exceções ou respostas brutas e sem
-    repetição automática da publicação.
+    repetição automática da publicação. O resultado é preparado antes do
+    registro técnico, e a serialização unitária usa chamada direta compatível
+    com a renomeação de funções pelo compilador Scriptcase. Falha inesperada do
+    registrador produz aviso seguro e não substitui o resultado conhecido.
 13. `sc_log_add` não integra mais o fluxo do PCA. O gate real demonstrou que a
     instalação hospedeira constrói literal incompatível com o envelope maior
     que 4.000 bytes e emite erro HTML antes da resposta segura.
@@ -1314,6 +1335,10 @@ distribuição, sem antecipar essas etapas durante a criação deste documento.
   antecipar a compilação no Scriptcase nem os gates reais de logs e pacote.
 - Construção e verificação local do pacote concluídas em 18/09/2026 no
   Microciclo 5; instalação e smoke no hospedeiro continuam pendentes.
+- Revisada em 23/09/2026 pelo Microciclo corretivo 3A da Sprint 9.4 para
+  preservar o resultado conhecido na Blank e identificar explicitamente a
+  decisão no contexto dos eventos técnicos, sem reabrir a observabilidade
+  operacional completa da Sprint 9.2.
 
 ## 6. Matriz de decisões substituídas
 

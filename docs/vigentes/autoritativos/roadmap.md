@@ -970,7 +970,8 @@ provisionados fora do webroot e da release, com leitura mínima pelo Apache/PHP.
 O perfil `PRODUCAO`, seus parâmetros e o localizador persistente foram validados
 sem executar Oracle, PNCP, Blank, release ou smoke. Em razão da decisão de
 escopo registrada nesta fase, a Sprint 9.2 não impediu o avanço das sprints
-seguintes. A Sprint 9.3 foi concluída e a Sprint 9.4 é a próxima.
+seguintes. As Sprints 9.3 e 9.4 foram posteriormente concluídas; a Sprint 9.5
+é a próxima.
 
 #### Sprint 9.2 — Observabilidade e segurança operacional
 
@@ -1004,7 +1005,7 @@ instalada sem Composer em
 a Blank anterior foram removidos do webroot; e a nova Blank foi compilada,
 publicada e aberta pelo menu do SGI. O botão **Publicar** não foi acionado e a
 abertura da interface não substitui o smoke funcional da Sprint 9.5. A Sprint
-9.4 é a próxima e exige planejamento próprio.
+9.4 foi posteriormente concluída conforme registrado abaixo.
 
 #### Sprint 9.4 — Migração assistida e recuperação
 
@@ -1012,11 +1013,54 @@ abertura da interface não substitui o smoke funcional da Sprint 9.5. A Sprint
 - documentar recuperação após efeito PNCP e falha Oracle;
 - tratar resíduos de homologação e produção sem adoção automática.
 
+**Correção operacional incorporada em 23/09/2026:** uma execução observada no
+`validaSGI` confirmou a publicação e a convergência local, mas a Blank descartou
+o resultado conhecido e respondeu `INTERROMPIDA/FALHA_INESPERADA` durante a
+adaptação posterior. A mesma evidência mostrou que os eventos técnicos não
+identificam explicitamente a decisão de negócio. O plano da Sprint 9.4 passa a
+incluir um microciclo corretivo limitado à preservação do resultado na fronteira
+Scriptcase, ao diagnóstico sanitizado da etapa e ao campo seguro
+`context.decisao`. A correção não reabre o escopo completo da Sprint 9.2, não
+altera regras de negócio, não transforma logs técnicos em auditoria e deve ser
+concluída antes da reconciliação pelo fluxo normal.
+
+**Estado do PCA:** Sprint 9.4 concluída em 24/09/2026. Os exercícios 2026 e
+2027 foram integralmente inventariados sem adoção automática. Os três PCAs
+oficiais de 2026 foram vinculados, mas sua reconciliação permanece como
+bloqueio nominal aceito pelo mantenedor: aquela tentativa recebeu HTTP 403 no
+`DELETE`, o Oracle sofreu rollback e a fotografia posterior ficou inalterada.
+Uma operação manual posterior com a mesma credencial funcionou após nova
+autenticação; portanto, o bloqueio não comprova falta permanente de permissão e
+exige novo diagnóstico antes de qualquer repetição. Em 2027, três publicações
+individuais próprias com resultado HTTP 201 incerto foram recuperadas pelos
+vínculos comprovados e depois concluíram como `NENHUMA_ACAO`. As correções 3A e
+7A foram implantadas; o gate, a Blank de inventário, a configuração temporária
+e os arquivos de transferência foram retirados dos caminhos ativos e
+eliminados. O runbook de recuperação passou no exercício de mesa. A Sprint 9.5
+é a próxima e exige planejamento próprio. Depois do encerramento, os
+procedimentos Oracle 8 e 9 ausentes foram provisionados por migration e a
+estratégia `INDIVIDUAL` foi formalizada por versão posterior, ambas com
+postchecks conformes e sem nova chamada ao PNCP.
+
 #### Sprint 9.5 — Prontidão de produção e suporte
 
 - executar checklist operacional e smoke test autorizado;
 - validar responsáveis, contatos, monitoramento e rotina de suporte;
-- registrar limitações aceitas e critérios de reabertura.
+- registrar limitações aceitas e critérios de reabertura;
+- criar catálogo operacional dos códigos públicos, com significado, efeito,
+  evidência necessária e ação segura do suporte;
+- completar o diagnóstico sanitizado de transporte com `curl_errno`, categoria
+  estável de falha e duração da tentativa, mantendo `status_http` somente quando
+  houve resposta HTTP;
+- verificar os procedimentos Oracle exigidos pela auditoria de negócio e
+  investigar a alternância observada entre HTTP 403 e sucesso após renovar o
+  token, além da diferença entre a duração percebida na Blank e no backend.
+
+A Sprint 9.5 permanece como encerramento da Fase 9. Seu smoke deve verificar a
+correção incorporada à Sprint 9.4; ela não é o estágio para descobrir ou
+implementar novamente esse corretivo. Os incrementos de suporte acima nasceram
+de evidências novas de produção e não reabrem dashboard, métricas, alertas ou a
+política de retenção dispensados com a Sprint 9.2.
 
 ## 6. Gates das decisões de integração
 

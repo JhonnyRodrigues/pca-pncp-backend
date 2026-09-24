@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 22/09/2026
+**Atualizado em:** 24/09/2026
 
 ## Limites de autoridade
 
@@ -32,12 +32,14 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 9.3.
+- A última sprint concluída é a Sprint 9.4.
 - A Sprint 9.2 permanece no roadmap como guia, mas não será executada neste
   ciclo por decisão de escopo do mantenedor. Ela não é pendência nem bloqueio.
 - A Sprint 9.3 — Empacotamento e implantação está concluída.
-- A Sprint 9.4 — Migração assistida e recuperação é a próxima para
-  planejamento.
+- A Sprint 9.4 — Migração assistida e recuperação está concluída, com o
+  bloqueio nominal aceito de 2026 e o corretivo de pré-requisitos Oracle
+  registrados abaixo.
+- A Sprint 9.5 — Prontidão de produção e suporte é a próxima para planejamento.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.
@@ -306,8 +308,72 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A abertura da tela conclui a verificação de implantação, mas não constitui
   smoke funcional. O botão **Publicar** não foi acionado; nenhuma publicação,
   conexão Oracle ou chamada PNCP foi executada nesta sprint.
-- A Sprint 9.3 foi concluída em 22/09/2026. A Sprint 9.4 — Migração assistida e
-  recuperação é a próxima e exige plano e autorização próprios.
+- A Sprint 9.3 foi concluída em 22/09/2026. A Sprint 9.4 foi posteriormente
+  concluída conforme as evidências seguintes.
+
+## Evidências da Sprint 9.4
+
+- O gate temporário inventariou 2026 e 2027 somente por leitura, com escrita de
+  logs, Oracle e PNCP desabilitada. Candidatos desconhecidos foram preservados
+  até a confirmação humana de procedência.
+- Os PCAs oficiais de 2026 foram vinculados em modo `INDIVIDUAL`: UASG
+  205/sequencial 4, UASG 207/sequencial 2 e UASG 210/sequencial 3. A execução
+  única de reconciliação foi interrompida no primeiro `DELETE` de itens com
+  HTTP 403 e código `PNCP_EXCLUSAO_ITENS_NAO_AUTORIZADA`. Não houve inclusão,
+  o Oracle sofreu rollback e a fotografia posterior permaneceu idêntica. O
+  mantenedor aceitou nominalmente esse bloqueio. Uma exclusão manual posterior
+  com a mesma credencial funcionou depois de renovar o token, invalidando a
+  hipótese de falta permanente de permissão. A execução de 2026 não deve ser
+  repetida sem novo diagnóstico, fotografia atual e autorização específica.
+- O PCA consolidado manual de 2027 foi removido conscientemente pelo mantenedor
+  antes da adoção definitiva da estratégia `INDIVIDUAL`. A publicação seguinte
+  criou três candidatos próprios, mas as respostas HTTP 201 ficaram incertas
+  porque o prefixo absoluto do `Location` não era reconhecido.
+- O inventário de SHA-256
+  `66fe4bfc01865dd2967b1801eab44abe9c66c36d4be3b4246b4116f27b709d69`
+  comprovou igualdade exata: UASG 205/sequencial 2 com 260 itens, UASG
+  207/sequencial 3 com 9 itens e UASG 210/sequencial 4 com 165 itens. Após o
+  vínculo assistido, a correlação `eda907a5-a7d6-45ca-9e46-60f1e9cd73e7`
+  concluiu as três unidades como `NENHUMA_ACAO`, sem escrita PNCP, e confirmou
+  localmente os planos.
+- A correção 3A preserva o resultado conhecido na Blank e inclui
+  `context.decisao` nos eventos finais. A execução real demonstrou a mensagem
+  segura e as decisões. A correção 7A reconhece em produção somente o prefixo
+  oficial estrito `https://pncp.gov.br/pncp-api`; formatos incompatíveis geram
+  apenas categoria sanitizada, sem registrar o header bruto.
+- O pacote 7A possui SHA-256
+  `2d1760221bd5cd0d080827c7483c41d1de8215ad3f83663ced504caf4c8b88a3`
+  e manifesto SHA-256
+  `6ff0b8d4118d86d24f340a745a499277a6de7ae61cb09387b81cafb1a3e192ba`.
+  Foi validado em diretório candidato, promovido por troca integral e carregado
+  como `www-data`; o backend anterior permaneceu disponível para rollback.
+- A regressão local aprovou 960 testes/4.600 asserções; os contratos Sprint 9.4
+  aprovaram 36 testes/116 asserções. Lint, Composer, PSR-4 estrito e pacote
+  autocontido também foram validados.
+- O exercício de mesa aprovou a matriz de recuperação sem induzir falha em
+  produção. A Blank e o gate temporários, `sprint94.php`, os arquivos de
+  transferência e a quarentena foram removidos. Os perfis permanentes e os
+  backends de rollback não foram alterados.
+- Depois do encerramento, uma retificação real de 2027 recompôs no PNCP os itens
+  949, 950 e 951 da UASG 205/sequencial 2. A leitura posterior confirmou a
+  quantidade novamente em 260. A escrita externa foi concluída, mas o Oracle
+  recusou o histórico porque `PAC_PROCEDIMENTOS` não possuía o procedimento 8;
+  o procedimento 9 também estava ausente. A falta desse registro histórico foi
+  aceita pelo mantenedor e não será reparada retroativamente.
+- O corretivo criou migrations posteriores para assegurar os procedimentos 8 e
+  9 e formalizar a estratégia `INDIVIDUAL`, preservando a migration consolidada
+  já aplicada. Também adicionou uma consulta somente leitura dos eventos por
+  correlação. Em 24/09/2026, ambas as migrations foram aplicadas em produção
+  com postchecks conformes: dois procedimentos presentes e uma configuração
+  individual conforme. Não houve chamada à Blank nem ao PNCP.
+- A Sprint 9.5 deve planejar um catálogo operacional de códigos e melhorar os
+  eventos de transporte com `curl_errno`, categoria sanitizada e duração da
+  tentativa. `status_http` continuará ausente quando não houver resposta HTTP.
+  Também deve investigar o HTTP 403 que desapareceu após nova autenticação e a
+  diferença entre o tempo percebido pela Blank e o medido no backend. Esse
+  escopo corretivo não reabre dashboards, alertas ou retenção da Sprint 9.2.
+- A Sprint 9.4 foi concluída em 24/09/2026. A Sprint 9.5 é a próxima, mas ainda
+  exige plano e autorização próprios.
 
 ## Evidências do Microciclo 5 da Sprint 8.5
 
@@ -1051,8 +1117,9 @@ As evidências não autoritativas da Sprint 5.1 permanecem em
   o servidor deve provisionar `PCA_PNCP_PROFILE_REGISTRY_FILE` com o caminho
   absoluto do índice antes da implantação.
 - A exposição dos eventos pela fachada e sua persistência pela Blank por meio
-  do `RegistradorEventosTecnicosScriptcase` têm contrato e implementação local
-  aprovados na Sprint 8.5; a comprovação real do corretivo permanece pendente.
+  do `RegistradorEventosTecnicosScriptcase` têm contrato e implementação
+  aprovados. A correção 3A foi comprovada no fluxo real da Sprint 9.4; a 7A foi
+  instalada e deve ser conferida sem induzir nova escrita no smoke da 9.5.
 - Uma falha fatal anterior ao retorno à Blank pode impedir a persistência dos
   eventos acumulados em memória; essa limitação foi aceita conscientemente.
 

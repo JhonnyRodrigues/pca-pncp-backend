@@ -117,6 +117,48 @@ final class PcaPublicarBlankTest extends TestCase
         $this->assertStringNotContainsString("'eventos' =>", $this->codigo);
     }
 
+    public function testSerializacaoDeUnidadesNaoDeveDependerDeCallbackTextual(): void
+    {
+        $this->assertDoesNotMatchRegularExpression(
+            '/array_map\s*\(\s*[\'\"]pca_publicar_serializar_resultado_unidade[\'\"]/',
+            $this->codigo
+        );
+        $this->assertMatchesRegularExpression(
+            '/foreach\s*\(\s*\$resultado->getResultadosUnitarios\(\)\s+as\s+\$resultadoUnitario\s*\)/',
+            $this->codigo
+        );
+    }
+
+    public function testDevePrepararResultadoAntesDoRegistroTecnico(): void
+    {
+        $serializacao = strpos(
+            $this->codigo,
+            '$resultadoSerializado = pca_publicar_serializar_resultado('
+        );
+        $registro = strpos(
+            $this->codigo,
+            'new \Semae\Pca\RegistradorEventosTecnicosScriptcase()'
+        );
+        $resposta = strpos(
+            $this->codigo,
+            "'resultado' => \$resultadoSerializado"
+        );
+
+        $this->assertIsInt($serializacao);
+        $this->assertIsInt($registro);
+        $this->assertIsInt($resposta);
+        $this->assertLessThan($registro, $serializacao);
+        $this->assertLessThan($resposta, $registro);
+        $this->assertStringContainsString(
+            'O resultado foi preservado, mas os eventos t&eacute;cnicos ',
+            $this->codigo
+        );
+        $this->assertStringContainsString(
+            'n&atilde;o puderam ser registrados.',
+            $this->codigo
+        );
+    }
+
     public function testDeveRegistrarEventosIntegraisEInterromperAposFalha(): void
     {
         $this->assertStringContainsString(

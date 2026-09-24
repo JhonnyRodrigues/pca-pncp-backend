@@ -271,7 +271,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 
 | Arquivo | Função |
 | --- | --- |
-| `Pncp/Escrita/EscritorPncpAdapter.php` | Executa publicação, inclusão e exclusões em chamada única, classifica o resultado e registra eventos seguros. |
+| `Pncp/Escrita/EscritorPncpAdapter.php` | Executa publicação, inclusão e exclusões em chamada única, classifica o resultado, extrai o sequencial de `Location` estrito por ambiente e registra somente diagnósticos sanitizados. |
 
 ### PNCP — autenticação e observabilidade
 
@@ -299,6 +299,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `PublicadorPcaScriptcase.php` | Única API conhecida pela Blank; valida o request ID, seleciona e carrega o perfil externo, materializa o CNPJ e aciona um grafo novo por chamada. Preserva a operação que devolve o ViewModel e oferece uma variante que também devolve, separadamente, eventos sanitizados e eventual aviso técnico. |
 | `ResultadoPublicacaoPcaScriptcase.php` | Saída imutável da variante com eventos: ViewModel existente, envelopes escalares e aviso técnico seguro. |
 | `RegistradorEventosTecnicosScriptcase.php` | Fachada pública que recebe o lote já exportado e solicita seu registro técnico sem expor SQL ou detalhes internos à Blank. |
+| `integracao/README.md` | Explica a fronteira com o Scriptcase, a publicação da Blank e os limites de responsabilidade e segurança. |
 | `integracao/scriptcase/PCA_PUBLICAR_B/onExecute.php` | Adaptação versionada da Blank: distingue a navegação do menu do POST JSON de publicação, carrega a entrada ao backend (`pca-pncp-backend/vendor/autoload.php`), chama as fachadas públicas, renderiza o resultado seguro e oferece ajuda estática ao operador. |
 
 ## 5. Presentation
@@ -468,7 +469,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `Infrastructure/Pncp/Leitura/PaginacaoCandidatosPncpTest.php` | Listagem completa, filtro por UASG, candidato único com itens e proibição de adoção automática. |
 | `Infrastructure/Pncp/Leitura/AusenciaDefinitivaPncpTest.php` | Prova em duas consultas, conflitos de vínculo e falhas que impedem concluir ausência. |
 | `Infrastructure/Pncp/Leitura/RetryLeituraPncpTest.php` | Duas tentativas máximas, `Retry-After`, tempo determinístico, classificação e eventos sanitizados. |
-| `Infrastructure/Pncp/Escrita/PublicacaoPncpTest.php` | Requisição de publicação e extração estrita do sequencial pelo `Location`. |
+| `Infrastructure/Pncp/Escrita/PublicacaoPncpTest.php` | Requisição de publicação, prefixos oficiais de `Location` por ambiente, rejeições estritas e diagnóstico sanitizado. |
 | `Infrastructure/Pncp/Escrita/EscritaItensPncpTest.php` | Inclusão e exclusão de itens em coleção integral, sem particionamento ou retry. |
 | `Infrastructure/Pncp/Escrita/ExclusaoPcaPncpTest.php` | Exclusão integral, justificativa preservada e status aceito exato. |
 | `Infrastructure/Pncp/Escrita/MatrizFalhasEscritaPncpTest.php` | Matriz das quatro escritas, falhas antes e depois do despacho e envelope sanitizado. |
@@ -645,6 +646,8 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | --- | --- |
 | `composer.json` | Dependências, PSR-4 e comandos ativos. |
 | `composer.lock` | Versões resolvidas das dependências. |
+| `tools/README.md` | Distingue ferramentas versionadas de resultados gerados, documenta o fluxo normal de release e limita a repetição de gates encerrados. |
+| `tests/README.md` | Orienta a suíte padrão, contratos opt-in e cuidados antes de executar qualquer gate com recurso real. |
 | `tools/package/build.php` | Constrói em `build/` o pacote isolado com código, dependências de produção e manifesto de integridade. |
 | `tools/package/verify.php` | Verifica hashes, topologia, conteúdo permitido e autoload do pacote gerado. |
 | `tools/package/archive.php` | Exige commit limpo, compacta o pacote validado com data de geração e commit no nome, confere sua topologia e calcula o SHA-256. |
@@ -672,9 +675,17 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `database/migrations/V202609181816__unidades_orcamentarias_pca.sql` | Insere quatro unidades orçamentárias, aceita estado já conforme e recusa conflitos de identidade, UASG ou lotação. |
 | `database/checks/V202609181816__unidades_orcamentarias_pca_precheck.sql` | Classifica as quatro unidades como ausentes, conformes, divergentes ou sem lotação correspondente. |
 | `database/checks/V202609181816__unidades_orcamentarias_pca_postcheck.sql` | Exige quatro unidades e lotações conformes depois da migração. |
+| `database/migrations/V202609241700__procedimentos_publicacao_pca.sql` | Assegura os procedimentos 8 e 9 da auditoria de negócio, recusando colisões de identificador ou nome. |
+| `database/checks/V202609241700__procedimentos_publicacao_pca_precheck.sql` | Classifica os procedimentos 8 e 9 como ausentes, conformes ou divergentes antes da migration. |
+| `database/checks/V202609241700__procedimentos_publicacao_pca_postcheck.sql` | Exige os procedimentos 8 e 9 com nomes exatos depois da migration. |
+| `database/migrations/V202609241701__estrategia_individual_publicacao_pca.sql` | Registra a transição da estratégia consolidada original para `INDIVIDUAL`, preservando a baseline aplicada. |
+| `database/checks/V202609241701__estrategia_individual_publicacao_pca_precheck.sql` | Distingue estratégia já conforme, transição necessária, ausência e divergência. |
+| `database/checks/V202609241701__estrategia_individual_publicacao_pca_postcheck.sql` | Exige a configuração final da estratégia individual com descrição atualizada. |
+| `database/queries/seguranca_log_por_correlacao.sql` | Localiza por bind os eventos técnicos de uma correlação e apresenta campos operacionais sanitizados. |
 | `database/seeds/README.md` | Delimita seeds descartáveis de DEV/HML e impede seu uso para configuração obrigatória, produção ou segredos. |
 | `database/deployments/README.md` | Define o conteúdo seguro do registro manual provisório de implantações. |
 | `database/deployments/homologacao.md` | Registra migrações aplicadas ou requisitos já satisfeitos no banco de homologação. |
+| `database/deployments/producao.md` | Registra migrations aplicadas ou requisitos já satisfeitos no banco de produção. |
 
 ## 9. Documentação vigente
 
@@ -687,7 +698,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `docs/vigentes/autoritativos/especificacao_de_logs_estruturados.md` | Consolida o envelope institucional, o significado dos campos e a proteção de dados dos eventos técnicos. |
 | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` | Descreve a colaboração vigente entre camadas, casos de uso e Ports. |
 | `docs/vigentes/autoritativos/roadmap.md` | Organiza a ordem de implementação, dependências e condições de avanço. |
-| `docs/vigentes/apoio/arquitetura.md` | Explica limites, responsabilidades e direção das dependências arquiteturais. |
+| `docs/vigentes/apoio/arquitetura.md` | Explica limites, responsabilidades, direção das dependências e fronteiras entre configuração, segredos e mapeamentos físicos. |
 | `docs/vigentes/apoio/glossario.md` | Mantém o índice semântico da linguagem de negócio, integração e arquitetura. |
 | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
 | `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |

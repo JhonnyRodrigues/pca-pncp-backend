@@ -17,7 +17,7 @@ negócio, não redefine o modelo conceitual e não aprova decisões de integraç
 A autoridade é distribuída da seguinte forma:
 
 | Assunto | Fonte autoritativa |
-|---|---|
+| --- | --- |
 | Comportamento normativo do negócio | [Regras de negócio](../autoritativos/regras_de_negocio.md) |
 | Conceitos, identidades, relações e invariantes | [Modelo de domínio](../autoritativos/modelo_de_dominio.md) |
 | Portas, integração, composição e operação | [Decisões de integração](../autoritativos/decisoes_de_integracao.md) |
@@ -167,7 +167,7 @@ Uma Port é um contrato interno definido pela camada que necessita da
 capacidade. Sua implementação concreta é um Adapter.
 
 | Capacidade | Ownership do contrato | Implementação |
-|---|---|---|
+| --- | --- | --- |
 | Reconstruir identidades e fotografias de Plano; registrar confirmação orientada à intenção | Domain — `PlanoRepository` | Infrastructure |
 | Autenticar no PNCP | Application | Infrastructure |
 | Observar PCA conhecido e candidatos de diagnóstico | Application | Infrastructure |
@@ -190,7 +190,7 @@ proprietária de logging.
 Quatro conceitos precisam permanecer separados:
 
 | Conceito | Camada ou fronteira conceitual |
-|---|---|
+| --- | --- |
 | Identidade e fotografia do Plano | Domain |
 | Política pura de decisão | Domain |
 | Orquestração e unidade externa de publicação | Application |
@@ -209,7 +209,9 @@ Application produz intenções e comandos tipados. Infrastructure converte esses
 contratos para as representações exigidas pelos sistemas externos. Um adapter
 não deve receber um Aggregate completo apenas para descobrir o que fazer.
 
-## 7. Fachada, Composition Root e Scriptcase
+## 7. Fachada, Composition Root, Scriptcase e configuração externa
+
+### 7.1 Fronteira pública e composição
 
 O backend é um produto independente consumido em processo pela aplicação
 Blank:
@@ -251,10 +253,219 @@ Controller, Application e ViewModel sem normalização ou regeneração.
 Configuração, ciclo de vida de recursos, distribuição e tratamento global de
 falhas permanecem detalhados na `DI-010`.
 
+### 7.2 Do localizador ao grafo de objetos
+
+Antes de montar os objetos que executarão a publicação, o backend precisa
+descobrir e validar a configuração da implantação. O fluxo é:
+
+```text
+PCA_PNCP_PROFILE_REGISTRY_FILE
+            │
+            ▼
+       registro.php
+            │  procura o SERVER_NAME literal
+            ▼
+        perfil.php
+            │  carrega o array
+            ▼
+CompositionRootPublicacaoPca
+    ├── PerfilPublicacaoPca valida estrutura, tipos e valores
+    └── wiring produz o grafo de objetos da execução
+```
+
+A variável de ambiente não guarda o perfil: ela informa somente o caminho
+absoluto do registro. O `registro.php` funciona como uma **allowlist**, isto é,
+uma lista explícita dos servidores autorizados, e associa cada `SERVER_NAME` ao
+seu perfil. O perfil reúne os valores daquela implantação. Na entrada do
+Composition Root, `PerfilPublicacaoPca` transforma o array em configuração
+tipada e rejeita estrutura incompleta, chave adicional ou valor inválido antes
+de qualquer I/O externo. Somente depois o Composition Root realiza o wiring das
+implementações.
+
+O nome **perfil** é semântico neste projeto porque o arquivo agrupa os valores
+de uma implantação. Não é uma convenção universal: outros projetos usam nomes
+como `config`, `settings` ou `environment`. Já **registro** descreve o papel de
+índice que localiza um perfil sem repetir seu conteúdo.
+
+Nesse contexto, **externo** significa fora do repositório, da release e do
+webroot; o arquivo ainda pode estar no mesmo servidor. Registro e perfil não
+são APIs da Blank: `PublicadorPcaScriptcase` os localiza internamente e a Blank
+não escolhe schema, tabela nem caminho de arquivo.
+
+### 7.3 Segredo, configuração da implantação e mapeamento físico
+
+Essas três categorias podem coexistir no mesmo perfil atual, mas não significam
+a mesma coisa:
+
+| Categoria | Significado | Exemplos no projeto | Proteção necessária |
+| --- | --- | --- | --- |
+| Segredo | Valor cujo conhecimento concede acesso ou aumenta materialmente o risco de abuso. | Login e senha do PNCP. | Não versionar, não registrar em logs e limitar a leitura. |
+| Configuração da implantação | Valor que varia conforme o ambiente no qual a mesma aplicação é instalada. | Ambiente, CNPJ autorizado, URL, timeouts, fuso, charset e caminho do CA bundle. | Validar, controlar alterações e expor apenas o necessário. |
+| Mapeamento físico Oracle | Tradução entre os conceitos usados pelo código e os nomes ou literais do banco. | Schema, tabelas, colunas e valor que representa um registro ativo. | Validar como identificadores permitidos; manter fora de Domain e Application. |
+
+Nem toda configuração é segredo. O caminho e o conteúdo público de um CA
+bundle, por exemplo, não concedem acesso ao PNCP; sua integridade ainda importa
+porque ele participa da validação TLS. Da mesma forma, nomes de tabelas e
+colunas costumam ser detalhes internos sensíveis à operação, mas não são
+credenciais por definição.
+
+O formato PHP externo foi escolhido pela `DI-010` para este projeto. Ele permite
+retornar arrays, usar `__DIR__` para caminhos vizinhos e ser carregado sem nova
+dependência. Em contrapartida, é um arquivo executável: deve ser gravado apenas
+por administradores autorizados, lido pelo usuário do PHP e validado antes de
+ser transformado em objetos.
+
+Colocar os mapeamentos em classes da Infrastructure protege as camadas internas
+porque apenas o adapter Oracle conhece os nomes físicos. Isso **não exige**, por
+si só, que esses nomes venham de um arquivo externo: um mapeamento estável
+poderia continuar na Infrastructure e ser versionado. A localização externa é
+uma decisão adicional sobre implantação e segurança, não uma consequência
+automática da Clean Architecture.
+
+### 7.4 Inversão de dependência no repositório
+
+**Inversão de dependência** é o princípio segundo o qual regras de alto nível
+dependem de abstrações estáveis, enquanto detalhes externos dependem desses
+contratos internos. Em linguagem simples: o núcleo declara de que capacidade
+precisa; Oracle, HTTP ou outro mecanismo se adapta a essa necessidade.
+
+Neste repositório, o fluxo de chamadas em tempo de execução vai da Application
+para o Repository, mas a dependência do código aponta para dentro:
+
+```text
+Application ── chama ──► PlanoRepository ◄── implementa ── OraclePlanoRepository
+                         contrato do Domain                  adapter da Infrastructure
+```
+
+- [`PlanoRepository`](../../../src/Domain/Ports/PlanoRepository.php) declara
+  operações com a linguagem do negócio, como `listarIdentidades()` e
+  `reconstruirFotografiaVigente()`, sem SQL ou ADOdb;
+- [`PreparadorExecucaoPublicacaoPca`](../../../src/Application/UseCases/PublicarPca/PreparadorExecucaoPublicacaoPca.php)
+  usa esse contrato para coordenar o caso de uso, sem escolher Oracle;
+- [`OraclePlanoRepository`](../../../src/Infrastructure/Oracle/Plano/OraclePlanoRepository.php)
+  depende de `PlanoRepository`, implementa suas operações e traduz a chamada
+  para SQL sobre a conexão ADOdb;
+- [`MapeamentoPlanosOracle`](../../../src/Infrastructure/Oracle/Plano/MapeamentoPlanosOracle.php)
+  valida e fornece os identificadores físicos usados somente pelo adapter.
+
+Inversão de dependência não é sinônimo de **injeção de dependências**. A
+primeira define para onde as dependências de código devem apontar; a segunda é
+o mecanismo usado para entregar uma implementação concreta a quem depende do
+contrato. O Composition Root injeta `OraclePlanoRepository` onde se espera um
+`PlanoRepository`.
+
+### 7.5 Exemplos corretos e contraexemplos
+
+O desenho correto mantém linguagem de negócio nas camadas internas e detalhes
+físicos no adapter:
+
+```php
+// Application: depende da capacidade, não de Oracle.
+$identidades = $this->planoRepository->listarIdentidades($anoExecucao);
+
+// Infrastructure: traduz a capacidade para o mecanismo concreto.
+final class OraclePlanoRepository implements PlanoRepository
+{
+    // SQL, ADOdb e mapeamentos Oracle permanecem aqui.
+}
+```
+
+Os trechos seguintes são **contraexemplos hipotéticos e incorretos**; não devem
+ser copiados:
+
+```php
+// INCORRETO: Application passou a conhecer ADOdb, Oracle e schema físico.
+$linhas = $conexaoAdodb->Execute(
+    'SELECT * FROM SCHEMA_FISICO.PAC_PLANOS WHERE ANO_EXECUCAO = ?',
+    [$ano]
+);
+
+// INCORRETO: a entidade do Domain foi modelada como uma linha de PAC_PLANOS.
+final class Plano
+{
+    public int $idPacPlano;
+    public string $colunaSituacaoOracle;
+}
+
+// INCORRETO: a Blank passou a controlar detalhes internos e de implantação.
+$publicador->executar(
+    schema: $_POST['schema'],
+    tabela: $_POST['tabela'],
+    caminhoPerfil: $_POST['perfil']
+);
+```
+
+No primeiro caso, trocar o mecanismo de persistência afetaria o caso de uso. No
+segundo, uma estrutura física passaria a definir o modelo de negócio. No
+terceiro, entrada HTTP controlaria configuração privilegiada e romperia a
+fronteira pública mínima estabelecida pela `DI-010`.
+
+### 7.6 Origem das decisões e avaliação do desenho
+
+A origem rastreável do desenho atual é:
+
+- a `DI-008` isolou conexão, transação, SQL, binds e traduções Oracle na
+  Infrastructure;
+- os [planos da Sprint 5.2](../../../.agents/sprints/planos/plano_sprint_5.2.md)
+  e da [Sprint 5.3](../../../.agents/sprints/planos/plano_sprint_5.3.md)
+  tornaram os mapeamentos físicos obrigatórios, validados e injetados nos
+  adapters, sem defaults silenciosos;
+- a `DI-010` e o [plano da Sprint 8.1](../../../.agents/sprints/planos/plano_sprint_8.1.md)
+  definiram o registro allowlisted, os perfis externos e sua materialização
+  tipada na entrada do Composition Root, antes do wiring.
+
+Não foi encontrada nessas fontes uma decisão explícita exigindo nomes físicos
+diferentes entre DEV, validaSGI e produção. Portanto, a justificativa correta
+para os mapeamentos configuráveis não é afirmar que esses três bancos diferem.
+O benefício comprovado hoje é tornar a dependência física explícita, validada e
+isolada; a variação entre instalações é uma capacidade oferecida pelo desenho.
+
+Para uma futura publicação open source, essa capacidade ajuda outra autarquia
+quando muda apenas o nome de schemas, tabelas, colunas ou literais e a semântica
+continua equivalente. Se a estrutura tiver relações, regras ou consultas
+semanticamente diferentes, apenas renomear o mapeamento provavelmente não
+bastará: será necessário outro adapter que implemente a mesma Port.
+
+Não existe uma única forma universal de configurar aplicações. As alternativas
+mais comuns têm custos diferentes:
+
+| Forma | Vantagem | Limite principal |
+| --- | --- | --- |
+| Arquivo PHP externo, desenho atual | Agrupa a configuração tipada do perfil e integra-se diretamente ao runtime PHP. | Mistura categorias diferentes no mesmo arquivo e exige proteger código executável. |
+| Variáveis de ambiente | Separam valores da release e funcionam bem para poucos valores que variam por implantação. | Muitos mapeamentos ficam difíceis de ler; valores podem vazar em diagnósticos como `phpinfo()`. |
+| Configuração estável versionada + segredos externos | Permite revisar no Git o que não é sensível e reduz o conteúdo secreto provisionado. | Exige regras claras de precedência e migração do formato atual. |
+| Secret manager | Centraliza controle de acesso, auditoria, rotação e, conforme a ferramenta, credenciais temporárias. | Acrescenta serviço, autenticação, disponibilidade e operação próprias. |
+
+Nenhuma opção é sempre a mais simples, escalável e segura. O arquivo PHP é a
+opção mais direta para o desenho atual; variáveis de ambiente são comuns e
+simples para poucos valores; separar configuração estável de segredos facilita
+revisão e manutenção à medida que o projeto cresce; e um secret manager oferece
+mais recursos de governança dos segredos ao custo de maior complexidade
+operacional. A segurança efetiva também depende de permissões, auditoria,
+processo de atualização e proteção contra exposição acidental.
+
+Essa comparação segue práticas amplamente documentadas: o
+[The Twelve-Factor App](https://12factor.net/config) separa do código o que varia
+entre implantações, mas distingue configuração interna estável; a
+[documentação do Symfony](https://symfony.com/doc/current/configuration.html)
+mostra a convivência de arquivos versionados, parâmetros e variáveis de
+ambiente, inclusive seus riscos de exposição; e a
+[documentação do Vault](https://developer.hashicorp.com/vault/docs/about-vault/how-vault-works)
+exemplifica um sistema dedicado a controlar, auditar e rotacionar segredos.
+Essas referências contextualizam práticas de mercado, mas não substituem a
+autoridade das `DI-008` e `DI-010` neste projeto.
+
+Uma possibilidade futura seria manter mapeamentos estáveis do adapter SEMAE
+versionados, deixar no perfil somente a configuração que varia por implantação
+e obter segredos de uma fonte externa dedicada. Isso é apenas material de
+avaliação: não está aprovado, não constitui pendência do roadmap e não autoriza
+refatoração. Até nova decisão, `registro.php`, perfil externo e mapeamentos no
+perfil continuam obrigatórios.
+
 ## 8. Convenções arquiteturais
 
 | Conceito | Significado arquitetural |
-|---|---|
+| --- | --- |
 | Entity | Conceito de negócio reconhecido por identidade contínua, como `Demanda` |
 | Value Object | Valor imutável com igualdade por conteúdo, como `Cnpj`, `AnoExecucao` ou `Uasg` |
 | Aggregate | Fronteira de consistência protegida por uma raiz, como `Plano` |
@@ -291,7 +502,7 @@ Os testes demonstram comportamentos e contratos relevantes, não a existência
 isolada de cada classe.
 
 | Fronteira | Evidência esperada |
-|---|---|
+| --- | --- |
 | Domain | Invariantes, transições e políticas puras |
 | Application | Casos de uso, coordenação de resultados e consumo das Ports com doubles |
 | Infrastructure | Contratos e integração concreta depois da liberação dos gates correspondentes |
@@ -329,7 +540,7 @@ Este documento não define:
 - endpoints ou serialização;
 - estruturas de banco ou comandos de persistência;
 - mecanismos concretos de conexão, transporte ou lock;
-- configuração de ambientes;
+- valores e procedimentos concretos de configuração dos ambientes;
 - detalhes de empacotamento.
 
 Esses assuntos pertencem ao fluxo, ao roadmap ou às decisões de
@@ -338,7 +549,7 @@ integração.
 ### 11.1 Matriz de referências
 
 | Assunto resumido aqui | Autoridade |
-|---|---|
+| --- | --- |
 | Identidade, fotografia e confirmação do Plano | `RN-PLA-001` a `RN-PLA-007` e [modelo de domínio](../autoritativos/modelo_de_dominio.md) |
 | Decisões de publicação | `RN-PUB-001` a `RN-PUB-011` e modelo de domínio |
 | Auditoria | `RN-AUD-001` a `RN-AUD-005`, `DI-006` e modelo de domínio |

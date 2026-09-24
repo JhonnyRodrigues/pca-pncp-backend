@@ -36,7 +36,7 @@ flowchart TD
 | --- | --- | --- |
 | `.agents/` | Guarda planos, checkpoints e registros usados para conduzir sprints e microciclos. | Sim |
 | `build/` | Recebe artefatos gerados localmente, incluindo o pacote autocontido. Seu conteúdo pode ser recriado. | Não |
-| `database/` | Guarda migrações Oracle versionadas, verificações de implantação e seeds descartáveis separados por ambiente. | Sim |
+| `database/` | Guarda migrations Oracle versionadas, verificações de implantação, consultas operacionais somente leitura e seeds descartáveis separados por ambiente. | Sim |
 | `docs/` | Reúne documentação vigente, histórica, investigativa e diagramas. | Sim |
 | `integracao/` | Guarda código pertencente ao sistema que hospeda o backend, atualmente a aplicação Blank do Scriptcase. | Sim |
 | `src/` | Contém o código de produção do backend, organizado pelas responsabilidades arquiteturais. | Sim |
@@ -161,6 +161,7 @@ recursos reais e quais exigem autorização.
 | --- | --- | --- |
 | `database/migrations/` | Mantém alterações incrementais de DDL ou dados de referência que acompanham uma implantação. | "O que alterar?" |
 | `database/checks/` | Mantém consultas somente leitura executadas antes e depois de uma migração. | "Como conferir?" |
+| `database/queries/` | Mantém consultas operacionais reutilizáveis e somente leitura, sem valores particulares de um incidente. | "Como diagnosticar?" |
 | `database/seeds/` | Reserva massa descartável e identificada para DEV ou HML; não recebe dados transacionais de produção. | "Qual massa descartável de DEV/HML?" |
 | `database/deployments/` | Registra provisoriamente o estado das migrações em cada ambiente enquanto não existe histórico automatizado no banco. | "O que ocorreu em cada ambiente?" |
 
@@ -225,6 +226,7 @@ A classificação e a precedência completas estão em
 | auxilia construção ou verificação do projeto | `tools/` |
 | altera estrutura ou dados de referência do Oracle durante implantação | `database/migrations/` |
 | confere uma migração sem alterar o Oracle | `database/checks/` |
+| consulta estado operacional recorrente sem alterar o Oracle | `database/queries/` |
 | é resultado gerado por uma ferramenta | `build/` |
 | explica sem criar uma regra | `docs/vigentes/apoio/` |
 

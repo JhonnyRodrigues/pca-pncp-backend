@@ -766,6 +766,7 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
                     'anoExecucao' => $contexto->getUnidadeExterna()->getAnoExecucao()->getValor(),
                     'uasg' => $contexto->getUnidadeExterna()->getUasgExterna()->getCodigo(),
                     'modo' => $contexto->getUnidadeExterna()->getModo()->value,
+                    'decisao' => $contexto->getResultadoDecisao()->getDecisao()->value,
                 ],
             ]);
         } catch (Throwable) {

@@ -66,9 +66,10 @@ aparece neste índice sem link até que o documento exista.
 12. [Guia de configuração de produção](vigentes/apoio/guia_de_configuracao_de_producao.md)
 13. [Guia de implantação e rollback](vigentes/apoio/guia_de_implantacao_e_rollback.md)
 14. [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md)
-15. [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md)
-16. [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md)
-17. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
+15. [Guia de migração assistida e recuperação](vigentes/apoio/guia_de_migracao_assistida_e_recuperacao.md)
+16. [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md)
+17. [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md)
+18. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
 
 ### 4.1 Princípio de autoridade
 
@@ -84,6 +85,17 @@ Quando dois documentos parecerem contraditórios, prevalece:
 8. Documentos de Apoio;
 9. Investigações;
 10. Históricos.
+
+### 4.2 Trilhas de leitura por objetivo
+
+A ordem completa acima oferece uma visão ampla. Para uma dúvida específica,
+estas trilhas reduzem o caminho sem alterar a autoridade dos documentos:
+
+| Objetivo | Trilha sugerida |
+| --- | --- |
+| Compreender a arquitetura | [Arquitetura](vigentes/apoio/arquitetura.md) → [Glossário](vigentes/apoio/glossario.md) → [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) |
+| Navegar no código | [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) → [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md) → [Catálogo de arquivos](vigentes/apoio/catalogo_de_arquivos.md) |
+| Operar a aplicação | [Arquitetura, seção 7](vigentes/apoio/arquitetura.md#7-fachada-composition-root-scriptcase-e-configuração-externa) para entender o desenho → [Guia de configuração de produção](vigentes/apoio/guia_de_configuracao_de_producao.md) → [Guia de implantação e rollback](vigentes/apoio/guia_de_implantacao_e_rollback.md) |
 
 ## 5. Registro documental
 
@@ -103,13 +115,14 @@ Quando dois documentos parecerem contraditórios, prevalece:
 
 | Documento | Status | Papel |
 | --- | --- | --- |
-| [Arquitetura](vigentes/apoio/arquitetura.md) | Vigente | Limites e direção de dependências |
+| [Arquitetura](vigentes/apoio/arquitetura.md) | Vigente | Limites, direção de dependências e separação entre configuração, segredos e detalhes físicos |
 | [Glossário integrado](vigentes/apoio/glossario.md) | Vigente | Índice semântico da linguagem do projeto |
 | [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Vigente | Usuários, etapas e contexto funcional |
 | [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) | Vigente | Mapas, fluxo, transações e roteiro de estudo |
 | [Guia de configuração de produção](vigentes/apoio/guia_de_configuracao_de_producao.md) | Vigente | Preparação e provisionamento seguro do registro, perfil e CA bundle de produção |
 | [Guia de implantação e rollback](vigentes/apoio/guia_de_implantacao_e_rollback.md) | Vigente | Construção, transferência SFTP, instalação, atualização e rollback da release |
 | [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md) | Vigente | Preparação e execução segura das probes e gates 5.1, 5.9, 8.2, 8.3 e corretivo 8.4.7-C |
+| [Guia de migração assistida e recuperação](vigentes/apoio/guia_de_migracao_assistida_e_recuperacao.md) | Vigente | Inventário, vínculo e reconciliação protegidos da Sprint 9.4 |
 | [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md) | Vigente | Finalidade, classificação, dependências e efeitos externos dos scripts ativos |
 | [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md) | Vigente | Finalidade das pastas e orientação para localizar ou criar artefatos |
 | [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md) | Vigente | Função dos arquivos ativos de código e teste |

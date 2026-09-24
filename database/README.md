@@ -8,9 +8,10 @@ auditorias ou credenciais.
 
 - `migrations/`: alterações versionadas, aplicadas em ordem;
 - `checks/`: consultas somente leitura executadas antes e depois da migração;
-- `seeds/`: reservado para massa descartável e identificada de DEV ou HML;"
+- `queries/`: consultas operacionais reutilizáveis e somente leitura;
+- `seeds/`: reservado para massa descartável e identificada de DEV ou HML;
 - `deployments/`: registro manual provisório do estado das migrações por
-  ambiente."
+  ambiente.
 
 O projeto ainda não adotou um executor como Flyway ou Liquibase. Até essa
 decisão, cada aplicação deve ser registrada em `deployments/` e, quando
@@ -26,8 +27,9 @@ Para cada migração:
 2. interrompa diante de qualquer estado divergente;
 3. se todo o estado já estiver conforme, não execute DML: registre a migração
    como requisito já satisfeito no ambiente;
-4. se houver estado ausente e nenhum divergente, obtenha a autorização do
-   ambiente e execute a migração como script completo;
+4. se o precheck indicar estado ausente ou transição necessária, sem qualquer
+   divergência, obtenha a autorização do ambiente e execute a migração como
+   script completo;
 5. quando houver execução, rode o `postcheck` e confira todas as condições
    esperadas;
 6. registre ambiente, data, executor, versão, SHA-256 e uma das situações:
@@ -35,6 +37,11 @@ Para cada migração:
 
 Os scripts não são executados pelo backend, pela Blank ou durante uma
 requisição. Eles também não integram o pacote autocontido da aplicação.
+
+As consultas de `queries/` não são migrations e não registram implantação.
+Elas existem para diagnósticos manuais recorrentes, devem usar parâmetros em
+vez de valores específicos de um incidente e nunca podem conter DML, controle
+transacional, credenciais ou tokens.
 
 Ainda não existe uma baseline versionada do DDL legado. Ela só deve ser criada
 depois de inventariar e comparar as estruturas efetivas de DEV, HML e PROD.

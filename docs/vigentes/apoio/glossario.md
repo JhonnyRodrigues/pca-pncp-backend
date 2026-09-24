@@ -149,6 +149,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Grafo de dependências | Conjunto de objetos ligados pelas dependências necessárias a uma execução. O Composition Root monta um grafo novo por chamada. | Arquitetura §7; `DI-010` |
 | Imutabilidade | Propriedade de um objeto cujo estado não muda depois da criação; uma alteração conceitual produz outro valor ou resultado. | Modelo §3; Arquitetura §8 |
 | Injeção de dependências | Entrega explícita dos colaboradores a um objeto, geralmente pelo construtor, em vez de o próprio objeto procurá-los ou criá-los escondidamente. | Arquitetura §§3, 5 e 7 |
+| Inversão de dependência | Princípio pelo qual regras de alto nível dependem de abstrações internas, enquanto detalhes concretos, como Oracle ou HTTP, dependem desses contratos. | Arquitetura §7.4 |
 | Domain | Camada que representa o negócio, protege invariantes e decide por políticas puras. | Modelo; Arquitetura §4.1 |
 | Double de teste | Substituto controlado usado para demonstrar como um consumidor utiliza um contrato. | Arquitetura §9; `DI-007` |
 | Entrypoint Scriptcase | Única API do backend conhecida pela Blank; recebe recursos naturais do host, seleciona o perfil externo e aciona o grafo interno. | Arquitetura §7; `DI-010` |
@@ -157,7 +158,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Fachada da Presentation | Fronteira interna que converte a execução em ViewModel seguro e impede a passagem de exceções ao consumidor. | Arquitetura §7; `DI-010` |
 | Infrastructure | Camada dos adapters concretos de persistência, transporte e recursos externos. | Arquitetura §4.3 |
 | Integração controlada do núcleo | Prova interna que monta adapters concretos sobre fronteiras programáveis e sem I/O real para verificar composição, compartilhamento de sessão e encerramento transacional. Não substitui gate real nem constitui o Composition Root final. | Roadmap Sprint 6.2; Arquitetura §9 |
-| Mapeamento físico explícito | Descrição injetada e validada dos nomes físicos e literais usados pelo adapter, sem incorporá-los aos contratos internos nem assumir valores implícitos. | `DI-008`; Arquitetura §4.3 |
+| Mapeamento físico explícito | Descrição validada de como conceitos do código correspondem a schemas, tabelas, colunas ou literais do banco. É injetada no adapter e não passa a integrar o Domain ou a Application. | `DI-008`; Arquitetura §§4.3 e 7.3 |
 | Mapeador de dados | Tradutor dos valores retornados por um mecanismo externo para tipos internos, sem definir nomes físicos nem decidir regras de negócio. | Arquitetura §4.3 |
 | Mock | Double de teste configurado principalmente para verificar se uma interação esperada ocorreu, por exemplo se uma Port recebeu determinada chamada. | Arquitetura §9 |
 | Namespace | Nome hierárquico que organiza classes PHP e evita colisões entre nomes iguais; o PSR-4 o relaciona aos diretórios. | Arquitetura §3 |
@@ -171,7 +172,8 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | SOLID | Conjunto de princípios para manter responsabilidades claras, dependências direcionadas e componentes substituíveis. É um meio de reduzir acoplamento, não uma exigência de criar mais classes. | Arquitetura §§3 e 5 |
 | Stub | Double de teste que fornece respostas previamente definidas para conduzir um cenário, sem ter como finalidade principal verificar chamadas. | Arquitetura §9 |
 | Sessão compartilhada | Mesma sessão Oracle e sua transação reutilizadas pelos adapters que participam da unidade, preservando contenção, visibilidade e atomicidade locais. | `DI-004`, `DI-008` |
-| Registro externo de perfis | Índice provisionado fora da release que associa literalmente `SERVER_NAME` ao caminho absoluto de um perfil, sem duplicar sua configuração. | `DI-010` |
+| Perfil de configuração | Conjunto validado de valores usados por uma implantação do backend. No desenho atual, é um array retornado por arquivo PHP externo e inclui configuração, segredos e mapeamentos físicos. | `DI-010`; Arquitetura §§7.2 e 7.3 |
+| Registro externo de perfis | Índice provisionado fora da release que associa literalmente cada `SERVER_NAME` autorizado ao caminho absoluto de um perfil, sem conter nem duplicar os valores desse perfil. | `DI-010`; Arquitetura §7.2 |
 | Sessão opaca | Capacidade autenticada do PNCP usada sem interpretar nem expor o token que a representa e descartada ao fim da execução. | `DI-009`, `DI-010` |
 | Teste contratual | Teste que demonstra compatibilidade com um contrato interno ou externo. | Arquitetura §9; `DI-007`, `DI-009` |
 | TDD | Ciclo de desenvolvimento no qual primeiro se demonstra a falta do comportamento com um teste, depois se implementa o mínimo e por fim se melhora o código: Red, Green e Refactor. | Arquitetura §9 |
@@ -218,7 +220,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | CA bundle | Arquivo com uma coleção de certificados públicos confiáveis. O cURL/OpenSSL usa essa coleção para verificar se o certificado HTTPS apresentado pelo PNCP pertence a uma cadeia confiável. Ele não contém senha, token ou chave privada. Neste projeto, ele foi copiado integralmente do bundle já usado em DEV, sem gerar certificados novos. | `DI-009`, `DI-010` |
 | CLOB | Tipo Oracle para texto grande. `SEGURANCA_LOG.DESCRIPTION` usa CLOB para armazenar o JSON integral dos eventos técnicos. | `DI-006`, `DI-010` |
 | Commit | Confirmação de uma transação, tornando permanentes suas alterações locais. | `DI-004`, `DI-008` |
-| Configuração externa | Configuração mantida fora da release e do webroot, com parâmetros e possíveis segredos específicos do ambiente. | `DI-010` |
+| Configuração externa | Valores carregados de uma fonte fora da release e do webroot. A localização externa reduz o acoplamento à implantação, mas não transforma todo valor em segredo. | `DI-010`; Arquitetura §§7.2 e 7.3 |
 | Correlação ou Request ID | UUID v4 que identifica a mesma execução através das camadas, resultados e eventos técnicos. | Logs; `DI-010` |
 | DML | Comandos SQL que alteram dados, como `INSERT`, `UPDATE`, `DELETE` e `MERGE`. Um PRECHECK não executa DML. | `DI-008`; Fluxo §11 |
 | Envelope de evento | Estrutura completa de um evento técnico, com campos institucionais, contexto sanitizado e metadados. | Logs; `DI-006` |
@@ -236,6 +238,8 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Rollback | Cancelamento das alterações ainda não confirmadas de uma transação. | `DI-004`, `DI-008` |
 | Runtime | Ambiente efetivo no qual o código roda, incluindo versão do PHP, extensões, sistema operacional e comportamento das bibliotecas. | `DI-008` a `DI-010` |
 | Sanitização | Remoção, substituição ou limitação de dados que não podem atravessar uma fronteira, como credenciais, SQL, stack trace ou payload sensível. | Logs; `DI-006`, `DI-010` |
+| Schema Oracle | Espaço lógico associado a um proprietário no Oracle e que reúne objetos como tabelas, views e sequências. Seu nome é detalhe físico da Infrastructure, não conceito do Domain. | `DI-008`; Arquitetura §7.3 |
+| Segredo | Valor cujo conhecimento permite acesso ou aumenta materialmente o risco de abuso, como senha, token ou chave privada. Deve ter leitura restrita e não aparecer no Git ou em logs. | `DI-006`, `DI-009`, `DI-010`; Arquitetura §7.3 |
 | Serialização | Conversão de um objeto ou estrutura em uma representação transportável ou persistível, como JSON. | Logs; `DI-009`, `DI-010` |
 | Status HTTP | Código numérico da resposta HTTP que resume o resultado do transporte, como `200`, `400` ou `500`; ele não substitui o resultado de negócio da aplicação. | `DI-009`, `DI-010` |
 | Timeout | Limite máximo de espera por uma operação. Ao expirar, interrompe a espera, mas não prova sozinho se uma escrita externa produziu efeito. | `DI-004`, `DI-009` |
@@ -331,7 +335,11 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Publicação ativa × confirmação | Existência do recurso externo versus convergência da versão. | `RN-PLA-007`; `DI-005` |
 | Estado desejado × observado × operacional | Planejamento homologado, fato externo e referência local cross-Plan. | `DI-002`, `DI-005` |
 | Sequencial PCA × identidade do Plano | Referência externa versus UO e Ano de Execução. | `RN-PLA-001`; `DI-005` |
-| Port × Adapter × Repository | Port é o contrato; Adapter é sua implementação concreta; Repository é uma especialização de Port ligada a Aggregate, cuja implementação concreta também é Adapter. | Arquitetura §§5 e 8; `DI-007` |
+| Port × Adapter | Port é o contrato interno de uma capacidade; Adapter é a implementação concreta que liga esse contrato a um mecanismo externo. Um Repository concreto também pode exercer o papel de Adapter. | Arquitetura §§5, 7.4 e 8; `DI-007` |
+| Inversão de dependência × injeção de dependências | Inversão define que detalhes concretos dependem das abstrações do núcleo; injeção é o mecanismo que entrega uma implementação concreta a quem usa o contrato. | Arquitetura §7.4 |
+| Configuração × segredo | Configuração ajusta o comportamento ou a implantação; segredo é o subconjunto cujo valor precisa de acesso restrito. Nem toda configuração é secreta. | Arquitetura §7.3 |
+| Registro de perfis × perfil de configuração | O registro localiza o perfil autorizado para um `SERVER_NAME`; o perfil contém os valores validados daquela implantação. | `DI-010`; Arquitetura §7.2 |
+| Modelo de domínio × schema físico | O modelo de domínio representa conceitos e regras do negócio; o schema físico organiza tabelas, colunas e outros objetos usados para persistência. | Modelo; `DI-008`; Arquitetura §§6 e 7.3 |
 | Suíte padrão × suíte opt-in | Execução ordinária, sem interação externa real implícita, versus execução deliberadamente ativada e protegida por configuração e preflight. | `DI-009`; Fluxo §11 |
 | Contrato controlado × gate real | Evidência determinística em condições controladas versus comprovação com os adapters concretos no ambiente externo efetivo. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |
 | Conexão emprestada × conexão própria | Recurso cujo ciclo de vida pertence à aplicação hospedeira versus recurso criado e administrado pelo próprio backend. | `DI-008` |

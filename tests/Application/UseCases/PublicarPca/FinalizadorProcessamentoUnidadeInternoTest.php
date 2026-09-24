@@ -94,7 +94,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             ResultadoDecisaoProcessamentoPlano::nenhumaAcao(),
             []
         );
-        $dependencias = $this->criarDependencias();
+        $logger = new LoggerMemoriaFinalizador();
+        $dependencias = $this->criarDependencias($logger);
         $dependencias->leitor->expects($this->never())->method('observarPcaConhecido');
         $dependencias->leitor->expects($this->never())->method('localizarCandidatos');
         $dependencias->estado->expects($this->once())->method('registrar')
@@ -114,6 +115,11 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $this->assertSame(
             SituacaoProcessamentoUnidade::SEM_ALTERACAO,
             $resultado->getResultadoUnitario()?->getSituacao()
+        );
+        $this->assertSame(
+            'NENHUMA_ACAO',
+            $logger->contextoDe('Unidade finalizada com convergência comprovada.')['context']['decisao']
+                ?? null
         );
         $this->assertSame($sequencial, $resultado->getResultadoUnitario()?->getSequencialPca());
     }
@@ -201,7 +207,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             ResultadoDecisaoProcessamentoPlano::publicar([1001]),
             [ResultadoPublicacaoPncp::aceita($sequencial)]
         );
-        $dependencias = $this->criarDependencias();
+        $logger = new LoggerMemoriaFinalizador();
+        $dependencias = $this->criarDependencias($logger);
         $ordem = [];
         $dependencias->leitor->expects($this->once())
             ->method('observarPcaConhecido')
@@ -254,6 +261,11 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $this->assertSame(
             SituacaoProcessamentoUnidade::CONCLUIDO,
             $resultado->getResultadoUnitario()?->getSituacao()
+        );
+        $this->assertSame(
+            'PUBLICAR',
+            $logger->contextoDe('Unidade finalizada com convergência comprovada.')['context']['decisao']
+                ?? null
         );
         $this->assertSame(88, $resultado->getResultadoUnitario()?->getSequencialPca()?->getValor());
     }
@@ -547,7 +559,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             ResultadoDecisaoProcessamentoPlano::retificar([1003], [1001]),
             [ResultadoEscritaPncp::aceita(), ResultadoEscritaPncp::aceita()]
         );
-        $dependencias = $this->criarDependencias();
+        $logger = new LoggerMemoriaFinalizador();
+        $dependencias = $this->criarDependencias($logger);
         $dependencias->leitor->expects($this->once())
             ->method('observarPcaConhecido')
             ->willReturn(ResultadoObservacaoPca::encontrado(
@@ -574,6 +587,11 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $this->assertSame(77, $resultado->getResultadoUnitario()?->getSequencialPca()?->getValor());
         $this->assertSame(1, $resultado->getResultadoUnitario()?->getQuantidadeInclusoes());
         $this->assertSame(1, $resultado->getResultadoUnitario()?->getQuantidadeExclusoes());
+        $this->assertSame(
+            'RETIFICAR',
+            $logger->contextoDe('Unidade finalizada com convergência comprovada.')['context']['decisao']
+                ?? null
+        );
     }
 
     public function testRetificacaoComAusenciaDoPcaConhecidoDeveBloquearDivergencia(): void
@@ -616,7 +634,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             ResultadoDecisaoProcessamentoPlano::excluirPca(),
             [ResultadoEscritaPncp::aceita()]
         );
-        $dependencias = $this->criarDependencias();
+        $logger = new LoggerMemoriaFinalizador();
+        $dependencias = $this->criarDependencias($logger);
         $dependencias->leitor->expects($this->once())
             ->method('observarPcaConhecido')
             ->willReturn(ResultadoObservacaoPca::ausenciaDefinitiva());
@@ -643,6 +662,11 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
 
         $this->assertSame(SituacaoProcessamentoUnidade::CONCLUIDO, $resultado->getResultadoUnitario()?->getSituacao());
         $this->assertSame(77, $resultado->getResultadoUnitario()?->getSequencialPca()?->getValor());
+        $this->assertSame(
+            'EXCLUIR_PCA',
+            $logger->contextoDe('Unidade finalizada com convergência comprovada.')['context']['decisao']
+                ?? null
+        );
     }
 
     public function testFalhaNoRegistroDeEstadoDeveImpedirDemaisEtapasEDesfazer(): void

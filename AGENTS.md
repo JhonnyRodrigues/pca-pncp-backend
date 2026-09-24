@@ -12,11 +12,9 @@ O projeto é um backend em PHP 8.1 para publicação e sincronização do Plano 
 Contratações Anual (PCA) com o PNCP, inicialmente consumido por aplicação Scriptcase do tipo Blank.
 
 O projeto também tem finalidade didática. As explicações devem ajudar o
-mantenedor a compreender as decisões adotadas, sem transformar cada tarefa em
-uma aula ou justificar complexidade desnecessária.
+mantenedor a compreender as decisões adotadas.
 
-> Implemente somente o escopo autorizado, da forma mais simples, clara,
-> testável e reversível que preserve as regras e fronteiras necessárias.
+> Implemente somente o escopo autorizado, da forma mais simples, clara, testável e reversível que preserve as regras e fronteiras necessárias.
 
 DDD, Clean Architecture, SOLID, Design Patterns, TDD e SDD são meios para reduzir riscos e organizar responsabilidades, não metas isoladas.
 

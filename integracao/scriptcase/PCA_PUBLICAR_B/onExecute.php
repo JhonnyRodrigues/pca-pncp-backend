@@ -25,12 +25,17 @@ function pca_publicar_serializar_resultado_unidade(object $resultado): array
 
 function pca_publicar_serializar_resultado(object $resultado): array
 {
+    $resultadosUnitarios = [];
+
+    foreach ($resultado->getResultadosUnitarios() as $resultadoUnitario) {
+        $resultadosUnitarios[] = pca_publicar_serializar_resultado_unidade(
+            $resultadoUnitario
+        );
+    }
+
     return [
         'situacao' => $resultado->getSituacao(),
-        'resultadosUnitarios' => array_map(
-            'pca_publicar_serializar_resultado_unidade',
-            $resultado->getResultadosUnitarios()
-        ),
+        'resultadosUnitarios' => $resultadosUnitarios,
         'codigoFalha' => $resultado->getCodigoFalha(),
         'mensagemFalha' => $resultado->getMensagemFalha(),
         'quantidadePlanejadas' => $resultado->getQuantidadePlanejadas(),
@@ -152,22 +157,32 @@ if ($requisicaoPublicacao) {
             $requestId
         );
 
+        $resultadoSerializado = pca_publicar_serializar_resultado(
+            $saida->getResultado()
+        );
         $avisoRegistroTecnico = $saida->getAvisoRegistroTecnico();
 
         if ($avisoRegistroTecnico === null) {
-            $avisoRegistroTecnico = (
-                new \Semae\Pca\RegistradorEventosTecnicosScriptcase()
-            )->registrar(
-                $this->Db,
-                $loginAutenticado,
-                $serverName,
-                'PCA_PUBLICAR_B',
-                $saida->getEventos()
-            );
+            try {
+                $avisoRegistroTecnico = (
+                    new \Semae\Pca\RegistradorEventosTecnicosScriptcase()
+                )->registrar(
+                    $this->Db,
+                    $loginAutenticado,
+                    $serverName,
+                    'PCA_PUBLICAR_B',
+                    $saida->getEventos()
+                );
+            } catch (\Throwable) {
+                $avisoRegistroTecnico = pca_publicar_texto_utf8(
+                    'O resultado foi preservado, mas os eventos t&eacute;cnicos '
+                        . 'n&atilde;o puderam ser registrados.'
+                );
+            }
         }
 
         $respostaHttp = [
-            'resultado' => pca_publicar_serializar_resultado($saida->getResultado()),
+            'resultado' => $resultadoSerializado,
             'avisoRegistroTecnico' => $avisoRegistroTecnico,
         ];
 

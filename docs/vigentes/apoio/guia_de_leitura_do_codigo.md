@@ -159,6 +159,10 @@ Nesse adapter, `MapeamentoPlanosOracle` declara e valida tabela e colunas
 físicas usadas na SQL, enquanto `MapeadorDadosPlanoOracle` traduz as linhas já
 projetadas por aliases canônicos para objetos do Domain.
 
+Para compreender por que a Port pertence ao núcleo, o adapter depende dela e o
+mapeamento físico permanece na Infrastructure, leia a explicação sobre
+[inversão de dependência e configuração externa](arquitetura.md#74-inversão-de-dependência-no-repositório).
+
 ## 7. Ordem prática de leitura
 
 1. `PublicadorPcaScriptcase`, que mostra o contrato mínimo da Blank, a

@@ -48,6 +48,7 @@ As classificações usadas são:
 | `composer contract:oracle82:tests` | Contratos locais da Sprint 8.2 para a subcomposição Oracle final. | Não abre conexão Oracle nem chama PNCP. | Não exige configuração externa para os testes locais. Valida composição, runner, falhas e proteções. |
 | `composer contract:pncp83:tests` | Contratos locais da Sprint 8.3 para a subcomposição PNCP; exclui os grupos nominal e incerto live. | Não acessa o PNCP e não escreve dados externos. | Não exige arquivos reais. Valida configuração, runner, paginação, incerteza, limpeza e sanitização com transporte em memória. |
 | `composer contract:sprint85:tests` | Contratos locais da Sprint 8.5 para Blank, falhas e preparação dos gates; exclui o grupo live. | Não acessa Oracle, PNCP ou Scriptcase real. | Valida consentimentos, massa protegida, consultas somente leitura e integrações controladas. A verificação do pacote possui comando próprio. |
+| `composer contract:sprint94:tests` | Contratos locais do gate temporário da Sprint 9.4. | Não acessa Oracle, PNCP ou Scriptcase real. | Valida configuração desarmada, guardas somente leitura, paginação, relatório sanitizado, Blank e empacotamento. |
 
 ## 5. Preflights sem acesso externo
 
@@ -94,6 +95,11 @@ rotina, em paralelo ou apenas para verificar se “continua tudo verde”.
 | `composer package:sprint85:log-gate:verify` | Confere hashes, topologia, pacote principal incorporado e carregamento dos três entrypoints do gate. | Lê somente os artefatos locais e o lock. | Espera `ARTEFATO_GATE_VALIDADO` antes do envio por FileZilla. |
 | `composer package:sprint85:containment-gate` | Monta `build/pca-pncp-containment-gate` para o Microciclo 7, com o pacote principal e o runtime mínimo da contenção. | Escreve somente em `build/`; não acessa Oracle, PNCP ou Scriptcase. | Exige o pacote principal validado e não inclui configuração nem segredo. |
 | `composer package:sprint85:containment-gate:verify` | Confere hashes, topologia e os três entrypoints de PRECHECK, contenção e disponibilidade. | Lê somente os artefatos locais e o lock. | Espera `ARTEFATO_CONTENCAO_VALIDADO` antes do envio por FileZilla. |
+| `composer package:sprint94:inventory-gate` | Constrói o gate temporário e separado de inventário da Sprint 9.4. | Pode baixar dependências durante a construção do backend e escreve somente em `build/`; não acessa Oracle, PNCP ou Scriptcase. | Inclui apenas o backend validado e o runtime do gate; não inclui configuração nem segredo. |
+| `composer package:sprint94:inventory-gate:verify` | Confere topologia, hashes e entrypoints do gate da Sprint 9.4. | Lê somente artefatos locais e o lock. | Espera `ARTEFATO_SPRINT94_VALIDADO`; não autoriza instalação ou execução em produção. |
+| `composer package:sprint94:correction-3a` | Monta o artefato nominal da correção 3A, contendo o backend completo validado e a fonte da Blank. | Pode baixar dependências durante a construção e escreve somente em `build/`; não acessa Oracle, PNCP ou Scriptcase. | O manifesto declara `release_oficial=false`; o artefato não substitui o processo normal de release e não inclui configuração nem segredo. |
+| `composer package:sprint94:correction-3a:verify` | Confere o pacote interno, a topologia, todos os hashes e as duas correções funcionais da 3A. | Lê somente o artefato local, o lock e os verificadores do checkout. | Espera `CORRECAO_SPRINT94_3A_VALIDADA`; qualquer divergência exige reconstrução. |
+| `composer package:sprint94:correction-3a:archive` | Compacta o artefato corretivo verificado e calcula seu SHA-256. | Escreve somente `build/pca-pncp-sprint94-correcao-3a.tar.gz`; não acessa sistemas externos. | Recusa sobrescrever o arquivo existente, confere a topologia e não identifica o resultado como release oficial. |
 
 ## 8. Limpeza e recuperação
 

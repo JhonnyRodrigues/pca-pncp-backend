@@ -31,6 +31,7 @@ final class EscritorPncpAdapter implements EscritorPncpPort
 {
     private const STATUS_PUBLICACAO_ACEITOS = [200, 201];
     private const PREFIXO_LOCATION_ALTERNATIVO_HOMOLOGACAO = 'https://treina.pncp.gov.br/pncp-api';
+    private const PREFIXO_LOCATION_ALTERNATIVO_PRODUCAO = 'https://pncp.gov.br/pncp-api';
 
     /** @var string[] */
     private const FALHAS_TRANSPORTE_SISTEMICAS = [
@@ -260,7 +261,11 @@ final class EscritorPncpAdapter implements EscritorPncpPort
         $sequencial = $this->extrairSequencial($resposta, $comando);
 
         if ($sequencial === null) {
-            return $this->resultadoIncertoPublicacao($quantidade, $status);
+            return $this->resultadoIncertoPublicacao(
+                $quantidade,
+                $status,
+                $this->diagnosticarLocation($resposta)
+            );
         }
 
         $this->logger->info('Publicação no PNCP aceita.', [
@@ -457,6 +462,9 @@ final class EscritorPncpAdapter implements EscritorPncpPort
         if ($this->configuracao->getAmbiente() === AmbientePncp::HOMOLOGACAO) {
             $prefixos[] = self::PREFIXO_LOCATION_ALTERNATIVO_HOMOLOGACAO . $recurso;
         }
+        if ($this->configuracao->getAmbiente() === AmbientePncp::PRODUCAO) {
+            $prefixos[] = self::PREFIXO_LOCATION_ALTERNATIVO_PRODUCAO . $recurso;
+        }
 
         foreach ($prefixos as $prefixo) {
             $correspondencias = [];
@@ -483,6 +491,36 @@ final class EscritorPncpAdapter implements EscritorPncpPort
         return null;
     }
 
+    /** @return array{locationCategoria: string, quantidadeLocations: int} */
+    private function diagnosticarLocation(RespostaHttpPncp $resposta): array
+    {
+        $locations = $resposta->getHeaders()['location'] ?? [];
+        $quantidade = count($locations);
+
+        if ($quantidade === 0) {
+            $categoria = 'AUSENTE';
+        } elseif ($quantidade !== 1) {
+            $categoria = 'MULTIPLO';
+        } else {
+            $location = trim($locations[0]);
+
+            if ($location === '') {
+                $categoria = 'VAZIO';
+            } elseif (str_starts_with($location, '/')) {
+                $categoria = 'RELATIVO_FORA_DO_CONTRATO';
+            } elseif (parse_url($location, PHP_URL_HOST) === 'pncp.gov.br') {
+                $categoria = 'ABSOLUTO_HOST_OFICIAL_FORA_DO_CONTRATO';
+            } else {
+                $categoria = 'ABSOLUTO_FORA_DO_CONTRATO';
+            }
+        }
+
+        return [
+            'locationCategoria' => $categoria,
+            'quantidadeLocations' => $quantidade,
+        ];
+    }
+
     private function rejeitadaPublicacao(
         int $status,
         int $quantidade
@@ -505,7 +543,8 @@ final class EscritorPncpAdapter implements EscritorPncpPort
 
     private function resultadoIncertoPublicacao(
         int $quantidade,
-        ?int $status = null
+        ?int $status = null,
+        array $diagnosticoLocation = []
     ): ResultadoPublicacaoPncp
     {
         $falha = new FalhaSegura(
@@ -517,7 +556,8 @@ final class EscritorPncpAdapter implements EscritorPncpPort
             $falha,
             SituacaoEscritaPncp::RESULTADO_INCERTO,
             $quantidade,
-            $status
+            $status,
+            $diagnosticoLocation
         );
 
         return ResultadoPublicacaoPncp::resultadoIncerto($falha);
@@ -546,7 +586,8 @@ final class EscritorPncpAdapter implements EscritorPncpPort
         FalhaSegura $falha,
         SituacaoEscritaPncp $situacao,
         int $quantidade,
-        ?int $status
+        ?int $status,
+        array $metadataAdicional = []
     ): void {
         $metadata = ['situacao' => $situacao->value];
 
@@ -555,6 +596,7 @@ final class EscritorPncpAdapter implements EscritorPncpPort
         }
 
         $metadata['quantidade'] = $quantidade;
+        $metadata = array_merge($metadata, $metadataAdicional);
 
         $this->logger->error($falha->getMensagem(), [
             'action' => $acao->value,

@@ -7,6 +7,8 @@ namespace Tests\Infrastructure\Pncp\Escrita;
 use DateTimeImmutable;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Semae\Pca\Application\Commands\ComandoPublicarPca;
 use Semae\Pca\Application\Enums\SituacaoEscritaPncp;
@@ -29,6 +31,7 @@ use Semae\Pca\Infrastructure\Pncp\Http\RequisicaoHttpPncp;
 use Semae\Pca\Infrastructure\Pncp\Http\RespostaHttpPncp;
 use Semae\Pca\Infrastructure\Pncp\Http\TransporteHttpPncp;
 use Semae\Pca\Infrastructure\Pncp\Serializacao\SerializadorPayloadPncp;
+use Stringable;
 
 final class PublicacaoPncpTest extends TestCase
 {
@@ -117,6 +120,41 @@ final class PublicacaoPncpTest extends TestCase
         $this->assertCount(1, $transporte->requisicoes);
     }
 
+    public function testDeveRegistrarSomenteDiagnosticoSanitizadoDoLocationIncompativel(): void
+    {
+        $location = 'https://host-nao-autorizado.example/v1/orgaos/'
+            . '12345678000195/pca/2026/77?token=segredo';
+        $logger = new LoggerPublicacaoPncpFake();
+        $transporte = new TransporteEscritaPncpFake(new RespostaHttpPncp(
+            201,
+            ['location' => [$location]],
+            ''
+        ));
+
+        $resultado = $this->adapter(
+            $transporte,
+            AmbientePncp::PRODUCAO,
+            $logger
+        )->publicar(new SessaoPncpAutenticada('token-opaco'), $this->comando());
+
+        $this->assertSame(SituacaoEscritaPncp::RESULTADO_INCERTO, $resultado->getSituacao());
+        $this->assertCount(1, $logger->registros);
+        $this->assertSame(
+            'ABSOLUTO_FORA_DO_CONTRATO',
+            $logger->registros[0]['context']['metadata']['locationCategoria'] ?? null
+        );
+        $this->assertSame(
+            1,
+            $logger->registros[0]['context']['metadata']['quantidadeLocations'] ?? null
+        );
+
+        $contextoSerializado = json_encode($logger->registros[0]['context']);
+        $this->assertIsString($contextoSerializado);
+        $this->assertStringNotContainsString($location, $contextoSerializado);
+        $this->assertStringNotContainsString('12345678000195', $contextoSerializado);
+        $this->assertStringNotContainsString('segredo', $contextoSerializado);
+    }
+
     /** @return array<string, array{int}> */
     public static function statusAceitos(): array
     {
@@ -155,6 +193,11 @@ final class PublicacaoPncpTest extends TestCase
                 'https://pncp.gov.br/api/pncp/v1/orgaos/12345678000195/pca/2026/32',
                 32,
             ],
+            'producao absoluto oficial emitido sob pncp-api' => [
+                AmbientePncp::PRODUCAO,
+                'https://pncp.gov.br/pncp-api/v1/orgaos/12345678000195/pca/2026/33',
+                33,
+            ],
         ];
     }
 
@@ -162,9 +205,6 @@ final class PublicacaoPncpTest extends TestCase
     public static function locationsRejeitadosEmProducao(): array
     {
         return [
-            'alias exclusivo da homologacao' => [
-                'https://pncp.gov.br/pncp-api/v1/orgaos/12345678000195/pca/2026/41',
-            ],
             'host divergente' => [
                 'https://treina.pncp.gov.br/api/pncp/v1/orgaos/12345678000195/pca/2026/42',
             ],
@@ -213,7 +253,8 @@ final class PublicacaoPncpTest extends TestCase
 
     private function adapter(
         TransporteHttpPncp $transporte,
-        AmbientePncp $ambiente = AmbientePncp::HOMOLOGACAO
+        AmbientePncp $ambiente = AmbientePncp::HOMOLOGACAO,
+        ?LoggerInterface $logger = null
     ): EscritorPncpAdapter
     {
         return new EscritorPncpAdapter(
@@ -224,7 +265,7 @@ final class PublicacaoPncpTest extends TestCase
                 1_000_000
             ),
             new SerializadorPayloadPncp(),
-            new NullLogger()
+            $logger ?? new NullLogger()
         );
     }
 
@@ -281,5 +322,21 @@ final class TransporteEscritaPncpFake implements TransporteHttpPncp
         $this->requisicoes[] = $requisicao;
 
         return $this->resposta;
+    }
+}
+
+final class LoggerPublicacaoPncpFake extends AbstractLogger
+{
+    /** @var array<int, array{level: mixed, message: string, context: array<string, mixed>}> */
+    public array $registros = [];
+
+    /** @param array<string, mixed> $context */
+    public function log(mixed $level, string|Stringable $message, array $context = []): void
+    {
+        $this->registros[] = [
+            'level' => $level,
+            'message' => (string) $message,
+            'context' => $context,
+        ];
     }
 }

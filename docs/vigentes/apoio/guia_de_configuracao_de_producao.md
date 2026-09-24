@@ -4,15 +4,21 @@
 
 **Status:** Vigente
 
-**Autoridade/Escopo:** procedimento operacional da Sprint 9.1 para preparar e
-provisionar o registro, o perfil e o CA bundle de produção sem implantar a
-release nem acessar Oracle ou PNCP
+**Autoridade/Escopo:** preparação do registro, do perfil, do CA bundle e dos
+pré-requisitos de configuração necessários à implantação em produção
 
 ## 1. Finalidade e limites
 
 Este guia explica como preparar a configuração externa exigida por `DI-009` e
-`DI-010`. Ele não autoriza publicação, acesso Oracle, chamada ao PNCP, instalação
-da release ou smoke test de produção.
+`DI-010` e como conferir os demais pré-requisitos da implantação. Ele não
+autoriza, por si só, publicação, chamada ao PNCP, DML Oracle, instalação da
+release ou smoke test de produção. Cada operação depende do processo de mudança
+e da autorização do ambiente.
+
+Este runbook responde **como provisionar** os arquivos e as permissões. Para
+entender **por que** existem variável de ambiente, registro, perfil, validação,
+segredos e mapeamentos Oracle, consulte a
+[seção 7 da arquitetura](arquitetura.md#7-fachada-composition-root-scriptcase-e-configuração-externa).
 
 Um **runbook** é um procedimento operacional passo a passo. Este documento é o
 runbook da configuração de produção da V1. Ele usa somente comandos locais do
@@ -259,7 +265,85 @@ exit($valido ? 0 : 1);
 '
 ```
 
-## 8. Critérios de aceite e interrupção
+## 8. Checklist integrado antes da ativação
+
+A configuração de produção não termina no arquivo de credenciais. Antes de
+ativar a Blank ou permitir o botão **Publicar**, confira os quatro blocos a
+seguir. O [guia de implantação e rollback](guia_de_implantacao_e_rollback.md)
+continua sendo a fonte do procedimento detalhado de instalação e troca da
+release.
+
+### 8.1 Pacote autocontido da aplicação
+
+Instale somente o pacote construído e validado, incluindo suas dependências de
+produção, em:
+
+```text
+/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/
+```
+
+A Blank `PCA_PUBLICAR_B` deve carregar o `vendor/autoload.php` desse diretório.
+Não execute `composer install` no servidor e não misture arquivos de releases
+diferentes. Confira o SHA-256 do arquivo transferido, a topologia, o manifesto,
+o autoload e as permissões conforme o guia de implantação.
+
+### 8.2 Segredos e certificados fora do webroot
+
+Mantenha `registro.php`, `perfil-producao.php` e `ca-bundle.crt` exclusivamente
+em:
+
+```text
+/var/www/configuracoes/pca-pncp/
+```
+
+O administrador pode alterar esses arquivos; o usuário efetivo do Apache/PHP
+deve apenas lê-los. Outros usuários não devem ter acesso. Aplique e verifique o
+princípio do menor privilégio conforme as seções 5 e 6, sem imprimir o conteúdo
+do perfil ou qualquer credencial.
+
+### 8.3 Localizador persistente no runtime web
+
+Configure `PCA_PNCP_PROFILE_REGISTRY_FILE` no runtime que realmente atende o
+Scriptcase. Para `mod_php`, use o `VirtualHost` do Apache; para PHP-FPM, use o
+pool correspondente. Siga a seção 7, valide a sintaxe e recarregue os serviços
+de forma controlada. Um `export` no terminal não configura um Apache já em
+execução.
+
+### 8.4 Migrações obrigatórias do Oracle
+
+O pacote autocontido não leva nem executa automaticamente scripts de banco. A
+implantação deve tratar, em ordem, os requisitos versionados atuais:
+
+1. `V202609181815__configuracao_publicacao_pca.sql`, que assegura a estratégia
+   consolidada original e a UASG consolidadora;
+2. `V202609181816__unidades_orcamentarias_pca.sql`, que assegura as unidades
+   orçamentárias participantes e suas UASGs;
+3. `V202609241700__procedimentos_publicacao_pca.sql`, que assegura os
+   procedimentos `8 — RETIFICAÇÃO DE PLANO` e
+   `9 — EXCLUSÃO DE PLANO NO PNCP` exigidos pela auditoria de negócio;
+4. `V202609241701__estrategia_individual_publicacao_pca.sql`, que registra a
+   transição posterior da estratégia para `INDIVIDUAL` sem reescrever a
+   migration de baseline já aplicada.
+
+Para cada versão, siga [`database/README.md`](../../../database/README.md):
+
+1. calcule e registre o SHA-256 do script;
+2. execute o `precheck` correspondente em `database/checks/`;
+3. interrompa diante de qualquer linha divergente;
+4. se o requisito já estiver integralmente conforme, não execute DML;
+5. caso existam somente dados ausentes, obtenha a autorização da mudança e
+   execute a migração como script completo;
+6. execute o `postcheck` e exija todas as linhas conformes;
+7. registre ambiente, data, executor, versão, hash, resultado e se houve DML em
+   `database/deployments/` e no procedimento institucional aplicável.
+
+Não habilite o botão **Publicar** enquanto configuração, unidades,
+procedimentos de auditoria ou checks permanecerem ausentes, divergentes ou sem
+evidência. A ausência dessas migrations pode ser apresentada ao usuário apenas
+como falha segura da preparação; ela não substitui o preflight operacional da
+implantação.
+
+## 9. Critérios de aceite e interrupção
 
 A etapa externa da Sprint 9.1 termina somente quando houver evidência
 sanitizada de que:
@@ -272,6 +356,11 @@ sanitizada de que:
 - diretório e arquivos usam `2750/640`, com leitura sem escrita pelo PHP;
 - a configuração persistente passou na validação do Apache e, quando aplicável,
   do PHP-FPM;
+- o pacote autocontido foi instalado no caminho esperado e teve integridade,
+  topologia, autoload e permissões verificados;
+- os prechecks e post-checks das migrations de configuração, unidades
+  orçamentárias, procedimentos de auditoria e estratégia individual ficaram
+  integralmente conformes, com registro da implantação;
 - nenhum segredo foi registrado como evidência.
 
 Interrompa sem implantar a release quando qualquer caminho, hostname,
