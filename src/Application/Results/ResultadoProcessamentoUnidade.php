@@ -20,15 +20,23 @@ final class ResultadoProcessamentoUnidade
         private readonly ?SequencialPca $sequencialPca,
         private readonly int $quantidadeInclusoes,
         private readonly int $quantidadeExclusoes,
-        private readonly ?FalhaSegura $falha
+        private readonly ?FalhaSegura $falha,
+        private readonly array $numerosItensIncluidos = [],
+        private readonly array $numerosItensExcluidos = []
     ) {}
 
+    /**
+     * @param int[] $numerosItensIncluidos
+     * @param int[] $numerosItensExcluidos
+     */
     public static function concluido(
         UnidadeExternaPublicacao $unidadeExterna,
         DecisaoProcessamentoPlano $decisao,
         SequencialPca $sequencialPca,
         int $quantidadeInclusoes,
-        int $quantidadeExclusoes
+        int $quantidadeExclusoes,
+        array $numerosItensIncluidos = [],
+        array $numerosItensExcluidos = []
     ): self {
         if ($decisao === DecisaoProcessamentoPlano::NENHUMA_ACAO) {
             throw new InvalidArgumentException(
@@ -38,6 +46,27 @@ final class ResultadoProcessamentoUnidade
 
         self::validarContagens($decisao, $quantidadeInclusoes, $quantidadeExclusoes);
 
+        $listasCompativeis = $decisao === DecisaoProcessamentoPlano::RETIFICAR
+            ? count($numerosItensIncluidos) === $quantidadeInclusoes
+                && count($numerosItensExcluidos) === $quantidadeExclusoes
+            : $numerosItensIncluidos === [] && $numerosItensExcluidos === [];
+
+        if (!$listasCompativeis) {
+            throw new InvalidArgumentException('Listas de itens incompatíveis com a decisão e as contagens.');
+        }
+
+        foreach ([$numerosItensIncluidos, $numerosItensExcluidos] as $lista) {
+            if (!array_is_list($lista)) {
+                throw new InvalidArgumentException('Itens devem formar uma lista indexada.');
+            }
+
+            foreach ($lista as $numeroItem) {
+                if (!is_int($numeroItem) || $numeroItem <= 0) {
+                    throw new InvalidArgumentException('Número do item deve ser inteiro positivo.');
+                }
+            }
+        }
+
         return new self(
             $unidadeExterna,
             SituacaoProcessamentoUnidade::CONCLUIDO,
@@ -45,7 +74,9 @@ final class ResultadoProcessamentoUnidade
             $sequencialPca,
             $quantidadeInclusoes,
             $quantidadeExclusoes,
-            null
+            null,
+            $numerosItensIncluidos,
+            $numerosItensExcluidos
         );
     }
 
@@ -130,6 +161,18 @@ final class ResultadoProcessamentoUnidade
     public function getQuantidadeExclusoes(): int
     {
         return $this->quantidadeExclusoes;
+    }
+
+    /** @return int[] */
+    public function getNumerosItensIncluidos(): array
+    {
+        return $this->numerosItensIncluidos;
+    }
+
+    /** @return int[] */
+    public function getNumerosItensExcluidos(): array
+    {
+        return $this->numerosItensExcluidos;
     }
 
     public function getFalha(): ?FalhaSegura

@@ -49,6 +49,53 @@ final class AcumuladorEventosTecnicosTest extends TestCase
         ], $eventos[0]->paraEnvelope());
     }
 
+    public function testDevePreservarMilNumerosItensSemRegistrarPayloadCompleto(): void
+    {
+        [$logger] = $this->criarLogger();
+        $ids = range(1, 1000);
+
+        $logger->info('Itens planejados para escrita no PNCP.', [
+            'action' => AcaoProcessamentoUnidade::REGISTRAR_ITENS_PLANEJADOS->value,
+            'context' => ['decisao' => 'PUBLICAR'],
+            'metadata' => [
+                'numerosItensAIncluir' => $ids,
+                'numerosItensAExcluir' => [],
+                'payload' => ['lista' => $ids],
+            ],
+        ]);
+
+        $envelope = $logger->getEventos()[0]->paraEnvelope();
+        $this->assertSame($ids, $envelope['metadata']['numerosItensAIncluir']);
+        $this->assertSame([], $envelope['metadata']['numerosItensAExcluir']);
+        $this->assertArrayNotHasKey('payload', $envelope['metadata']);
+
+        $serializado = json_encode($envelope, JSON_THROW_ON_ERROR);
+        $decodificado = json_decode($serializado, true, 512, JSON_THROW_ON_ERROR);
+        $this->assertCount(1000, $decodificado['metadata']['numerosItensAIncluir']);
+        $this->assertSame(1000, $decodificado['metadata']['numerosItensAIncluir'][999]);
+    }
+
+    public function testDeveExportarDiagnosticoHttpSemDadosDaRequisicao(): void
+    {
+        [$logger] = $this->criarLogger();
+
+        $logger->warning('Tentativa HTTP PNCP encerrada.', [
+            'action' => AcaoTecnicaPncp::EXECUTAR_REQUISICAO_HTTP_PNCP->value,
+            'metadata' => [
+                'metodo' => 'DELETE',
+                'duracaoTentativaMs' => 231,
+                'status_http' => 403,
+                'categoriaFalha' => 'HTTP_4XX',
+            ],
+        ]);
+
+        $envelope = $logger->getEventos()[0]->paraEnvelope();
+        $this->assertSame('EXECUTAR_REQUISICAO_HTTP_PNCP', $envelope['action']);
+        $this->assertSame(403, $envelope['metadata']['status_http']);
+        $this->assertSame(231, $envelope['metadata']['duracaoTentativaMs']);
+        $this->assertArrayNotHasKey('curl_errno', $envelope['metadata']);
+    }
+
     public function testDeveExigirUuidV4SomenteNoAcumulador(): void
     {
         foreach ([

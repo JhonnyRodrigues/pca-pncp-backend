@@ -18,6 +18,8 @@ function pca_publicar_serializar_resultado_unidade(object $resultado): array
         'sequencialPca' => $resultado->getSequencialPca(),
         'quantidadeInclusoes' => $resultado->getQuantidadeInclusoes(),
         'quantidadeExclusoes' => $resultado->getQuantidadeExclusoes(),
+        'numerosItensIncluidos' => $resultado->getNumerosItensIncluidos(),
+        'numerosItensExcluidos' => $resultado->getNumerosItensExcluidos(),
         'codigoFalha' => $resultado->getCodigoFalha(),
         'mensagemFalha' => $resultado->getMensagemFalha(),
     ];
@@ -375,6 +377,27 @@ function adicionarLinha(container, rotulo, valor) {
     container.appendChild(linha);
 }
 
+function adicionarListaItens(container, rotulo, numerosItens) {
+    const titulo = document.createElement('p');
+    const destaque = document.createElement('strong');
+    destaque.textContent = rotulo + ':';
+    titulo.appendChild(destaque);
+    container.appendChild(titulo);
+
+    const lista = document.createElement('ul');
+    if (numerosItens.length === 0) {
+        const item = document.createElement('li');
+        item.textContent = 'Nenhum';
+        lista.appendChild(item);
+    }
+    numerosItens.forEach((numeroItem) => {
+        const item = document.createElement('li');
+        item.appendChild(document.createTextNode(String(numeroItem)));
+        lista.appendChild(item);
+    });
+    container.appendChild(lista);
+}
+
 function criarConteudoResultado(resposta) {
     const resultado = resposta.resultado;
     const container = document.createElement('div');
@@ -409,6 +432,10 @@ function criarConteudoResultado(resposta) {
         adicionarLinha(secao, 'Sequencial do PCA', unidade.sequencialPca);
         adicionarLinha(secao, 'Inclusões', unidade.quantidadeInclusoes);
         adicionarLinha(secao, 'Exclusões', unidade.quantidadeExclusoes);
+        if (unidade.situacao === 'CONCLUIDO' && unidade.decisao === 'RETIFICAR') {
+            adicionarListaItens(secao, 'Itens incluídos', unidade.numerosItensIncluidos);
+            adicionarListaItens(secao, 'Itens excluídos', unidade.numerosItensExcluidos);
+        }
         adicionarLinha(secao, 'Código', unidade.codigoFalha);
         adicionarLinha(secao, 'Mensagem', unidade.mensagemFalha);
         container.appendChild(secao);

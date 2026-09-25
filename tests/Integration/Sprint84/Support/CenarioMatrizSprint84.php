@@ -331,6 +331,7 @@ final class CenarioMatrizSprint84
     ): void {
         if ($decisao === DecisaoProcessamentoPlano::PUBLICAR) {
             self::programarListaVazia($curl);
+            self::programarLoginDeEscrita($curl);
             $curl->programar(
                 'POST',
                 self::BASE_PNCP . '/v1/orgaos/' . self::CNPJ . '/pca',
@@ -350,6 +351,7 @@ final class CenarioMatrizSprint84
         }
 
         $basePca = self::basePca($sequencial);
+        self::programarLoginDeEscrita($curl);
         if ($decisao === DecisaoProcessamentoPlano::RETIFICAR) {
             $curl->programar('DELETE', $basePca . '/itens', 'excluir_itens', 200, [], '');
             $curl->programar('POST', $basePca . '/itens', 'inserir_itens', 201, [], '');
@@ -360,6 +362,18 @@ final class CenarioMatrizSprint84
         $curl->programar('DELETE', $basePca, 'excluir_pca', 200, [], '');
         $curl->programar('GET', $basePca . '/consolidado', 'identidade', 400, [], '');
         self::programarListaVazia($curl);
+    }
+
+    private static function programarLoginDeEscrita(ExecutorCurlRoteirizado $curl): void
+    {
+        $curl->programar(
+            'POST',
+            self::BASE_PNCP . '/v1/usuarios/login',
+            'login',
+            200,
+            ['Authorization: Bearer token-matriz'],
+            ''
+        );
     }
 
     /** @param int[] $ids */

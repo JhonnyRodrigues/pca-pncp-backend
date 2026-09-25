@@ -70,6 +70,7 @@ aparece neste índice sem link até que o documento exista.
 16. [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md)
 17. [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md)
 18. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
+19. [Catálogo operacional dos códigos públicos](vigentes/operacional/catalogo_codigos_publicos.md)
 
 ### 4.1 Princípio de autoridade
 

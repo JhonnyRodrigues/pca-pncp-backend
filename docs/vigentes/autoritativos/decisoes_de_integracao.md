@@ -804,7 +804,11 @@ testes contratuais aplicáveis.
 ### DI-009 — Transporte HTTP
 
 - **Status:** Aceita.
-- **Contexto e problema:** o adapter PNCP precisa tratar autenticação, leitura, escrita incerta, TLS, paginação e números exatos sem vazar HTTP ou cURL para as camadas internas.
+- **Contexto e problema:** o adapter PNCP precisa tratar autenticação, leitura,
+  escrita incerta, TLS, paginação e números exatos sem vazar HTTP ou cURL para
+  as camadas internas. Na Sprint 9.5, o primeiro `DELETE` de 2026 recebeu `403`
+  mesmo após login `200`; um teste manual no Swagger teve sucesso com novo
+  token após `403`. A causa do bloqueio no backend continua não comprovada.
 - **Fontes:** continuação 03, seção 3; manual PNCP 2.5 e OpenAPI adotados durante a decisão.
 
 #### DI-009 — Decisão vigente
@@ -834,14 +838,19 @@ testes contratuais aplicáveis.
 
 ##### DI-009 — Autenticação
 
-1. A autenticação ocorre uma vez por execução.
+1. A execução autentica para as leituras e, após a decisão de cada unidade que
+   exige escrita, autentica novamente antes do primeiro envio mutante.
 2. JWT é valor opaco.
 3. Claims não são decodificados para controlar expiração.
 4. O header `Authorization` deve usar esquema `Bearer`.
 5. Token não é persistido nem compartilhado entre execuções.
 6. Token, credenciais e header não aparecem em logs ou exceções.
-7. Não há renovação ou segunda autenticação na mesma execução.
-8. `401` e `403` são falhas sistêmicas.
+7. A nova sessão da unidade é reutilizada em suas escritas, observações finais
+   e eventual reconciliação. `NENHUMA_ACAO` não gera novo login.
+8. Falha no novo login desfaz a unidade antes de qualquer escrita. `401` e
+   `403` são falhas sistêmicas e não autorizam repetição de `POST` ou `DELETE`.
+9. A nova autenticação é preventiva; não comprova a causa de um `403` anterior
+   nem garante autorização para a escrita seguinte.
 
 ##### DI-009 — Timeouts e retry
 
@@ -1190,6 +1199,14 @@ e da execução dos gates de ambiente e contrato.
 11. Demais falhas anteriores à execução produzem
     `INTERROMPIDA/FALHA_INESPERADA`, mensagem pública fixa e preservam a
     correlação externa válida.
+12. Cada resultado unitário expõe `numerosItensIncluidos` e
+    `numerosItensExcluidos` como arrays de `numeroItem` (`ID_DEMANDA`,
+    `DI-001`). Somente `RETIFICAR` com situação `CONCLUIDO` pode preencher as
+    listas; suas extensões correspondem a `quantidadeInclusoes` e
+    `quantidadeExclusoes`. Nas demais decisões e situações, ambas são vazias.
+    Os campos existentes permanecem no JSON. A Blank apresenta as listas
+    rotuladas “Itens incluídos” e “Itens excluídos” somente nesse caso,
+    inclusive quando uma delas está vazia.
 
 ##### DI-010 — Eventos técnicos na fronteira hospedeira
 

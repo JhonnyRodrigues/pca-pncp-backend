@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Infrastructure\Pncp\Http;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Log\AbstractLogger;
 use Semae\Pca\Infrastructure\Pncp\Http\AmbientePncp;
 use Semae\Pca\Infrastructure\Pncp\Http\ConfiguracaoTransportePncp;
 use Semae\Pca\Infrastructure\Pncp\Http\ExecutorCurlNativoPncp;
@@ -75,6 +76,104 @@ final class TransporteCurlPncpTest extends TestCase
         $this->assertSame(422, $resposta->getStatus());
         $this->assertSame('{"codigo":"campo_invalido"}', $resposta->getCorpo());
         $this->assertSame(1, $executor->execucoes);
+    }
+
+    public function testDeveRegistrarTentativaHttp403ComDuracaoSemDadosSensiveis(): void
+    {
+        $executor = new ExecutorCurlPncpFake();
+        $executor->status = 403;
+        $executor->headerLines = ["HTTP/1.1 403 Forbidden\r\n", "\r\n"];
+        $logger = new LoggerTentativaHttpFake();
+
+        (new TransporteCurlPncp($this->configuracao(), $executor, $logger))->enviar(
+            new RequisicaoHttpPncp(
+                'DELETE',
+                '/v1/orgaos/123/pca/2026/32/itens',
+                ['Authorization' => 'Bearer segredo'],
+                '{"numeroItem":1001}',
+                30
+            )
+        );
+
+        $this->assertCount(1, $logger->eventos);
+        $evento = $logger->eventos[0];
+        $this->assertSame('EXECUTAR_REQUISICAO_HTTP_PNCP', $evento['context']['action']);
+        $this->assertSame('DELETE', $evento['context']['metadata']['metodo']);
+        $this->assertSame(403, $evento['context']['metadata']['status_http']);
+        $this->assertSame('HTTP_4XX', $evento['context']['metadata']['categoriaFalha']);
+        $this->assertGreaterThanOrEqual(0, $evento['context']['metadata']['duracaoTentativaMs']);
+        $this->assertArrayNotHasKey('curl_errno', $evento['context']['metadata']);
+        $this->assertStringNotContainsString('segredo', json_encode($evento, JSON_THROW_ON_ERROR));
+        $this->assertStringNotContainsString('numeroItem', json_encode($evento, JSON_THROW_ON_ERROR));
+    }
+
+    public function testFalhaCurlDeveRegistrarErrnoSemInventarRespostaHttp(): void
+    {
+        $executor = new ExecutorCurlPncpFake();
+        $executor->executado = false;
+        $executor->errno = 28;
+        $executor->status = 0;
+        $logger = new LoggerTentativaHttpFake();
+
+        try {
+            (new TransporteCurlPncp($this->configuracao(), $executor, $logger))->enviar(
+                new RequisicaoHttpPncp('GET', '/v1/recurso', [], null, 30)
+            );
+            $this->fail('Era esperada falha de transporte.');
+        } catch (FalhaTransportePncpException) {
+            $metadata = $logger->eventos[0]['context']['metadata'];
+            $this->assertSame(28, $metadata['curl_errno']);
+            $this->assertSame('CURL', $metadata['categoriaFalha']);
+            $this->assertArrayNotHasKey('status_http', $metadata);
+        }
+    }
+
+    public function testStatusInformadoSemCabecalhoHttpNaoDeveVirarEvidenciaDeResposta(): void
+    {
+        $executor = new ExecutorCurlPncpFake();
+        $executor->status = 200;
+        $logger = new LoggerTentativaHttpFake();
+
+        (new TransporteCurlPncp($this->configuracao(), $executor, $logger))->enviar(
+            new RequisicaoHttpPncp('GET', '/v1/recurso', [], null, 30)
+        );
+
+        $this->assertArrayNotHasKey('status_http', $logger->eventos[0]['context']['metadata']);
+    }
+
+    public function testRespostaInterrompidaPorLimiteDevePreservarStatusComprovado(): void
+    {
+        $executor = new ExecutorCurlPncpFake();
+        $executor->headerLines = ["HTTP/1.1 200 OK\r\n", "\r\n"];
+        $executor->bodyChunks = ['12345'];
+        $logger = new LoggerTentativaHttpFake();
+
+        try {
+            (new TransporteCurlPncp(
+                $this->configuracao(limiteResposta: 4),
+                $executor,
+                $logger
+            ))->enviar(new RequisicaoHttpPncp('GET', '/v1/recurso', [], null, 30));
+            $this->fail('Era esperado limite de resposta.');
+        } catch (FalhaTransportePncpException) {
+            $metadata = $logger->eventos[0]['context']['metadata'];
+            $this->assertSame(200, $metadata['status_http']);
+            $this->assertSame(23, $metadata['curl_errno']);
+            $this->assertSame('LIMITE_RESPOSTA', $metadata['categoriaFalha']);
+        }
+    }
+
+    public function testFalhaDoLoggerNaoDeveAlterarRespostaHttp(): void
+    {
+        $executor = new ExecutorCurlPncpFake();
+        $executor->headerLines = ["HTTP/1.1 200 OK\r\n", "\r\n"];
+        $logger = new LoggerTentativaHttpFake();
+        $logger->falhar = true;
+
+        $resposta = (new TransporteCurlPncp($this->configuracao(), $executor, $logger))
+            ->enviar(new RequisicaoHttpPncp('GET', '/v1/recurso', [], null, 30));
+
+        $this->assertSame(200, $resposta->getStatus());
     }
 
     public function testProducaoDeveManterBaseCanonicaDoTransporte(): void
@@ -197,6 +296,23 @@ final class TransporteCurlPncpTest extends TestCase
             $limiteResposta,
             caminhoCaBundle: $caminhoCaBundle
         );
+    }
+}
+
+final class LoggerTentativaHttpFake extends AbstractLogger
+{
+    public bool $falhar = false;
+
+    /** @var array<int, array{level: mixed, message: string, context: array}> */
+    public array $eventos = [];
+
+    public function log(mixed $level, string|\Stringable $message, array $context = []): void
+    {
+        if ($this->falhar) {
+            throw new \RuntimeException('Falha simulada do logger.');
+        }
+
+        $this->eventos[] = compact('level', 'message', 'context');
     }
 }
 

@@ -32,7 +32,9 @@ final class ResultadoProcessamentoUnidadeTest extends TestCase
             DecisaoProcessamentoPlano::RETIFICAR,
             $sequencial,
             2,
-            1
+            1,
+            [1001, 1002],
+            [1003]
         );
 
         $this->assertSame(SituacaoProcessamentoUnidade::CONCLUIDO, $resultado->getSituacao());
@@ -41,6 +43,8 @@ final class ResultadoProcessamentoUnidadeTest extends TestCase
         $this->assertSame($sequencial, $resultado->getSequencialPca());
         $this->assertSame(2, $resultado->getQuantidadeInclusoes());
         $this->assertSame(1, $resultado->getQuantidadeExclusoes());
+        $this->assertSame([1001, 1002], $resultado->getNumerosItensIncluidos());
+        $this->assertSame([1003], $resultado->getNumerosItensExcluidos());
         $this->assertNull($resultado->getFalha());
     }
 
@@ -56,6 +60,8 @@ final class ResultadoProcessamentoUnidadeTest extends TestCase
         $this->assertNull($resultado->getSequencialPca());
         $this->assertSame(0, $resultado->getQuantidadeInclusoes());
         $this->assertSame(0, $resultado->getQuantidadeExclusoes());
+        $this->assertSame([], $resultado->getNumerosItensIncluidos());
+        $this->assertSame([], $resultado->getNumerosItensExcluidos());
         $this->assertNull($resultado->getFalha());
     }
 
@@ -80,6 +86,8 @@ final class ResultadoProcessamentoUnidadeTest extends TestCase
         $this->assertNull($resultado->getSequencialPca());
         $this->assertSame(0, $resultado->getQuantidadeInclusoes());
         $this->assertSame(0, $resultado->getQuantidadeExclusoes());
+        $this->assertSame([], $resultado->getNumerosItensIncluidos());
+        $this->assertSame([], $resultado->getNumerosItensExcluidos());
         $this->assertSame($falha, $resultado->getFalha());
     }
 
@@ -108,6 +116,79 @@ final class ResultadoProcessamentoUnidadeTest extends TestCase
             new SequencialPca(77),
             0,
             0
+        );
+    }
+
+    public function testRetificacaoConcluidaDeveExigirListasCompativeisComContagens(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ResultadoProcessamentoUnidade::concluido(
+            $this->criarUnidade(),
+            DecisaoProcessamentoPlano::RETIFICAR,
+            new SequencialPca(77),
+            2,
+            0,
+            [1001],
+            []
+        );
+    }
+
+    #[DataProvider('retificacoesComUmaOperacao')]
+    public function testRetificacaoConcluidaComUmaOperacaoDeveExporSomenteSeusIds(
+        array $incluidos,
+        array $excluidos
+    ): void {
+        $resultado = ResultadoProcessamentoUnidade::concluido(
+            $this->criarUnidade(),
+            DecisaoProcessamentoPlano::RETIFICAR,
+            new SequencialPca(77),
+            count($incluidos),
+            count($excluidos),
+            $incluidos,
+            $excluidos
+        );
+
+        $this->assertSame($incluidos, $resultado->getNumerosItensIncluidos());
+        $this->assertSame($excluidos, $resultado->getNumerosItensExcluidos());
+    }
+
+    /** @return array<string, array{int[], int[]}> */
+    public static function retificacoesComUmaOperacao(): array
+    {
+        return [
+            'somente inclusão' => [[1002], []],
+            'somente exclusão' => [[], [1001]],
+        ];
+    }
+
+    public function testPublicacaoNaoDeveAceitarListasPublicasDeItens(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ResultadoProcessamentoUnidade::concluido(
+            $this->criarUnidade(),
+            DecisaoProcessamentoPlano::PUBLICAR,
+            new SequencialPca(77),
+            1,
+            0,
+            [1001],
+            []
+        );
+    }
+
+    public function testListasPublicasDevemSerArraysIndexadosParaJson(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ResultadoProcessamentoUnidade::concluido(
+            $this->criarUnidade(),
+            DecisaoProcessamentoPlano::RETIFICAR,
+            new SequencialPca(77),
+            1,
+            0,
+            ['id' => 1001],
+            []
         );
     }
 

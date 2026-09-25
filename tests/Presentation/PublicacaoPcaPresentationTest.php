@@ -45,7 +45,9 @@ final class PublicacaoPcaPresentationTest extends TestCase
                     DecisaoProcessamentoPlano::RETIFICAR,
                     new SequencialPca(701),
                     2,
-                    1
+                    1,
+                    [1001, 1002],
+                    [1003]
                 ),
                 ResultadoProcessamentoUnidade::semAlteracao(
                     $this->criarUnidade('uo-702', '928702', $ano)
@@ -81,6 +83,8 @@ final class PublicacaoPcaPresentationTest extends TestCase
         $this->assertSame(701, $resultados[0]->getSequencialPca());
         $this->assertSame(2, $resultados[0]->getQuantidadeInclusoes());
         $this->assertSame(1, $resultados[0]->getQuantidadeExclusoes());
+        $this->assertSame([1001, 1002], $resultados[0]->getNumerosItensIncluidos());
+        $this->assertSame([1003], $resultados[0]->getNumerosItensExcluidos());
         $this->assertSaidaRenderizavel($viewModel);
     }
 
@@ -276,6 +280,8 @@ final class PublicacaoPcaPresentationTest extends TestCase
                     'sequencialPca' => $resultado->getSequencialPca(),
                     'quantidadeInclusoes' => $resultado->getQuantidadeInclusoes(),
                     'quantidadeExclusoes' => $resultado->getQuantidadeExclusoes(),
+                    'numerosItensIncluidos' => $resultado->getNumerosItensIncluidos(),
+                    'numerosItensExcluidos' => $resultado->getNumerosItensExcluidos(),
                     'codigoFalha' => $resultado->getCodigoFalha(),
                     'mensagemFalha' => $resultado->getMensagemFalha(),
                 ],

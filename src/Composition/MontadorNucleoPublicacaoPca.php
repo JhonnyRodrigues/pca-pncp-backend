@@ -71,7 +71,9 @@ final class MontadorNucleoPublicacaoPca
             new DespachadorComandosUnidade(
                 $executor,
                 $finalizador,
-                $this->unidadeDeTrabalho
+                $this->unidadeDeTrabalho,
+                $this->autenticadorPncp,
+                $this->logger
             )
         );
 

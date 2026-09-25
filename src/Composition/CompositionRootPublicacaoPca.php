@@ -63,16 +63,17 @@ final class CompositionRootPublicacaoPca
             $loginAutenticado
         );
         $configuracaoTransporte = $perfilTipado->getConfiguracaoTransporte();
-        $transporte = $this->transportePncp ?? new TransporteCurlPncp(
-            $configuracaoTransporte,
-            new ExecutorCurlNativoPncp()
-        );
         $logger = new AcumuladorEventosTecnicos(
             $correlacao->getValor(),
             $perfilTipado->getAmbiente()->value,
             self::MODULO_OBSERVABILIDADE,
             null,
             new RelogioSistemaEventosTecnicos()
+        );
+        $transporte = $this->transportePncp ?? new TransporteCurlPncp(
+            $configuracaoTransporte,
+            new ExecutorCurlNativoPncp(),
+            $logger
         );
         $pncp = new ComposicaoPncpPublicacaoPca(
             $perfilTipado,

@@ -58,7 +58,9 @@ final class PublicarPcaPresenter
             $resultado->getQuantidadeInclusoes(),
             $resultado->getQuantidadeExclusoes(),
             $falha?->getCodigo(),
-            $falha?->getMensagem()
+            $falha?->getMensagem(),
+            $resultado->getNumerosItensIncluidos(),
+            $resultado->getNumerosItensExcluidos()
         );
     }
 }

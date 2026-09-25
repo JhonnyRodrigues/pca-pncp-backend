@@ -80,7 +80,7 @@ final class MontadorNucleoPublicacaoPcaIntegrationTest extends TestCase
         );
     }
 
-    public function testDeveRetificarComSessaoCompartilhadaEPersistenciaOrdenada(): void
+    public function testDeveRetificarComSessaoRenovadaEPersistenciaOrdenada(): void
     {
         $cenario = CenarioIntegracaoNucleo::individualParaRetificacao();
 
@@ -95,7 +95,7 @@ final class MontadorNucleoPublicacaoPcaIntegrationTest extends TestCase
         $this->assertSame(1, $resultado->getQuantidadeInclusoes());
         $this->assertSame(1, $resultado->getQuantidadeExclusoes());
 
-        $this->assertSame(1, $cenario->curl->quantidadeChamadas('POST', 'login'));
+        $this->assertSame(2, $cenario->curl->quantidadeChamadas('POST', 'login'));
         $this->assertSame(2, $cenario->curl->quantidadeChamadas('GET', 'identidade'));
         $this->assertSame(2, $cenario->curl->quantidadeChamadas('GET', 'itens'));
         $this->assertSame(1, $cenario->curl->quantidadeChamadas('DELETE', 'excluir_itens'));
@@ -118,6 +118,7 @@ final class MontadorNucleoPublicacaoPcaIntegrationTest extends TestCase
             [
                 'pncp:GET:identidade',
                 'pncp:GET:itens',
+                'pncp:POST:login',
                 'pncp:DELETE:excluir_itens',
                 'pncp:POST:inserir_itens',
                 'pncp:GET:identidade',
@@ -129,7 +130,7 @@ final class MontadorNucleoPublicacaoPcaIntegrationTest extends TestCase
                 'oracle:write:auditoria',
                 'oracle:commit',
             ],
-            array_slice($cenario->eventos->todos(), -12)
+            array_slice($cenario->eventos->todos(), -13)
         );
         $this->assertNotContains('oracle:write:estado_operacional', $cenario->eventos->todos());
     }

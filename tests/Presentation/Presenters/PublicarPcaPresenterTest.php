@@ -75,7 +75,9 @@ final class PublicarPcaPresenterTest extends TestCase
                     DecisaoProcessamentoPlano::RETIFICAR,
                     new SequencialPca(77),
                     2,
-                    1
+                    1,
+                    [1001, 1002],
+                    [1003]
                 ),
                 ResultadoProcessamentoUnidade::semAlteracao($segundaUnidade),
             ],
@@ -99,6 +101,8 @@ final class PublicarPcaPresenterTest extends TestCase
         $this->assertSame(77, $resultados[0]->getSequencialPca());
         $this->assertSame(2, $resultados[0]->getQuantidadeInclusoes());
         $this->assertSame(1, $resultados[0]->getQuantidadeExclusoes());
+        $this->assertSame([1001, 1002], $resultados[0]->getNumerosItensIncluidos());
+        $this->assertSame([1003], $resultados[0]->getNumerosItensExcluidos());
         $this->assertNull($resultados[0]->getCodigoFalha());
         $this->assertNull($resultados[0]->getMensagemFalha());
     }
@@ -194,6 +198,8 @@ final class PublicarPcaPresenterTest extends TestCase
         $this->assertSame(88, $resultado->getSequencialPca());
         $this->assertSame(0, $resultado->getQuantidadeInclusoes());
         $this->assertSame(1, $resultado->getQuantidadeExclusoes());
+        $this->assertSame([], $resultado->getNumerosItensIncluidos());
+        $this->assertSame([], $resultado->getNumerosItensExcluidos());
         $this->assertSame('UNIDADE_BLOQUEADA', $resultado->getCodigoFalha());
         $this->assertSame(
             'Unidade temporariamente bloqueada.',
@@ -232,6 +238,8 @@ final class PublicarPcaPresenterTest extends TestCase
 
         $this->assertSame('PUBLICAR', $resultados[0]->getDecisao());
         $this->assertSame(90, $resultados[0]->getSequencialPca());
+        $this->assertSame([], $resultados[0]->getNumerosItensIncluidos());
+        $this->assertSame([], $resultados[0]->getNumerosItensExcluidos());
         $this->assertSame('EXCLUIR_PCA', $resultados[1]->getDecisao());
         $this->assertSame(91, $resultados[1]->getSequencialPca());
     }

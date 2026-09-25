@@ -105,6 +105,8 @@ final class PcaPublicarBlankTest extends TestCase
             'sequencialPca',
             'quantidadeInclusoes',
             'quantidadeExclusoes',
+            'numerosItensIncluidos',
+            'numerosItensExcluidos',
         ] as $campo) {
             $this->assertStringContainsString("'{$campo}' =>", $this->codigo);
         }
@@ -127,6 +129,17 @@ final class PcaPublicarBlankTest extends TestCase
             '/foreach\s*\(\s*\$resultado->getResultadosUnitarios\(\)\s+as\s+\$resultadoUnitario\s*\)/',
             $this->codigo
         );
+    }
+
+    public function testListasDevemAparecerSomenteEmRetificacaoConcluida(): void
+    {
+        $this->assertStringContainsString(
+            "unidade.situacao === 'CONCLUIDO' && unidade.decisao === 'RETIFICAR'",
+            $this->codigo
+        );
+        $this->assertStringContainsString("'Itens incluídos'", $this->codigo);
+        $this->assertStringContainsString("'Itens excluídos'", $this->codigo);
+        $this->assertStringContainsString('document.createTextNode(String(numeroItem))', $this->codigo);
     }
 
     public function testDevePrepararResultadoAntesDoRegistroTecnico(): void

@@ -76,6 +76,7 @@ final class FluxoConcretoApplicationTest extends TestCase
 
         $this->assertConcluidaComOperacoes($response, ['publicar'], $cenario);
         $this->assertSame(1, $cenario->auditoria->registros);
+        $this->assertSame(2, $cenario->autenticador->chamadas);
     }
 
     public function testDeveRetificarExcluindoAntesDeInserirComGrafoConcreto(): void
@@ -96,6 +97,7 @@ final class FluxoConcretoApplicationTest extends TestCase
             $cenario
         );
         $this->assertSame(1, $cenario->auditoria->registros);
+        $this->assertSame(2, $cenario->autenticador->chamadas);
     }
 
     /** @regra RN-PUB-003 */
@@ -399,8 +401,12 @@ final class UnidadeTrabalhoFluxoConcreto implements UnidadeDeTrabalhoPort
 
 final class AutenticadorFluxoConcreto implements AutenticadorPncpPort
 {
+    public int $chamadas = 0;
+
     public function autenticar(): ResultadoAutenticacaoPncp
     {
+        $this->chamadas++;
+
         return ResultadoAutenticacaoPncp::autenticada(new SessaoFluxoConcreto());
     }
 }

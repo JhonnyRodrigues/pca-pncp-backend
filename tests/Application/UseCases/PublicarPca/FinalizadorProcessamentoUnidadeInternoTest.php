@@ -250,7 +250,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
             });
         $dependencias->unidadeTrabalho->expects($this->once())
             ->method('confirmar')
-            ->willReturnCallback(static function () use (&$ordem): ResultadoFinalizacaoUnidadeTrabalho {
+            ->willReturnCallback(static function () use (&$ordem, $logger): ResultadoFinalizacaoUnidadeTrabalho {
+                self::assertSame([], $logger->contextoDe('Itens confirmados após convergência e commit.'));
                 $ordem[] = 'commit';
                 return ResultadoFinalizacaoUnidadeTrabalho::concluida();
             });
@@ -268,6 +269,14 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
                 ?? null
         );
         $this->assertSame(88, $resultado->getResultadoUnitario()?->getSequencialPca()?->getValor());
+        $this->assertSame(
+            [1001],
+            $logger->contextoDe('Itens confirmados após convergência e commit.')['metadata']['numerosItensIncluidos'] ?? null
+        );
+        $this->assertSame(
+            [],
+            $logger->contextoDe('Itens confirmados após convergência e commit.')['metadata']['numerosItensExcluidos'] ?? null
+        );
     }
 
     public function testObservacaoInconclusivaDepoisDaEscritaDeveDesfazerEReconciliar(): void
@@ -587,6 +596,16 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $this->assertSame(77, $resultado->getResultadoUnitario()?->getSequencialPca()?->getValor());
         $this->assertSame(1, $resultado->getResultadoUnitario()?->getQuantidadeInclusoes());
         $this->assertSame(1, $resultado->getResultadoUnitario()?->getQuantidadeExclusoes());
+        $this->assertSame([1003], $resultado->getResultadoUnitario()?->getNumerosItensIncluidos());
+        $this->assertSame([1001], $resultado->getResultadoUnitario()?->getNumerosItensExcluidos());
+        $this->assertSame(
+            [1003],
+            $logger->contextoDe('Itens confirmados após convergência e commit.')['metadata']['numerosItensIncluidos'] ?? null
+        );
+        $this->assertSame(
+            [1001],
+            $logger->contextoDe('Itens confirmados após convergência e commit.')['metadata']['numerosItensExcluidos'] ?? null
+        );
         $this->assertSame(
             'RETIFICAR',
             $logger->contextoDe('Unidade finalizada com convergência comprovada.')['context']['decisao']
@@ -731,6 +750,39 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $this->assertSame($falha, $resultado->getFalhaSistemica());
     }
 
+    public function testFalhaNoCommitAposEscritaNaoDeveRegistrarIdsConfirmados(): void
+    {
+        $sequencial = new SequencialPca(88);
+        $contexto = $this->criarContexto(
+            [$this->criarPlano('uo-101', '928344', [1001])],
+            EstadoOperacionalPublicacao::naoPublicado(),
+            PcaObservado::ausente(),
+            ResultadoDecisaoProcessamentoPlano::publicar([1001]),
+            [ResultadoPublicacaoPncp::aceita($sequencial)]
+        );
+        $logger = new LoggerMemoriaFinalizador();
+        $dependencias = $this->criarDependencias($logger);
+        $dependencias->leitor->method('observarPcaConhecido')
+            ->willReturn(ResultadoObservacaoPca::encontrado(
+                PcaObservado::ativo($sequencial, [1001])
+            ));
+        $dependencias->estado->method('registrar')
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
+        $dependencias->auditoria->method('registrar')
+            ->willReturn(ResultadoPersistenciaLocal::concluida());
+        $dependencias->unidadeTrabalho->expects($this->once())->method('confirmar')
+            ->willReturn(ResultadoFinalizacaoUnidadeTrabalho::falhaSistemica(
+                new FalhaSegura('COMMIT_FALHOU', 'Commit falhou.')
+            ));
+        $dependencias->unidadeTrabalho->method('desfazer')
+            ->willReturn(ResultadoFinalizacaoUnidadeTrabalho::concluida());
+
+        $resultado = $dependencias->finalizador->finalizar($contexto);
+
+        $this->assertNull($resultado->getResultadoUnitario());
+        $this->assertSame([], $logger->contextoDe('Itens confirmados após convergência e commit.'));
+    }
+
     public function testFalhaNaConfirmacaoDosPlanosDeveImpedirAuditoriaECommit(): void
     {
         $plano = $this->criarPlano('uo-101', '928344', []);
@@ -810,7 +862,8 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
                 new FalhaSegura('RETIFICACAO_REJEITADA', 'Retificação rejeitada.')
             )]
         );
-        $dependencias = $this->criarDependencias();
+        $logger = new LoggerMemoriaFinalizador();
+        $dependencias = $this->criarDependencias($logger);
         $dependencias->leitor->expects($this->once())
             ->method('observarPcaConhecido')
             ->willReturn(ResultadoObservacaoPca::encontrado(
@@ -827,6 +880,12 @@ final class FinalizadorProcessamentoUnidadeInternoTest extends TestCase
         $resultado = $dependencias->finalizador->finalizar($contexto);
 
         $this->assertSame(SituacaoProcessamentoUnidade::CONCLUIDO, $resultado->getResultadoUnitario()?->getSituacao());
+        $this->assertSame([1001], $resultado->getResultadoUnitario()?->getNumerosItensIncluidos());
+        $this->assertSame([1002], $resultado->getResultadoUnitario()?->getNumerosItensExcluidos());
+        $this->assertSame(
+            [1001],
+            $logger->contextoDe('Itens confirmados após convergência e commit.')['metadata']['numerosItensIncluidos'] ?? null
+        );
     }
 
     public function testConflitoNaObservacaoFinalDeveBloquearEFalhaSistemicaDeveInterromper(): void

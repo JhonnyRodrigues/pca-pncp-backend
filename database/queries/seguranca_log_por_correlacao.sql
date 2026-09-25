@@ -13,6 +13,12 @@ SELECT L.ID,
            JSON_VALUE(L.DESCRIPTION, '$.metadata.status_http' NULL ON ERROR),
            JSON_VALUE(L.DESCRIPTION, '$.metadata.statusHttp' NULL ON ERROR)
        ) AS STATUS_HTTP,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.duracaoTentativaMs' NULL ON ERROR)
+           AS DURACAO_TENTATIVA_MS,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.curl_errno' NULL ON ERROR)
+           AS CURL_ERRNO,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.categoriaFalha' NULL ON ERROR)
+           AS CATEGORIA_FALHA,
        JSON_VALUE(L.DESCRIPTION, '$.metadata.tentativa' NULL ON ERROR) AS TENTATIVA,
        JSON_VALUE(L.DESCRIPTION, '$.metadata.pagina' NULL ON ERROR) AS PAGINA,
        JSON_VALUE(
@@ -21,7 +27,23 @@ SELECT L.ID,
        ) AS DURACAO_EXECUCAO_MS,
        JSON_VALUE(L.DESCRIPTION, '$.context.anoExecucao' NULL ON ERROR) AS ANO,
        JSON_VALUE(L.DESCRIPTION, '$.context.uasg' NULL ON ERROR) AS UASG,
-       JSON_VALUE(L.DESCRIPTION, '$.context.decisao' NULL ON ERROR) AS DECISAO
+       JSON_VALUE(L.DESCRIPTION, '$.context.decisao' NULL ON ERROR) AS DECISAO,
+       JSON_QUERY(
+           L.DESCRIPTION,
+           '$.metadata.numerosItensAIncluir' RETURNING CLOB NULL ON ERROR
+       ) AS ITENS_A_INCLUIR,
+       JSON_QUERY(
+           L.DESCRIPTION,
+           '$.metadata.numerosItensAExcluir' RETURNING CLOB NULL ON ERROR
+       ) AS ITENS_A_EXCLUIR,
+       JSON_QUERY(
+           L.DESCRIPTION,
+           '$.metadata.numerosItensIncluidos' RETURNING CLOB NULL ON ERROR
+       ) AS ITENS_INCLUIDOS,
+       JSON_QUERY(
+           L.DESCRIPTION,
+           '$.metadata.numerosItensExcluidos' RETURNING CLOB NULL ON ERROR
+       ) AS ITENS_EXCLUIDOS
   FROM SGI.SEGURANCA_LOG L
  WHERE DBMS_LOB.INSTR(L.DESCRIPTION, :correlacao) > 0
  ORDER BY L.ID;

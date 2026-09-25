@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 24/09/2026
+**Atualizado em:** 25/09/2026
 
 ## Limites de autoridade
 
@@ -39,7 +39,9 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 9.4 — Migração assistida e recuperação está concluída, com o
   bloqueio nominal aceito de 2026 e o corretivo de pré-requisitos Oracle
   registrados abaixo.
-- A Sprint 9.5 — Prontidão de produção e suporte é a próxima para planejamento.
+- A Sprint 9.5 — Prontidão de produção e suporte está em execução conforme o
+  [plano aprovado](../../../.agents/sprints/planos/plano_sprint_9.5.md).
+  Microciclos 1 a 5 concluídos; Microciclo 6 autorizado e em validação local.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.
@@ -366,14 +368,16 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   correlação. Em 24/09/2026, ambas as migrations foram aplicadas em produção
   com postchecks conformes: dois procedimentos presentes e uma configuração
   individual conforme. Não houve chamada à Blank nem ao PNCP.
-- A Sprint 9.5 deve planejar um catálogo operacional de códigos e melhorar os
-  eventos de transporte com `curl_errno`, categoria sanitizada e duração da
-  tentativa. `status_http` continuará ausente quando não houver resposta HTTP.
-  Também deve investigar o HTTP 403 que desapareceu após nova autenticação e a
-  diferença entre o tempo percebido pela Blank e o medido no backend. Esse
-  escopo corretivo não reabre dashboards, alertas ou retenção da Sprint 9.2.
-- A Sprint 9.4 foi concluída em 24/09/2026. A Sprint 9.5 é a próxima, mas ainda
-  exige plano e autorização próprios.
+- A Sprint 9.5 criou o catálogo operacional de códigos e acrescentou aos
+  eventos de transporte `curl_errno`, categoria sanitizada e duração da
+  tentativa. `status_http` permanece ausente quando não houve resposta HTTP.
+  A nova autenticação antes da escrita foi implementada; sua eficácia real
+  diante do HTTP 403 ainda não foi testada em produção. A diferença entre o
+  tempo percebido pela Blank e o medido no backend ainda carece do tempo do
+  navegador para a mesma correlação. Esse escopo não reabre dashboards,
+  alertas ou retenção da Sprint 9.2.
+- A Sprint 9.4 foi concluída em 24/09/2026. A Sprint 9.5 recebeu plano e
+  autorizações incrementais; os Microciclos 7 e 8 seguem sem autorização.
 
 ## Evidências do Microciclo 5 da Sprint 8.5
 

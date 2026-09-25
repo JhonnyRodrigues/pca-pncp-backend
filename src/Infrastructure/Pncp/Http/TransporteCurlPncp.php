@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace Semae\Pca\Infrastructure\Pncp\Http;
 
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
+use Semae\Pca\Infrastructure\Pncp\Observabilidade\AcaoTecnicaPncp;
+use Throwable;
 
 final class TransporteCurlPncp implements TransporteHttpPncp
 {
     public function __construct(
         private readonly ConfiguracaoTransportePncp $configuracao,
-        private readonly ExecutorCurlPncp $executor
+        private readonly ExecutorCurlPncp $executor,
+        private readonly ?LoggerInterface $logger = null
     ) {}
 
     public function enviar(RequisicaoHttpPncp $requisicao): RespostaHttpPncp
@@ -30,38 +34,113 @@ final class TransporteCurlPncp implements TransporteHttpPncp
         $headersResposta = [];
         $corpoResposta = '';
         $limiteRespostaExcedido = false;
+        $houveRespostaHttp = false;
 
         $opcoes = $this->montarOpcoes(
             $requisicao,
             $headersResposta,
             $corpoResposta,
-            $limiteRespostaExcedido
+            $limiteRespostaExcedido,
+            $houveRespostaHttp
         );
-        $resultado = $this->executor->executar(
-            $this->configuracao->getBaseUrl() . $requisicao->getCaminho(),
-            $opcoes
-        );
+        $inicio = hrtime(true);
+        $resultado = null;
+        $categoriaFalha = 'TRANSPORTE_LOCAL';
+        try {
+            $resultado = $this->executor->executar(
+                $this->configuracao->getBaseUrl() . $requisicao->getCaminho(),
+                $opcoes
+            );
 
-        if ($limiteRespostaExcedido) {
-            throw FalhaTransportePncpException::limiteRespostaExcedido();
+            if ($limiteRespostaExcedido) {
+                $categoriaFalha = 'LIMITE_RESPOSTA';
+                throw FalhaTransportePncpException::limiteRespostaExcedido();
+            }
+
+            if (!$resultado->foiExecutado() || $resultado->getErrno() !== 0) {
+                $categoriaFalha = 'CURL';
+                throw FalhaTransportePncpException::execucaoCurlFalhou($resultado->getErrno());
+            }
+
+            if ($resultado->getResultadoVerificacaoTls() !== 0) {
+                $categoriaFalha = 'TLS';
+                throw FalhaTransportePncpException::tlsNaoConfirmado();
+            }
+
+            $categoriaFalha = 'RESPOSTA_INVALIDA';
+            try {
+                $resposta = new RespostaHttpPncp(
+                    $resultado->getStatusHttp(),
+                    $headersResposta,
+                    $corpoResposta
+                );
+            } catch (InvalidArgumentException) {
+                throw FalhaTransportePncpException::respostaHttpInvalida();
+            }
+
+            $categoriaFalha = match (true) {
+                $resposta->getStatus() >= 500 => 'HTTP_5XX',
+                $resposta->getStatus() >= 400 => 'HTTP_4XX',
+                $resposta->getStatus() >= 300 => 'HTTP_3XX',
+                default => null,
+            };
+
+            return $resposta;
+        } finally {
+            $this->registrarTentativa(
+                $requisicao->getMetodo(),
+                $inicio,
+                $resultado,
+                $houveRespostaHttp,
+                $categoriaFalha
+            );
+        }
+    }
+
+    private function registrarTentativa(
+        string $metodo,
+        int $inicio,
+        ?ResultadoExecucaoCurlPncp $resultado,
+        bool $houveRespostaHttp,
+        ?string $categoriaFalha
+    ): void {
+        if ($this->logger === null) {
+            return;
         }
 
-        if (!$resultado->foiExecutado() || $resultado->getErrno() !== 0) {
-            throw FalhaTransportePncpException::execucaoCurlFalhou($resultado->getErrno());
+        $metadata = [
+            'metodo' => $metodo,
+            'duracaoTentativaMs' => max(0, intdiv(hrtime(true) - $inicio, 1_000_000)),
+        ];
+
+        if ($resultado !== null && $resultado->getErrno() !== 0) {
+            $metadata['curl_errno'] = $resultado->getErrno();
         }
 
-        if ($resultado->getResultadoVerificacaoTls() !== 0) {
-            throw FalhaTransportePncpException::tlsNaoConfirmado();
+        if (
+            $houveRespostaHttp
+            && $resultado !== null
+            && $resultado->getStatusHttp() >= 100
+            && $resultado->getStatusHttp() <= 599
+        ) {
+            $metadata['status_http'] = $resultado->getStatusHttp();
+        }
+
+        if ($categoriaFalha !== null) {
+            $metadata['categoriaFalha'] = $categoriaFalha;
         }
 
         try {
-            return new RespostaHttpPncp(
-                $resultado->getStatusHttp(),
-                $headersResposta,
-                $corpoResposta
+            $this->logger->log(
+                $categoriaFalha === null ? 'info' : 'warning',
+                'Tentativa HTTP PNCP encerrada.',
+                [
+                    'action' => AcaoTecnicaPncp::EXECUTAR_REQUISICAO_HTTP_PNCP->value,
+                    'metadata' => $metadata,
+                ]
             );
-        } catch (InvalidArgumentException) {
-            throw FalhaTransportePncpException::respostaHttpInvalida();
+        } catch (Throwable) {
+            // Observabilidade não modifica o resultado da requisição.
         }
     }
 
@@ -80,7 +159,8 @@ final class TransporteCurlPncp implements TransporteHttpPncp
         RequisicaoHttpPncp $requisicao,
         array &$headersResposta,
         string &$corpoResposta,
-        bool &$limiteRespostaExcedido
+        bool &$limiteRespostaExcedido,
+        bool &$houveRespostaHttp
     ): array {
         $opcoes = [
             CURLOPT_CUSTOMREQUEST => $requisicao->getMetodo(),
@@ -98,9 +178,10 @@ final class TransporteCurlPncp implements TransporteHttpPncp
             CURLOPT_HEADERFUNCTION => static function (
                 mixed $handle,
                 string $linha
-            ) use (&$headersResposta): int {
+            ) use (&$headersResposta, &$houveRespostaHttp): int {
                 if (str_starts_with($linha, 'HTTP/')) {
                     $headersResposta = [];
+                    $houveRespostaHttp = true;
 
                     return strlen($linha);
                 }

@@ -43,6 +43,41 @@ explica qual decisão orientou o processamento; ele não substitui `action`, que
 continua identificando a operação técnica do evento, nem cria auditoria de
 negócio.
 
+Para `PUBLICAR` e `RETIFICAR`, o evento `REGISTRAR_ITENS_PLANEJADOS` ocorre
+antes do primeiro comando mutante e contém em `metadata` os arrays ordenados
+`numerosItensAIncluir` e `numerosItensAExcluir`. O evento
+`REGISTRAR_ITENS_CONFIRMADOS` contém `numerosItensIncluidos` e
+`numerosItensExcluidos` somente após observação de convergência e confirmação da
+transação Oracle. A confirmação descreve o estado observado, sem atribuir a
+mudança à requisição quando a escrita foi rejeitada. Cada
+número corresponde ao `ID_DEMANDA` enviado como `numeroItem` (`DI-001`). Em
+`PUBLICAR`, a lista de exclusões é vazia; em `RETIFICAR`, as listas podem
+representar somente inclusão ou somente exclusão. `NENHUMA_ACAO` e
+`EXCLUIR_PCA` não geram esses eventos de itens.
+
+Cada chamada efetivamente iniciada no transporte cURL gera
+`EXECUTAR_REQUISICAO_HTTP_PNCP` com `metadata.metodo` e
+`metadata.duracaoTentativaMs` (relógio monotônico, milissegundos). Se cURL
+retornar errno não zero, o evento inclui `metadata.curl_errno`. Uma falha
+recebe `metadata.categoriaFalha`: `CURL`, `TLS`, `LIMITE_RESPOSTA`,
+`RESPOSTA_INVALIDA`, `TRANSPORTE_LOCAL`, `HTTP_3XX`, `HTTP_4XX` ou `HTTP_5XX`.
+`metadata.status_http` aparece somente quando o transporte recebeu uma
+resposta HTTP com código válido. Um 403 é resposta HTTP; timeout sem resposta
+não recebe `status_http`. O evento não inclui caminho, URL, headers, corpo ou
+credenciais. Falhas anteriores ao início da tentativa não geram este evento.
+As categorias `HTTP_3XX`, `HTTP_4XX` e `HTTP_5XX` classificam apenas a faixa
+do status; a interpretação da operação pertence ao adaptador PNCP.
+
+Os arrays contêm apenas inteiros, sem payloads completos. Um erro `403` pode
+preservar o evento planejado, mas não produz evento confirmado. A consulta
+operacional por correlação usa `JSON_QUERY ... RETURNING CLOB` para não truncar
+listas grandes.
+
+Os arrays planejados pertencem apenas aos eventos técnicos. O resultado
+público e a Blank exibem IDs somente para `RETIFICAR/CONCLUIDO`, com as duas
+listas confirmadas e contagens correspondentes (`DI-010`). Uma publicação pode
+registrar os IDs nos logs sem apresentá-los na Blank.
+
 ## 3. Erro seguro
 
 `action` identifica a operação e nunca é substituída pelo código da falha. Em

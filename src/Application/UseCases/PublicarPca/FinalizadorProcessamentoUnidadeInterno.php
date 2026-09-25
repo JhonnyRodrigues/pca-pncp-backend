@@ -439,6 +439,7 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
             ));
         }
 
+        $this->registrarItensConfirmados($contexto);
         $this->registrarLog(
             'info',
             AcaoProcessamentoUnidade::PERSISTIR_CONVERGENCIA,
@@ -447,6 +448,34 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         );
 
         return $this->criarResultadoSucesso($contexto, $estadoFinal);
+    }
+
+    private function registrarItensConfirmados(
+        ContextoFinalizacaoProcessamentoUnidade $contexto
+    ): void {
+        $decisao = $contexto->getResultadoDecisao();
+
+        if (
+            !in_array(
+                $decisao->getDecisao(),
+                [DecisaoProcessamentoPlano::PUBLICAR, DecisaoProcessamentoPlano::RETIFICAR],
+                true
+            )
+        ) {
+            return;
+        }
+
+        $this->registrarLog(
+            'info',
+            AcaoProcessamentoUnidade::REGISTRAR_ITENS_CONFIRMADOS,
+            'Itens confirmados após convergência e commit.',
+            $contexto,
+            null,
+            [
+                'numerosItensIncluidos' => $decisao->getDemandasAIncluir(),
+                'numerosItensExcluidos' => $decisao->getDemandasAExcluir(),
+            ]
+        );
     }
 
     private function derivarEstadoFinal(
@@ -499,7 +528,13 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
                 $decisao->getDecisao(),
                 $sequencial,
                 count($decisao->getDemandasAIncluir()),
-                count($decisao->getDemandasAExcluir())
+                count($decisao->getDemandasAExcluir()),
+                $decisao->getDecisao() === DecisaoProcessamentoPlano::RETIFICAR
+                    ? $decisao->getDemandasAIncluir()
+                    : [],
+                $decisao->getDecisao() === DecisaoProcessamentoPlano::RETIFICAR
+                    ? $decisao->getDemandasAExcluir()
+                    : []
             )
         );
     }
@@ -756,7 +791,8 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
         AcaoProcessamentoUnidade $acao,
         string $mensagem,
         ContextoFinalizacaoProcessamentoUnidade $contexto,
-        ?FalhaSegura $falha = null
+        ?FalhaSegura $falha = null,
+        array $metadata = []
     ): void {
         try {
             $this->logger->log($nivel, $mensagem, [
@@ -768,6 +804,7 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
                     'modo' => $contexto->getUnidadeExterna()->getModo()->value,
                     'decisao' => $contexto->getResultadoDecisao()->getDecisao()->value,
                 ],
+                'metadata' => $metadata,
             ]);
         } catch (Throwable) {
             // Observabilidade nunca altera o desfecho da transação de negócio.

@@ -18,7 +18,9 @@ final class ResultadoUnidadeViewModel
         private readonly int $quantidadeInclusoes,
         private readonly int $quantidadeExclusoes,
         private readonly ?string $codigoFalha,
-        private readonly ?string $mensagemFalha
+        private readonly ?string $mensagemFalha,
+        private readonly array $numerosItensIncluidos,
+        private readonly array $numerosItensExcluidos
     ) {}
 
     public function getIdUnidadeOrcamentaria(): ?string
@@ -69,6 +71,18 @@ final class ResultadoUnidadeViewModel
     public function getQuantidadeExclusoes(): int
     {
         return $this->quantidadeExclusoes;
+    }
+
+    /** @return int[] */
+    public function getNumerosItensIncluidos(): array
+    {
+        return $this->numerosItensIncluidos;
+    }
+
+    /** @return int[] */
+    public function getNumerosItensExcluidos(): array
+    {
+        return $this->numerosItensExcluidos;
     }
 
     public function getCodigoFalha(): ?string
