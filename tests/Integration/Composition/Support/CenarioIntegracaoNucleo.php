@@ -376,14 +376,6 @@ final class CenarioIntegracaoNucleo
 
             if ($indice === 0) {
                 $curl->programar(
-                    'POST',
-                    self::BASE_PNCP . '/v1/usuarios/login',
-                    'login',
-                    200,
-                    ['Authorization: Bearer token-ficticio'],
-                    ''
-                );
-                $curl->programar(
                     'DELETE',
                     $basePca . '/itens',
                     'excluir_itens',
@@ -441,14 +433,6 @@ final class CenarioIntegracaoNucleo
                 [array_merge($identidade, ['numeroItem' => 1001])],
                 JSON_THROW_ON_ERROR
             )
-        );
-        $curl->programar(
-            'POST',
-            self::BASE_PNCP . '/v1/usuarios/login',
-            'login',
-            200,
-            ['Authorization: Bearer token-ficticio'],
-            ''
         );
         $curl->programar('DELETE', $basePca . '/itens', 'excluir_itens', 200, [], '');
         $curl->programar('POST', $basePca . '/itens', 'inserir_itens', 201, [], '');

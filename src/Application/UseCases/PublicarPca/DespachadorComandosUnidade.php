@@ -7,8 +7,6 @@ namespace Semae\Pca\Application\UseCases\PublicarPca;
 use Psr\Log\LoggerInterface;
 use Semae\Pca\Application\Contracts\FinalizadorProcessamentoUnidade;
 use Semae\Pca\Application\Enums\AcaoProcessamentoUnidade;
-use Semae\Pca\Application\Enums\SituacaoAutenticacaoPncp;
-use Semae\Pca\Application\Ports\AutenticadorPncpPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
 use Semae\Pca\Application\ValueObjects\ContextoFinalizacaoProcessamentoUnidade;
@@ -26,7 +24,6 @@ final class DespachadorComandosUnidade
         private readonly ExecutorComandosUnidade $executor,
         private readonly FinalizadorProcessamentoUnidade $finalizador,
         UnidadeDeTrabalhoPort $unidadeDeTrabalho,
-        private readonly AutenticadorPncpPort $autenticadorPncp,
         private readonly LoggerInterface $logger
     ) {
         $this->desfazedor = new DesfazedorUnidadeProcessamento($unidadeDeTrabalho);
@@ -36,43 +33,6 @@ final class DespachadorComandosUnidade
         ContextoUsuario $contextoUsuario,
         ContextoUnidadeComDecisao $contexto
     ): DesfechoProcessamentoUnidade {
-        if ($contexto->getResultadoDecisao()->getDecisao() !== DecisaoProcessamentoPlano::NENHUMA_ACAO) {
-            try {
-                $autenticacao = $this->autenticadorPncp->autenticar();
-            } catch (Throwable) {
-                return $this->interromperEDesfazer(new FalhaSegura(
-                    'AUTENTICACAO_PNCP_ANTES_ESCRITA_FALHOU',
-                    'Não foi possível autenticar no PNCP antes da escrita.'
-                ));
-            }
-
-            if ($autenticacao->getSituacao() !== SituacaoAutenticacaoPncp::AUTENTICADA) {
-                return $this->interromperEDesfazer(
-                    $autenticacao->getFalha() ?? new FalhaSegura(
-                        'AUTENTICACAO_PNCP_ANTES_ESCRITA_FALHOU',
-                        'Não foi possível autenticar no PNCP antes da escrita.'
-                    )
-                );
-            }
-
-            $sessao = $autenticacao->getSessao();
-
-            if ($sessao === null) {
-                return $this->interromperEDesfazer(new FalhaSegura(
-                    'SESSAO_PNCP_ANTES_ESCRITA_INCONSISTENTE',
-                    'A autenticação PNCP não forneceu sessão para a escrita.'
-                ));
-            }
-
-            $contexto = new ContextoUnidadeComDecisao(
-                $sessao,
-                $contexto->getCnpj(),
-                $contexto->getContextoSobExclusividade(),
-                $contexto->getPcaObservado(),
-                $contexto->getResultadoDecisao()
-            );
-        }
-
         $this->registrarItensPlanejados($contexto);
 
         try {

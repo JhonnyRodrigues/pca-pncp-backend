@@ -26,8 +26,8 @@ da resposta prevalece sobre uma interpretação apenas pelo prefixo.
 | --- | --- | --- |
 | `ENTRADA_HTTP_INVALIDA`, `CNPJ_INVALIDO`, `ANO_EXECUCAO_INVALIDO`, `REQUEST_ID_INVALIDO` | Entrada rejeitada antes da varredura; nenhuma escrita dessa execução é comprovada. | Conferir método, JSON, exercício e correlação da resposta; corrigir a entrada ou a configuração do servidor. `REQUEST_ID_INVALIDO` não tem correlação técnica fabricada. |
 | `FALHA_INESPERADA`, `RESPOSTA_INVALIDA` | Falha capturada na fronteira ou resposta da Blank não interpretável; o efeito anterior pode existir. | Preservar resposta e horário sem dados sensíveis; localizar eventos e consultar o estado antes de repetir. |
-| `AUTENTICACAO_PNCP_FALHOU`, `AUTENTICACAO_PNCP_ANTES_ESCRITA_FALHOU`, `PNCP_AUTENTICACAO_NAO_AUTORIZADA` | Login inicial ou renovação antes da escrita falhou. A renovação falha antes do primeiro comando mutante da unidade. | Conferir na correlação o login, `status_http` e a ausência de escrita posterior; validar conta, permissão e ambiente com o responsável. Não repetir `POST` ou `DELETE` automaticamente. |
-| `PNCP_AUTENTICACAO_TRANSPORTE_FALHOU`, `PNCP_AUTENTICACAO_RESPOSTA_INVALIDA`, `PNCP_AUTENTICACAO_CREDENCIAIS_INVALIDAS`, `SESSAO_PNCP_INCONSISTENTE`, `SESSAO_PNCP_ANTES_ESCRITA_INCONSISTENTE` | Sessão não pôde ser obtida ou validada. | Usar evento de login e diagnóstico de transporte; corrigir perfil ou investigar o PNCP antes de nova execução. |
+| `AUTENTICACAO_PNCP_FALHOU`, `PNCP_AUTENTICACAO_NAO_AUTORIZADA` | A autenticação única da execução falhou antes do processamento das unidades. | Conferir na correlação o login e `status_http`; validar conta, permissão e ambiente com o responsável. |
+| `PNCP_AUTENTICACAO_TRANSPORTE_FALHOU`, `PNCP_AUTENTICACAO_RESPOSTA_INVALIDA`, `PNCP_AUTENTICACAO_CREDENCIAIS_INVALIDAS`, `SESSAO_PNCP_INCONSISTENTE` | A sessão única não pôde ser obtida ou validada. | Usar o evento de login e o diagnóstico de transporte; corrigir o perfil ou investigar o PNCP antes de nova execução. |
 | `PNCP_{operação}_NAO_AUTORIZADA`, `PNCP_PUBLICACAO_NAO_AUTORIZADA` | Resposta 401/403 em escrita; unidade interrompida, sem retry mutante. | Ler o detalhe do PNCP na mensagem da Blank e em `diagnosticoHttp`; verificar PNCP e Oracle antes de acionar suporte de acesso. O status isolado não prova a causa quando o serviço não trouxer detalhe. |
 | `PNCP_{operação}_REJEITADA`, `PNCP_PUBLICACAO_REJEITADA` | PNCP rejeitou comando com resposta definitiva de validação. | Consultar a mensagem externa e o diagnóstico HTTP; corrigir dados ou requisito identificado, sem forçar repetição. |
 | `PNCP_{operação}_RESULTADO_INCERTO`, `PNCP_PUBLICACAO_RESULTADO_INCERTO`, `PNCP_RESPOSTA_INCONCLUSIVA`, `RESULTADO_INCERTO` | O efeito externo não foi determinado com segurança. | Comparar inventário PNCP, projeção e confirmação Oracle; aplicar o runbook de recuperação, sem reenviar a escrita às cegas. |
@@ -48,6 +48,11 @@ Códigos técnicos `PNCP_TRANSPORTE_*` aparecem na exceção interna; o código
 público normalmente é o do adaptador PNCP correspondente. Se surgir um código
 fora dos grupos, preservá-lo literalmente no chamado e revisar sua origem no
 backend, sem inferir que é seguro repetir a operação.
+
+Versões que continham a renovação experimental podem ter emitido
+`AUTENTICACAO_PNCP_ANTES_ESCRITA_FALHOU` ou
+`SESSAO_PNCP_ANTES_ESCRITA_INCONSISTENTE`. Esses códigos são legados e não são
+emitidos pelo fluxo vigente.
 
 ## Comparação de duração pela correlação
 

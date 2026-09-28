@@ -52,10 +52,12 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   71/3/38 inclusões e zero exclusões. O mantenedor informou três acionamentos
   da Blank; todos pararam no primeiro `POST` com mensagem de inclusão não
   autorizada. Na correlação fornecida, seis chamadas tiveram HTTP 200, o
-  `POST` recebeu 403 e não houve `DELETE`. Uma instrumentação opt-in, sem token,
-  foi autorizada para capturar os bytes efetivos da próxima chamada que venha
-  a receber autorização própria. Não há autorização implícita para repetir a
-  Blank.
+  `POST` recebeu 403 e não houve `DELETE`. O diagnóstico protegido confirmou a
+  mesma identidade do usuário corrente e preservou a mensagem do PNCP de que
+  somente o publicador poderia editar o PCA. A renovação experimental não
+  resolveu o bloqueio e foi removida; o fluxo voltou a autenticar uma vez por
+  execução. O esclarecimento da autoria permanece pendente de chamado ao PNCP,
+  sem autorização implícita para repetir a Blank.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.
@@ -390,9 +392,10 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   HTTP 200 após a decisão da UASG 205, seguido de HTTP 403 no primeiro `DELETE`
   de 208 itens. Os 71 itens a incluir e 208 a excluir foram registrados como
   planejados; não houve itens confirmados. A renovação do token foi insuficiente
-  para este bloqueio, cuja causa ainda não está demonstrada. A execução foi
-  interrompida; não repetir a escrita. O mantenedor confirmou que as contagens
-  PNCP permanecem em 5, 153 e 208 para as UASGs 207, 210 e 205. Não solicitar
+  para este bloqueio e foi posteriormente removida, restaurando a sessão única
+  por execução. A execução foi interrompida; não repetir a escrita. O
+  mantenedor confirmou que as contagens PNCP permanecem em 5, 153 e 208 para as
+  UASGs 207, 210 e 205. Não solicitar
   nova leitura apenas para reconfirmar essas contagens. A projeção e auditoria
   Oracle não foram reconferidas após a tentativa; a causa da primeira falha de
   autenticação também permanece sem diagnóstico.
@@ -453,8 +456,9 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 9.4 foi concluída em 24/09/2026. A Sprint 9.5 recebeu plano e
   autorizações incrementais; o smoke de 2027 do Microciclo 7 foi concluído,
   e o precheck pós-migration de 2026 foi aprovado. O Microciclo 8 encontra-se
-  interrompido pelo 403 no `POST`; a causa externa foi identificada e a
-  correção funcional ainda não foi comprovada.
+  interrompido pelo 403 no `POST`; a mensagem externa atribui a recusa à autoria
+  do PCA, mas a confirmação pelo PNCP e a correção funcional continuam
+  pendentes. A segunda autenticação, comprovadamente insuficiente, foi retirada.
 
 ## Evidências do Microciclo 5 da Sprint 8.5
 

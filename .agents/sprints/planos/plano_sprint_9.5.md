@@ -75,6 +75,16 @@ Presenter, transporte PNCP, Blank, testes, consultas e documentação de suporte
    comprovada nem repetir a operação. Registrar limitações e critérios de
    reabertura.
 
+### Revisão posterior do Microciclo 2
+
+A autenticação adicional descrita no Microciclo 2 foi uma hipótese experimental.
+As tentativas reais demonstraram novo login HTTP 200 seguido de HTTP 403 tanto
+em `DELETE` quanto em `POST`. Como a renovação não alterou a autorização, o
+fluxo voltou a autenticar uma única vez por execução e a reutilizar a mesma
+sessão em leituras, escritas e observações finais. O texto original do
+microciclo permanece acima como registro da decisão então aprovada; esta revisão
+é a decisão vigente.
+
 ## Critérios, riscos e adiamentos
 
 - “Confirmado” significa convergência observada e transação Oracle concluída.

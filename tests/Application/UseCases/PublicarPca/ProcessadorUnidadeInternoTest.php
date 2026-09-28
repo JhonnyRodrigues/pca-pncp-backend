@@ -8,7 +8,6 @@ use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Semae\Pca\Application\Contracts\SessaoPncp;
-use Semae\Pca\Application\Ports\AutenticadorPncpPort;
 use Semae\Pca\Application\Ports\EscritorPncpPort;
 use Semae\Pca\Application\Ports\EstadoOperacionalPublicacaoPort;
 use Semae\Pca\Application\Ports\LeitorPncpPort;
@@ -65,8 +64,6 @@ final class ProcessadorUnidadeInternoTest extends TestCase
         $estado = $this->createMock(EstadoOperacionalPublicacaoPort::class);
         $leitor = $this->createMock(LeitorPncpPort::class);
         $escritor = $this->createMock(EscritorPncpPort::class);
-        $autenticador = $this->createMock(AutenticadorPncpPort::class);
-        $autenticador->expects($this->never())->method('autenticar');
         $auditoria = $this->createMock(RegistroAuditoriaPort::class);
 
         $unidadeTrabalho->expects($this->once())
@@ -132,7 +129,6 @@ final class ProcessadorUnidadeInternoTest extends TestCase
                 $executor,
                 $finalizador,
                 $unidadeTrabalho,
-                $autenticador,
                 new NullLogger()
             )
         );

@@ -17,11 +17,9 @@ use Semae\Pca\Application\Contracts\SessaoPncp;
 use Semae\Pca\Application\Enums\SituacaoDesfechoProcessamentoUnidade;
 use Semae\Pca\Application\Enums\SituacaoEscritaPncp;
 use Semae\Pca\Application\Enums\SituacaoProcessamentoUnidade;
-use Semae\Pca\Application\Ports\AutenticadorPncpPort;
 use Semae\Pca\Application\Ports\EscritorPncpPort;
 use Semae\Pca\Application\Ports\UnidadeDeTrabalhoPort;
 use Semae\Pca\Application\Results\DesfechoProcessamentoUnidade;
-use Semae\Pca\Application\Results\ResultadoAutenticacaoPncp;
 use Semae\Pca\Application\Results\ResultadoEscritaPncp;
 use Semae\Pca\Application\Results\ResultadoFinalizacaoUnidadeTrabalho;
 use Semae\Pca\Application\Results\ResultadoInicioUnidadeTrabalho;
@@ -341,7 +339,6 @@ final class DespachadorComandosUnidadeTest extends TestCase
         );
 
         $this->assertSame($falha, $resultado->getFalhaSistemica());
-        $this->assertSame(1, $dependencias->autenticador->chamadas);
         $this->assertSame(['excluir_itens'], $dependencias->escritor->chamadas);
         $this->assertSame(0, $dependencias->finalizador->chamadas);
         $this->assertSame(1, $dependencias->unidadeTrabalho->desfazimentos);
@@ -464,12 +461,11 @@ final class DespachadorComandosUnidadeTest extends TestCase
         $this->assertSame([], $dependencias->escritor->chamadas);
         $this->assertSame([], $dependencias->finalizador->contextoRecebido?->getResultadosEscrita());
         $this->assertSame(1, $dependencias->finalizador->chamadas);
-        $this->assertSame(0, $dependencias->autenticador->chamadas);
         $this->assertNull($dependencias->logger->contextoDeAcao('REGISTRAR_ITENS_PLANEJADOS'));
         $this->assertSame($contexto->getSessaoPncp(), $dependencias->finalizador->contextoRecebido?->getSessaoPncp());
     }
 
-    public function testEscritaDeveUsarNovaSessaoTambemNaFinalizacao(): void
+    public function testEscritaDeveUsarSessaoCompartilhadaTambemNaFinalizacao(): void
     {
         $contexto = $this->criarContexto(
             [2001],
@@ -479,35 +475,14 @@ final class DespachadorComandosUnidadeTest extends TestCase
 
         $dependencias->despachador->despachar($this->criarContextoUsuario(), $contexto);
 
-        $this->assertSame(1, $dependencias->autenticador->chamadas);
-        $this->assertNotSame($contexto->getSessaoPncp(), $dependencias->autenticador->sessao);
         $this->assertSame(
-            [$dependencias->autenticador->sessao, $dependencias->autenticador->sessao],
+            [$contexto->getSessaoPncp(), $contexto->getSessaoPncp()],
             $dependencias->escritor->sessoes
         );
         $this->assertSame(
-            $dependencias->autenticador->sessao,
+            $contexto->getSessaoPncp(),
             $dependencias->finalizador->contextoRecebido?->getSessaoPncp()
         );
-    }
-
-    public function testFalhaNaNovaAutenticacaoDeveDesfazerAntesDaEscrita(): void
-    {
-        $contexto = $this->criarContexto(
-            [1001],
-            ResultadoDecisaoProcessamentoPlano::publicar([1001])
-        );
-        $dependencias = $this->criarDependencias($contexto);
-        $falha = new FalhaSegura('PNCP_AUTENTICACAO_NAO_AUTORIZADA', 'Autenticacao recusada.');
-        $dependencias->autenticador->resultado = ResultadoAutenticacaoPncp::falhaSistemica($falha);
-
-        $resultado = $dependencias->despachador->despachar($this->criarContextoUsuario(), $contexto);
-
-        $this->assertSame($falha, $resultado->getFalhaSistemica());
-        $this->assertSame(1, $dependencias->autenticador->chamadas);
-        $this->assertSame([], $dependencias->escritor->chamadas);
-        $this->assertSame(0, $dependencias->finalizador->chamadas);
-        $this->assertSame(1, $dependencias->unidadeTrabalho->desfazimentos);
     }
 
     /** @return array<string, array{string}> */
@@ -546,7 +521,6 @@ final class DespachadorComandosUnidadeTest extends TestCase
         $escritor = new EscritorPncpFakeDespacho();
         $finalizador = new FinalizadorFakeDespacho();
         $unidadeTrabalho = new UnidadeTrabalhoFakeDespacho();
-        $autenticador = new AutenticadorFakeDespacho();
         $logger = new LoggerMemoriaDespacho();
 
         return new DependenciasDespachadorFake(
@@ -554,13 +528,11 @@ final class DespachadorComandosUnidadeTest extends TestCase
                 new ExecutorComandosUnidade($escritor, $unidadeTrabalho),
                 $finalizador,
                 $unidadeTrabalho,
-                $autenticador,
                 $logger
             ),
             $escritor,
             $finalizador,
             $unidadeTrabalho,
-            $autenticador,
             $logger
         );
     }
@@ -643,7 +615,6 @@ final class DependenciasDespachadorFake
         public readonly EscritorPncpFakeDespacho $escritor,
         public readonly FinalizadorFakeDespacho $finalizador,
         public readonly UnidadeTrabalhoFakeDespacho $unidadeTrabalho,
-        public readonly AutenticadorFakeDespacho $autenticador,
         public readonly LoggerMemoriaDespacho $logger
     ) {}
 }
@@ -669,25 +640,6 @@ final class LoggerMemoriaDespacho extends AbstractLogger
         }
 
         return null;
-    }
-}
-
-final class AutenticadorFakeDespacho implements AutenticadorPncpPort
-{
-    public int $chamadas = 0;
-    public SessaoPncp $sessao;
-    public ?ResultadoAutenticacaoPncp $resultado = null;
-
-    public function __construct()
-    {
-        $this->sessao = new SessaoPncpFakeDespacho();
-    }
-
-    public function autenticar(): ResultadoAutenticacaoPncp
-    {
-        $this->chamadas++;
-
-        return $this->resultado ?? ResultadoAutenticacaoPncp::autenticada($this->sessao);
     }
 }
 

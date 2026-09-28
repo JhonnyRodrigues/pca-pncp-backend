@@ -72,7 +72,6 @@ final class MontadorNucleoPublicacaoPca
                 $executor,
                 $finalizador,
                 $this->unidadeDeTrabalho,
-                $this->autenticadorPncp,
                 $this->logger
             )
         );

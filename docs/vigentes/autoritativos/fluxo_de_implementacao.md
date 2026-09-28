@@ -90,7 +90,7 @@ adotar ou conferir estratégia anual
         ↓
 formar unidades externas
         ↓
-autenticar para as leituras no PNCP
+autenticar uma vez no PNCP
         ↓
 para cada unidade:
     obter exclusividade
@@ -100,8 +100,6 @@ para cada unidade:
     observar estado externo
         ↓
     Domain decide a intenção
-        ↓
-    se houver escrita, autenticar novamente
         ↓
     executar, quando necessário
         ↓
@@ -245,10 +243,8 @@ mesma unidade, e uma UO vazia apenas deixa de contribuir (`RN-PUB-010`).
 
 ### 4.6 Autenticação externa
 
-Somente depois da preparação válida, a Application autentica para as leituras
-iniciais da execução. Após a decisão de uma unidade que exige escrita, autentica
-novamente antes do primeiro comando mutante e reutiliza essa sessão nas escritas
-e observações finais da unidade. `NENHUMA_ACAO` preserva a sessão inicial
+Somente depois da preparação válida, a Application autentica uma vez e recebe
+uma sessão opaca reutilizada em todas as leituras e escritas da execução
 (`DI-007`, `DI-009` e `DI-010`).
 
 Falha de autenticação ou autorização é sistêmica e encerra a varredura. A
