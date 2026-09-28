@@ -165,7 +165,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Port | Contrato interno pertencente à camada que necessita da capacidade. | Arquitetura §5; `DI-007` |
 | PSR-4 | Convenção que relaciona namespace e caminho de arquivo para o autoload localizar classes PHP. | Arquitetura §3; catálogo de arquivos |
 | Presentation | Camada que protege a entrada pública e apresenta o resultado. | Arquitetura §4.4; `DI-010` |
-| Presenter | Componente que transforma a Response em ViewModel estruturado. | Arquitetura §§4.4 e 8; `DI-010` |
+| Presenter | Componente que transforma a Response do UseCase em ViewModel estruturado. | Arquitetura §§4.4 e 8; `DI-010` |
 | Repository | Port especializada em reconstrução e persistência de um Aggregate; sua implementação concreta também é um Adapter. | Arquitetura §§5 e 8; `DI-007` |
 | Request | Contrato de entrada de um caso de uso. | Arquitetura §8; `DI-010` |
 | Response | Contrato de saída de um caso de uso. | Arquitetura §8; `DI-010` |
@@ -180,7 +180,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Tradução de erro externo | Conversão de falhas do mecanismo externo em resultados internos tipados e seguros, sem fazer sua representação física atravessar a Port. | `DI-008`, `DI-009`; Arquitetura §4.3 |
 | Unidade de trabalho | Abstração usada para coordenar atomicidade local e conclusão de uma unidade. | `DI-004`, `DI-007` |
 | UseCase | Componente da Application que orquestra uma intenção usando Domain e Ports. | Arquitetura §§4.2 e 8 |
-| ViewModel | Estrutura de apresentação produzida pelo Presenter e renderizada pelo consumidor. | Arquitetura §7; `DI-010` |
+| ViewModel | Objeto de dados preparado pelo Presenter para apresentação ao consumidor externo, sem regra de negócio nem responsabilidade de renderização. | Arquitetura §7; `DI-010` |
 | Wiring | Composição das implementações concretas no grafo de dependências. | Arquitetura §§3 e 7; `DI-010` |
 
 ### 6.1 Termos de validação da Infrastructure

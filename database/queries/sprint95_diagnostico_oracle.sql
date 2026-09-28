@@ -33,7 +33,9 @@ SELECT p.ANO_EXERCICIO,
           p.VERSAO,
           p.ID_PLANO;
 
--- 04 Ciclo completo das demandas, inclusive as nao participantes.
+-- 04 Demandas ligadas a PAC_PLANOS de 2026/2027, inclusive situacoes nao
+-- participantes. Demandas com FK_PLANO nulo ficam fora desta consulta.
+-- Nao usar este resultado isolado como fotografia completa de 2026.
 SELECT p.ANO_EXERCICIO,
        p.FK_UNIDADE_ORCAMENTARIA,
        d.ID_DEMANDA,

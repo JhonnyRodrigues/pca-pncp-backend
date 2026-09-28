@@ -41,7 +41,17 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   registrados abaixo.
 - A Sprint 9.5 — Prontidão de produção e suporte está em execução conforme o
   [plano aprovado](../../../.agents/sprints/planos/plano_sprint_9.5.md).
-  Microciclos 1 a 5 concluídos; Microciclo 6 autorizado e em validação local.
+  Microciclos 1 a 7 concluídos; Microciclo 8 recebeu autorização específica
+  e iniciou pela preparação da execução única de 2026.
+  Oracle e PNCP de 2027 coincidiram por IDs;
+  após corrigir a publicação da Blank, uma leitura PNCP expirou duas vezes e
+  a execução seguinte concluiu as três unidades em `NENHUMA_ACAO`. Não houve
+  `POST` ou `DELETE` nessas duas correlações, e a auditoria de 2027 permaneceu
+  inalterada. O precheck somente leitura de 2026 encontrou as três unidades
+  com decisão prevista `RETIFICAR`: UASG 205 com 71 inclusões/208 exclusões,
+  207 com 3/5 e 210 com 38/153. Os arrays exatos coincidem com a avaliação
+  anterior. A primeira escrita ainda seria `DELETE`; não houve execução de
+  2026 neste microciclo.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.
@@ -371,13 +381,61 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A Sprint 9.5 criou o catálogo operacional de códigos e acrescentou aos
   eventos de transporte `curl_errno`, categoria sanitizada e duração da
   tentativa. `status_http` permanece ausente quando não houve resposta HTTP.
-  A nova autenticação antes da escrita foi implementada; sua eficácia real
-  diante do HTTP 403 ainda não foi testada em produção. A diferença entre o
+  A nova autenticação antes da escrita foi implementada. Em 25/09/2026, a
+  correlação `74936623-5300-4392-b67c-6383d1e70cd8` comprovou novo login
+  HTTP 200 após a decisão da UASG 205, seguido de HTTP 403 no primeiro `DELETE`
+  de 208 itens. Os 71 itens a incluir e 208 a excluir foram registrados como
+  planejados; não houve itens confirmados. A renovação do token foi insuficiente
+  para este bloqueio, cuja causa ainda não está demonstrada. A execução foi
+  interrompida; não repetir a escrita. O mantenedor confirmou que as contagens
+  PNCP permanecem em 5, 153 e 208 para as UASGs 207, 210 e 205. Não solicitar
+  nova leitura apenas para reconfirmar essas contagens. A projeção e auditoria
+  Oracle não foram reconferidas após a tentativa; a causa da primeira falha de
+  autenticação também permanece sem diagnóstico.
+  O precheck de 2026 também foi invalidado: o mantenedor conferiu no SGI que
+  os itens `411`, `412`, `413`, `418` e `419` da UASG 207 continuam homologados
+  e desejados, mas nenhum deles consta no export Oracle que embasou a decisão
+  de excluí-los. Para a UASG 205, informou que os 208 itens normais publicados
+  devem permanecer e receber mais 71 itens extraordinários, totalizando 279;
+  o evento planejado incorretamente propôs excluir os 208. A consulta direta no
+  banco `sgi` mostrou `SITUACAO = 2` e `FK_PLANO = NULL` nas amostras normais;
+  as extraordinárias amostradas possuem vínculo com Planos de 2026. O `JOIN`
+  obrigatório por `FK_PLANO` na reconstrução omite as demandas normais. Pela
+  `RN-PLA-004`, elas devem integrar a fotografia quando vigentes. É preciso
+  comprovar como o SGI associa essas demandas a exercício e UO antes de corrigir
+  o acesso a dados ou permitir qualquer nova escrita.
+  A diferença entre o
   tempo percebido pela Blank e o medido no backend ainda carece do tempo do
   navegador para a mesma correlação. Esse escopo não reabre dashboards,
   alertas ou retenção da Sprint 9.2.
+- Em 25/09/2026, o mantenedor informou ter aplicado a migration excepcional
+  `V202609251823` para vincular os 366 IDs normais legados de 2026 aos planos
+  de versão 1 e ter conferido os dados no banco, com resultado conforme. Em
+  28/09/2026, confirmou que o arquivo executado em produção é exatamente o do
+  repositório, com SHA-256
+  `47309C11DEA3E017B7AC129ACBC13CFFFBC9E53CAE2A3E245428B5BE153F2F9F`.
+  A fotografia Oracle anterior permanece inválida. O precheck somente leitura
+  pós-migration foi preparado para reconstruir o conjunto desejado e as
+  diferenças por UASG antes de nova execução da Blank. O HTTP 403 anterior
+  continua sem causa comprovada.
+- Em 28/09/2026, o precheck pós-migration foi executado em produção e aprovado.
+  Os 366 vínculos normais e as quantidades desejadas por UASG ficaram
+  `CONFORME`. A comparação dos 478 pares distintos `UASG + numeroItem` com o
+  inventário PNCP comprovou 71, 3 e 38 inclusões para as UASGs 205, 207 e 210,
+  respectivamente, sem qualquer exclusão. A consulta de auditoria dos
+  procedimentos 5, 8 e 9 permaneceu vazia. A Blank não foi acionada depois do
+  saneamento; a execução funcional continua sujeita ao ponto de autorização do
+  Microciclo 8.
+- Em 28/09/2026, o mantenedor autorizou uma única execução funcional da Blank
+  para 2026 após o precheck aprovado. Esperam-se três retificações somente com
+  inclusões: 71, 3 e 38 itens nas UASGs 205, 207 e 210. Qualquer exclusão,
+  `DELETE`, falha de autenticação, 401/403 ou resultado incerto exige parada sem
+  nova tentativa.
 - A Sprint 9.4 foi concluída em 24/09/2026. A Sprint 9.5 recebeu plano e
-  autorizações incrementais; os Microciclos 7 e 8 seguem sem autorização.
+  autorizações incrementais; o smoke de 2027 do Microciclo 7 foi concluído,
+  mas seu precheck de 2026 foi invalidado. O Microciclo 8 encontra-se
+  interrompido pelo 403 e pela fotografia Oracle incompleta de 2026, conforme
+  o plano da sprint.
 
 ## Evidências do Microciclo 5 da Sprint 8.5
 

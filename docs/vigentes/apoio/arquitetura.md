@@ -77,9 +77,6 @@ Aplicação Blank (Scriptcase)
                                   │                 │
                                   └── Infrastructure┘
                                       implementa portas
-
-Composition Root do backend
-    └── constrói o grafo e injeta implementações concretas
 ```
 
 O diagrama representa dependências de código, não a ordem temporal completa de
@@ -88,7 +85,7 @@ uma execução.
 - A aplicação Blank consome somente o entrypoint Scriptcase do backend.
 - Presentation depende dos contratos e casos de uso da Application.
 - Application depende do modelo e das políticas do Domain.
-- Infrastructure depende das abstrações internas que implementa.
+- Infrastructure depende das abstrações internas que ela implementa.
 - Domain não depende de Presentation, Infrastructure ou do ambiente
   hospedeiro.
 - O Composition Root pertence ao backend e é o único ponto autorizado a
@@ -182,7 +179,7 @@ O `PlanoRepository` permanece no Domain porque seu contrato expressa
 reconstrução e confirmação do Aggregate. Metadados cross-Plan e coordenação
 operacional não pertencem a esse Repository (`DI-005`, `DI-006` e `DI-007`).
 
-PSR-3 atende ao contrato de observabilidade técnica. Não será criada uma Port
+PSR-3 atende ao contrato de observabilidade técnica. Portanto, não será criada uma Port
 proprietária de logging.
 
 ## 6. Domain versus fatos externos
@@ -197,7 +194,7 @@ Quatro conceitos precisam permanecer separados:
 | Estado operacional e estado externo observado | Fora do Aggregate, obtidos por portas da Application |
 
 A política do Domain recebe a fotografia desejada e fatos tipados suficientes
-para expressar `PUBLICAR`, `RETIFICAR`, `EXCLUIR_PCA` ou `NENHUMA_ACAO`. A
+para expressar sua decisão: `PUBLICAR`, `RETIFICAR`, `EXCLUIR_PCA` ou `NENHUMA_ACAO`. A
 forma de observar, transportar ou persistir esses fatos fica fora da política
 (`DI-002`, `DI-003`, `DI-005` e `DI-007`).
 
@@ -229,29 +226,25 @@ Scriptcase
 
 Conforme a `DI-010`:
 
-- Scriptcase fornece somente conexão emprestada, login, `SERVER_NAME`, ano e
+- Scriptcase fornece somente conexão emprestada ($this->db), login, `SERVER_NAME`, ano e
   `X-Request-ID` ao entrypoint público;
 - Scriptcase não fornece CNPJ, perfil, allowlist ou caminho e não conhece
   Controller, UseCase, Repository concreto, cliente PNCP ou política
   transacional;
 - o Composition Root pertence ao backend;
-- o entrypoint seleciona o perfil pelo registro externo e o Composition Root
-  recebe perfil já carregado e correlação validada;
-- o wiring é manual por construtores;
-- não há container nem Service Locator;
-- o Controller não usa macros e não faz wiring;
-- o Presenter produz ViewModel, sem renderizar HTML, JSON ou macros;
-- nenhuma exceção atravessa a fachada;
-- detalhes internos e credenciais não são expostos ao consumidor.
+- o entrypoint seleciona o perfil (arquivo `perfil.php`) através do arquivo de registro externo (`registro.php`) e o Composition Root recebe perfil já carregado e correlação validada;
+- o wiring é manual por construtores, ou seja, as dependências das classes são montadas explicitamente pelo código, chamando os construtores com `new`, em vez de usar um container de injeção de dependência ou Service Locator;
+- o Controller não usa macros e não faz wiring, ficando responsável apenas por receber a entrada já preparada, acionar o caso de uso e encaminhar a saída. Ele não conhece detalhes do Scriptcase nem sabe como as dependências são construídas;
+- o Presenter produz o ViewModel (um objeto de saída já preparado para ser consumido pela camada externa). Sem renderizar HTML, JSON ou macros;
+- nenhuma exceção atravessa a fachada: toda falha interna é capturada e convertida em uma resposta controlada antes de sair do backend. Exceções de banco, HTTP, configuração ou regra interna permanecem encapsuladas, evitando a exposição de detalhes internos e credenciais ao consumidor.
 
 O registro externo é somente o índice literal `SERVER_NAME => caminho absoluto
 do perfil`. Seu próprio caminho vem da variável de processo provisionada
 `PCA_PNCP_PROFILE_REGISTRY_FILE`; não existe `.env`, default ou derivação de
-caminho. O mesmo UUID v4 recebido em `X-Request-ID` atravessa logger, fachada,
+caminho. O mesmo correlationID UUIDv4 recebido pelo servidor através da variável `X-Request-ID` atravessa logger, fachada,
 Controller, Application e ViewModel sem normalização ou regeneração.
 
-Configuração, ciclo de vida de recursos, distribuição e tratamento global de
-falhas permanecem detalhados na `DI-010`.
+Configuração, ciclo de vida de recursos, distribuição e tratamento global de falhas permanecem detalhados na `DI-010`.
 
 ### 7.2 Do localizador ao grafo de objetos
 
@@ -292,7 +285,7 @@ webroot; o arquivo ainda pode estar no mesmo servidor. Registro e perfil não
 são APIs da Blank: `PublicadorPcaScriptcase` os localiza internamente e a Blank
 não escolhe schema, tabela nem caminho de arquivo.
 
-### 7.3 Segredo, configuração da implantação e mapeamento físico
+### 7.3 Segredo vs configuração da implantação vs mapeamento físico
 
 Essas três categorias podem coexistir no mesmo perfil atual, mas não significam
 a mesma coisa:
@@ -348,8 +341,9 @@ Application ── chama ──► PlanoRepository ◄── implementa ── O
 - [`MapeamentoPlanosOracle`](../../../src/Infrastructure/Oracle/Plano/MapeamentoPlanosOracle.php)
   valida e fornece os identificadores físicos usados somente pelo adapter.
 
-Inversão de dependência não é sinônimo de **injeção de dependências**. A
-primeira define para onde as dependências de código devem apontar; a segunda é
+#### Inversão de dependência não é sinônimo de injeção de dependências
+
+A primeira define para onde as dependências de código devem apontar; a segunda é
 o mecanismo usado para entregar uma implementação concreta a quem depende do
 contrato. O Composition Root injeta `OraclePlanoRepository` onde se espera um
 `PlanoRepository`.
@@ -387,7 +381,7 @@ final class Plano
     public string $colunaSituacaoOracle;
 }
 
-// INCORRETO: a Blank passou a controlar detalhes internos e de implantação.
+// INCORRETO: a Blank da camada de apresentação passou a controlar detalhes internos e de implantação.
 $publicador->executar(
     schema: $_POST['schema'],
     tabela: $_POST['tabela'],
@@ -395,10 +389,9 @@ $publicador->executar(
 );
 ```
 
-No primeiro caso, trocar o mecanismo de persistência afetaria o caso de uso. No
-segundo, uma estrutura física passaria a definir o modelo de negócio. No
-terceiro, entrada HTTP controlaria configuração privilegiada e romperia a
-fronteira pública mínima estabelecida pela `DI-010`.
+* No primeiro caso, trocar o mecanismo de persistência afetaria o caso de uso. 
+* No segundo, uma estrutura física passaria a definir o modelo de negócio.
+* No terceiro, entrada HTTP controlaria configuração privilegiada e romperia a fronteira pública mínima estabelecida pela `DI-010`.
 
 ### 7.6 Origem das decisões e avaliação do desenho
 
@@ -419,12 +412,6 @@ diferentes entre DEV, validaSGI e produção. Portanto, a justificativa correta
 para os mapeamentos configuráveis não é afirmar que esses três bancos diferem.
 O benefício comprovado hoje é tornar a dependência física explícita, validada e
 isolada; a variação entre instalações é uma capacidade oferecida pelo desenho.
-
-Para uma futura publicação open source, essa capacidade ajuda outra autarquia
-quando muda apenas o nome de schemas, tabelas, colunas ou literais e a semântica
-continua equivalente. Se a estrutura tiver relações, regras ou consultas
-semanticamente diferentes, apenas renomear o mapeamento provavelmente não
-bastará: será necessário outro adapter que implemente a mesma Port.
 
 Não existe uma única forma universal de configurar aplicações. As alternativas
 mais comuns têm custos diferentes:
@@ -513,24 +500,9 @@ Testes técnicos não precisam forçar associação artificial com uma RN. Não
 existe relação obrigatória de um para um entre regra, classe e teste, conforme
 a política do catálogo.
 
-## 10. Arquitetura-alvo versus código atual
+## 10. Considerações finais
 
-Este documento não é inventário das classes existentes. Ele descreve a
-separação aprovada para orientar:
-
-1. o fluxo de implementação;
-2. a refatoração arquitetural com TDD;
-3. a conclusão da Application com mocks;
-4. a implementação posterior da Infrastructure.
-
-Ao encontrar divergência:
-
-- não promover a estrutura atual a regra arquitetural;
-- não alterar uma fonte autoritativa para acomodar legado;
-- registrar o conflito;
-- corrigir o código somente na etapa autorizada.
-
-## 11. Exclusões deliberadas e referências
+### 10.1 Exclusões deliberadas e referências
 
 Este documento não define:
 
@@ -546,7 +518,7 @@ Este documento não define:
 Esses assuntos pertencem ao fluxo, ao roadmap ou às decisões de
 integração.
 
-### 11.1 Matriz de referências
+### 10.2 Matriz de referências
 
 | Assunto resumido aqui | Autoridade |
 | --- | --- |
@@ -559,5 +531,4 @@ integração.
 | Mecanismos Oracle e HTTP | `DI-008` e `DI-009` |
 | Fachada, Composition Root e Scriptcase | `DI-010` |
 
-Este resumo deve ser atualizado quando uma fonte autoritativa alterar uma
-fronteira arquitetural.
+Este resumo deve ser atualizado quando uma fonte autoritativa alterar uma fronteira arquitetural.

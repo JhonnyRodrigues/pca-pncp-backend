@@ -1,8 +1,10 @@
 # Sprint 9.5 — Prontidão de produção e suporte
 
-**Status:** plano aprovado; Microciclos 1 a 5 concluídos localmente. O
-Microciclo 6 foi autorizado pelo mantenedor. Cada microciclo termina com pausa
-e o próximo exige autorização explícita.
+**Status:** plano aprovado; o precheck de 2026 do Microciclo 7 foi invalidado
+por omitir demandas normais homologadas com `FK_PLANO` nulo. O Microciclo 8 foi
+interrompido por HTTP 403 no primeiro `DELETE` de 2026. Não repetir a escrita;
+a fonte de pertencimento das demandas normais ainda precisa ser identificada.
+Cada microciclo termina com pausa e o próximo exige autorização explícita.
 
 ## Objetivo e fontes
 
@@ -116,5 +118,219 @@ anterior e a versão anterior do evento da Blank, verificar novamente hash e
 autoload e preservar a candidata rejeitada para diagnóstico. O rollback de
 arquivos não reverte efeitos Oracle ou PNCP; por isso não deve executar o
 fluxo funcional durante a implantação. A identificação da release anterior,
-o hash do arquivo novo no servidor e a conferência de carregamento ainda
-dependem de acesso ao ambiente de produção.
+o hash do arquivo novo no servidor e a conferência de carregamento estão
+registrados no resultado abaixo.
+
+## Resultado do Microciclo 6
+
+O commit `861d9ef` foi criado com 33 arquivos da Sprint 9.5, preservando fora
+dele as alterações preexistentes em `arquitetura.md` e `glossario.md`. A suíte
+completa passou com 976 testes e 4.694 asserções; os contratos relacionados,
+lint de 434 arquivos PHP, autoload PSR-4 e verificação do pacote passaram.
+O arquivo de release `pca-pncp-backend_20260925_861d9ef.tar.gz` foi gerado de
+worktree limpa e validado com SHA-256
+`b945b73c49b13774b32407f2abeb6fdf42e2c24c8c45ce6454333725e0f82185`.
+
+Em produção, o mantenedor confirmou o mesmo SHA-256 após a transferência. O
+manifesto da release anterior tinha SHA-256
+`6ff0b8d4118d86d24f340a745a499277a6de7ae61cb09387b81cafb1a3e192ba`
+e seu diretório foi preservado como
+`pca-pncp-backend-anterior-sprint95-6ff0b8d4`. Após a troca, o manifesto
+ativo apresentou SHA-256
+`1f86934fbbe36d676cc5763b63a9e9c074f523520f7582f3b67fc8d7214f40df`.
+O mantenedor informou que o backend carregou como `www-data` e guardou uma
+cópia do evento `onExecute` anterior. A Blank compilou e abriu pela interface,
+mas a execução posterior mostrou que a publicação da nova versão havia falhado
+por uso de usuário incorreto e que a Blank antiga continuava ativa. A versão
+correta foi publicada e compilada durante o Microciclo 7. Nenhum clique em
+**Publicar** foi realizado como teste de implantação no Microciclo 6.
+
+## Evidências parciais do Microciclo 7
+
+A fotografia Oracle de 2027 em
+`build/fotografia_oracle_sprint95_microciclo7.json` manteve a estratégia
+`INDIVIDUAL`, os três planos e todos os 452 registros de demandas idênticos à
+fotografia anterior. As leituras PNCP em `build/lista_unidades_2027.json` e
+`build/itens_2027.json` encontraram apenas UASG 205/sequencial 2 (260 itens),
+207/sequencial 3 (9 itens) e 210/sequencial 4 (165 itens); os conjuntos exatos
+de `numeroItem` coincidiram com os `ID_DEMANDA` ativos, sem duplicidade.
+
+O roteiro previa uma execução da Blank. A primeira, correlação
+`4f7b548d-2120-4e32-a886-7f46f20028db`, usou a Blank antiga e concluiu as
+três unidades como `NENHUMA_ACAO`, com o procedimento 8 de 2027 ainda em uma
+linha antes e depois. Após corrigir a implantação da Blank, a execução
+`00a67211-2dba-4a95-9a18-16ca0c69e879` terminou com a UASG 205 em
+`FALHA_RECONCILIAVEL`: duas leituras expiraram com `curl_errno=28`, sem
+resposta HTTP. O mantenedor executou novamente, fora da quantidade prevista;
+em `a66fd7d8-796a-497c-8189-50df0775916d`, as três unidades ficaram em
+`NENHUMA_ACAO`. Esta última execução também teve um timeout na leitura da
+UASG 210, resolvido pela segunda tentativa de `GET`. Os logs dessas duas
+correlações não mostram `POST` nem `DELETE`. A Blank nova apresentou os arrays
+públicos vazios. O mantenedor confirmou que a contagem de auditoria de 2027
+permaneceu em uma linha do procedimento 8 e nenhuma dos procedimentos 5 e 9
+após as execuções. A falha transitória não comprova sua causa de rede ou PNCP;
+os tempos do navegador e do backend não foram comparados entre correlações
+distintas. Não repetir a Blank de 2027.
+
+A nova fotografia Oracle e o inventário PNCP de 2026 foram produzidos somente
+por leitura. O resultado está registrado abaixo.
+
+## Resultado do Microciclo 7 — precheck de 2026
+
+A fotografia `build/fotografia_oracle_sprint95_microciclo7_2026.json`
+(SHA-256 `92143edc15d0a569a219182ba3611661014bfa3412c5f1ee498ed04da74919a2`)
+mantém exatamente a estratégia `INDIVIDUAL`, os procedimentos 5/8/9, os 112
+planos e as 112 demandas de 2026 da fotografia anterior. O inventário PNCP
+`build/lista_unidades_2026.json`
+(SHA-256 `137d70fca947540ed53e9cc6e67deaa3ab71ba54f90633b73e7a603033777711`)
+lista exatamente os três PCAs vinculados. `build/itens_2026.json`
+(SHA-256 `b8a9a6a363807d52bebb87e745480e3d0bc6a541414bc02552274fc9aeaa0877`)
+contém os três conjuntos completos de itens, com identidades consistentes,
+`numeroItem` inteiro positivo e nenhuma duplicidade.
+
+As situações de Demanda `2`, `3` e `5` participam da fotografia vigente,
+conforme `SituacaoDemanda`. A diferença calculada a partir **deste export
+incompleto**, que não deve servir de autorização para escrita, foi:
+
+| UO / UASG / sequencial | Itens PNCP | Incluir | Excluir | Manter | Decisão produzida, insegura |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 149 / 205 / 4 | 208 | 71 | 208 | 0 | `RETIFICAR` |
+| 3 / 207 / 2 | 5 | 3 | 5 | 0 | `RETIFICAR` |
+| 94 / 210 / 3 | 153 | 38 | 153 | 0 | `RETIFICAR` |
+
+Os conjuntos exportados para este precheck não possuem interseção com os itens
+PNCP, por isso a decisão efetiva do backend foi excluir todos os itens atuais e
+incluir apenas os IDs do export. **Essa decisão não está validada como correta.**
+O mantenedor verificou no SGI que `411`, `412`, `413`, `418` e `419` da UASG 207
+continuam homologadas e são desejadas, junto com `814`, `879` e `912`. Para a
+UASG 205, confirmou que os 208 itens normais publicados continuam desejados e
+devem ser mantidos; os 71 itens extraordinários devem ser acrescentados,
+resultando em 279 itens desejados e nenhuma exclusão conhecida. Os IDs normais
+antigos não aparecem no export de `SGI.PAC_DEMANDA` unido a
+`SGI.PAC_PLANOS` por `FK_PLANO`, usado neste precheck. Portanto, as quantidades
+de exclusão desta tabela são apenas o resultado da fotografia exportada; não
+representam cancelamentos homologados comprovados. Pela `RN-PLA-004`, a
+fotografia vigente deve conter as demandas de todas as versões que continuem
+vigentes. A leitura direta dos IDs está registrada abaixo; ainda é necessário
+comprovar a fonte de exercício e UO das demandas normais antes de qualquer nova
+escrita.
+
+O diagnóstico direto no banco `sgi`, serviço `sgi`, esquema `SGI`, comprovou
+`SITUACAO = 2` e `FK_PLANO = NULL` para as amostras normais `411`, `412`, `413`,
+`414`, `415`, `418`, `419` e `434`. As amostras extraordinárias `795`, `796`,
+`797`, `814`, `879` e `912` possuem `FK_PLANO` preenchido e se ligam a Planos de
+2026 das respectivas UOs. O `JOIN` obrigatório por `FK_PLANO` na reconstrução
+Oracle omite as demandas normais. O vínculo alternativo que identifica com
+segurança exercício e UO dessas demandas ainda não foi comprovado; não basta
+trocar `JOIN` por `LEFT JOIN` sem essa regra de pertencimento.
+O teste `OraclePlanoRepositoryTest::testDeveReconstruirMaiorVersaoComDemandasVigentesDeTodasAsOrigens`
+afirma textualmente esse `JOIN` e usa linhas simuladas já retornadas pela
+consulta; por isso não detectou a omissão de registros com `FK_PLANO` nulo.
+
+Na correlação `74936623-5300-4392-b67c-6383d1e70cd8`, a lista planejada
+para exclusão é exatamente o conjunto completo dos 208 itens PNCP da UASG 205.
+Se esse `DELETE` fosse aceito, a justificativa gerada pelo backend atribuiria
+os 208 itens a "cancelamentos homologados no SGI", incompatível com a situação
+de negócio informada pelo mantenedor. O HTTP 403 interrompeu a execução. O
+mantenedor confirmou que as quantidades PNCP permanecem 5, 153 e 208 para as
+UASGs 207, 210 e 205, respectivamente; não será solicitada nova leitura apenas
+para reconfirmar essas contagens.
+
+Os arrays ordenados exatos de itens a incluir e excluir em cada unidade são
+iguais aos da [avaliação pós-vínculo da Sprint 9.4](../../../tests/Contract/Sprint94/avaliacao_pos_vinculo_2026_2027.json),
+mas ambas as avaliações usam a mesma premissa incompleta sobre o conjunto
+desejado. A igualdade entre elas não valida a regra de negócio.
+Com a fotografia incompleta, o executor enviaria `DELETE` antes de `POST`; a
+primeira tentativa real recebeu 403 nesse `DELETE`. Essa sequência não
+representa a mudança de negócio correta informada pelo mantenedor.
+Este precheck não executou a Blank de 2026 nem autoriza sua execução sem o
+Microciclo 8. Se a fotografia mudar antes da execução, refazer o diagnóstico
+e interromper o avanço.
+
+## Microciclo 8 — referência anterior à execução
+
+Após a autorização específica do Microciclo 8, o mantenedor executou no
+DBeaver o `SELECT` de `SGI.PAC_HISTORICOS` filtrado pelo exercício 2026 e pelos
+procedimentos 5, 8 e 9. A consulta com `GROUP BY` retornou nenhuma linha, o
+que estabelece zero auditorias correspondentes antes da execução da Blank.
+A execução funcional de 2026 ainda não havia sido realizada nesse ponto.
+
+## Microciclo 8 — bloqueio observado em produção
+
+O mantenedor informou duas tentativas de acionamento da Blank em 25/09/2026.
+A primeira terminou após cerca de 30 segundos com mensagem de falha na
+autenticação; sua correlação e seus eventos ainda não foram fornecidos. Portanto,
+não há evidência para classificar a causa desse primeiro erro como timeout,
+resposta HTTP ou recusa de credenciais. A segunda tentativa retornou
+`INTERROMPIDA`, sem resultados unitários, com código
+`PNCP_EXCLUSAO_ITENS_NAO_AUTORIZADA`, uma unidade visitada de três e correlação
+`74936623-5300-4392-b67c-6383d1e70cd8`.
+
+Nos 16 eventos fornecidos dessa correlação, o login inicial e o novo login após
+a decisão da UASG 205 receberam HTTP 200. Após o novo login, o evento
+`REGISTRAR_ITENS_PLANEJADOS` apresentou 71 `numeroItem` para incluir e 208 para
+excluir, em arrays ordenados exatamente iguais aos da fotografia prévia da UASG
+205/sequencial 4. O primeiro `DELETE` recebeu resposta HTTP 403 em 13.706 ms,
+classificada `HTTP_4XX`, sem `curl_errno`. Não houve `POST` de inclusão nem evento
+`REGISTRAR_ITENS_CONFIRMADOS`. As sete tentativas HTTP registradas somaram
+135.938 ms, frente a `executionTimeMs = 136.042` da execução; a maior parte do
+tempo medido no backend foi gasta nas chamadas PNCP. Esses dados comprovam que
+a sessão renovada não foi suficiente para autorizar este `DELETE`; não identificam
+qual regra ou componente do PNCP produziu o 403.
+
+A correção do bloqueio de 2026 não foi comprovada. O mantenedor confirmou que
+as contagens PNCP permanecem 5, 153 e 208. A projeção e confirmação Oracle de
+2026 e a auditoria dos procedimentos 5/8/9 não foram reconferidas após a
+tentativa. Preservar as respostas e os eventos. Não repetir a Blank,
+o `DELETE` ou executar DML manual. A comparação com uma exclusão manual
+anterior exige confirmar identidade da conta, ambiente, CNPJ, ano, sequencial,
+lista de itens, justificativa e origem de rede; o sucesso de outra chamada não
+comprova autorização para este lote.
+
+## Saneamento legado informado após a interrupção
+
+O mantenedor identificou que as demandas normais legadas de 2026 precedem o
+versionamento dos planos e por isso tinham `FK_PLANO` nulo. A migration
+`V202609251823__vincular_demandas_normais_legadas_2026.sql` foi preparada para
+vincular os 366 IDs normais já publicados aos planos de versão 1 de suas UOs.
+Em 25/09/2026, o mantenedor a executou em produção e conferiu os dados no
+banco, com resultado conforme. Em 28/09/2026, confirmou que o arquivo executado
+é exatamente o arquivo do repositório, cujo SHA-256 é
+`47309C11DEA3E017B7AC129ACBC13CFFFBC9E53CAE2A3E245428B5BE153F2F9F`.
+A migration aplicada não será editada.
+
+A fotografia anterior e a decisão que excluía todos os itens publicados
+continuam inválidas como precheck. Antes de retomar a execução da Blank de 2026,
+produzir nova fotografia Oracle somente leitura, reconstruir o conjunto
+desejado e conferir por unidade as inclusões e exclusões. A aplicação da
+migration, isoladamente, não demonstra que a decisão agora é segura nem resolve
+a causa do HTTP 403 observado anteriormente.
+
+O novo precheck somente leitura está em
+`database/queries/sprint95_precheck_pos_migration_2026.sql`. Ele confirma os
+366 vínculos, reconstrói as quantidades desejadas, exporta os 478 IDs para
+comparação exata com o inventário PNCP e verifica que a migration não criou
+auditoria de publicação. A Blank permanece suspensa até esse precheck resultar
+em 71, 3 e 38 inclusões e zero exclusões, respectivamente para as UASGs 205,
+207 e 210.
+
+Em 28/09/2026, o mantenedor executou o precheck em produção. O ambiente foi
+confirmado como banco e serviço `sgi`, esquema `SGI`. Os 366 vínculos normais
+resultaram `CONFORME`: 208 na UASG 205, 5 na 207 e 153 na 210. A fotografia
+desejada também resultou `CONFORME`: 279, 8 e 191 itens, compostos por 208/71,
+5/3 e 153/38 itens normais/extraordinários. O export foi preservado em
+`build/demandas_desejadas_2026_pos_migration.json`, SHA-256
+`30CD6CA3B8220527E8DDC935D432745A38CE7785B52D0A55EFAC5FDF8E8F79DA`.
+
+A comparação exata dos 478 pares distintos `UASG + numeroItem` com
+`build/itens_2026.json` comprovou somente inclusões: 71 na UASG 205, 3 na 207 e
+38 na 210; nenhuma exclusão. A consulta de `PAC_HISTORICOS` não retornou linhas
+dos procedimentos 5, 8 ou 9 para 2026, confirmando que a migration não gerou
+auditoria de publicação. O precheck pós-migration está aprovado. A Blank ainda
+não foi acionada após esse saneamento.
+
+Em 28/09/2026, o mantenedor autorizou explicitamente uma única execução da
+Blank para 2026 após o precheck aprovado. A decisão esperada nas três unidades
+é `RETIFICAR`, somente com `POST`: UASG 205 com 71 inclusões, UASG 207 com 3 e
+UASG 210 com 38. Qualquer exclusão planejada, `DELETE`, 401/403, falha de
+autenticação ou resultado incerto interrompe o procedimento sem nova tentativa.
