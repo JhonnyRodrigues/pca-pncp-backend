@@ -27,12 +27,25 @@ final class ExecutorCurlNativoPncp implements ExecutorCurlPncp
             }
 
             $executado = curl_exec($handle) !== false;
+            $versaoCurl = curl_version();
 
             return new ResultadoExecucaoCurlPncp(
                 $executado,
                 curl_errno($handle),
                 (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE),
-                (int) curl_getinfo($handle, CURLINFO_SSL_VERIFYRESULT)
+                (int) curl_getinfo($handle, CURLINFO_SSL_VERIFYRESULT),
+                (int) curl_getinfo($handle, CURLINFO_HTTP_VERSION),
+                ($cabecalhos = curl_getinfo($handle, CURLINFO_HEADER_OUT)) !== false
+                    ? (string) $cabecalhos
+                    : null,
+                [
+                    'curlVersion' => (string) ($versaoCurl['version'] ?? ''),
+                    'sslVersion' => (string) ($versaoCurl['ssl_version'] ?? ''),
+                    'remoteIp' => (string) curl_getinfo($handle, CURLINFO_PRIMARY_IP),
+                    'remotePort' => (int) curl_getinfo($handle, CURLINFO_PRIMARY_PORT),
+                    'localIp' => (string) curl_getinfo($handle, CURLINFO_LOCAL_IP),
+                    'localPort' => (int) curl_getinfo($handle, CURLINFO_LOCAL_PORT),
+                ]
             );
         } catch (FalhaTransportePncpException $exception) {
             throw $exception;

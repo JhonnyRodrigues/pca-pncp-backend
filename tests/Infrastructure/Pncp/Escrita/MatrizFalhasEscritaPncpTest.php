@@ -114,6 +114,31 @@ final class MatrizFalhasEscritaPncpTest extends TestCase
         }
     }
 
+    #[DataProvider('operacoesProvider')]
+    public function testDeveAcrescentarMensagemDoPncpNaFalhaExibidaAoOperador(
+        string $operacao
+    ): void {
+        $detalhe = 'Operação não autorizada. Somente o usuário que publicou a informação pode editá-la.';
+        $transporte = new TransporteMatrizEscritaPncpFake(new RespostaHttpPncp(
+            403,
+            ['Content-Type' => ['application/json']],
+            json_encode(['message' => $detalhe], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)
+        ));
+
+        $resultado = $this->executar($operacao, $this->adapter($transporte));
+
+        $mensagemBase = 'A ' . self::operacoes()[$operacao]['descricao']
+            . ' no PNCP não foi autorizada.';
+        $this->assertSame(
+            $mensagemBase . ' O PNCP informou: ' . $detalhe,
+            $resultado->getFalha()?->getMensagem()
+        );
+        $this->assertSame(
+            'PNCP_' . self::operacoes()[$operacao]['codigo'] . '_NAO_AUTORIZADA',
+            $resultado->getFalha()?->getCodigo()
+        );
+    }
+
     #[DataProvider('falhasTransporte')]
     public function testDeveClassificarFalhaDeTransporteSemRetry(
         string $operacao,

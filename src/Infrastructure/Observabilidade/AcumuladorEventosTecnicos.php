@@ -115,7 +115,7 @@ final class AcumuladorEventosTecnicos extends AbstractLogger
             $this->sanitizarMensagem((string) $message),
             $this->sanitizarMapa($context['error'] ?? []),
             $this->sanitizarMapa($contextoDetalhado),
-            $this->sanitizarMapa($context['metadata'] ?? []),
+            $this->sanitizarMetadata($context['metadata'] ?? [], $acao),
             $this->ipAddress
         );
     }
@@ -198,6 +198,127 @@ final class AcumuladorEventosTecnicos extends AbstractLogger
         }
 
         return $sanitizado;
+    }
+
+    /** @return array<string, mixed> */
+    private function sanitizarMetadata(mixed $metadata, string $acao): array
+    {
+        if (!is_array($metadata)) {
+            return [];
+        }
+
+        $diagnostico = $metadata['diagnosticoHttp'] ?? null;
+        unset($metadata['diagnosticoHttp']);
+        $sanitizada = $this->sanitizarMapa($metadata);
+
+        if (
+            $acao === AcaoTecnicaPncp::EXECUTAR_REQUISICAO_HTTP_PNCP->value
+            && is_array($diagnostico)
+        ) {
+            $diagnosticoSanitizado = $this->sanitizarDiagnosticoHttp($diagnostico);
+            if ($diagnosticoSanitizado !== []) {
+                $sanitizada['diagnosticoHttp'] = $diagnosticoSanitizado;
+            }
+        }
+
+        return $sanitizada;
+    }
+
+    /**
+     * @param array<string, mixed> $diagnostico
+     * @return array<string, mixed>
+     */
+    private function sanitizarDiagnosticoHttp(array $diagnostico): array
+    {
+        $url = $diagnostico['url'] ?? null;
+        $request = $diagnostico['request'] ?? null;
+        $response = $diagnostico['response'] ?? null;
+        if (!is_string($url) || !is_array($request) || !is_array($response)) {
+            return [];
+        }
+
+        $requestSanitizada = $this->normalizarEstruturaDiagnostica($request);
+        $responseSanitizada = $this->normalizarEstruturaDiagnostica($response);
+
+        if (is_string($requestSanitizada['headersSent'] ?? null)) {
+            $requestSanitizada['headersSent'] = $this->redigirCabecalhosHttp(
+                $requestSanitizada['headersSent']
+            );
+        }
+        if (is_string($responseSanitizada['headersReceived'] ?? null)) {
+            $responseSanitizada['headersReceived'] = $this->redigirCabecalhosHttp(
+                $responseSanitizada['headersReceived']
+            );
+        }
+
+        $sanitizado = [
+            'url' => $url,
+            'request' => $requestSanitizada,
+            'response' => $responseSanitizada,
+        ];
+
+        $connection = $diagnostico['connection'] ?? null;
+        if (is_array($connection)) {
+            $sanitizado['connection'] = $this->normalizarEstruturaDiagnostica($connection);
+        }
+
+        $curl = $diagnostico['curlCommandTemplate'] ?? null;
+        if (is_string($curl)) {
+            $sanitizado['curlCommandTemplate'] = $this->redigirCredenciaisHttp($curl);
+        }
+
+        return $sanitizado;
+    }
+
+    /** @param array<int|string, mixed> $estrutura */
+    private function normalizarEstruturaDiagnostica(array $estrutura, int $profundidade = 0): array
+    {
+        if ($profundidade > 8) {
+            return [];
+        }
+
+        $normalizada = [];
+        foreach ($estrutura as $chave => $valor) {
+            if (!is_int($chave) && !is_string($chave)) {
+                continue;
+            }
+            if ($valor === null || is_bool($valor) || is_int($valor) || is_string($valor)) {
+                $normalizada[$chave] = $valor;
+                continue;
+            }
+            if (is_float($valor) && is_finite($valor)) {
+                $normalizada[$chave] = $valor;
+                continue;
+            }
+            if (is_array($valor)) {
+                $normalizada[$chave] = $this->normalizarEstruturaDiagnostica(
+                    $valor,
+                    $profundidade + 1
+                );
+            }
+        }
+
+        return $normalizada;
+    }
+
+    private function redigirCabecalhosHttp(string $cabecalhos): string
+    {
+        return (string) preg_replace(
+            '/^(authorization|proxy-authorization|cookie|set-cookie):.*$/im',
+            '$1: [REDACTED]',
+            $cabecalhos
+        );
+    }
+
+    private function redigirCredenciaisHttp(string $texto): string
+    {
+        $texto = (string) preg_replace(
+            '/\bBearer\s+[A-Za-z0-9._~+\/-]+=*/i',
+            'Bearer [REDACTED]',
+            $texto
+        );
+
+        return $this->redigirCabecalhosHttp($texto);
     }
 
     /** @return array{bool, mixed} */

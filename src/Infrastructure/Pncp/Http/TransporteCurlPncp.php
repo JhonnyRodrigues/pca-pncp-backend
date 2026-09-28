@@ -11,6 +11,8 @@ use Throwable;
 
 final class TransporteCurlPncp implements TransporteHttpPncp
 {
+    private int $ordemHttp = 0;
+
     public function __construct(
         private readonly ConfiguracaoTransportePncp $configuracao,
         private readonly ExecutorCurlPncp $executor,
@@ -35,13 +37,16 @@ final class TransporteCurlPncp implements TransporteHttpPncp
         $corpoResposta = '';
         $limiteRespostaExcedido = false;
         $houveRespostaHttp = false;
+        $cabecalhosRespostaBrutos = '';
+        $ordemHttp = ++$this->ordemHttp;
 
         $opcoes = $this->montarOpcoes(
             $requisicao,
             $headersResposta,
             $corpoResposta,
             $limiteRespostaExcedido,
-            $houveRespostaHttp
+            $houveRespostaHttp,
+            $cabecalhosRespostaBrutos
         );
         $inicio = hrtime(true);
         $resultado = null;
@@ -88,20 +93,26 @@ final class TransporteCurlPncp implements TransporteHttpPncp
             return $resposta;
         } finally {
             $this->registrarTentativa(
-                $requisicao->getMetodo(),
+                $ordemHttp,
+                $requisicao,
                 $inicio,
                 $resultado,
                 $houveRespostaHttp,
+                $cabecalhosRespostaBrutos,
+                $corpoResposta,
                 $categoriaFalha
             );
         }
     }
 
     private function registrarTentativa(
-        string $metodo,
+        int $ordemHttp,
+        RequisicaoHttpPncp $requisicao,
         int $inicio,
         ?ResultadoExecucaoCurlPncp $resultado,
         bool $houveRespostaHttp,
+        string $cabecalhosResposta,
+        string $corpoResposta,
         ?string $categoriaFalha
     ): void {
         if ($this->logger === null) {
@@ -109,9 +120,27 @@ final class TransporteCurlPncp implements TransporteHttpPncp
         }
 
         $metadata = [
-            'metodo' => $metodo,
+            'ordemHttp' => $ordemHttp,
+            'operacao' => $this->classificarOperacao($requisicao),
+            'metodo' => $requisicao->getMetodo(),
+            'ambientePncp' => $this->configuracao->getAmbiente()->value,
             'duracaoTentativaMs' => max(0, intdiv(hrtime(true) - $inicio, 1_000_000)),
         ];
+
+        $corpoRequisicao = $requisicao->getCorpo();
+        if ($corpoRequisicao !== null) {
+            $metadata['requisicaoBytes'] = strlen($corpoRequisicao);
+            $metadata['requisicaoSha256'] = hash('sha256', $corpoRequisicao);
+        }
+
+        $authorization = $requisicao->getHeaders()['authorization'] ?? null;
+        $metadata['sessaoPresente'] = $authorization !== null;
+        if (
+            $authorization !== null
+            && preg_match('/^Bearer[ \t]+([^\s]+)$/iD', $authorization, $partes) === 1
+        ) {
+            $metadata['sessaoFingerprintSha256'] = hash('sha256', $partes[1]);
+        }
 
         if ($resultado !== null && $resultado->getErrno() !== 0) {
             $metadata['curl_errno'] = $resultado->getErrno();
@@ -124,10 +153,30 @@ final class TransporteCurlPncp implements TransporteHttpPncp
             && $resultado->getStatusHttp() <= 599
         ) {
             $metadata['status_http'] = $resultado->getStatusHttp();
+            $metadata['retornoBytes'] = strlen($corpoResposta);
+            $metadata['retornoSha256'] = hash('sha256', $corpoResposta);
+        }
+
+        if ($resultado !== null && $resultado->getVersaoHttp() !== null) {
+            $metadata['httpVersion'] = $this->formatarVersaoHttp($resultado->getVersaoHttp());
         }
 
         if ($categoriaFalha !== null) {
             $metadata['categoriaFalha'] = $categoriaFalha;
+        }
+
+        if (
+            $houveRespostaHttp
+            && $resultado !== null
+            && in_array($categoriaFalha, ['HTTP_3XX', 'HTTP_4XX', 'HTTP_5XX'], true)
+            && $this->classificarOperacao($requisicao) !== 'AUTENTICAR'
+        ) {
+            $metadata['diagnosticoHttp'] = $this->montarDiagnosticoHttp(
+                $requisicao,
+                $resultado,
+                $cabecalhosResposta,
+                $corpoResposta
+            );
         }
 
         try {
@@ -160,13 +209,15 @@ final class TransporteCurlPncp implements TransporteHttpPncp
         array &$headersResposta,
         string &$corpoResposta,
         bool &$limiteRespostaExcedido,
-        bool &$houveRespostaHttp
+        bool &$houveRespostaHttp,
+        string &$cabecalhosRespostaBrutos
     ): array {
         $opcoes = [
             CURLOPT_CUSTOMREQUEST => $requisicao->getMetodo(),
             CURLOPT_HTTPHEADER => $this->formatarHeaders($requisicao->getHeaders()),
             CURLOPT_RETURNTRANSFER => false,
             CURLOPT_HEADER => false,
+            CURLINFO_HEADER_OUT => true,
             CURLOPT_CONNECTTIMEOUT => $this->configuracao->getTimeoutConexaoSegundos(),
             CURLOPT_TIMEOUT => $requisicao->getTimeoutSegundos(),
             CURLOPT_NOSIGNAL => true,
@@ -178,7 +229,8 @@ final class TransporteCurlPncp implements TransporteHttpPncp
             CURLOPT_HEADERFUNCTION => static function (
                 mixed $handle,
                 string $linha
-            ) use (&$headersResposta, &$houveRespostaHttp): int {
+            ) use (&$headersResposta, &$houveRespostaHttp, &$cabecalhosRespostaBrutos): int {
+                $cabecalhosRespostaBrutos .= $linha;
                 if (str_starts_with($linha, 'HTTP/')) {
                     $headersResposta = [];
                     $houveRespostaHttp = true;
@@ -241,5 +293,204 @@ final class TransporteCurlPncp implements TransporteHttpPncp
         }
 
         return $formatados;
+    }
+
+    private function classificarOperacao(RequisicaoHttpPncp $requisicao): string
+    {
+        $metodo = $requisicao->getMetodo();
+        $caminho = $requisicao->getCaminho();
+
+        if ($metodo === 'POST' && $caminho === '/v1/usuarios/login') {
+            return 'AUTENTICAR';
+        }
+        if (
+            $metodo === 'GET'
+            && preg_match('#^/v1/orgaos/[^/]+/pca/[^/]+/consolidado/unidades(?:\?.*)?$#D', $caminho) === 1
+        ) {
+            return 'CONSULTAR_UNIDADES_PCA';
+        }
+        if (
+            $metodo === 'GET'
+            && preg_match('#^/v1/orgaos/[^/]+/pca/[^/]+(?:/[^/]+)?/consolidado(?:\?.*)?$#D', $caminho) === 1
+        ) {
+            return 'CONSULTAR_CONSOLIDADO_PCA';
+        }
+        if (
+            $metodo === 'GET'
+            && preg_match('#^/v1/orgaos/[^/]+/unidades(?:\?.*)?$#D', $caminho) === 1
+        ) {
+            return 'CONSULTAR_UNIDADES_ORGAO';
+        }
+        if (preg_match('#^/v1/orgaos/[^/]+/pca/[^/]+/[^/]+/itens(?:\?.*)?$#D', $caminho) === 1) {
+            return match ($metodo) {
+                'GET' => 'CONSULTAR_ITENS_PCA',
+                'POST' => 'INCLUIR_ITENS_PCA',
+                'DELETE' => 'EXCLUIR_ITENS_PCA',
+                default => 'REQUISICAO_PNCP',
+            };
+        }
+        if ($metodo === 'POST' && preg_match('#^/v1/orgaos/[^/]+/pca$#D', $caminho) === 1) {
+            return 'PUBLICAR_PCA';
+        }
+        if ($metodo === 'DELETE' && preg_match('#^/v1/orgaos/[^/]+/pca/[^/]+/[^/]+$#D', $caminho) === 1) {
+            return 'EXCLUIR_PCA';
+        }
+
+        return $metodo === 'GET' ? 'CONSULTAR_PNCP' : 'REQUISICAO_PNCP';
+    }
+
+    private function formatarVersaoHttp(int $versao): string
+    {
+        $versoes = [];
+        foreach ([
+            'CURL_HTTP_VERSION_1_0' => '1.0',
+            'CURL_HTTP_VERSION_1_1' => '1.1',
+            'CURL_HTTP_VERSION_2_0' => '2',
+            'CURL_HTTP_VERSION_2TLS' => '2',
+            'CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE' => '2',
+            'CURL_HTTP_VERSION_3' => '3',
+        ] as $constante => $rotulo) {
+            if (defined($constante)) {
+                $versoes[(int) constant($constante)] = $rotulo;
+            }
+        }
+
+        return $versoes[$versao] ?? 'DESCONHECIDA_' . $versao;
+    }
+
+    /** @return array<string, mixed> */
+    private function montarDiagnosticoHttp(
+        RequisicaoHttpPncp $requisicao,
+        ResultadoExecucaoCurlPncp $resultado,
+        string $cabecalhosResposta,
+        string $corpoResposta
+    ): array {
+        $corpoRequisicao = $requisicao->getCorpo() ?? '';
+        $cabecalhosEnviados = $resultado->getCabecalhosEnviados();
+        if ($cabecalhosEnviados === null) {
+            $cabecalhosEnviados = implode("\r\n", $this->formatarHeaders(
+                $requisicao->getHeaders()
+            ));
+        }
+
+        return [
+            'url' => $this->configuracao->getBaseUrl() . $requisicao->getCaminho(),
+            'request' => array_merge(
+                [
+                    'method' => $requisicao->getMetodo(),
+                    'headersSent' => $this->redigirCabecalhos($cabecalhosEnviados),
+                    'authorizationDiagnostic' => $this->diagnosticarAutorizacao(
+                        $requisicao->getHeaders()['authorization'] ?? null
+                    ),
+                ],
+                $this->descreverCorpo($corpoRequisicao)
+            ),
+            'response' => array_merge(
+                [
+                    'status' => $resultado->getStatusHttp(),
+                    'headersReceived' => $this->redigirCabecalhos($cabecalhosResposta),
+                ],
+                $this->descreverCorpo($corpoResposta)
+            ),
+            'connection' => $resultado->getDiagnosticoConexao(),
+            'curlCommandTemplate' => $this->montarCurlSeguro(
+                $requisicao,
+                $this->configuracao->getBaseUrl() . $requisicao->getCaminho()
+            ),
+        ];
+    }
+
+    private function redigirCabecalhos(string $cabecalhos): string
+    {
+        return (string) preg_replace(
+            '/^(authorization|proxy-authorization|cookie|set-cookie):.*$/im',
+            '$1: [REDACTED]',
+            $cabecalhos
+        );
+    }
+
+    /** @return array<string, mixed> */
+    private function diagnosticarAutorizacao(?string $authorization): array
+    {
+        if (
+            $authorization === null
+            || preg_match('/^Bearer[ \t]+([^\s]+)$/iD', $authorization, $partes) !== 1
+        ) {
+            return ['present' => $authorization !== null, 'scheme' => null];
+        }
+
+        $token = $partes[1];
+        $segmentos = explode('.', $token);
+        $diagnostico = [
+            'present' => true,
+            'scheme' => 'Bearer',
+            'tokenSha256' => hash('sha256', $token),
+            'format' => count($segmentos) === 3 ? 'JWT' : 'OPAQUE',
+        ];
+
+        if (count($segmentos) === 3) {
+            $diagnostico['jwtHeader'] = $this->decodificarSegmentoJwt($segmentos[0]);
+            $diagnostico['jwtClaims'] = $this->decodificarSegmentoJwt($segmentos[1]);
+        }
+
+        return $diagnostico;
+    }
+
+    /** @return array<string, mixed>|null */
+    private function decodificarSegmentoJwt(string $segmento): ?array
+    {
+        $preenchimento = (4 - strlen($segmento) % 4) % 4;
+        $json = base64_decode(
+            strtr($segmento, '-_', '+/') . str_repeat('=', $preenchimento),
+            true
+        );
+        if ($json === false) {
+            return null;
+        }
+
+        $decodificado = json_decode($json, true);
+
+        return is_array($decodificado) && !array_is_list($decodificado)
+            ? $decodificado
+            : null;
+    }
+
+    /** @return array<string, int|string|null> */
+    private function descreverCorpo(string $corpo): array
+    {
+        $utf8Valido = preg_match('//u', $corpo) === 1;
+
+        return [
+            'bodyUtf8' => $utf8Valido ? $corpo : null,
+            'bodyBase64' => $utf8Valido ? null : base64_encode($corpo),
+            'bodyBytes' => strlen($corpo),
+            'bodySha256' => hash('sha256', $corpo),
+        ];
+    }
+
+    private function montarCurlSeguro(RequisicaoHttpPncp $requisicao, string $url): string
+    {
+        $partes = [
+            "curl --request '" . $requisicao->getMetodo() . "' '" . $url . "'",
+        ];
+
+        foreach ($requisicao->getHeaders() as $nome => $valor) {
+            if ($nome === 'authorization') {
+                $partes[] = '  --header "authorization: Bearer ${PNCP_BEARER_TOKEN}"';
+                continue;
+            }
+            if ($nome === 'cookie') {
+                continue;
+            }
+            $partes[] = "  --header '" . $nome . ': ' . $valor . "'";
+        }
+
+        if ($requisicao->getCorpo() !== null) {
+            $partes[] = "  --data-binary '@payload.json'";
+        }
+
+        return 'PNCP_BEARER_TOKEN=[PREENCHER_NO_TERMINAL_PROTEGIDO]'
+            . PHP_EOL
+            . implode(' ' . chr(92) . PHP_EOL, $partes);
     }
 }

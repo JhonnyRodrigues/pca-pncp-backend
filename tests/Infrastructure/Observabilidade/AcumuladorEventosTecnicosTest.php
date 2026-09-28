@@ -82,10 +82,18 @@ final class AcumuladorEventosTecnicosTest extends TestCase
         $logger->warning('Tentativa HTTP PNCP encerrada.', [
             'action' => AcaoTecnicaPncp::EXECUTAR_REQUISICAO_HTTP_PNCP->value,
             'metadata' => [
+                'ordemHttp' => 7,
+                'operacao' => 'EXCLUIR_ITENS_PCA',
                 'metodo' => 'DELETE',
                 'duracaoTentativaMs' => 231,
                 'status_http' => 403,
                 'categoriaFalha' => 'HTTP_4XX',
+                'requisicaoBytes' => 123,
+                'requisicaoSha256' => str_repeat('a', 64),
+                'sessaoPresente' => true,
+                'sessaoFingerprintSha256' => str_repeat('b', 64),
+                'retornoBytes' => 45,
+                'retornoSha256' => str_repeat('c', 64),
             ],
         ]);
 
@@ -93,7 +101,55 @@ final class AcumuladorEventosTecnicosTest extends TestCase
         $this->assertSame('EXECUTAR_REQUISICAO_HTTP_PNCP', $envelope['action']);
         $this->assertSame(403, $envelope['metadata']['status_http']);
         $this->assertSame(231, $envelope['metadata']['duracaoTentativaMs']);
+        $this->assertSame(7, $envelope['metadata']['ordemHttp']);
+        $this->assertSame('EXCLUIR_ITENS_PCA', $envelope['metadata']['operacao']);
+        $this->assertSame(123, $envelope['metadata']['requisicaoBytes']);
+        $this->assertSame(str_repeat('a', 64), $envelope['metadata']['requisicaoSha256']);
+        $this->assertTrue($envelope['metadata']['sessaoPresente']);
+        $this->assertSame(
+            str_repeat('b', 64),
+            $envelope['metadata']['sessaoFingerprintSha256']
+        );
+        $this->assertSame(45, $envelope['metadata']['retornoBytes']);
+        $this->assertSame(str_repeat('c', 64), $envelope['metadata']['retornoSha256']);
         $this->assertArrayNotHasKey('curl_errno', $envelope['metadata']);
+    }
+
+    public function testDevePreservarDiagnosticoHttpConfiavelComCredenciaisRedigidas(): void
+    {
+        [$logger] = $this->criarLogger();
+        $resposta = '{"status":"403","message":"Somente o publicador pode editar."}';
+
+        $logger->warning('Tentativa HTTP PNCP encerrada.', [
+            'action' => AcaoTecnicaPncp::EXECUTAR_REQUISICAO_HTTP_PNCP->value,
+            'metadata' => [
+                'diagnosticoHttp' => [
+                    'url' => 'https://pncp.gov.br/api/pncp/v1/orgaos/123/pca/2026/4/itens',
+                    'request' => [
+                        'headersSent' => "Authorization: Bearer token-secreto\r\n"
+                            . "Cookie: sessao=segredo-cookie",
+                        'bodyUtf8' => '[{"numeroItem":10}]',
+                    ],
+                    'response' => [
+                        'headersReceived' => "HTTP/1.1 403 Forbidden\r\n"
+                            . "Set-Cookie: segredo-resposta",
+                        'bodyUtf8' => $resposta,
+                    ],
+                    'connection' => ['remoteIp' => '192.0.2.20'],
+                    'curlCommandTemplate' => 'curl -H "Authorization: Bearer token-secreto"',
+                ],
+            ],
+        ]);
+
+        $diagnostico = $logger->getEventos()[0]->paraEnvelope()['metadata']['diagnosticoHttp'];
+        $this->assertSame('[{"numeroItem":10}]', $diagnostico['request']['bodyUtf8']);
+        $this->assertSame($resposta, $diagnostico['response']['bodyUtf8']);
+        $this->assertSame('192.0.2.20', $diagnostico['connection']['remoteIp']);
+        $serializado = json_encode($diagnostico, JSON_THROW_ON_ERROR);
+        $this->assertStringNotContainsString('token-secreto', $serializado);
+        $this->assertStringNotContainsString('segredo-cookie', $serializado);
+        $this->assertStringNotContainsString('segredo-resposta', $serializado);
+        $this->assertStringContainsString('[REDACTED]', $serializado);
     }
 
     public function testDeveExigirUuidV4SomenteNoAcumulador(): void

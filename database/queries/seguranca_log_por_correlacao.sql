@@ -13,12 +13,38 @@ SELECT L.ID,
            JSON_VALUE(L.DESCRIPTION, '$.metadata.status_http' NULL ON ERROR),
            JSON_VALUE(L.DESCRIPTION, '$.metadata.statusHttp' NULL ON ERROR)
        ) AS STATUS_HTTP,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.ordemHttp' NULL ON ERROR)
+           AS ORDEM_HTTP,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.operacao' NULL ON ERROR)
+           AS OPERACAO_HTTP,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.metodo' NULL ON ERROR)
+           AS METODO_HTTP,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.ambientePncp' NULL ON ERROR)
+           AS AMBIENTE_PNCP,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.httpVersion' NULL ON ERROR)
+           AS VERSAO_HTTP,
        JSON_VALUE(L.DESCRIPTION, '$.metadata.duracaoTentativaMs' NULL ON ERROR)
            AS DURACAO_TENTATIVA_MS,
        JSON_VALUE(L.DESCRIPTION, '$.metadata.curl_errno' NULL ON ERROR)
            AS CURL_ERRNO,
        JSON_VALUE(L.DESCRIPTION, '$.metadata.categoriaFalha' NULL ON ERROR)
            AS CATEGORIA_FALHA,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.requisicaoBytes' NULL ON ERROR)
+           AS REQUISICAO_BYTES,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.requisicaoSha256' NULL ON ERROR)
+           AS REQUISICAO_SHA256,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.sessaoPresente' NULL ON ERROR)
+           AS SESSAO_PRESENTE,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.sessaoFingerprintSha256' NULL ON ERROR)
+           AS SESSAO_FINGERPRINT_SHA256,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.retornoBytes' NULL ON ERROR)
+           AS RETORNO_BYTES,
+       JSON_VALUE(L.DESCRIPTION, '$.metadata.retornoSha256' NULL ON ERROR)
+           AS RETORNO_SHA256,
+       JSON_QUERY(
+           L.DESCRIPTION,
+           '$.metadata.diagnosticoHttp' RETURNING CLOB NULL ON ERROR
+       ) AS DIAGNOSTICO_HTTP,
        JSON_VALUE(L.DESCRIPTION, '$.metadata.tentativa' NULL ON ERROR) AS TENTATIVA,
        JSON_VALUE(L.DESCRIPTION, '$.metadata.pagina' NULL ON ERROR) AS PAGINA,
        JSON_VALUE(

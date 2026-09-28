@@ -1,9 +1,11 @@
 # Sprint 9.5 — Prontidão de produção e suporte
 
-**Status:** plano aprovado; o precheck de 2026 do Microciclo 7 foi invalidado
-por omitir demandas normais homologadas com `FK_PLANO` nulo. O Microciclo 8 foi
-interrompido por HTTP 403 no primeiro `DELETE` de 2026. Não repetir a escrita;
-a fonte de pertencimento das demandas normais ainda precisa ser identificada.
+**Status:** plano aprovado; as 366 demandas normais legadas de 2026 foram
+vinculadas e o precheck pós-migration aprovou 478 pares desejados, com somente
+71/3/38 inclusões. O Microciclo 8 continua interrompido: três acionamentos
+informados pelo mantenedor terminaram com HTTP 403 no primeiro `POST` de itens.
+Não repetir a escrita antes de implantar e preparar a captura diagnóstica
+autorizada.
 Cada microciclo termina com pausa e o próximo exige autorização explícita.
 
 ## Objetivo e fontes
@@ -334,3 +336,31 @@ Blank para 2026 após o precheck aprovado. A decisão esperada nas três unidade
 é `RETIFICAR`, somente com `POST`: UASG 205 com 71 inclusões, UASG 207 com 3 e
 UASG 210 com 38. Qualquer exclusão planejada, `DELETE`, 401/403, falha de
 autenticação ou resultado incerto interrompe o procedimento sem nova tentativa.
+
+O mantenedor informou posteriormente que acionou a Blank três vezes e recebeu
+em todas “A inclusão de itens no PNCP não foi autorizada”. A resposta fornecida,
+correlação `2b433428-88ab-4cd5-99db-39bccefcf966`, ficou `INTERROMPIDA`, visitou
+uma de três unidades e deixou duas não processadas. Nos 16 eventos anexados,
+seis chamadas HTTP receberam 200 e o `POST` de inclusão da primeira unidade
+recebeu 403 em 109 ms; não houve `DELETE`. A decisão planejada permaneceu
+`RETIFICAR`, agora com 73 inclusões e zero exclusões; os IDs 919 e 937 explicam
+a diferença em relação ao precheck anterior de 71 itens.
+
+O artefato protegido da ordem HTTP 7 comprovou a requisição ao ambiente de
+produção, o Bearer presente e o payload de 73 itens. O PNCP devolveu
+explicitamente `Operação não autorizada. Somente o usuário que publicou a
+informação pode editá-la.` O JWT possui `idBaseDados` 397 e `sub/login`
+`fc904958-e3e8-48b1-b16d-9cdfd1c46d4c`, iguais ao usuário atual consultado no
+PNCP. A causa externa fica identificada: o PNCP não reconhece esse usuário como
+publicador do PCA 2026/sequencial 4. A correção funcional continua não
+comprovada e nenhuma repetição foi autorizada.
+
+Após a investigação, o mantenedor decidiu confiar no conteúdo de erro do PNCP
+para suporte interno e revisar a política de observabilidade. O mecanismo de
+arquivo opt-in foi removido na mesma refatoração. Respostas HTTP
+`3xx/4xx/5xx`, exceto autenticação, passam a registrar requisição, resposta,
+conexão e cURL reproduzível em `metadata.diagnosticoHttp`; Bearer, cookies e
+`Set-Cookie` permanecem redigidos. O código público não muda e a mensagem da
+Blank acrescenta `O PNCP informou: ...` quando o corpo JSON traz `message` ou
+`mensagem`. Esta implementação não autoriza nova execução. O Microciclo 8 não
+está concluído.

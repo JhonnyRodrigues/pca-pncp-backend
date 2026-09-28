@@ -13,8 +13,9 @@ para verificar a sequência dos eventos.
 `BLOQUEADO` e `FALHA_RECONCILIAVEL` preservam a unidade afetada; `INTERROMPIDA` encerra a
 varredura e pode preservar resultados de unidades anteriores. Contagens e IDs
 planejados não comprovam escrita. Em qualquer falha após possível escrita,
-confira PNCP e Oracle antes de decidir uma nova execução. Nunca copie token,
-credenciais, payload ou corpo de resposta para um chamado.
+confira PNCP e Oracle antes de decidir uma nova execução. Eventos HTTP de erro
+podem conter payload e resposta integrais em `metadata.diagnosticoHttp`; trate
+seus exports como restritos e nunca copie credenciais para um chamado.
 
 Os grupos abaixo reúnem códigos com a mesma conduta operacional. Nas células
 com `{operação}`, substitua por `INCLUSAO_ITENS`, `EXCLUSAO_ITENS` ou
@@ -27,8 +28,8 @@ da resposta prevalece sobre uma interpretação apenas pelo prefixo.
 | `FALHA_INESPERADA`, `RESPOSTA_INVALIDA` | Falha capturada na fronteira ou resposta da Blank não interpretável; o efeito anterior pode existir. | Preservar resposta e horário sem dados sensíveis; localizar eventos e consultar o estado antes de repetir. |
 | `AUTENTICACAO_PNCP_FALHOU`, `AUTENTICACAO_PNCP_ANTES_ESCRITA_FALHOU`, `PNCP_AUTENTICACAO_NAO_AUTORIZADA` | Login inicial ou renovação antes da escrita falhou. A renovação falha antes do primeiro comando mutante da unidade. | Conferir na correlação o login, `status_http` e a ausência de escrita posterior; validar conta, permissão e ambiente com o responsável. Não repetir `POST` ou `DELETE` automaticamente. |
 | `PNCP_AUTENTICACAO_TRANSPORTE_FALHOU`, `PNCP_AUTENTICACAO_RESPOSTA_INVALIDA`, `PNCP_AUTENTICACAO_CREDENCIAIS_INVALIDAS`, `SESSAO_PNCP_INCONSISTENTE`, `SESSAO_PNCP_ANTES_ESCRITA_INCONSISTENTE` | Sessão não pôde ser obtida ou validada. | Usar evento de login e diagnóstico de transporte; corrigir perfil ou investigar o PNCP antes de nova execução. |
-| `PNCP_{operação}_NAO_AUTORIZADA`, `PNCP_PUBLICACAO_NAO_AUTORIZADA` | Resposta 401/403 em escrita; unidade interrompida, sem retry mutante. | Guardar correlação, método, status e IDs planejados; verificar no PNCP e no Oracle antes de acionar suporte de acesso. O http code 403 isolado não prova a causa. |
-| `PNCP_{operação}_REJEITADA`, `PNCP_PUBLICACAO_REJEITADA` | PNCP rejeitou comando com resposta definitiva de validação. | Consultar status e contrato da operação; corrigir dados ou requisito identificado, sem forçar repetição. |
+| `PNCP_{operação}_NAO_AUTORIZADA`, `PNCP_PUBLICACAO_NAO_AUTORIZADA` | Resposta 401/403 em escrita; unidade interrompida, sem retry mutante. | Ler o detalhe do PNCP na mensagem da Blank e em `diagnosticoHttp`; verificar PNCP e Oracle antes de acionar suporte de acesso. O status isolado não prova a causa quando o serviço não trouxer detalhe. |
+| `PNCP_{operação}_REJEITADA`, `PNCP_PUBLICACAO_REJEITADA` | PNCP rejeitou comando com resposta definitiva de validação. | Consultar a mensagem externa e o diagnóstico HTTP; corrigir dados ou requisito identificado, sem forçar repetição. |
 | `PNCP_{operação}_RESULTADO_INCERTO`, `PNCP_PUBLICACAO_RESULTADO_INCERTO`, `PNCP_RESPOSTA_INCONCLUSIVA`, `RESULTADO_INCERTO` | O efeito externo não foi determinado com segurança. | Comparar inventário PNCP, projeção e confirmação Oracle; aplicar o runbook de recuperação, sem reenviar a escrita às cegas. |
 | `PNCP_{operação}_TRANSPORTE_FALHOU`, `PNCP_PUBLICACAO_TRANSPORTE_FALHOU`, `PNCP_LEITURA_TRANSPORTE_FALHOU`, `PNCP_LEITURA_FALHOU` | Falha de transporte ou leitura externa; escrita pode ser incerta conforme a operação. | Ver `categoriaFalha`, `curl_errno`, `duracaoTentativaMs` e presença de `status_http`; confirmar o estado antes de qualquer repetição mutante. |
 | `PNCP_{operação}_PREPARACAO_FALHOU`, `PNCP_PUBLICACAO_PREPARACAO_FALHOU`, `PNCP_{operação}_SESSAO_INVALIDA`, `PNCP_PUBLICACAO_SESSAO_INVALIDA`, `PNCP_LEITURA_SESSAO_INVALIDA` | Comando não foi preparado ou sessão local é inválida. | Conferir eventos anteriores da unidade e configuração; encaminhar ao mantenedor. Não corrigir dados Oracle manualmente por inferência. |

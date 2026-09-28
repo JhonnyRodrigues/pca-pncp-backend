@@ -242,20 +242,27 @@ final class EscritorPncpAdapter implements EscritorPncpPort
         $quantidade = count($comando->getDemandas());
 
         if (in_array($status, [400, 422], true)) {
-            return $this->rejeitadaPublicacao($status, $quantidade);
+            return $this->rejeitadaPublicacao($resposta, $quantidade);
         }
 
         if (in_array($status, [401, 403], true)) {
             return $this->falhaSistemicaPublicacao(
                 'PNCP_PUBLICACAO_NAO_AUTORIZADA',
-                'A publicação no PNCP não foi autorizada.',
+                $this->acrescentarDetalhePncp(
+                    'A publicação no PNCP não foi autorizada.',
+                    $resposta
+                ),
                 $quantidade,
                 $status
             );
         }
 
         if (!in_array($status, self::STATUS_PUBLICACAO_ACEITOS, true)) {
-            return $this->resultadoIncertoPublicacao($quantidade, $status);
+            return $this->resultadoIncertoPublicacao(
+                $quantidade,
+                $status,
+                resposta: $resposta
+            );
         }
 
         $sequencial = $this->extrairSequencial($resposta, $comando);
@@ -356,7 +363,10 @@ final class EscritorPncpAdapter implements EscritorPncpPort
             return $this->rejeitadaEscrita(
                 $acao,
                 'PNCP_' . $codigoOperacao . '_REJEITADA',
-                'O PNCP rejeitou a ' . $descricaoOperacao . '.',
+                $this->acrescentarDetalhePncp(
+                    'O PNCP rejeitou a ' . $descricaoOperacao . '.',
+                    $resposta
+                ),
                 $status,
                 $quantidade
             );
@@ -366,7 +376,10 @@ final class EscritorPncpAdapter implements EscritorPncpPort
             return $this->falhaSistemicaEscrita(
                 $acao,
                 'PNCP_' . $codigoOperacao . '_NAO_AUTORIZADA',
-                'A ' . $descricaoOperacao . ' no PNCP não foi autorizada.',
+                $this->acrescentarDetalhePncp(
+                    'A ' . $descricaoOperacao . ' no PNCP não foi autorizada.',
+                    $resposta
+                ),
                 $quantidade,
                 $status
             );
@@ -377,7 +390,8 @@ final class EscritorPncpAdapter implements EscritorPncpPort
             $codigoOperacao,
             $descricaoOperacao,
             $quantidade,
-            $status
+            $status,
+            $resposta
         );
     }
 
@@ -405,11 +419,16 @@ final class EscritorPncpAdapter implements EscritorPncpPort
         string $codigoOperacao,
         string $descricaoOperacao,
         int $quantidade,
-        ?int $status = null
+        ?int $status = null,
+        ?RespostaHttpPncp $resposta = null
     ): ResultadoEscritaPncp {
         $falha = new FalhaSegura(
             'PNCP_' . $codigoOperacao . '_RESULTADO_INCERTO',
-            'Não foi possível determinar o resultado da ' . $descricaoOperacao . ' no PNCP.'
+            $this->acrescentarDetalhePncp(
+                'Não foi possível determinar o resultado da '
+                    . $descricaoOperacao . ' no PNCP.',
+                $resposta
+            )
         );
         $this->registrarFalha(
             $acao,
@@ -522,20 +541,22 @@ final class EscritorPncpAdapter implements EscritorPncpPort
     }
 
     private function rejeitadaPublicacao(
-        int $status,
+        RespostaHttpPncp $resposta,
         int $quantidade
-    ): ResultadoPublicacaoPncp
-    {
+    ): ResultadoPublicacaoPncp {
         $falha = new FalhaSegura(
             'PNCP_PUBLICACAO_REJEITADA',
-            'O PNCP rejeitou a publicação.'
+            $this->acrescentarDetalhePncp(
+                'O PNCP rejeitou a publicação.',
+                $resposta
+            )
         );
         $this->registrarFalha(
             AcaoTecnicaPncp::PUBLICAR_PCA_PNCP,
             $falha,
             SituacaoEscritaPncp::REJEITADA,
             $quantidade,
-            $status
+            $resposta->getStatus()
         );
 
         return ResultadoPublicacaoPncp::rejeitada($falha);
@@ -544,12 +565,16 @@ final class EscritorPncpAdapter implements EscritorPncpPort
     private function resultadoIncertoPublicacao(
         int $quantidade,
         ?int $status = null,
-        array $diagnosticoLocation = []
+        array $diagnosticoLocation = [],
+        ?RespostaHttpPncp $resposta = null
     ): ResultadoPublicacaoPncp
     {
         $falha = new FalhaSegura(
             'PNCP_PUBLICACAO_RESULTADO_INCERTO',
-            'Não foi possível determinar o resultado da publicação no PNCP.'
+            $this->acrescentarDetalhePncp(
+                'Não foi possível determinar o resultado da publicação no PNCP.',
+                $resposta
+            )
         );
         $this->registrarFalha(
             AcaoTecnicaPncp::PUBLICAR_PCA_PNCP,
@@ -579,6 +604,32 @@ final class EscritorPncpAdapter implements EscritorPncpPort
         );
 
         return ResultadoPublicacaoPncp::falhaSistemica($falha);
+    }
+
+    private function acrescentarDetalhePncp(
+        string $mensagem,
+        ?RespostaHttpPncp $resposta
+    ): string {
+        if ($resposta === null) {
+            return $mensagem;
+        }
+
+        $corpo = trim($resposta->getCorpo());
+        if ($corpo === '') {
+            return $mensagem;
+        }
+
+        $decodificado = json_decode($corpo, true);
+        if (!is_array($decodificado)) {
+            return $mensagem;
+        }
+
+        $detalhe = $decodificado['message'] ?? $decodificado['mensagem'] ?? null;
+        if (!is_string($detalhe) || trim($detalhe) === '') {
+            return $mensagem;
+        }
+
+        return $mensagem . ' O PNCP informou: ' . trim($detalhe);
     }
 
     private function registrarFalha(

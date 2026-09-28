@@ -7,7 +7,7 @@
 **Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
 sprint na ordem, gates, pendências e restrições operacionais
 
-**Atualizado em:** 25/09/2026
+**Atualizado em:** 28/09/2026
 
 ## Limites de autoridade
 
@@ -41,17 +41,21 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   registrados abaixo.
 - A Sprint 9.5 — Prontidão de produção e suporte está em execução conforme o
   [plano aprovado](../../../.agents/sprints/planos/plano_sprint_9.5.md).
-  Microciclos 1 a 7 concluídos; Microciclo 8 recebeu autorização específica
-  e iniciou pela preparação da execução única de 2026.
+  Microciclos 1 a 7 concluídos; o Microciclo 8 continua interrompido durante
+  a investigação do HTTP 403 na inclusão de itens de 2026.
   Oracle e PNCP de 2027 coincidiram por IDs;
   após corrigir a publicação da Blank, uma leitura PNCP expirou duas vezes e
   a execução seguinte concluiu as três unidades em `NENHUMA_ACAO`. Não houve
   `POST` ou `DELETE` nessas duas correlações, e a auditoria de 2027 permaneceu
-  inalterada. O precheck somente leitura de 2026 encontrou as três unidades
-  com decisão prevista `RETIFICAR`: UASG 205 com 71 inclusões/208 exclusões,
-  207 com 3/5 e 210 com 38/153. Os arrays exatos coincidem com a avaliação
-  anterior. A primeira escrita ainda seria `DELETE`; não houve execução de
-  2026 neste microciclo.
+  inalterada. Após a migration que vinculou 366 demandas legadas, o precheck
+  somente leitura aprovou 478 pares desejados e decisões `RETIFICAR` com
+  71/3/38 inclusões e zero exclusões. O mantenedor informou três acionamentos
+  da Blank; todos pararam no primeiro `POST` com mensagem de inclusão não
+  autorizada. Na correlação fornecida, seis chamadas tiveram HTTP 200, o
+  `POST` recebeu 403 e não houve `DELETE`. Uma instrumentação opt-in, sem token,
+  foi autorizada para capturar os bytes efetivos da próxima chamada que venha
+  a receber autorização própria. Não há autorização implícita para repetir a
+  Blank.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.
@@ -423,19 +427,34 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   `CONFORME`. A comparação dos 478 pares distintos `UASG + numeroItem` com o
   inventário PNCP comprovou 71, 3 e 38 inclusões para as UASGs 205, 207 e 210,
   respectivamente, sem qualquer exclusão. A consulta de auditoria dos
-  procedimentos 5, 8 e 9 permaneceu vazia. A Blank não foi acionada depois do
-  saneamento; a execução funcional continua sujeita ao ponto de autorização do
-  Microciclo 8.
+  procedimentos 5, 8 e 9 permaneceu vazia.
 - Em 28/09/2026, o mantenedor autorizou uma única execução funcional da Blank
   para 2026 após o precheck aprovado. Esperam-se três retificações somente com
   inclusões: 71, 3 e 38 itens nas UASGs 205, 207 e 210. Qualquer exclusão,
   `DELETE`, falha de autenticação, 401/403 ou resultado incerto exige parada sem
   nova tentativa.
+- O mantenedor informou três acionamentos posteriores, todos interrompidos com
+  `PNCP_INCLUSAO_ITENS_NAO_AUTORIZADA`. A resposta preservada tem correlação
+  `2b433428-88ab-4cd5-99db-39bccefcf966`; seus 16 eventos mostram seis
+  respostas HTTP 200 e um `POST` de 73 inclusões recusado com 403 em 109 ms,
+  sem `DELETE`. A captura autorizada preservou a resposta exata do PNCP:
+  `Operação não autorizada. Somente o usuário que publicou a informação pode
+  editá-la.` O JWT usado pelo backend corresponde ao usuário de produção
+  consultado no PNCP (`idBaseDados` 397 e o mesmo `sub/login`), portanto o PNCP
+  considera que o PCA 2026/sequencial 4 pertence a outro publicador interno.
+  Isso identifica a causa da recusa, mas não comprova uma correção funcional.
+- Após a investigação, o mantenedor revisou a política de observabilidade. O
+  arquivo diagnóstico opt-in foi descontinuado. Respostas HTTP `3xx/4xx/5xx`
+  não autenticadoras passam a registrar em `SEGURANCA_LOG` requisição,
+  resposta, conexão e cURL reproduzível em `metadata.diagnosticoHttp`, sempre
+  sem Bearer ou cookies. O código público permanece estável e a mensagem da
+  Blank acrescenta o detalhe textual devolvido pelo PNCP. Essa alteração não
+  autoriza nova chamada real.
 - A Sprint 9.4 foi concluída em 24/09/2026. A Sprint 9.5 recebeu plano e
   autorizações incrementais; o smoke de 2027 do Microciclo 7 foi concluído,
-  mas seu precheck de 2026 foi invalidado. O Microciclo 8 encontra-se
-  interrompido pelo 403 e pela fotografia Oracle incompleta de 2026, conforme
-  o plano da sprint.
+  e o precheck pós-migration de 2026 foi aprovado. O Microciclo 8 encontra-se
+  interrompido pelo 403 no `POST`; a causa externa foi identificada e a
+  correção funcional ainda não foi comprovada.
 
 ## Evidências do Microciclo 5 da Sprint 8.5
 

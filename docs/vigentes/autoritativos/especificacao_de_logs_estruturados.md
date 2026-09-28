@@ -30,7 +30,7 @@ mapas sem conteúdo permanecem vazios e `ipAddress` pode ser `null`.
 | `system` | string | Sistema emissor, identificado como `pca-pncp-backend`. |
 | `module` | string | Módulo lógico que originou o evento. |
 | `action` | string | Operação técnica estável que estava sendo executada. |
-| `message` | string | Mensagem técnica sanitizada. |
+| `message` | string | Mensagem técnica sanitizada; em falhas PNCP pode acrescentar o detalhe textual recebido do serviço. |
 | `error` | objeto | Erro seguro associado ao evento ou mapa vazio. |
 | `context` | objeto | Contexto técnico sanitizado ou mapa vazio. |
 | `metadata` | objeto | Medidas e classificações sanitizadas ou mapa vazio. |
@@ -63,10 +63,38 @@ recebe `metadata.categoriaFalha`: `CURL`, `TLS`, `LIMITE_RESPOSTA`,
 `RESPOSTA_INVALIDA`, `TRANSPORTE_LOCAL`, `HTTP_3XX`, `HTTP_4XX` ou `HTTP_5XX`.
 `metadata.status_http` aparece somente quando o transporte recebeu uma
 resposta HTTP com código válido. Um 403 é resposta HTTP; timeout sem resposta
-não recebe `status_http`. O evento não inclui caminho, URL, headers, corpo ou
-credenciais. Falhas anteriores ao início da tentativa não geram este evento.
+não recebe `status_http`. Falhas anteriores ao início da tentativa não geram
+este evento.
 As categorias `HTTP_3XX`, `HTTP_4XX` e `HTTP_5XX` classificam apenas a faixa
 do status; a interpretação da operação pertence ao adaptador PNCP.
+
+Para distinguir as chamadas sem multiplicar valores de `action`, o mesmo
+evento inclui `metadata.ordemHttp`, `metadata.operacao` e
+`metadata.ambientePncp`. `operacao` é uma classificação sem identificadores,
+como `AUTENTICAR`, `CONSULTAR_CONSOLIDADO_PCA`, `CONSULTAR_ITENS_PCA` ou
+`INCLUIR_ITENS_PCA`. Quando aplicável, o evento também contém tamanho e
+SHA-256 dos corpos de requisição e resposta, presença de autorização,
+SHA-256 do token opaco sem o prefixo `Bearer` e versão HTTP negociada. Esses
+hashes permitem comparar bytes e sessões sem registrar o conteúdo original;
+não são credenciais reutilizáveis.
+
+Respostas `HTTP_3XX`, `HTTP_4XX` ou `HTTP_5XX`, exceto na operação
+`AUTENTICAR`, acrescentam `metadata.diagnosticoHttp`. Esse objeto preserva a
+URL efetiva, headers enviados e recebidos, corpos de requisição e resposta,
+hashes, tamanhos, diagnóstico não reutilizável da sessão, informações de
+conexão e um comando cURL reproduzível. `Authorization`,
+`Proxy-Authorization`, `Cookie` e `Set-Cookie` são substituídos por
+`[REDACTED]`; o Bearer nunca é persistido e o cURL contém somente um marcador
+para preenchimento no terminal protegido. Corpos UTF-8 permanecem textuais;
+conteúdo binário usa Base64. Respostas aceitas continuam registrando apenas os
+metadados resumidos.
+
+O corpo de erro devolvido pelo PNCP é preservado integralmente como evidência
+do serviço externo confiável. Quando esse corpo JSON contém `message` ou
+`mensagem`, o adaptador pode acrescentar o texto à mensagem segura apresentada
+à Blank como `O PNCP informou: ...`. O código público permanece estável e a
+decisão continua baseada no status HTTP e no contrato da operação, nunca na
+comparação literal do texto externo.
 
 Os arrays contêm apenas inteiros, sem payloads completos. Um erro `403` pode
 preservar o evento planejado, mas não produz evento confirmado. A consulta
@@ -88,20 +116,26 @@ evento de erro, `error` preserva:
 | `error.code` | Código seguro e estável da falha. |
 | `error.message` | Mensagem sanitizada correspondente ao código. |
 
-Código e mensagem não recebem texto externo como autoridade nem detalhes
-internos sensíveis. A mensagem principal do envelope também permanece
-sanitizada.
+O código não recebe texto externo e permanece estável. A mensagem principal e
+`error.message` permanecem sanitizadas pelo acumulador, mas podem incluir o
+detalhe textual confiável devolvido pelo PNCP. Esse detalhe explica a falha ao
+operador; não se torna regra de negócio nem substitui o código.
 
 ## 4. Proteção dos dados
 
-`error`, `context` e `metadata` são mapas associativos sanitizados
-recursivamente. Não são registrados credenciais, senhas, segredos, tokens ou
-JWT, autorização, SQL ou consultas, dados de conexão, requisições, respostas ou
-payloads integrais, headers, exceções, traces, stacks ou valores não
+`error`, `context` e os metadados comuns são mapas associativos sanitizados
+recursivamente. Não são registrados senhas, segredos, tokens reutilizáveis,
+Authorization, cookies, SQL, exceções, traces, stacks ou valores não
 serializáveis.
 
-A correlação necessária ao diagnóstico deve usar os campos próprios do
-envelope e dados técnicos seguros, sem transportar conteúdo externo integral.
+`metadata.diagnosticoHttp` é a exceção tipada destinada ao suporte interno. Ela
+pode conter payload e resposta integrais de uma chamada PNCP não autenticadora
+que falhou. O transporte redige credenciais e cookies antes de entregar o
+objeto, e o acumulador repete a redação dos headers. O diagnóstico de JWT pode
+preservar fingerprint, cabeçalho e claims decodificados, mas nunca o token ou
+sua assinatura. Chamadas de autenticação e respostas aceitas não recebem esse
+objeto. Por conter dados de negócio, `SEGURANCA_LOG` e seus exports devem
+permanecer restritos aos desenvolvedores e ao suporte autorizado.
 
 Quando uma publicação aceita pelo PNCP trouxer `Location` incompatível com o
 contrato conhecido, o evento `PUBLICAR_PCA_PNCP` pode incluir apenas em

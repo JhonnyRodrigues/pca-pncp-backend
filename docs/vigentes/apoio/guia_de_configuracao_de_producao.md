@@ -265,6 +265,20 @@ exit($valido ? 0 : 1);
 '
 ```
 
+### 7.4 Diagnóstico persistente de erros HTTP do PNCP
+
+Não existe configuração adicional nem arquivo diagnóstico externo. Respostas
+HTTP `3xx`, `4xx` ou `5xx` de operações diferentes de autenticação registram em
+`SEGURANCA_LOG`, na mesma correlação, `metadata.diagnosticoHttp` com requisição,
+resposta, conexão e cURL reproduzível. Bearer, cookies e `Set-Cookie` aparecem
+como `[REDACTED]`.
+
+Use `database/queries/seguranca_log_por_correlacao.sql` e examine a coluna
+`DIAGNOSTICO_HTTP`. Como o evento pode conter o payload e a resposta integrais,
+seu acesso e eventual exportação devem permanecer restritos aos
+desenvolvedores e ao suporte autorizado. A presença do diagnóstico não
+autoriza repetir uma escrita; confirme antes o estado PNCP e Oracle.
+
 ## 8. Checklist integrado antes da ativação
 
 A configuração de produção não termina no arquivo de credenciais. Antes de
