@@ -30,9 +30,7 @@ function pca_publicar_serializar_resultado(object $resultado): array
     $resultadosUnitarios = [];
 
     foreach ($resultado->getResultadosUnitarios() as $resultadoUnitario) {
-        $resultadosUnitarios[] = pca_publicar_serializar_resultado_unidade(
-            $resultadoUnitario
-        );
+        $resultadosUnitarios[] = pca_publicar_serializar_resultado_unidade($resultadoUnitario);
     }
 
     return [
@@ -110,7 +108,8 @@ function pca_publicar_responder_json(int $statusHttp, array $conteudo): void
 $anoAtual = (int) date('Y');
 $proximoAno = $anoAtual + 1;
 $cnpjConsultaPublica = '50853555000154';
-$urlConsultaPublica = 'https://pncp.gov.br/app/pca/' . $cnpjConsultaPublica . '/' . $anoAtual;
+$urlConsultaPublicaAnoAtual = 'https://pncp.gov.br/app/pca/' . $cnpjConsultaPublica . '/' . $anoAtual;
+$urlConsultaPublicaProximoAno = 'https://pncp.gov.br/app/pca/' . $cnpjConsultaPublica . '/' . $proximoAno;
 
 $metodoHttp = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 $contentTypeRecebido = $_SERVER['CONTENT_TYPE'] ?? ($_SERVER['HTTP_CONTENT_TYPE'] ?? '');
@@ -301,6 +300,25 @@ if ($requisicaoPublicacao) {
             background: #fff4d6;
         }
 
+        .tempo-publicacao {
+            margin-bottom: 0;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rodape-resultado {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #d8dee6;
+            color: #52606d;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rodape-resultado p {
+            margin: 0;
+        }
+
         .ajuda-operador {
             max-height: min(65vh, 40rem);
             overflow-y: auto;
@@ -345,7 +363,10 @@ if ($requisicaoPublicacao) {
         <button id="btnAjuda" type="button">Ajuda</button>
     </div>
     <p>
-        <small><a href="<?= htmlspecialchars($urlConsultaPublica, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" >Consulta pública no PNCP (produção) - exercício <?= $anoAtual ?></a></small>
+        <small><a href="<?= htmlspecialchars($urlConsultaPublicaAnoAtual, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" >Consulta pública no PNCP - exercício <?= $anoAtual ?></a></small>
+    </p>
+    <p>
+        <small><a href="<?= htmlspecialchars($urlConsultaPublicaProximoAno, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer" >Consulta pública no PNCP - exercício <?= $proximoAno ?></a></small>
     </p>
 </main>
 
@@ -364,8 +385,45 @@ function definirEstadoBotao(processando, texto) {
 
 function textoSeguro(valor) {
     return valor === null || valor === undefined || valor === ''
-        ? '—'
+        ? '-'
         : String(valor);
+}
+
+function formatarDuracao(duracaoMs) {
+    const totalSegundos = Math.floor(Math.max(0, duracaoMs) / 1000);
+    const minutos = String(Math.floor(totalSegundos / 60)).padStart(2, '0');
+    const segundos = String(totalSegundos % 60).padStart(2, '0');
+
+    return minutos + ':' + segundos;
+}
+
+function formatarTempoDecorrido(inicio) {
+    return formatarDuracao(Date.now() - inicio);
+}
+
+function criarConteudoProcessamento(ano) {
+    const container = document.createElement('div');
+    const descricao = document.createElement('p');
+    const tempo = document.createElement('p');
+
+    descricao.textContent = 'Sincronizando o PCA do exercício ' + ano + ' com o PNCP.';
+    tempo.id = 'tempoPublicacao';
+    tempo.className = 'tempo-publicacao';
+    tempo.textContent = 'Tempo decorrido: 00:00';
+    container.appendChild(descricao);
+    container.appendChild(tempo);
+
+    return container;
+}
+
+function atualizarTempoPublicacao(inicio) {
+    const tempo = document.getElementById('tempoPublicacao');
+
+    if (tempo === null) {
+        return;
+    }
+
+    tempo.textContent = 'Tempo decorrido: ' + formatarTempoDecorrido(inicio);
 }
 
 function adicionarLinha(container, rotulo, valor) {
@@ -398,22 +456,18 @@ function adicionarListaItens(container, rotulo, numerosItens) {
     container.appendChild(lista);
 }
 
-function criarConteudoResultado(resposta) {
+function criarConteudoResultado(resposta, duracaoProcessamento) {
     const resultado = resposta.resultado;
     const container = document.createElement('div');
     container.className = 'resultado-pca';
 
     const resumo = document.createElement('section');
     adicionarLinha(resumo, 'Situação', resultado.situacao);
-    adicionarLinha(resumo, 'Código', resultado.codigoFalha);
-    adicionarLinha(resumo, 'Mensagem', resultado.mensagemFalha);
     adicionarLinha(resumo, 'Unidades planejadas', resultado.quantidadePlanejadas);
     adicionarLinha(resumo, 'Unidades visitadas', resultado.quantidadeVisitadas);
-    adicionarLinha(
-        resumo,
-        'Unidades não processadas',
-        resultado.quantidadeNaoProcessadas
-    );
+    adicionarLinha(resumo, 'Unidades não processadas', resultado.quantidadeNaoProcessadas);
+    adicionarLinha(resumo, 'Código', resultado.codigoFalha);
+    adicionarLinha(resumo, 'Mensagem', resultado.mensagemFalha);
     adicionarLinha(resumo, 'Identificador da execução', resultado.correlacao);
     container.appendChild(resumo);
 
@@ -422,14 +476,14 @@ function criarConteudoResultado(resposta) {
         const titulo = document.createElement('h3');
         titulo.textContent = 'Resultado da unidade ' + (indice + 1);
         secao.appendChild(titulo);
-        adicionarLinha(secao, 'Unidade orçamentária', unidade.idUnidadeOrcamentaria);
-        adicionarLinha(secao, 'Modo', unidade.modo);
-        adicionarLinha(secao, 'Exercício', unidade.anoExecucao);
-        adicionarLinha(secao, 'UASG', unidade.codigoUasg);
-        adicionarLinha(secao, 'Descrição da UASG', unidade.descricaoUasg);
-        adicionarLinha(secao, 'Situação', unidade.situacao);
         adicionarLinha(secao, 'Ação', unidade.decisao);
+        adicionarLinha(secao, 'Situação', unidade.situacao);
+        adicionarLinha(secao, 'Exercício', unidade.anoExecucao);
+        adicionarLinha(secao, 'Descrição da UASG', unidade.descricaoUasg);
+        adicionarLinha(secao, 'UASG', unidade.codigoUasg);
+        adicionarLinha(secao, 'Unidade orçamentária', unidade.idUnidadeOrcamentaria);
         adicionarLinha(secao, 'Sequencial do PCA', unidade.sequencialPca);
+        adicionarLinha(secao, 'Modo de publicação', unidade.modo);
         adicionarLinha(secao, 'Inclusões', unidade.quantidadeInclusoes);
         adicionarLinha(secao, 'Exclusões', unidade.quantidadeExclusoes);
         if (unidade.situacao === 'CONCLUIDO' && unidade.decisao === 'RETIFICAR') {
@@ -447,6 +501,15 @@ function criarConteudoResultado(resposta) {
         adicionarLinha(aviso, 'Aviso de registro técnico', resposta.avisoRegistroTecnico);
         container.appendChild(aviso);
     }
+
+    const rodape = document.createElement('footer');
+    rodape.className = 'rodape-resultado';
+    adicionarLinha(
+        rodape,
+        'Tempo de processamento',
+        formatarDuracao(duracaoProcessamento)
+    );
+    container.appendChild(rodape);
 
     return container;
 }
@@ -560,13 +623,29 @@ function abrirAjuda() {
 
 function executarPublicacao(ano) {
     definirEstadoBotao(true, 'Publicando...');
+    const inicioPublicacao = Date.now();
+    let intervaloTemporizador = null;
+    const pararTemporizadorPublicacao = () => {
+        if (intervaloTemporizador !== null) {
+            window.clearInterval(intervaloTemporizador);
+            intervaloTemporizador = null;
+        }
+    };
 
     Swal.fire({
         title: 'Publicando...',
-        text: 'Sincronizando o PCA do exercício ' + ano + ' com o PNCP.',
+        html: criarConteudoProcessamento(ano),
         allowOutsideClick: false,
         allowEscapeKey: false,
-        didOpen: () => Swal.showLoading()
+        didOpen: () => {
+            Swal.showLoading();
+            atualizarTempoPublicacao(inicioPublicacao);
+            intervaloTemporizador = window.setInterval(
+                () => atualizarTempoPublicacao(inicioPublicacao),
+                1000
+            );
+        },
+        willClose: pararTemporizadorPublicacao
     });
 
     fetch(window.location.pathname, {
@@ -578,6 +657,9 @@ function executarPublicacao(ano) {
         return respostaHttp.json();
     })
     .then((resposta) => {
+        const duracaoProcessamento = Date.now() - inicioPublicacao;
+        pararTemporizadorPublicacao();
+
         if (!respostaValida(resposta)) {
             throw new Error('RESPOSTA_INVALIDA');
         }
@@ -586,17 +668,22 @@ function executarPublicacao(ano) {
         return Swal.fire({
             icon: modal.icon,
             title: modal.title,
-            html: criarConteudoResultado(resposta),
+            html: criarConteudoResultado(resposta, duracaoProcessamento),
             width: 760,
             confirmButtonText: 'Fechar'
         });
     })
-    .catch(() => Swal.fire({
-        icon: 'error',
-        title: 'Falha na comunicação',
-        text: 'Não foi possível obter uma resposta segura do servidor.'
-    }))
+    .catch(() => {
+        pararTemporizadorPublicacao();
+
+        return Swal.fire({
+            icon: 'error',
+            title: 'Falha na comunicação',
+            text: 'Não foi possível obter uma resposta segura do servidor.'
+        });
+    })
     .finally(() => {
+        pararTemporizadorPublicacao();
         publicacaoEmAndamento = false;
         definirEstadoBotao(false, 'Publicar');
     });

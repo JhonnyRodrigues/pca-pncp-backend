@@ -37,7 +37,9 @@ final class PcaPublicarBlankTest extends TestCase
                 . '\$serverName,\s*\$entrada\[\'ano\'\],\s*\$requestId\s*\)/s',
             $this->codigo
         );
-        $this->assertSame(2, substr_count($this->codigo, '$cnpjConsultaPublica'));
+        $this->assertSame(3, substr_count($this->codigo, '$cnpjConsultaPublica'));
+        $this->assertStringContainsString('$urlConsultaPublicaAnoAtual', $this->codigo);
+        $this->assertStringContainsString('$urlConsultaPublicaProximoAno', $this->codigo);
 
         $this->assertStringNotContainsString('PcaController', $this->codigo);
         $this->assertStringNotContainsString('getCredenciais', $this->codigo);
@@ -204,6 +206,42 @@ final class PcaPublicarBlankTest extends TestCase
         $this->assertStringContainsString('.finally(() =>', $this->codigo);
         $this->assertStringContainsString('publicacaoEmAndamento = false;', $this->codigo);
         $this->assertStringNotContainsString('setTimeout(', $this->codigo);
+    }
+
+    public function testEsperaDeveExibirTempoDecorridoSemLimitarARequisicao(): void
+    {
+        $this->assertStringContainsString("? '-'", $this->codigo);
+        $this->assertStringContainsString('Tempo decorrido: 00:00', $this->codigo);
+        $this->assertStringContainsString('Date.now()', $this->codigo);
+        $this->assertStringContainsString('window.setInterval(', $this->codigo);
+        $this->assertStringContainsString('window.clearInterval(', $this->codigo);
+        $this->assertStringContainsString('const pararTemporizadorPublicacao = () =>', $this->codigo);
+        $this->assertStringContainsString(
+            'willClose: pararTemporizadorPublicacao',
+            $this->codigo
+        );
+        $this->assertGreaterThanOrEqual(
+            3,
+            substr_count($this->codigo, 'pararTemporizadorPublicacao();')
+        );
+        $this->assertStringNotContainsString('timer:', $this->codigo);
+        $this->assertSame(1, substr_count($this->codigo, 'fetch('));
+    }
+
+    public function testResultadoDeveExibirTempoDeProcessamentoNoRodape(): void
+    {
+        $this->assertStringContainsString(
+            'function criarConteudoResultado(resposta, duracaoProcessamento)',
+            $this->codigo
+        );
+        $this->assertStringContainsString("rodape.className = 'rodape-resultado'", $this->codigo);
+        $this->assertStringContainsString("'Tempo de processamento'", $this->codigo);
+        $this->assertStringContainsString('formatarDuracao(duracaoProcessamento)', $this->codigo);
+        $this->assertStringContainsString('Date.now() - inicioPublicacao', $this->codigo);
+        $this->assertStringContainsString(
+            'criarConteudoResultado(resposta, duracaoProcessamento)',
+            $this->codigo
+        );
     }
 
     public function testAjudaDeveOrientarOperadorSemExecutarPublicacao(): void

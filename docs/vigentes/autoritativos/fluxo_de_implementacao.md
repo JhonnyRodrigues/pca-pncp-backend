@@ -162,10 +162,13 @@ a fachada, o acumulador e o estado transacional da mesma chamada disponíveis
 para essa exportação, sem duplicar o processamento (`DI-010`).
 
 Request ID ausente ou inválido produz `INTERROMPIDA/REQUEST_ID_INVALIDO`, com
-correlação `null`, sem consultar o registro e sem evento técnico. Qualquer outra
+correlação `null`, sem consultar o registro e sem evento técnico. O retorno inclui
+aviso seguro para verificar o servidor responsável pelo `X-Request-ID`. Qualquer outra
 falha na inicialização e composição global (`bootstrap`) produz
 `INTERROMPIDA/FALHA_INESPERADA`, preserva a correlação externa válida e não
-expõe exceção, caminho, perfil, CNPJ ou segredo (`DI-010`).
+expõe exceção, caminho, perfil, CNPJ ou segredo. Como o logger ainda não está
+disponível, o retorno mantém os eventos vazios e inclui aviso seguro para
+verificar a configuração e os pré-requisitos do servidor (`DI-010`).
 
 ### 4.2 Validação da solicitação e do contexto
 
@@ -568,7 +571,9 @@ O logger usa exatamente a correlação válida fornecida pelo servidor HTTP. Uma
 falha inesperada capturada pela fachada gera a ação
 `EXECUTAR_PUBLICACAO_PCA` com erro seguro, sem transportar a exceção. A falha
 anterior à correlação válida ou à construção do logger não fabrica evento
-técnico, e uma falha do logger não altera o ViewModel seguro.
+técnico. Quando a correlação já foi validada, a falha de inicialização anterior
+ao logger devolve aviso seguro para orientar a verificação do servidor. Uma
+falha do logger não altera o ViewModel seguro.
 
 Os eventos não integram `PublicarPcaResponse`. O contrato aprovado para a
 Sprint 8.5 exige sua devolução separada ao hospedeiro por

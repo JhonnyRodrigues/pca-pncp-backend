@@ -16,6 +16,14 @@ use Throwable;
 final class ExecutorPublicacaoPcaScriptcase
 {
     private const UUID_V4 = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/Di';
+    private const AVISO_REQUEST_ID_INVALIDO =
+        'Não há eventos técnicos (logs) disponíveis para esta execução porque '
+        . 'o identificador da requisição está ausente ou inválido. Verifique a configuração '
+        . 'do servidor desta aplicação responsável por fornecer o X-Request-ID.';
+    private const AVISO_INICIALIZACAO =
+        'Não há eventos técnicos (logs) disponíveis para esta execução porque '
+        . 'a inicialização do processamento falhou. Verifique a configuração '
+        . 'e os pré-requisitos do servidor desta aplicação.';
 
     private readonly CompositionRootPublicacaoPca $compositionRoot;
 
@@ -70,7 +78,7 @@ final class ExecutorPublicacaoPcaScriptcase
             return new ResultadoPublicacaoPcaScriptcase(
                 FachadaPublicarPca::interrompidaPorRequestIdInvalido(),
                 [],
-                null
+                self::AVISO_REQUEST_ID_INVALIDO
             );
         }
 
@@ -101,7 +109,7 @@ final class ExecutorPublicacaoPcaScriptcase
             return new ResultadoPublicacaoPcaScriptcase(
                 FachadaPublicarPca::interrompidaPorFalhaInesperada($correlacao),
                 [],
-                null
+                self::AVISO_INICIALIZACAO
             );
         }
     }

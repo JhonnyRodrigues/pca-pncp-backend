@@ -17,6 +17,10 @@ final class PublicadorPcaScriptcaseTest extends TestCase
     private const VARIAVEL_REGISTRO = 'PCA_PNCP_PROFILE_REGISTRY_FILE';
     private const SERVIDOR = 'pca.exato.test';
     private const REQUEST_ID = '550E8400-E29B-41D4-A716-446655440000';
+    private const AVISO_REQUEST_ID_INVALIDO =
+        'Não há eventos técnicos (logs) disponíveis para esta execução porque '
+        . 'o identificador da requisição está ausente ou inválido. Verifique a configuração '
+        . 'do servidor desta aplicação responsável por fornecer o X-Request-ID.';
 
     private string|false $registroAnterior;
     private string $diretorioTemporario;
@@ -143,7 +147,10 @@ final class PublicadorPcaScriptcaseTest extends TestCase
 
         $this->assertInterrupcaoRequestIdInvalido($saida->getResultado());
         $this->assertSame([], $saida->getEventos());
-        $this->assertNull($saida->getAvisoRegistroTecnico());
+        $this->assertSame(
+            self::AVISO_REQUEST_ID_INVALIDO,
+            $saida->getAvisoRegistroTecnico()
+        );
         $this->assertFileDoesNotExist($marcador);
     }
 
@@ -161,7 +168,12 @@ final class PublicadorPcaScriptcaseTest extends TestCase
 
         $this->assertInterrupcaoInesperada($saida->getResultado(), self::REQUEST_ID);
         $this->assertSame([], $saida->getEventos());
-        $this->assertNull($saida->getAvisoRegistroTecnico());
+        $this->assertSame(
+            'Não há eventos técnicos (logs) disponíveis para esta execução porque '
+                . 'a inicialização do processamento falhou. Verifique a configuração '
+                . 'e os pré-requisitos do servidor desta aplicação.',
+            $saida->getAvisoRegistroTecnico()
+        );
     }
 
     public function testRequestIdValidoDeveSerPreservadoQuandoRegistroEstaAusente(): void

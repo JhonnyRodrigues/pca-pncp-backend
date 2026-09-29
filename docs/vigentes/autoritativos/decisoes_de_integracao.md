@@ -1220,9 +1220,13 @@ os gates reais permanecem pendentes, conforme o
    devolve envelopes ordenados separadamente do resultado. A exportação
    preserva a correlação e acrescenta `executionTimeMs` somente ao último
    envelope da cópia, sem alterar os eventos originais.
-3. Falhas anteriores à criação do logger retornam eventos vazios, sem
-   fabricar eventos. Falha na exportação preserva o resultado conhecido e
-   produz `avisoRegistroTecnico` seguro.
+3. Request ID ausente ou inválido retorna eventos vazios, sem fabricar
+   correlação ou eventos, e produz `avisoRegistroTecnico` seguro para verificar
+   o servidor responsável pelo `X-Request-ID`. Falhas de inicialização
+   posteriores à validação da correlação e anteriores à criação do logger também
+   retornam eventos vazios e aviso seguro para verificar a configuração e os
+   pré-requisitos do servidor. Falha na exportação preserva o resultado conhecido
+   e também produz aviso seguro.
 4. A persistência só é permitida após encerramento confirmado da transação
    Oracle do backend. Se esse encerramento não estiver confirmado, a fronteira
    deve impedir a gravação e devolver aviso separado. Nunca se confirma uma

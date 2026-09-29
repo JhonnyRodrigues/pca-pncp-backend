@@ -155,13 +155,16 @@ O backend não gera, normaliza ou substitui `correlationId`. A Blank encaminha o
 v4 válido, preservando sua representação byte a byte. Ausência ou formato
 inválido interrompem o entrypoint antes da criação do logger; por isso, essa
 falha pública possui correlação `null` e não produz evento técnico com identidade
-fabricada.
+fabricada. A saída da fronteira inclui aviso público seguro para verificar a
+configuração do servidor responsável por fornecer o `X-Request-ID`.
 
 Uma falha inesperada capturada pela fachada já construída usa a ação
 `EXECUTAR_PUBLICACAO_PCA` e erro seguro `FALHA_INESPERADA`. O evento não recebe
 o `Throwable`, e eventual falha do próprio logger não atravessa a fronteira
 pública. Falhas de bootstrap anteriores à construção do logger também não
-produzem evento técnico.
+produzem evento técnico. Quando já existe uma correlação válida, essas falhas
+de inicialização produzem aviso público seguro para verificar a configuração e
+os pré-requisitos do servidor, sem expor o detalhe interno.
 
 ## 5. Imutabilidade e exportação
 
