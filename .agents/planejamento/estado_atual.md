@@ -5,7 +5,7 @@
 **Autoridade/Escopo:** progresso da implementação, última sprint concluída,
 próxima sprint na ordem, gates, pendências e continuidade do trabalho
 
-**Atualizado em:** 28/09/2026
+**Atualizado em:** 01/10/2026
 
 ## Limites de autoridade
 
@@ -61,6 +61,16 @@ definida pelo [Roadmap](../../docs/vigentes/autoritativos/roadmap.md).
   resolveu o bloqueio e foi removida; o fluxo voltou a autenticar uma vez por
   execução. O esclarecimento da autoria permanece pendente de chamado ao PNCP,
   sem autorização implícita para repetir a Blank.
+- Permanece uma pendência técnica local para o encerramento da Sprint 9.5. A
+  unificação das configurações do PHPUnit revelou sete fixtures contratuais das
+  Sprints 8.4 e 8.5 que ainda constroem `ResultadoUnidadeViewModel` sem os
+  campos `numerosItensIncluidos` e `numerosItensExcluidos`, acrescentados na
+  Sprint 9.5. A suíte padrão permanece verde com 984 testes e 4.753 asserções,
+  sem evidência de impacto no produto instalado. Na retomada, antes de encerrar
+  a sprint, atualizar as fixtures com listas coerentes com cada cenário e
+  reexecutar `contract:sprint84:tests`, `contract:sprint85:tests` e a suíte
+  padrão. A correção é exclusivamente local, não requer acesso ao Oracle ou ao
+  PNCP e permanece adiada até o planejamento posterior à resposta do chamado.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.

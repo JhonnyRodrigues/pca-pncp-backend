@@ -14,6 +14,11 @@ A suíte padrão executa `Domain`, `Application`, `Infrastructure`,
 `Composition`, `Presentation` e `Integration`. Ela exclui `tests/Contract` e
 não deve acessar Oracle, PNCP ou Scriptcase reais.
 
+O projeto possui um único `phpunit.xml`. A suíte `PCA` é declarada como padrão,
+de modo que `composer tests` e a execução direta de `vendor/bin/phpunit`
+continuem seguros. As suítes contratuais também estão nesse arquivo, mas só são
+selecionadas explicitamente pelos comandos Composer correspondentes.
+
 As pastas das camadas espelham o código de produção. `tests/Support` contém
 objetos reutilizáveis; `tests/Integration` verifica colaborações usando
 fronteiras controladas.
@@ -23,6 +28,10 @@ fronteiras controladas.
 `tests/Contract` preserva contratos locais e gates de sprints anteriores.
 Alguns comandos são seguros e locais; outros são opt-in e podem depender de
 configuração externa, ambiente autorizado e recursos reais.
+
+Os nomes públicos dos comandos Composer constituem a interface recomendada para
+executar essas suítes. Eles selecionam a suíte com `--testsuite` e mantêm fora
+da execução comum os grupos `live`, que podem realizar I/O real.
 
 Antes de executar qualquer preflight, grupo `live`, runner manual ou Blank de
 teste:

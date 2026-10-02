@@ -1,13 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<phpunit
-    bootstrap="vendor/autoload.php"
-    colors="true"
->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         defaultTestSuite="PCA">
     <testsuites>
         <testsuite name="PCA">
             <directory>tests</directory>
             <exclude>tests/Contract</exclude>
+        </testsuite>
+        <testsuite name="contratos-externos">
+            <directory>tests/Contract/Sprint51</directory>
+        </testsuite>
+        <testsuite name="contratos-adapters">
+            <directory>tests/Contract/Sprint59</directory>
+        </testsuite>
+        <testsuite name="contratos-oracle">
+            <directory>tests/Contract/Sprint82</directory>
+        </testsuite>
+        <testsuite name="contratos-pncp-treinamento">
+            <directory>tests/Contract/Sprint83</directory>
+        </testsuite>
+        <testsuite name="fluxos-completos">
+            <directory>tests/Contract/Sprint84</directory>
+            <directory>tests/Integration/Sprint84</directory>
+        </testsuite>
+        <testsuite name="falhas-e-preparacao">
+            <directory>tests/Contract/Sprint85</directory>
+            <directory>tests/Integration/Sprint85</directory>
+            <directory>tests/Integration/Scriptcase</directory>
+        </testsuite>
+        <testsuite name="inventario-e-recuperacao">
+            <directory>tests/Contract/Sprint94</directory>
         </testsuite>
     </testsuites>
 </phpunit>

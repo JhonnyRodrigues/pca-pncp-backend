@@ -61,15 +61,24 @@ final class Sprint84EntrypointTest extends TestCase
         $this->assertArrayHasKey('sha256_relatorio', $report);
     }
 
-    public function testSuiteSeparadaDeveExcluirGrupoRealPorPadrao(): void
+    public function testSuiteUnificadaDeveManterFluxoSeguroEPreflightSeparado(): void
     {
-        $xml = file_get_contents(dirname(__DIR__, 3) . '/phpunit.sprint84.contract.xml');
+        $xml = file_get_contents(dirname(__DIR__, 3) . '/phpunit.xml');
         $composer = file_get_contents(dirname(__DIR__, 3) . '/composer.json');
 
         $this->assertIsString($xml);
-        $this->assertStringContainsString('<group>sprint84-live</group>', $xml);
+        $this->assertStringContainsString('defaultTestSuite="PCA"', $xml);
+        $this->assertStringContainsString('<testsuite name="fluxos-completos">', $xml);
+        $this->assertStringContainsString(
+            '<directory>tests/Contract/Sprint84</directory>',
+            $xml
+        );
         $this->assertIsString($composer);
-        $this->assertStringContainsString('contract:sprint84:tests', $composer);
+        $this->assertStringContainsString(
+            'vendor/bin/phpunit --testsuite fluxos-completos '
+                . '--exclude-group sprint84-live',
+            $composer
+        );
         $this->assertStringContainsString('contract:sprint84:preflight', $composer);
     }
 

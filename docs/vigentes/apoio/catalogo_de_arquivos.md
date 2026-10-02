@@ -659,13 +659,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `tools/package/verify-log-gate.php` | Confere o manifesto, a topologia e os entrypoints carregáveis do artefato temporário. |
 | `tools/package/build-containment-gate.php` | Monta o artefato temporário do gate de contenção a partir do pacote principal validado e de uma lista fechada de suporte. |
 | `tools/package/verify-containment-gate.php` | Confere manifesto, topologia, hashes e entrypoints do artefato de contenção. |
-| `phpunit.xml` | Bootstrap da suíte padrão, com exclusão explícita dos contratos opt-in. |
-| `phpunit.contract.xml` | Suíte contratual legada da Sprint 5.1. |
-| `phpunit.adapters.contract.xml` | Suíte separada dos contratos de adapters da Sprint 5.9. |
-| `phpunit.oracle82.contract.xml` | Suíte separada da integração Oracle da Sprint 8.2. |
-| `phpunit.pncp83.contract.xml` | Suíte separada dos contratos locais e gates PNCP da Sprint 8.3. |
-| `phpunit.sprint84.contract.xml` | Suíte separada dos contratos e do runner da Sprint 8.4. |
-| `phpunit.sprint85.contract.xml` | Suíte separada dos contratos locais e futuros gates opt-in da Sprint 8.5. |
+| `phpunit.xml` | Configuração unificada do PHPUnit: mantém `PCA` como suíte padrão segura e reúne suítes contratuais opt-in, selecionadas pelos comandos Composer. |
 | `README.md` | Entrada cognitiva que explica o que o projeto faz, por que ele é útil, como começar e onde obter ajuda. |
 
 ### Migrações do banco de dados
