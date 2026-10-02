@@ -1,4 +1,5 @@
 # MODELO DE DOMÍNIO V1 (LEGADO)
+>
 > Arquivado em 2026-07-30.
 > Este documento foi substituído pela versão vigente em:
 > `docs/vigentes/autoritativos/modelo_de_dominio.md`
@@ -13,6 +14,7 @@ Este documento responde à pergunta: O QUE existe no negócio?
 # Aprendizado
 
 A leitura de um modelo de domínio normalmente fica mais natural quando segue a sequência:
+
 1. Vocabulário
 2. Processo de negócio
 3. Regras de negócio
@@ -30,6 +32,7 @@ A leitura de um modelo de domínio normalmente fica mais natural quando segue a 
 ## Objetivo
 
 Independentemente da tecnologia utilizada, descrever:
+
 - os conceitos do negócio;
 - entidades;
 - regras;
@@ -158,11 +161,11 @@ Observações:
 Representa o ano exercício da execução (compra ou contratação) do item presente no Plano de Contratações Anual.
 
 Regras:
+
 - deve aceitar apenas o ano atual ou o próximo ano;
 - anos anteriores ao ano atual são inválidos;
 - anos posteriores ao próximo ano são inválidos;
 - quando inválido, deve lançar exceção de domínio apropriada.
-
 
 ## Representante
 
@@ -184,7 +187,6 @@ Observações:
 - Representante identifica o responsável por uma ação registrada em um HistoricoProcedimento;
 - pode representar operador, avaliador, consolidador ou presidente;
 - para os procedimentos de Publicação e Retificação, os dados do representante serão obtidos a partir do usuário autenticado no sistema.
-
 
 ## Lotacao
 
@@ -239,7 +241,7 @@ Observações:
 
 ---
 
-# Modelagem: Entidades 
+# Modelagem: Entidades
 
 ## Demanda
 
@@ -272,13 +274,13 @@ Regras:
   - 1 (Material)
   - 2 (Serviço).
 
-
 Após processo de homologação no sistema interno PCA:
+
 - número do plano (foreign key)
 
 Após publicação no sistema externo PNCP:
-- número sequencial PNCP
 
+- número sequencial PNCP
 
 ## Procedimento
 
@@ -312,7 +314,6 @@ Exemplos:
 - Cancelamento de Demanda Homologada
 - Publicação de Plano
 
-
 Importante:
 
 Os processos de Publicação e Retificação realizados junto ao PNCP
@@ -337,6 +338,7 @@ Possui:
 - mensagem de auditoria
 
 Opcionalmente:
+
 - idDemanda
 
 Responsabilidades:
@@ -360,9 +362,7 @@ Observações:
 - o histórico não representa o catálogo de procedimentos;
 - o histórico representa a execução de um procedimento.
 
-
 As regras de Publicação e Retificação não dependem da consulta ao histórico de procedimentos, sendo baseadas no cadastro de Planos e em seus dados de homologação/publicação.
-
 
 ## UnidadeOrcamentaria
 
@@ -370,6 +370,7 @@ Representa uma Unidade Orçamentária responsável pela publicação do
 Plano de Contratações Anual junto ao PNCP.
 
 Possui:
+
 - lotacao
 - descricao
 - UASG
@@ -392,7 +393,6 @@ Observações:
 - UASG é Unidade Administrativa de Serviços Gerais, um código criado pelo Governo Federal para identificar o Óregão ou o Setor exato que está realizando a compra. Utilizado para diferenciar as entidades compradoras
 - A UASG é uma informação de configuração utilizada para integração com o PNCP.
 
-
 ---
 
 # Aggregate Root
@@ -414,7 +414,6 @@ Além disso, possui:
 - DataPublicacao
 - Demandas
 
-
 Regras:
 
 - deve possuir ao menos uma Demanda;
@@ -428,7 +427,6 @@ Regras:
 Observação:
 idPlano é utilizado para estabelecer o vínculo entre Plano e Demanda dentro do domínio.
 Embora a identificação lógica da versão seja composta por AnoExecucao, UnidadeOrcamentaria e SequencialVersao, o identificador idPlano também faz parte do modelo de domínio.
-
 
 Origem:
 

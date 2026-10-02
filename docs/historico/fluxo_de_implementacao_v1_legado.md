@@ -1,4 +1,5 @@
 # FLUXO DE IMPLEMENTAÇÃO V1 (LEGADO)
+>
 > Arquivado em 2026-07-30.
 > A versão V2 ainda não foi criada.
 > Consultar `docs/README.md` para o status documental vigente.
@@ -54,25 +55,32 @@ Cada unidade corresponde a uma transação independente no banco de dados.
 # Responsabilidades
 
 Domínio
+
 - decidir entre Publicação, Retificação ou Nenhuma Ação
 - aplicar as regras de negócio relacionadas ao estado dos Planos
 
 UseCase
+
 - orquestrar o fluxo
 
 Repository
+
 - persistência
 
 PncpClient
+
 - comunicação HTTP
 
 PncpPayloadBuilder
+
 - construir payload
 
 Response DTO
+
 - preparar resposta ao Scriptcase (módulo PCA do SGI)
 
 Controller
+
 - adaptar entrada e saída
 
 ---
@@ -89,7 +97,6 @@ Resumo:
 6. Atualizar o sistema
 7. Retornar resultado
 
-
 ## 1. Receber solicitação
 
 Entradas:
@@ -98,7 +105,6 @@ Entradas:
 - CNPJ do órgão
 - ano de execução
 - credenciais do PNCP
-
 
 ## 2. Validar entrada
 
@@ -111,7 +117,6 @@ Validar:
 
 Caso inválido, interromper imediatamente.
 
-
 ## 3. Buscar demandas homologadas
 
 - com situação homologada
@@ -122,12 +127,10 @@ Caso inválido, interromper imediatamente.
 As demandas já devem ser retornadas agrupadas por Unidade Orçamentária.
 Caso nenhuma demanda seja encontrada, então retornar resposta informativa ao usuário.
 
-
 ## 4. Autenticar no PNCP
 
 Realizar autenticação apenas uma vez.
 O token obtido será reutilizado durante toda a execução.
-
 
 ## 5. Processar cada Unidade Orçamentária
 
@@ -137,17 +140,18 @@ Para cada unidade:
 
 Garantir isolamento da operação da unidade (Abrir transação no banco de dados).
 
-
 ### 5.2 Obter o último plano
 
 Recuperar o plano mais recente da unidade para o exercício informado.
 
 O domínio será responsável por decidir:
+
 - Publicação
 - Retificação
 - a decisão também poderá resultar em Nenhuma Ação
 
 A decisão deverá considerar:
+
 - Plano
 - Cadastro histórico de Planos
 
@@ -195,7 +199,6 @@ Em caso de erro:
 - registrar falha
 - continuar o processamento das demais unidades
 
-
 ## 6. Finalizar
 
 Após todas as unidades:
@@ -210,9 +213,10 @@ A resposta será encaminhada ao DTO / Presenter.
 
 ---
 
-# Observações:
+# Observações
 
 As regras que determinam quando um plano deve ser:
+
 - publicado
 - retificado
 - ignorado (nenhuma ação)

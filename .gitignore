@@ -1,12 +1,31 @@
+# Dependências e ferramentas locais
+/vendor/
+/composer.phar
+
+# Segredos e configurações locais
 *.env
+.env.*
+/auth.json
 /config/
 
-*.deb
+# Chaves, certificados e material criptográfico externo
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
 
-/vendor/
+# Artefatos de distribuição
+*.deb
 /build/*
 !/build/README.md
-.phpunit.result.cache
 
-# Investigações são artefatos locais temporários. Conclusões devem ser promovidas à documentação vigente ou preservadas em docs/historico/.
+# Cache de testes
+/.phpunit.result.cache
+/.phpunit.cache/
+
+# Investigações locais temporárias
+# Conclusões devem ser promovidas à documentação vigente ou preservadas
+# em docs/historico/.
 /docs/investigacoes/*

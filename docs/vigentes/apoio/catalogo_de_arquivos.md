@@ -644,8 +644,9 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 
 | Arquivo | Função |
 | --- | --- |
-| `.editorconfig` | Orienta editores compatíveis a usar o charset UTF-8, finais de linha LF e quebra final nos arquivos do repositório. |
-| `.gitattributes` | Ajusta a verificação de whitespace ao acervo legado com CRLF e identifica formatos binários para impedir conversão de conteúdo e diffs textuais inadequados. |
+| `.editorconfig` | Orienta editores compatíveis a usar o charset UTF-8, finais de linha LF, indentação com quatro espaços e quebra final nos arquivos do repositório. |
+| `.gitattributes` | Normaliza arquivos de texto com finais de linha LF e identifica formatos binários para impedir conversão de conteúdo e diffs textuais inadequados. |
+| `.gitignore` | Exclui do versionamento dependências, configurações locais, segredos, caches, relatórios e artefatos gerados, preservando somente as exceções intencionalmente rastreadas. |
 | `composer.json` | Dependências, PSR-4 e comandos ativos. |
 | `composer.lock` | Versões resolvidas das dependências. |
 | `build/README.md` | Explica a finalidade da pasta de artefatos gerados, seu conteúdo comum e os limites da limpeza local. |

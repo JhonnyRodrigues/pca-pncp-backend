@@ -240,11 +240,48 @@ Essa lista é um ponto de partida. Ignore arquivos gerados, caches e segredos;
 não ignore silenciosamente código-fonte, migrations ou configurações de
 referência que sejam necessárias para reproduzir o projeto.
 
+Defina também, desde o início, uma política curta e compartilhada para arquivos
+de texto:
+
+- `.gitattributes`: normalização dos finais de linha e identificação de
+  formatos binários;
+- `.editorconfig`: charset, final de linha, indentação e quebra final esperados
+  pelos editores compatíveis.
+
+Um ponto de partida para projetos que adotam UTF-8, LF e indentação com quatro
+espaços é:
+
+```gitattributes
+* text=auto eol=lf
+
+*.jpg binary
+*.pdf binary
+*.png binary
+*.zip binary
+```
+
+```editorconfig
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+```
+
+`insert_final_newline` garante que o último registro também termine com um
+delimitador de linha. Isso evita concatenações acidentais, avisos de ferramentas
+e diffs marcados com `No newline at end of file`. Em um repositório existente,
+introduza essa política em alteração isolada, com o estado limpo, e use
+`git add --renormalize .` somente depois de revisar o alcance da conversão.
+
 Antes da primeira fotografia, inspecione exatamente o que será versionado:
 
 ```bash
 git status --short
-git add README.md .gitignore
+git add README.md .gitignore .gitattributes .editorconfig
 git diff --cached
 git commit -m "chore: inicia o projeto"
 ```
@@ -257,6 +294,7 @@ entrega local.
 
 - `git status` reconhece o repositório;
 - identidade e política de branch foram conferidas;
+- codificação, finais de linha e indentação possuem uma política explícita;
 - segredos, dependências instaladas e arquivos gerados não entram no histórico;
 - existe uma fotografia inicial revisável.
 

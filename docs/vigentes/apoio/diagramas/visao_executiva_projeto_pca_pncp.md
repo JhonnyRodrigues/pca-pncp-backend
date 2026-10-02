@@ -45,6 +45,7 @@ flowchart LR
     D --> E["Nova observação"]
     E --> F["Confirmação local<br/>e auditoria"]
 ```
+
 > A nova observação é importante porque uma resposta técnica de sucesso não prova, sozinha, que o estado externo ficou correto.
 >
 > O objetivo real é alcançar a convergência: estado observado no PNCP = estado desejado pelo sistema

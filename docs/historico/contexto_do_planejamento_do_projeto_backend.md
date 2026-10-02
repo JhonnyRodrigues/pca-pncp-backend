@@ -9,6 +9,7 @@ preservado como evidência de sua época. Para o estado vigente, consulte o
 [índice documental](../README.md).
 
 ## Resumo Executivo
+
 Projeto de backend em PHP para publicação e retificação de planos PCA no PNCP.
 Iniciou com código legado em Scriptcase e precisa ser reconstruido para Clean Architecture em camadas (Domínio, Aplicação, Infraestrutura, Apresentação).
 
@@ -17,6 +18,7 @@ Iniciou com código legado em Scriptcase e precisa ser reconstruido para Clean A
 ## Estado do projeto
 
 Fases já implementadas no módulo interno (PCA) do Sistema de Gestão Integrado (SGI)
+
 1. Registra Demandas
 2. Avalia Demandas
 3. Consolida Demandas em planos
@@ -35,11 +37,13 @@ Fases que faltam implementar
 ## Estrutura do Projeto
 
 ### Localização
+
 - Workspace: `~/Desktop/backend`
 - Linguagem: PHP 8.1
 - Ferramentas: Composer com autoloader, PHPUnit para testes
 
 ### Sugestão inicial de Arquitetura
+
 Scriptcase (Blank PCA_PUBLICAR_B)
                 │
                 ▼
@@ -54,7 +58,6 @@ ProcessarPublicacaoPcaUseCase
                 ▼
          Repositories
          PncpClient
-
 
 Presentation
 │
@@ -82,7 +85,6 @@ Infrastructure
 ├── OracleHistoricoProcedimentoRepository
 ├── PncpClient
 └── PncpPayloadBuilder
-
 
 \`\`\`
 src/
@@ -150,6 +152,7 @@ tests/
 ## Testes necessários
 
 Cobertura:
+
 - Plano: regra de publicação ou retificação
 - Demanda: mapeamento para payload
 - Request: transformação de entrada
@@ -174,12 +177,14 @@ php.exe vendor/bin/phpunit
 ## Informações Técnicas
 
 ### Ambiente
+
 - PHP: 8.1
 - PHPUnit: 10.5.63 (compatível com PHP 8.1, não 8.2+)
 - Banco: Oracle (credenciais via .env)
 - API Externa: PNCP
 
 ### Autoload
+
 - Arquivo: autoload.php
 - Padrão: PSR-4 customizado
 - Namespace base: Semae\Pca\
@@ -200,6 +205,7 @@ php.exe vendor/bin/phpunit
 ## Plano de Implementação do Zero (Resumo)
 
 **Fase 1 - Domínio:**
+
 1. Plano.php (teste: PlanoTest.php)
 2. Demanda.php (teste: DemandaTest.php)
 3. PcaRepository.php (interface)
@@ -224,6 +230,7 @@ php.exe vendor/bin/phpunit
 14. Testes de fluxo completo
 
 ### Responsabilidade de cada classe, de forma bem objetiva
+
 Domínio
     • Plano: representar o plano e suas regras
     • Demanda: representar a demanda e seu formato de saída
@@ -248,6 +255,7 @@ Apresentação
 ## Contato com Usuário
 
 Conversas devem estabelecer:
+
 - Objetivo: Pretensão de aprender Domain-Driven Design (DDD) junto com Clean Architecture enquanto implementa.
 - Abordagem: incremental, com testes a cada passo
 - Foco: entender o "porquê" de cada camada, não só o "como"

@@ -113,7 +113,6 @@ Nunca acessa:
 - JSON
 - Scriptcase
 
-
 ## Application
 
 Coordena os casos de uso.
@@ -123,7 +122,6 @@ Não conhece SQL.
 Não conhece Oracle.
 
 Não conhece HTTP.
-
 
 ## Infrastructure
 
@@ -135,7 +133,6 @@ Exemplos:
 - PNCP
 - Logger
 - Configuração
-
 
 ## Presentation
 
@@ -155,7 +152,6 @@ Somente acesso aos dados.
 
 Nenhuma regra de negócio.
 
-
 ## Entity
 
 Representa um conceito de negócio com identidade própria.
@@ -168,7 +164,6 @@ Deve:
 - manter estado consistente
 
 Evitar entidades anêmicas.
-
 
 ## Value Object
 
@@ -187,7 +182,6 @@ Exemplos possíveis:
 - Cnpj
 - SequencialItem
 
-
 ## UseCase
 
 Orquestra o fluxo.
@@ -196,11 +190,9 @@ Não monta SQL.
 
 Não monta JSON.
 
-
 ## Client
 
 Responsável exclusivamente pela comunicação HTTP.
-
 
 ## PayloadBuilder
 
@@ -223,7 +215,6 @@ Futuramente:
 - REST
 - CLI
 - outro consumidor
-
 
 ## Sistemas Externos
 

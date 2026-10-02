@@ -1,4 +1,5 @@
 # ROADMAP V1 (LEGADO)
+>
 > Arquivado em 2026-07-30.
 > A versão V2 ainda não foi criada.
 > Consultar `docs/README.md` para o status documental vigente.
@@ -12,7 +13,7 @@ Este documento responde à pergunta: EM QUAL ORDEM devo construir?
 
 Esse roadmap define uma progressão lógica, evita que a infraestrutura contamine o domínio e incentiva a implementação incremental seguindo TDD.
 
-# Fases 
+# Fases
 
 - FASE 0 — **Preparação do projeto**: estrutura de organização dos arquivos; instalação de ferramentas: git, composer, phpunit; documentação inicial (README.md, AGENTS.md)
 - FASE 1 — **Descoberta das regras de negócio**: elaboração de documentos e fluxogramas
@@ -23,7 +24,7 @@ Esse roadmap define uma progressão lógica, evita que a infraestrutura contamin
   2. Validator
   3. UseCase inicial
   4. Response
-- FASE ? — **Portas da Application** e teste do Fluxo Completo com Mocks: contratos de PNCP, contratos de transação, contratos de configuração, __evolução do UseCase__, testes do UseCase real com mocks (sem Oracle/HTTP)
+- FASE ? — **Portas da Application** e teste do Fluxo Completo com Mocks: contratos de PNCP, contratos de transação, contratos de configuração, **evolução do UseCase**, testes do UseCase real com mocks (sem Oracle/HTTP)
 - FASE ? — Implementação da camada **Infrastructure**: Oracle, PNCP, HTTP, configuração, mapeadores e implementações concretas das portas.
 - FASE ? — **Composition / Wiring**: ponto onde as implementações concretas são injetadas no UseCase.
 - FASE ? — Implementação da camada **Presentation**: Controller, Presenter e adaptação do Scriptcase.
@@ -38,65 +39,81 @@ Essa sequência respeita a Clean Architecture:
 
 ---
 
-## FASE 0 — Preparação do projeto - Objetivo: deixar o ambiente pronto.
+## FASE 0 — Preparação do projeto - Objetivo: deixar o ambiente pronto
 
 ### Sprint 0.1
+
 * Estrutura do projeto
 
 ### Sprint 0.2
+
 * Git
 
 ### Sprint 0.3
+
 * README.md
 
 ### Sprint 0.4
+
 * AGENTS.md
 
 ### Sprint 0.5
+
 * arquitetura.md
 
 ### Sprint 0.6
+
 * modelo_dominio.md
 
 ### Sprint 0.7
+
 * fluxo_implementacao.md
 
 ### Sprint 0.8
+
 * roadmap.md
 
 ### Sprint 0.9
+
 * iniciar Composer para obter Autoload PSR-4, gerenciar pacotes e o Intelephense reconhecer corretamente as classes
 
 ### Sprint 0.10
+
 * instalar biblioteca de testes PHPUnit
-* criar phpunit.xml para configurar bootstrap="vendor/autoload.php"
+- criar phpunit.xml para configurar bootstrap="vendor/autoload.php"
 
 ### Sprint 0.11
-* Criar tests/PrimeiroTeste.php aplicando corretamente o namespace
-* execute php.exe vendor/bin/phpunit e verifique o resultado
 
-## FASE 1 — Modelagem do Domínio - Objetivo: construir o domínio rico antes de qualquer infraestrutura.
+* Criar tests/PrimeiroTeste.php aplicando corretamente o namespace
+- execute php.exe vendor/bin/phpunit e verifique o resultado
+
+## FASE 1 — Modelagem do Domínio - Objetivo: construir o domínio rico antes de qualquer infraestrutura
 
 ### Sprint 1.1 - Introdução ao DDD
+
 * Criar Value Object Cnpj
-* CnpjTest
+- CnpjTest
 
 ### Sprint 1.2
+
 * Criar Value Object AnoExecucao
-* AnoExecucaoTest
+- AnoExecucaoTest
   - A interface do sistema somente permite seleção do ano atual ou do próximo ano, reforçando as restrições definidas pelo Value Object.
 
 ### Sprint 1.3
+
 * Criar Value Object Lotacao
-* LotacaoTest
+- LotacaoTest
 
 ### Sprint 1.4
+
 * Criar Value Object Representante
-* RepresentanteTest
+- RepresentanteTest
 
 ### Sprint 1.5
+
 * Criar Entity UnidadeOrcamentaria
-* UnidadeOrcamentariaTest
+- UnidadeOrcamentariaTest
 
 UnidadeOrcamentaria
 ├── Lotacao
@@ -105,20 +122,23 @@ UnidadeOrcamentaria
 Observação: posteriormente foi descoberto que UnidadeOrcamentaria possui identidade própria e não deve ser tratada apenas como Value Object
 
 ### Sprint 1.6
+
 * Criar Entity Demanda
-* DemandaTest
+- DemandaTest
 
 Demanda
   ├── AnoExecucao
   └── UnidadeOrcamentaria
 
 ### Sprint 1.7
+
 * Criar Entity Procedimento
-* ProcedimentoTest
+- ProcedimentoTest
 
 ### Sprint 1.8
+
 * Criar Entity HistoricoProcedimento
-* HistoricoProcedimentoTest
+- HistoricoProcedimentoTest
 
 HistoricoProcedimento
  ├── Procedimento
@@ -126,19 +146,22 @@ HistoricoProcedimento
  └── Lotacao
 
 ### Sprint 1.9
+
 * Criar Aggregate Root Plano
-* PlanoTest
+- PlanoTest
 
 O Plano é o Aggregate Root do domínio.
 O Plano nasce a partir da homologação de Demandas
 consolidadas.
 
 A identidade lógica de um Plano é composta por:
+
 - AnoExecucao
 - UnidadeOrcamentaria
 - SequencialVersao
 
 Todo Plano:
+
 - possui uma ou mais Demandas;
 - não pode existir sem Demandas;
 - possui data de homologação;
@@ -159,80 +182,92 @@ Plano
 Objetivo: definir os contratos (interfaces) necessários para a Application sem implementar infraestrutura.
 
 ### Sprint 2.1
+
 * Criar PlanoRepository
 
 Regras:
-  - Plano é o Aggregate Root principal do domínio.
-  - O acesso de persistência ao Plano deve ocorrer através de PlanoRepository.
-  - Demanda não possui repositório próprio neste momento.
-  - PlanoRepository deve retornar o Aggregate Root Plano já reconstruído com suas Demandas.
+
+- Plano é o Aggregate Root principal do domínio.
+- O acesso de persistência ao Plano deve ocorrer através de PlanoRepository.
+- Demanda não possui repositório próprio neste momento.
+- PlanoRepository deve retornar o Aggregate Root Plano já reconstruído com suas Demandas.
 
 ### Sprint 2.2
+
 * Criar HistoricoProcedimentoRepository
 
 Regras:
-  - HistoricoProcedimento não pertence ao agregado Plano.
-  - HistoricoProcedimentoRepository existe para registrar auditoria das ações executadas.
+
+- HistoricoProcedimento não pertence ao agregado Plano.
+- HistoricoProcedimentoRepository existe para registrar auditoria das ações executadas.
 
 ### Sprint 2.3
+
 * Criar RepresentanteRepository
 
 Responsável por localizar um Representante a partir do usuário autenticado.
 
 ### Sprint 2.4
+
 * Criar LotacaoRepository
 
 Responsável por localizar a Lotacao associada a um Representante.
 
-
-## FASE 3 — Casos de Uso - Agora começamos a Application.
+## FASE 3 — Casos de Uso - Agora começamos a Application
 
 ### FASE 3A — Application: decisão e resposta   [concluída]
 
 #### Sprint 3A.1
+
 * PublicarPcaRequest
-* PublicarPcaRequestTest
+- PublicarPcaRequestTest
 
 Representa todos os dados necessários para iniciar o caso de uso. Inclui:
-  - Cnpj
-  - AnoExecucao
-  - usuarioLogado
-  - credenciais
+
+- Cnpj
+- AnoExecucao
+- usuarioLogado
+- credenciais
 
 Observações:
-  - Cnpj e AnoExecucao devem utilizar os respectivos Value Objects do domínio.
-  - usuarioLogado representa o usuário autenticado na aplicação.
-  - credenciais são necessárias para a integração com o PNCP, não pertencem ao domínio e devem permanecer na camada Application/Infrastructure.
-  - PublicarPcaRequest é apenas um DTO de entrada.
-  - Não contém validações ou regras de negócio.
-  - Deve ser imutável.
+
+- Cnpj e AnoExecucao devem utilizar os respectivos Value Objects do domínio.
+- usuarioLogado representa o usuário autenticado na aplicação.
+- credenciais são necessárias para a integração com o PNCP, não pertencem ao domínio e devem permanecer na camada Application/Infrastructure.
+- PublicarPcaRequest é apenas um DTO de entrada.
+- Não contém validações ou regras de negócio.
+- Deve ser imutável.
 
 #### Sprint 3A.2
+
 * PublicarPcaValidator
-* PublicarPcaValidatorTest
+- PublicarPcaValidatorTest
 Artefatos auxiliares (se necessários):
-* ValidationResult
-* ValidationResultTest
+- ValidationResult
+- ValidationResultTest
 
 Responsabilidades:
-  - validar os dados recebidos em PublicarPcaRequest;
-  - validar usuarioLogado;
-  - validar credenciais;
-  - retornar todos os erros encontrados.
+
+- validar os dados recebidos em PublicarPcaRequest;
+- validar usuarioLogado;
+- validar credenciais;
+- retornar todos os erros encontrados.
 
 Não deve validar Cnpj ou AnoExecucao
 
 Observações:
-  - As invariantes de Cnpj pertencem ao Value Object Cnpj.
-  - As invariantes de AnoExecucao pertencem ao Value Object AnoExecucao.
-  - O Validator não deve duplicar validações já existentes no Domain.
-  - O Validator não deve conter regras de negócio.
-  - O Validator pertence à camada Application.
+
+- As invariantes de Cnpj pertencem ao Value Object Cnpj.
+- As invariantes de AnoExecucao pertencem ao Value Object AnoExecucao.
+- O Validator não deve duplicar validações já existentes no Domain.
+- O Validator não deve conter regras de negócio.
+- O Validator pertence à camada Application.
 
 #### Sprint 3A.3 - DECISÃO de processamento da publicacao
+
 * Criar DecisaoProcessamentoPlano
-* Evoluir Aggregate Root Plano para decidir o processamento
-* Criar testes para os cenários:
+- Evoluir Aggregate Root Plano para decidir o processamento
+- Criar testes para os cenários:
   - primeira publicação
   - retificação
   - nenhuma ação
@@ -240,18 +275,21 @@ Observações:
 Objetivo: Permitir que o próprio Aggregate Plano determine qual ação deve ser executada.
 
 Possíveis resultados:
-  - PUBLICAR
-  - RETIFICAR
-  - NENHUMA_ACAO
+
+- PUBLICAR
+- RETIFICAR
+- NENHUMA_ACAO
 
 Observações:
-  - A decisão pertence ao domínio.
-  - A decisão não pertence ao UseCase, Controller, Repository ou Infrastructure.
-  - O UseCase deverá apenas consumir a decisão retornada pelo Aggregate Root.
+
+- A decisão pertence ao domínio.
+- A decisão não pertence ao UseCase, Controller, Repository ou Infrastructure.
+- O UseCase deverá apenas consumir a decisão retornada pelo Aggregate Root.
 
 #### Sprint 3A.4
+
 * Criar ProcessarPublicacaoPcaUseCase
-* Criar ProcessarPublicacaoPcaUseCaseTest
+- Criar ProcessarPublicacaoPcaUseCaseTest
 Objetivo:
 Provar que a camada Application consegue orquestrar o Domain sem depender da Infrastructure.
 
@@ -266,8 +304,8 @@ Perguntar ao Domínio
 ↓
 Produzir resultado de aplicação
 
-
 Responsabilidades:
+
 - receber e validar o PublicarPcaRequest;
 - consultar o PlanoRepository através da operação:obterPlanosHomologadosParaProcessamento(AnoExecucao);
 - trabalhar com zero, um ou múltiplos Planos;
@@ -277,6 +315,7 @@ Responsabilidades:
 - retornar uma resposta simples e provisória de aplicação.
 
 Importante! O UseCase NÃO decide:
+
 - PUBLICAR;
 - RETIFICAR;
 - NENHUMA_ACAO.
@@ -286,6 +325,7 @@ Observações:
 Nesta sprint o UseCase deve trabalhar com múltiplos Planos, representando múltiplas Unidades Orçamentárias.
 A publicação efetiva junto ao PNCP ainda não será realizada.
 O objetivo é validar a orquestração entre:
+
 - PublicarPcaRequest;
 - PublicarPcaValidator;
 - PlanoRepository;
@@ -294,25 +334,27 @@ O objetivo é validar a orquestração entre:
 
 Observação:
 O modo de publicação poderá ser alterado por configuração.
-* PUBLICAR_EM_UNICA_UASG = SIM
+- PUBLICAR_EM_UNICA_UASG = SIM
   - consolida múltiplos Planos para fins de publicação.
-* PUBLICAR_EM_UNICA_UASG = NÃO
+- PUBLICAR_EM_UNICA_UASG = NÃO
   - publica um Plano por UnidadeOrcamentaria.
 Essa configuração não altera:
+
 - o modelo de domínio;
 - a composição dos Planos homologados;
 - a forma como as Demandas são agrupadas internamente.
 A alteração ocorre apenas no fluxo de publicação.
 
-
 #### Sprint 3A.5
+
 * PublicarPcaResponse
-* ResultadoProcessamentoPlano
+- ResultadoProcessamentoPlano
 
 Objetivo:
 Substituir a estrutura provisória retornada pelo UseCase por DTOs explícitos da camada Application.
 
 Observações:
+
 - ambos são DTOs da camada Application;
 - não representam conceitos do domínio;
 - representam apenas a saída produzida pelo caso de uso;
@@ -324,6 +366,7 @@ Neste momento, utilizar DTOs de resposta na camada Application. Presenter poder�
 ---
 
 ### FASE 3B — Application: fluxo efetivo  [próxima]
+
 - Decisões pendentes documentadas
 - Porta PNCP
 - Porta de transação
@@ -345,14 +388,14 @@ Antes de escrever código de Infrastructure, documentar e confirmar:
     6.4. Número de Controle do PCA (id pca pncp)
     Máscara: 99999999999999-0-999999/9999
     Cada PCA receberá um número de controle composto por:
-    - CNPJ do Órgão/Entidade do PCA (14 dígitos)
-    - Dígito 0 — marcador que indica tratar-se de um plano de contratação anual
-    - Número sequencial do Plano no PNCP *
-    - Ano do Plano (4 dígitos)
+  - CNPJ do Órgão/Entidade do PCA (14 dígitos)
+  - Dígito 0 — marcador que indica tratar-se de um plano de contratação anual
+  - Número sequencial do Plano no PNCP *
+  - Ano do Plano (4 dígitos)
 
 - qual é a unidade de processamento e de falha quando `PUBLICAR_EM_UNICA_UASG = SIM`;
-    - A unidade de processamento pode ser consultada na query SELECT VALOR FROM PAC_CONFIGURACOES WHERE CHAVE = 'UASG_CONSOLIDADORA'
-    - Se ao enviar um único payload consolidado ao PNCP, então não existirá mais falhas independentes por Unidades Orçamentárias. Nesse caso, existirá uma falha da publicação consolidada inteira.
+  - A unidade de processamento pode ser consultada na query SELECT VALOR FROM PAC_CONFIGURACOES WHERE CHAVE = 'UASG_CONSOLIDADORA'
+  - Se ao enviar um único payload consolidado ao PNCP, então não existirá mais falhas independentes por Unidades Orçamentárias. Nesse caso, existirá uma falha da publicação consolidada inteira.
 - qual UASG recebe a publicação consolidada e de onde vem essa configuração;
 - qual identificador de negócio corresponde ao procedimento `PUBLICAÇÃO DE PLANO` e como o catálogo será consultado;
 - como os códigos de Lotação do SGI são mapeados para UASG;
@@ -372,6 +415,7 @@ Critério de conclusão:
 
 Criar contratos que o UseCase precisa para executar o fluxo real.
 Definir na camada Application, com nomes orientados à intenção:
+
 - porta para publicar, retificar e consultar o estado do PCA no PNCP;
 - porta para controlar transação sem expor Oracle ao UseCase. Sugestão: adotar nome neutro como TransactionManager, métodos como: iniciar(), confirmar(), desfazer(); A implementação concreta na Infrastructure poderia ser: OracleTransactionManager;
 - contrato tipado para obter a configuração do modo de publicação;
@@ -385,9 +429,13 @@ Não implementar Oracle ou HTTP nesta sprint.
 ### Sprint 3B.8 — Evoluir o UseCase antes dos adaptadores (Contemplar Fluxo completo com mocks/fakes)
 
 Esta sprint concentra a evolução do fluxo efetivo do UseCase e poderá ser dividida em subtarefas menores, mantendo TDD e sem criar adaptadores concretos. Sugestão:
+
 #### Sprint 3B.2A — Evoluir UseCase com portas PNCP e configuração
+
 #### Sprint 3B.2B — Evoluir UseCase com transação e persistência
+
 #### Sprint 3B.2C — Evoluir UseCase com falhas, rollback e recuperação
+
 #### Sprint 3B.2D — Adicionar comportamento mínimo no Domain para registrar publicação confirmada
 
 Evoluir `ProcessarPublicacaoPcaUseCase` usando apenas mocks/fakes das portas.
@@ -410,6 +458,7 @@ Nesta sprint também deve ser adicionado ao Domain, com testes, apenas o comport
 — Application completa com mocks
 Antes de escrever Oracle e PNCP reais, você evolui o UseCase usando fakes/mocks.
 Aqui você testa:
+
 1. autentica uma vez
 2. publica
 3. retifica
@@ -447,13 +496,12 @@ Importante:
 - cada classe concreta deve ser criada por TDD e possuir teste correspondente;
 - testes com Oracle e PNCP reais permanecem na Fase 6.
 
-
 ### Sprint 4.1 — Configuração e conexão Oracle (OracleConnection)
 
-* Implementar o adaptador de configuração.
-* Implementar `OracleConnection`.
-* Implementar o gerenciador de transações Oracle.
-* Criar testes para os três componentes usando doubles do mecanismo escolhido.
+- Implementar o adaptador de configuração.
+- Implementar `OracleConnection`.
+- Implementar o gerenciador de transações Oracle.
+- Criar testes para os três componentes usando doubles do mecanismo escolhido.
 
 Responsabilidades:
 
@@ -467,8 +515,8 @@ Todos os repositórios envolvidos em uma unidade de processamento devem receber 
 
 ### Sprint 4.2 — Mapeamento Oracle do Aggregate Plano (Mapeadores Oracle)
 
-* Criar o mapeamento entre linhas Oracle e objetos do Domain.
-* Criar testes do mapeamento com linhas controladas, sem banco real.
+- Criar o mapeamento entre linhas Oracle e objetos do Domain.
+- Criar testes do mapeamento com linhas controladas, sem banco real.
 
 Responsabilidades:
 
@@ -480,8 +528,8 @@ Responsabilidades:
 
 ### Sprint 4.3 — OraclePlanoRepository (Repositório agreggate)
 
-* Implementar `OraclePlanoRepository`.
-* Criar `OraclePlanoRepositoryTest` com conexão/resultado simulados.
+- Implementar `OraclePlanoRepository`.
+- Criar `OraclePlanoRepositoryTest` com conexão/resultado simulados.
 
 Responsabilidades:
 
@@ -500,8 +548,8 @@ O Repository não deve:
 
 ### Sprint 4.4 — Repositórios de responsável e lotação (Repositórios auxiliares Oracle)
 
-* Implementar `OracleRepresentanteRepository` e seu teste.
-* Implementar `OracleLotacaoRepository` e seu teste.
+- Implementar `OracleRepresentanteRepository` e seu teste.
+- Implementar `OracleLotacaoRepository` e seu teste.
 
 Responsabilidades:
 
@@ -511,9 +559,9 @@ Responsabilidades:
 
 ### Sprint 4.5 — Auditoria no Oracle (Registro de histórico do procedimento publicação)
 
-* Implementar a consulta do catálogo de Procedimentos definida na Sprint 4.1, caso necessária.
-* Implementar `OracleHistoricoProcedimentoRepository`.
-* Criar testes para os adaptadores.
+- Implementar a consulta do catálogo de Procedimentos definida na Sprint 4.1, caso necessária.
+- Implementar `OracleHistoricoProcedimentoRepository`.
+- Criar testes para os adaptadores.
 
 Responsabilidades:
 
@@ -523,23 +571,23 @@ Responsabilidades:
 
 ### Sprint 4.6 — Transporte HTTP e autenticação PNCP (PncpAuthenticator)
 
-* Definir/adotar o transporte HTTP conforme a decisão da Sprint 3B.6.
-* Implementar `PncpAuthenticator`.
-* Criar `PncpAuthenticatorTest` com respostas HTTP simuladas.
+- Definir/adotar o transporte HTTP conforme a decisão da Sprint 3B.6.
+- Implementar `PncpAuthenticator`.
+- Criar `PncpAuthenticatorTest` com respostas HTTP simuladas.
 
 Cobrir:
 
 - envio das credenciais ao endpoint correto;
 - leitura do token no header documentado pelo PNCP;
 - reutilização do token durante uma execução;
-    - O manual informa que a API de login retorna JWT no header Authorization, após Bearer, e que o token tem validade de 1 hora. Isso justifica testar reutilização de token, expiração e leitura do header.
+  - O manual informa que a API de login retorna JWT no header Authorization, após Bearer, e que o token tem validade de 1 hora. Isso justifica testar reutilização de token, expiração e leitura do header.
 - expiração, respostas inválidas e falhas HTTP;
 - ausência de credenciais e token em logs/exceções.
 
 ### Sprint 4.7 — Payload PNCP (PncpPayloadBuilder)
 
-* Implementar `PncpPayloadBuilder`.
-* Criar `PncpPayloadBuilderTest`.
+- Implementar `PncpPayloadBuilder`.
+- Criar `PncpPayloadBuilderTest`.
 
 Responsabilidades:
 
@@ -553,8 +601,8 @@ Os testes devem comparar a estrutura completa esperada pelo contrato do PNCP, in
 
 ### Sprint 4.8 — Cliente PNCP
 
-* Implementar `PncpClient` como adaptador da porta definida na Sprint 4.1.
-* Criar `PncpClientTest` usando mocks do transporte HTTP.
+- Implementar `PncpClient` como adaptador da porta definida na Sprint 4.1.
+- Criar `PncpClientTest` usando mocks do transporte HTTP.
 
 Cobrir:
 
@@ -581,6 +629,7 @@ Executar a suíte unitária completa e adicionar testes de integração controla
 - ausência de dependências de Infrastructure no Domain.
 
 Responsabilidades:
+
 - instanciar implementações concretas;
 - injetar dependências no UseCase;
 - manter Controller fino;
@@ -591,10 +640,12 @@ Não realizar ainda chamadas ao Oracle ou PNCP reais. Essas validações pertenc
 ## FASE 6 — Apresentação
 
 ### Sprint 6.1
+
 * PcaController
-* PcaControllerTest
+- PcaControllerTest
 Controller não monta tudo. Controller recebe ou obtém o UseCase já montado.
 Ele fica fino:
+
 1. recebe array do Scriptcase
 2. converte para Request
 3. chama UseCase
@@ -602,8 +653,10 @@ Ele fica fino:
 Sem regra de negócio.
 
 ## FASE 7 — Integração
+
 Objetivo: validar o funcionamento do backend com integrações reais ou simuladas de ponta a ponta.
 Aqui sim entram:
+
 - Oracle real
 - PNCP homologação
 - testes end to end
@@ -611,18 +664,23 @@ Aqui sim entram:
 - massa de dados real/controlada
 
 ### Sprint 7.1
+
 * Testar OraclePlanoRepository com dados reais ou base controlada
 
 ### Sprint 7.2
+
 * Testar autenticação PNCP em ambiente de homologação
 
 ### Sprint 7.3
+
 * Testar envio de Publicação ao PNCP em ambiente de homologação
 
 ### Sprint 7.4
+
 * Testar envio de Retificação ao PNCP em ambiente de homologação
 
 ### Sprint 7.5
+
 * Testar fluxo completo:
   - entrada Scriptcase
   - caso de uso
@@ -632,6 +690,7 @@ Aqui sim entram:
   - resposta final
 
 ### Sprint 7.6
+
 * Validar comportamento em falha parcial:
   - uma UnidadeOrcamentaria falha
   - demais unidades continuam sendo processadas

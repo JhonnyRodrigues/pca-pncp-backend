@@ -390,9 +390,9 @@ $publicador->executar(
 );
 ```
 
-* No primeiro caso, trocar o mecanismo de persistência afetaria o caso de uso. 
-* No segundo, uma estrutura física passaria a definir o modelo de negócio.
-* No terceiro, entrada HTTP controlaria configuração privilegiada e romperia a fronteira pública mínima estabelecida pela `DI-010`.
+- No primeiro caso, trocar o mecanismo de persistência afetaria o caso de uso.
+- No segundo, uma estrutura física passaria a definir o modelo de negócio.
+- No terceiro, entrada HTTP controlaria configuração privilegiada e romperia a fronteira pública mínima estabelecida pela `DI-010`.
 
 ### 7.6 Origem das decisões e avaliação do desenho
 

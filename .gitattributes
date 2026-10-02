@@ -1,6 +1,5 @@
-# O acervo legado ainda combina LF e CRLF. O CR que integra um final CRLF não
-# deve ser relatado pelo Git como espaço em branco no fim da linha.
-* whitespace=cr-at-eol
+# Arquivos de texto são normalizados e mantidos com finais de linha LF.
+* text=auto eol=lf
 
 *.gif binary
 *.gz binary
