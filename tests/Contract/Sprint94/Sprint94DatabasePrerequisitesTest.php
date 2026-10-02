@@ -80,26 +80,26 @@ final class Sprint94DatabasePrerequisitesTest extends TestCase
         );
     }
 
-    public function testDocumentacaoDevePreservarPreRequisitosEPendenciasOperacionais(): void
+    public function testDocumentacaoDevePreservarPreRequisitosESituacaoOperacional(): void
     {
-        $guide = $this->read('docs/vigentes/apoio/guia_de_configuracao_de_producao.md');
+        $guide = $this->read('docs/vigentes/operacional/guia_de_configuracao_de_producao.md');
         $roadmap = $this->read('docs/vigentes/autoritativos/roadmap.md');
-        $state = $this->read('docs/vigentes/operacional/estado_atual.md');
+        $situation = $this->read('docs/vigentes/operacional/situacao_operacional.md');
 
         $this->assertStringContainsString(self::PROCEDURES_VERSION . '.sql', $guide);
         $this->assertStringContainsString(self::STRATEGY_VERSION . '.sql', $guide);
-        $this->assertStringContainsString('catálogo operacional dos códigos públicos', $roadmap);
+        $this->assertStringContainsString('guia operacional de diagnóstico da publicação PCA', $roadmap);
         $this->assertStringContainsString('`curl_errno`', $roadmap);
-        $this->assertStringContainsString('não será reparada retroativamente', $state);
-        $this->assertStringContainsString(
-            'ambas as migrations foram aplicadas em produção',
-            $state
-        );
+        $this->assertStringContainsString('procedimentos de auditoria 8 e 9', $situation);
+        $this->assertStringContainsString('migrations verificadas em produção', $situation);
 
         $deployment = $this->read('database/deployments/producao.md');
-        $this->assertStringContainsString('`V202609241700`', $deployment);
-        $this->assertStringContainsString('`V202609241701`', $deployment);
-        $this->assertSame(2, substr_count($deployment, '`APLICADA`'));
+        foreach (['V202609241700', 'V202609241701', 'V202609251823'] as $version) {
+            $this->assertMatchesRegularExpression(
+                '/^\| [^\r\n]*`' . $version . '`[^\r\n]*\| `APLICADA` \|/m',
+                $deployment
+            );
+        }
     }
 
     private function read(string $relativePath): string

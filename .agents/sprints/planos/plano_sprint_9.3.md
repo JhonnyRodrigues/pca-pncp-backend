@@ -10,7 +10,7 @@ Composer no servidor.
 
 O escopo vem da [Sprint 9.3 do roadmap](../../../docs/vigentes/autoritativos/roadmap.md),
 da [DI-010](../../../docs/vigentes/autoritativos/decisoes_de_integracao.md), do
-[estado operacional](../../../docs/vigentes/operacional/estado_atual.md) e da
+[estado do trabalho](../../planejamento/estado_atual.md) e da
 decisão do mantenedor registrada neste plano.
 
 ## Decisões do mantenedor
@@ -50,7 +50,7 @@ A preparação local não autoriza acesso ao servidor. Depois de um commit que
 identifique a release, o pacote final deve ser reconstruído, compactado como
 `.tar.gz` e acompanhado de seu SHA-256. A implantação em produção exige nova
 autorização explícita e segue o
-[guia de implantação e rollback](../../../docs/vigentes/apoio/guia_de_implantacao_e_rollback.md).
+[guia de implantação e rollback](../../../docs/vigentes/operacional/guia_de_implantacao_e_rollback.md).
 
 ## Artefatos e justificativas
 

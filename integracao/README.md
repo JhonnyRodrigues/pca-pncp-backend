@@ -26,17 +26,10 @@ O arquivo deste repositório não é executado automaticamente pelo servidor. Um
 alteração precisa ser levada ao evento correspondente (Blank->evento onExecute), compilada e publicada
 pelo processo do Scriptcase. O backend autocontido é implantado separadamente.
 
-Em produção, a Blank carrega o backend instalado em:
+Em produção, a Blank carrega o backend instalado em `/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/`
 
-```text
-/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/
-```
-
-Segredos e perfis permanecem fora do webroot, em
-`/var/www/configuracoes/pca-pncp/`. Não coloque credenciais, tokens ou conteúdo
-do perfil neste diretório.
+Segredos e perfis permanecem fora do webroot, em `/var/www/configuracoes/pca-pncp/`. Não coloque credenciais, tokens ou conteúdo do perfil neste diretório.
 
 Antes de publicar ou substituir a Blank, siga o
-[guia de implantação e rollback](../docs/vigentes/apoio/guia_de_implantacao_e_rollback.md)
-e valide os contratos de integração correspondentes. Abrir a interface não
-equivale a executar um smoke funcional.
+[guia de implantação e rollback](../docs/vigentes/operacional/guia_de_implantacao_e_rollback.md)
+e valide os contratos de integração correspondentes. Abrir a interface não equivale a executar um teste de smoke funcional.

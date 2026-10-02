@@ -116,4 +116,6 @@ As pastas:
 - `tests/Integration` e `tests/Composition` verificam colaboração entre componentes usando ambientes controlados.
 - `tests/Contract` contém tanto verificações locais quanto gates opt-in; por isso o nome da pasta, sozinho, não informa se existe I/O real.
 
-Para preparação detalhada das configurações externas, execução em Git Bash, Blanks protegidas, diagnóstico e tratamento de resíduos, consulte o [guia de execução das probes](guia_de_execucao_das_probes.md).
+Para recuperar a preparação original das configurações externas, Blanks
+protegidas, diagnóstico e tratamento de resíduos dos gates encerrados, consulte
+o [guia histórico de execução das probes](../../historico/operacional/guia_de_execucao_das_probes.md).

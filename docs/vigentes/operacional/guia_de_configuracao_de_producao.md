@@ -1,8 +1,6 @@
 # Guia de configuração de produção
 
-**Classificação documental:** Apoio
-
-**Status:** Vigente
+**Classificação documental:** Operacional
 
 **Autoridade/Escopo:** preparação do registro, do perfil, do CA bundle e dos
 pré-requisitos de configuração necessários à implantação em produção
@@ -18,12 +16,12 @@ e da autorização do ambiente.
 Este runbook responde **como provisionar** os arquivos e as permissões. Para
 entender **por que** existem variável de ambiente, registro, perfil, validação,
 segredos e mapeamentos Oracle, consulte a
-[seção 7 da arquitetura](arquitetura.md#7-fachada-composition-root-scriptcase-e-configuração-externa).
+[seção 7 da arquitetura](../apoio/arquitetura.md#7-fachada-composition-root-scriptcase-e-configuração-externa).
 
 Um **runbook** é um procedimento operacional passo a passo. Este documento é o
-runbook da configuração de produção da V1. Ele usa somente comandos locais do
-servidor e deve ser executado por pessoa autorizada após a pausa prevista no
-plano da Sprint 9.1.
+runbook da configuração de produção. Ele usa somente comandos locais do
+servidor e deve ser executado por pessoa autorizada dentro do processo de
+mudança aplicável ao ambiente.
 
 O caminho da configuração e o nome do CA bundle podem ser versionados: eles não
 são segredos e já integram o contrato operacional conhecido. Nunca registre no
@@ -60,8 +58,8 @@ Substitua `SERVER_NAME_EXATO_DE_PRODUCAO` pelo valor efetivamente recebido em pr
 
 ## 3. Referência autorizada de homologação
 
-O perfil de homologação foi lido de forma sanitizada durante o planejamento da
-Sprint 9.1. Ele possui a estrutura exata esperada por
+O perfil de homologação foi lido de forma sanitizada durante o provisionamento
+inicial. Ele possui a estrutura exata esperada por
 `PerfilPublicacaoPca`, credenciais não vazias, os onze grupos de mapeamento e os
 seguintes parâmetros não secretos:
 
@@ -162,8 +160,8 @@ openssl crl2pkcs7 -nocrl -certfile /var/www/configuracoes/pca-pncp/ca-bundle.crt
 Os dois arquivos PHP devem passar no **lint**, a verificação de sintaxe sem
 executar a aplicação. O bundle não pode estar vazio, o
 SHA-256 deve corresponder ao arquivo aprovado e o OpenSSL deve conseguir ler os
-certificados. A validade TLS contra o PNCP será comprovada somente no smoke
-autorizado de produção, em Sprint posterior.
+certificados. Essas verificações locais não comprovam, sozinhas, a comunicação
+TLS com o PNCP; qualquer smoke real depende de autorização específica.
 
 ## 7. Tornar o localizador persistente
 
@@ -359,8 +357,7 @@ implantação.
 
 ## 9. Critérios de aceite e interrupção
 
-A etapa externa da Sprint 9.1 termina somente quando houver evidência
-sanitizada de que:
+O provisionamento é aceito somente quando houver evidência sanitizada de que:
 
 - o `DocumentRoot` foi identificado e a configuração está fora dele e da
   release;
@@ -379,9 +376,10 @@ sanitizada de que:
 
 Interrompa sem implantar a release quando qualquer caminho, hostname,
 permissão, parâmetro, hash, sintaxe ou topologia permanecer incerto. A
-visibilidade efetiva da variável pelo runtime do backend será confirmada na
-Sprint de implantação; a Sprint 9.1 não cria probe nem executa a aplicação.
+visibilidade efetiva da variável deve ser confirmada no runtime usado pela
+aplicação, sem inferi-la a partir de um terminal isolado.
 
 A implantação e o rollback da release seguem o
 [guia de implantação e rollback](guia_de_implantacao_e_rollback.md).
-Reconciliação do legado pertence à Sprint 9.4; smoke e prontidão final, à 9.5.
+Consulte a [situação operacional](situacao_operacional.md) antes de qualquer
+smoke ou intervenção real.

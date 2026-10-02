@@ -1,10 +1,21 @@
-# Catálogo operacional dos códigos públicos
+# Guia operacional de diagnóstico da publicação PCA
 
-- **Classificação documental:** Operacional
-- **Status:** Vigente
-- **Escopo:** triagem da resposta da Blank e dos eventos pela mesma correlação
+**Classificação documental:** Operacional
 
-## Uso pelo suporte
+**Autoridade/Escopo:** interpretação da resposta da aplicação, correlação com
+os eventos técnicos e orientação segura para manutenção e suporte
+
+## 1. Finalidade
+
+Este guia ajuda suporte e mantenedores a interpretar o resultado apresentado
+pela aplicação, localizar os eventos técnicos pela correlação e escolher a
+próxima ação segura.
+
+Ele não cria códigos de falha nem redefine comportamentos da aplicação. Seu
+papel é reunir, em linguagem operacional, o significado, as evidências e os
+cuidados associados aos resultados produzidos pelo sistema.
+
+## 2. Uso pelo suporte
 
 Leia primeiro `situacao`, `codigoFalha`, `correlacao` e os resultados unitários.
 Use a [consulta por correlação](../../../database/queries/seguranca_log_por_correlacao.sql)
@@ -53,19 +64,3 @@ Versões que continham a renovação experimental podem ter emitido
 `AUTENTICACAO_PNCP_ANTES_ESCRITA_FALHOU` ou
 `SESSAO_PNCP_ANTES_ESCRITA_INCONSISTENTE`. Esses códigos são legados e não são
 emitidos pelo fluxo vigente.
-
-## Comparação de duração pela correlação
-
-Na fotografia salva para a execução informada como
-`ee83c8a3-9323-464c-a24b-1dcea03f7f5c`, o último evento traz
-`executionTimeMs = 6452` e a exclusão de itens recebeu HTTP 403. Essa
-fotografia não contém o tempo da requisição medido pelo navegador. Portanto,
-não há diferença numérica comprovada nem causa atribuível à rede, à Blank ou
-ao backend.
-
-Para uma comparação futura, registrar na aba Rede do navegador o tempo total
-da requisição da Blank e o `correlacao` devolvido pelo mesmo POST; obter
-`executionTimeMs` do último evento dessa correlação e, quando disponível,
-`duracaoTentativaMs` dos eventos HTTP. Comparar os intervalos e horários sem
-somar durações de tentativas paralelas ou equiparar tempo do navegador ao tempo
-interno do backend.

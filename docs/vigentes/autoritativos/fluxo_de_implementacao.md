@@ -166,9 +166,10 @@ correlação `null`, sem consultar o registro e sem evento técnico. O retorno i
 aviso seguro para verificar o servidor responsável pelo `X-Request-ID`. Qualquer outra
 falha na inicialização e composição global (`bootstrap`) produz
 `INTERROMPIDA/FALHA_INESPERADA`, preserva a correlação externa válida e não
-expõe exceção, caminho, perfil, CNPJ ou segredo. Como o logger ainda não está
-disponível, o retorno mantém os eventos vazios e inclui aviso seguro para
-verificar a configuração e os pré-requisitos do servidor (`DI-010`).
+expõe exceção, caminho, perfil, CNPJ ou segredo. Quando a falha ocorre antes de
+a composição disponibilizar o logger, o retorno mantém os eventos vazios e
+inclui aviso seguro para verificar a configuração e os pré-requisitos do
+servidor (`DI-010`).
 
 ### 4.2 Validação da solicitação e do contexto
 
@@ -610,17 +611,17 @@ Ao navegador segue
 somente `{resultado, avisoRegistroTecnico}`, sem eventos técnicos, exceções ou
 respostas brutas. Falha de transporte não provoca nova publicação automática.
 
-Esse contrato foi aprovado no Microciclo 1 da Sprint 8.5, e a exportação local
-foi implementada no Microciclo 2. O Microciclo 3 comprovou localmente a
-contenção, a reconciliação limitada e a interrupção sistêmica sobre adapters
-concretos com fronteiras físicas controladas. O Microciclo 4 versionou a
-adaptação da Blank, incluindo validação da entrada, serialização explícita da
-saída e a primeira integração de logs. O gate do Microciclo 6 demonstrou que
-`sc_log_add` não suporta o CLOB exigido nesta instalação; o Microciclo 6A
-substitui a macro pelo registrador próprio descrito acima. O Microciclo 5 gerou o pacote
-autocontido e preparou o suporte opt-in, as consultas completas e o PRECHECK
-bloqueante. A instalação e os gates reais permanecem pendentes; seu progresso pertence ao
-[estado operacional](../operacional/estado_atual.md).
+O contrato foi implementado e comprovado sobre as fronteiras concretas. A Blank
+versionada valida a entrada, serializa explicitamente a saída, chama as fachadas
+públicas e registra os eventos depois do resultado. Como `sc_log_add` não
+suporta o CLOB exigido nesta instalação, o registrador próprio persiste cada
+evento em uma transação técnica separada, conforme descrito acima.
+
+O pacote autocontido, a instalação e os gates reais já foram exercitados. As
+evidências de construção pertencem ao
+[estado do trabalho dos agentes](../../../.agents/planejamento/estado_atual.md).
+Restrições correntes e decisões sobre novas execuções pertencem à
+[situação operacional](../operacional/situacao_operacional.md).
 
 Auditoria e observabilidade não são intercambiáveis: a primeira afirma fatos
 de negócio confirmados; a segunda registra o funcionamento e os problemas da

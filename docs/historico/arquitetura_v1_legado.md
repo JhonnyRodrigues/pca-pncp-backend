@@ -1,8 +1,9 @@
 # Arquitetura
 
-**Classificação documental:** Apoio  
-**Status:** Vigente  
-**Autoridade/Escopo:** apoio para limites arquiteturais e direção de dependências, sem competir com regras, modelo ou Decisões de Integração
+**Classificação documental:** Histórico
+
+**Autoridade/Escopo:** versão substituída da arquitetura, preservada sem
+autoridade vigente
 
 Este documento responde à pergunta: COMO o sistema será construído?
 

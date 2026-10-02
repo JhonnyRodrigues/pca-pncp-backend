@@ -1,11 +1,12 @@
 # Guia de migração assistida e recuperação
 
-**Classificação documental:** Apoio
+**Classificação documental:** Histórico
 
-**Status:** Vigente; procedimento validado na Sprint 9.4
+**Autoridade/Escopo:** procedimento encerrado de inventário, vínculo e
+reconciliação das publicações PCA legadas na Sprint 9.4
 
-**Autoridade/Escopo:** operação protegida do inventário, vínculo e reconciliação
-de publicações PCA legadas
+> Este runbook foi concluído e permanece disponível apenas para auditoria e
+> aprendizado. Ele não autoriza uma nova execução.
 
 ## 1. Finalidade
 

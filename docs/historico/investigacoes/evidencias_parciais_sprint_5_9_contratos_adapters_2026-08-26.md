@@ -1,14 +1,12 @@
 # Evidências da Sprint 5.9 — contratos dos adapters
 
-**Classificação documental:** Investigação
-
-**Status:** Concluída — gates Oracle e PNCP aprovados
+**Classificação documental:** Histórico
 
 **Data:** 26/08/2026
 
 **Última atualização:** 28/08/2026
 
-**Autoridade/Escopo:** evidências não normativas da implementação e das
+**Autoridade/Escopo:** evidências históricas não normativas da implementação e das
 validações controladas da Sprint 5.9
 
 ## 1. Resultado atual

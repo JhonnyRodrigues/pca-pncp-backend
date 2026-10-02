@@ -58,7 +58,7 @@ integração sejam confundidos com conceitos constitutivos do negócio.
 ### 2.2 Linguagem ubíqua
 
 | Termo | Significado no modelo |
-|---|---|
+| --- | --- |
 | **Plano** | Planejamento homologado de uma Unidade Orçamentária para um Ano de Execução, representado por sua fotografia vigente completa |
 | **Demanda** | Necessidade de material ou serviço com identidade própria e ciclo de vida controlado |
 | **DFD-E** | Demanda extraordinária submetida a fluxo próprio e homologação individual |
@@ -405,7 +405,7 @@ informações fica fora da política (`DI-002` e `DI-007`).
 ### 8.2 Decisões
 
 | Situação conceitual | Decisão | Autoridade |
-|---|---|---|
+| --- | --- | --- |
 | Há Demandas vigentes e não há PCA externo ativo conhecido | `PUBLICAR` | `RN-PUB-001` |
 | Há PCA externo ativo e mudanças homologadas no conjunto vigente | `RETIFICAR` | `RN-PUB-002` e `RN-PUB-006` |
 | A unidade de publicação ficou vazia e há PCA externo ativo | `EXCLUIR_PCA` | `RN-PUB-003` |
@@ -448,7 +448,7 @@ agrupamento são responsabilidades externas ao Aggregate, conforme `DI-003`.
 ### 9.1 Quatro conceitos independentes
 
 | Conceito | Conteúdo | Responsabilidade |
-|---|---|---|
+| --- | --- | --- |
 | Identidade do Plano | UO + Ano de Execução | Distinguir o Plano lógico |
 | Fotografia vigente | Demandas ativas da mesma UO e exercício | Representar o planejamento homologado atual |
 | Confirmação da sincronização | Pendência ou instante de confirmação de cada versão | Registrar que a versão vigente convergiu |
@@ -567,7 +567,7 @@ demonstrada.
 ## 11. Invariantes e relacionamentos
 
 | Conceito | Invariante ou relação protegida | Referência |
-|---|---|---|
+| --- | --- | --- |
 | CNPJ | Identificação válida no padrão alfanumérico vigente | `RN-CAD-001` |
 | Ano de Execução | Ano corrente ou imediatamente seguinte | `RN-CAD-002` |
 | Representante | Identificador e nome da pessoa responsável | `RN-CAD-003` |
@@ -636,7 +636,7 @@ ao roadmap. Sua ausência aqui preserva a independência do modelo conceitual.
 ### 13.1 Regras de negócio por parte do modelo
 
 | Parte do modelo | Regras autoritativas |
-|---|---|
+| --- | --- |
 | Cadastros e referências | `RN-CAD-001` a `RN-CAD-006` |
 | Ciclo de planejamento | `RN-FLX-001` a `RN-FLX-004` |
 | Identidade e ciclo da Demanda | `RN-DEM-001` a `RN-DEM-009` |
@@ -647,7 +647,7 @@ ao roadmap. Sua ausência aqui preserva a independência do modelo conceitual.
 ### 13.2 Decisões que delimitam o modelo
 
 | Decisão | Uso neste documento |
-|---|---|
+| --- | --- |
 | `DI-001` | Distingue criação, sincronização e exclusão sem incorporar referências externas ao Plano |
 | `DI-002` | Separa conjunto desejado, estado observado e autoridade por fato |
 | `DI-003` | Mantém Aggregates por UO e coloca o agrupamento fora deles |

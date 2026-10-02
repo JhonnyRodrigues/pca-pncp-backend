@@ -1,23 +1,26 @@
-# Estado operacional do projeto PCA/PNCP
+# Estado atual do trabalho no projeto PCA/PNCP
 
-**Classificação documental:** Operacional
+**Classificação:** artefato de agentes
 
-**Status:** Vigente
-
-**Autoridade/Escopo:** progresso do projeto, última sprint concluída, próxima
-sprint na ordem, gates, pendências e restrições operacionais
+**Autoridade/Escopo:** progresso da implementação, última sprint concluída,
+próxima sprint na ordem, gates, pendências e continuidade do trabalho
 
 **Atualizado em:** 28/09/2026
 
 ## Limites de autoridade
 
-Este documento centraliza somente o estado corrente do trabalho. Ele não cria
-nem altera regras de negócio, modelo de domínio, decisões de integração,
-arquitetura, fluxo de implementação, ordem das sprints ou critérios de saída.
+Este documento centraliza o estado corrente do trabalho para agentes. A
+condição do produto instalado, as restrições externas e a conduta segura para
+manutenção e suporte pertencem à
+[situação operacional](../../docs/vigentes/operacional/situacao_operacional.md).
+
+Ele não cria nem altera regras de negócio, modelo de domínio, decisões de
+integração, arquitetura, fluxo de implementação, ordem das sprints ou critérios
+de saída.
 
 Para esses assuntos, prevalecem as fontes autoritativas registradas no
-[índice documental](../../README.md). A ordem de construção permanece definida
-pelo [Roadmap](../autoritativos/roadmap.md).
+[índice documental](../../docs/README.md). A ordem de construção permanece
+definida pelo [Roadmap](../../docs/vigentes/autoritativos/roadmap.md).
 
 ## Progresso
 
@@ -40,7 +43,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   bloqueio nominal aceito de 2026 e o corretivo de pré-requisitos Oracle
   registrados abaixo.
 - A Sprint 9.5 — Prontidão de produção e suporte está em execução conforme o
-  [plano aprovado](../../../.agents/sprints/planos/plano_sprint_9.5.md).
+  [plano aprovado](../sprints/planos/plano_sprint_9.5.md).
   Microciclos 1 a 7 concluídos; o Microciclo 8 continua interrompido durante
   a investigação do HTTP 403 na inclusão de itens de 2026.
   Oracle e PNCP de 2027 coincidiram por IDs;
@@ -220,7 +223,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   microciclos autorizados e o corretivo de paginação e ausência.
 - A Sprint 8.4 — Fluxos completos dos dois modos está concluída.
 - A Sprint 8.5 — Falhas, segurança e smoke test do pacote está concluída,
-  conforme o [plano aprovado](../../../.agents/sprints/planos/plano_sprint_8.5.md).
+  conforme o [plano aprovado](../sprints/planos/plano_sprint_8.5.md).
   O Microciclo 1 foi concluído em 17/09/2026 com o registro do plano e a revisão
   contratual de exportação, logs e tratamento de falhas. O Microciclo 2 foi
   concluído em 18/09/2026 com a exportação compatível dos eventos pela API
@@ -237,7 +240,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   as regressões e encerrou a sprint. A configuração externa permanece
   desarmada em `PRECHECK`. Nenhum gate real deve ser repetido.
 - A Sprint 9.1 — Configuração e segredos de produção está concluída conforme o
-  [plano aprovado](../../../.agents/sprints/planos/plano_sprint_9.1.md). A pausa
+  [plano aprovado](../sprints/planos/plano_sprint_9.1.md). A pausa
   foi cumprida antes do provisionamento manual autorizado em produção. A Sprint
   9.3 é a próxima na ordem e exige planejamento próprio.
 
@@ -259,7 +262,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - A política aprovada aplica o princípio do menor privilégio: diretório `2750`
   com `setgid`, arquivos `640`, propriedade `administrator:www-data`, escrita
   administrativa, leitura pelo PHP e nenhum acesso para os demais usuários.
-- O [guia de configuração de produção](../apoio/guia_de_configuracao_de_producao.md)
+- O [guia de configuração de produção](../../docs/vigentes/operacional/guia_de_configuracao_de_producao.md)
   documenta também como distinguir `mod_php` de PHP-FPM e provisionar
   `PCA_PNCP_PROFILE_REGISTRY_FILE` de forma persistente. Um `export` de terminal
   não substitui a configuração do processo Apache/PHP.
@@ -470,7 +473,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
 - O corretivo do Microciclo 5 retirou a sprint dos nomes das ferramentas,
   removeu o teste que apenas inspecionava seu texto e preservou os contratos
   comportamentais de configuração, consultas, PRECHECK e segurança. O
-  [catálogo de diretórios](../apoio/catalogo_de_diretorios.md) registra a
+  [catálogo de diretórios](../../docs/vigentes/apoio/catalogo_de_diretorios.md) registra a
   organização atual e a diferença entre ferramenta mantida e artefato gerado.
 - O pacote validado possui 194 arquivos no total: 193 arquivos de conteúdo
   protegidos por hash e o próprio `PACKAGE-MANIFEST.json`. Contém apenas
@@ -696,7 +699,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   Houve tradução imediata de `ORA-00054`, liberação posterior e ausência de
   `Close()` nos três relatórios.
 - O guia operacional das probes 5.1, 5.9 e 8.2 foi consolidado em
-  [Guia de execução das probes](../apoio/guia_de_execucao_das_probes.md); o
+  [guia histórico de execução das probes](../../docs/historico/operacional/guia_de_execucao_das_probes.md); o
   README passou a apenas encaminhar para essa fonte de apoio.
 - Por decisão do mantenedor, os arquivos externos permaneceram sob o webroot
   somente no desenvolvimento controlado. Produção continua exigindo registro,
@@ -953,7 +956,7 @@ pelo [Roadmap](../autoritativos/roadmap.md).
   verdes. O autoload PSR-4 estrito gerou 1.734 classes, lint dos arquivos PHP
   afetados e `git diff --check` foram aprovados. As execuções usaram PHP 8.4.7.
 - O relatório investigativo sanitizado está em
-  [Evidências da Sprint 5.9](../../investigacoes/evidencias_parciais_sprint_5_9_contratos_adapters_2026-08-26.md).
+  [Evidências da Sprint 5.9](../../docs/historico/investigacoes/evidencias_parciais_sprint_5_9_contratos_adapters_2026-08-26.md).
 
 O resíduo PCA 24 teve ausência definitiva confirmada sem nova publicação. Em
 seguida, o gate PNCP executou o ciclo real completo e aprovou limpeza e eventos
@@ -989,7 +992,7 @@ expôs credenciais, CNPJ, URL, token ou `Authorization`.
   Token, Authorization, headers, corpos, URLs, CNPJ, UASG, sequencial e IDs não
   são registrados.
 - O contrato institucional do envelope foi consolidado na
-  [Especificação de logs estruturados](../autoritativos/especificacao_de_logs_estruturados.md),
+  [Especificação de logs estruturados](../../docs/vigentes/autoritativos/especificacao_de_logs_estruturados.md),
   com referências enxutas na DI-006 e no Fluxo de Implementação.
 - A suíte focada de escrita aprovou 131 testes e 575 asserções.
 - A regressão de `Infrastructure/Pncp` aprovou 326 testes e 1.059 asserções.
@@ -1176,7 +1179,7 @@ Sprint 5.3.
   a mesma sessão Oracle real, com restauração integral por rollback.
 
 As evidências não autoritativas da Sprint 5.1 permanecem em
-[Evidências dos gates Oracle e PNCP](../../investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md).
+[Evidências dos gates Oracle e PNCP](../../docs/historico/investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md).
 
 ## Pendências não bloqueantes
 

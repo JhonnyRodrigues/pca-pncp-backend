@@ -1,258 +1,253 @@
-# Arquitetura da Documentação
+# Arquitetura da documentação
 
-**Classificação documental:** Autoritativo  
-**Status:** Vigente  
-**Autoridade/Escopo:** governança, classificação, navegação e caminhos canônicos da documentação do projeto
+**Classificação documental:** Autoritativo
 
-## 1. Finalidade
+**Autoridade/Escopo:** organização, classificação, navegação e caminhos
+canônicos da documentação mantida em `docs/`
 
-O [`README.md` da raiz](../README.md) é a entrada cognitiva do repositório e
-explica o que é o projeto, seu estado geral e sua finalidade didática. Este
-índice assume essa visão geral e governa especificamente a arquitetura da
-documentação.
+## 1. Finalidade e limites
 
-Esta página define como a documentação do backend PCA/PNCP é organizada e
-qual autoridade cada artefato possui. A classificação documental e o status
-são dimensões diferentes:
+O [`README.md` da raiz](../README.md) é a entrada cognitiva do repositório. Ele
+explica o que o projeto faz, por que ele é útil, como começar, onde obter ajuda,
+seu estado geral e sua finalidade didática.
 
-- **Classificação** informa o papel permanente do documento.
-- **Status** informa sua situação atual no ciclo de vida.
+Este índice assume essa visão geral e governa especificamente a documentação
+canônica mantida em `docs/`: onde cada assunto deve ser registrado, qual fonte
+responde por ele e como localizar o conhecimento vigente.
 
-Em caso de dúvida sobre classificação documental, caminhos, status ou vigência, este índice prevalece como autoridade de governança documental. Ele não substitui as fontes autoritativas de negócio, domínio ou integração.
+Instruções permanentes para agentes pertencem a [`AGENTS.md`](../AGENTS.md), e
+o planejamento e a continuidade do trabalho pertencem a
+[`.agents/`](../.agents/README.md). READMEs de `database/`, `integracao/`,
+`tests/` e `tools/` orientam seus próprios contextos e não integram o registro
+deste índice.
 
-## 2. Classificações
+## 2. Como começar a leitura
 
-| Classificação | Papel |
-| --- | --- |
-| **Autoritativo** | Fonte oficial da verdade para o escopo declarado |
-| **Operacional** | Estado corrente do trabalho, sem autoridade para alterar fontes prescritivas |
-| **Apoio** | Explica e contextualiza, sem criar norma concorrente |
-| **Investigação** | Preserva pesquisas, experimentações e evidências sem autoridade normativa |
-| **Histórico** | Preserva versões substituídas para auditoria e aprendizado |
+A entrada recomendada para uma pessoa que ainda não conhece o projeto é:
 
-Os status usados são `Vigente`, `Transitório`, `Histórico` e
-`Planejado (ainda não criado)`. Status não criam diretórios.
+1. [README da raiz](../README.md), para compreender o produto e sua finalidade;
+2. este índice, para entender onde o conhecimento está e quem responde por ele;
+3. [glossário](vigentes/apoio/glossario.md), como referência para a linguagem
+   do projeto;
+4. uma das trilhas abaixo, conforme a necessidade concreta.
 
-## 3. Estrutura canônica
+O glossário não precisa ser lido integralmente antes dos demais documentos.
+Conheça suas categorias e distinções principais e retorne a ele quando um termo
+precisar de definição mais precisa.
 
-```text
-docs/
-├── README.md
-├── diagramas/
-├── investigacoes/
-├── vigentes/
-│   ├── autoritativos/
-│   ├── apoio/
-│   └── operacional/
-└── historico/
-```
-
-Arquivos planejados não são criados como placeholders. Seu caminho reservado
-aparece neste índice sem link até que o documento exista.
-
-## 4. Ordem recomendada de leitura
-
-1. [Arquitetura](vigentes/apoio/arquitetura.md)
-2. [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md)
-3. [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md)
-4. [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md)
-5. [Especificação de logs estruturados](vigentes/autoritativos/especificacao_de_logs_estruturados.md)
-6. [Glossário integrado](vigentes/apoio/glossario.md)
-7. [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md)
-8. [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md)
-9. [Roadmap de implementação](vigentes/autoritativos/roadmap.md)
-10. [Estado operacional do projeto](vigentes/operacional/estado_atual.md)
-11. [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md)
-12. [Guia de configuração de produção](vigentes/apoio/guia_de_configuracao_de_producao.md)
-13. [Guia de implantação e rollback](vigentes/apoio/guia_de_implantacao_e_rollback.md)
-14. [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md)
-15. [Guia de migração assistida e recuperação](vigentes/apoio/guia_de_migracao_assistida_e_recuperacao.md)
-16. [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md)
-17. [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md)
-18. [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md)
-19. [Catálogo operacional dos códigos públicos](vigentes/operacional/catalogo_codigos_publicos.md)
-
-### 4.1 Princípio de autoridade
-
-Quando dois documentos parecerem contraditórios, prevalece:
-
-1. Regras de Negócio;
-2. Modelo de Domínio;
-3. Decisões de Integração;
-4. Especificações autoritativas vinculadas às Decisões de Integração;
-5. Fluxo de Implementação;
-6. Roadmap;
-7. Documentos Operacionais, somente quanto ao estado corrente do trabalho;
-8. Documentos de Apoio;
-9. Investigações;
-10. Históricos.
-
-### 4.2 Trilhas de leitura por objetivo
-
-A ordem completa acima oferece uma visão ampla. Para uma dúvida específica,
-estas trilhas reduzem o caminho sem alterar a autoridade dos documentos:
+### 2.1 Trilhas por objetivo
 
 | Objetivo | Trilha sugerida |
 | --- | --- |
-| Compreender a arquitetura | [Arquitetura](vigentes/apoio/arquitetura.md) → [Glossário](vigentes/apoio/glossario.md) → [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) |
+| Compreender o negócio | [Contexto funcional](vigentes/apoio/contexto_funcional_do_sistema_pca.md) → [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md) → [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md) |
+| Compreender arquitetura e integração | [Arquitetura](vigentes/apoio/arquitetura.md) → [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) → [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md) |
 | Navegar no código | [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) → [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md) → [Catálogo de arquivos](vigentes/apoio/catalogo_de_arquivos.md) |
-| Operar a aplicação | [Arquitetura, seção 7](vigentes/apoio/arquitetura.md#7-fachada-composition-root-scriptcase-e-configuração-externa) para entender o desenho → [Guia de configuração de produção](vigentes/apoio/guia_de_configuracao_de_producao.md) → [Guia de implantação e rollback](vigentes/apoio/guia_de_implantacao_e_rollback.md) |
+| Operar ou prestar suporte | [Situação operacional](vigentes/operacional/situacao_operacional.md) → [Guia de diagnóstico](vigentes/operacional/guia_operacional_de_diagnostico_da_publicacao_pca.md) |
+| Configurar, implantar ou reverter | [Situação operacional](vigentes/operacional/situacao_operacional.md) → [Configuração de produção](vigentes/operacional/guia_de_configuracao_de_producao.md) → [Implantação e rollback](vigentes/operacional/guia_de_implantacao_e_rollback.md) |
+| Preparar um novo projeto | [Guia de preparação inicial de projetos](vigentes/apoio/guia_de_preparacao_inicial_de_projetos.md) |
+| Acompanhar a construção | [Roadmap](vigentes/autoritativos/roadmap.md) → [Estado do trabalho dos agentes](../.agents/planejamento/estado_atual.md) |
+| Atuar como agente | [`AGENTS.md`](../AGENTS.md) → [Governança dos agentes](../.agents/README.md) → [Estado do trabalho](../.agents/planejamento/estado_atual.md) |
 
-## 5. Registro documental
+## 3. Papéis documentais e autoridade
+
+| Classificação | Papel |
+| --- | --- |
+| **Autoritativo** | Fonte oficial da verdade para o assunto declarado em seu escopo |
+| **Operacional** | Situação corrente ou procedimento ainda aplicável à operação e ao suporte, sem redefinir fontes prescritivas |
+| **Apoio** | Explicação, mapa ou referência que facilita a compreensão sem criar norma concorrente |
+
+A situação no ciclo de vida é expressa principalmente pela localização:
+
+- `docs/vigentes/` contém conhecimento atual;
+- `docs/historico/` preserva material encerrado ou substituído, sem autoridade
+  vigente;
+- `docs/investigacoes/` ignorada pelo Git, essa é uma área local temporária que armazena, por exemplo: justificativas, relatórios, ensaios, fotografias de bases de dados, etc
+
+Versão documental, conclusão de uma investigação e observações de sprint não
+são classificações nem devem ser incorporadas ao nome do status.
+
+### 3.1 Autoridade por assunto
+
+| Assunto | Fonte responsável |
+| --- | --- |
+| Regras e comportamento normativo do negócio | [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md) |
+| Conceitos, identidades, relações e invariantes | [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md) |
+| Contratos externos, persistência e decisões de integração | [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) |
+| Envelope e proteção dos eventos técnicos | [Especificação de logs](vigentes/autoritativos/especificacao_de_logs_estruturados.md) |
+| Colaboração dinâmica entre componentes | [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md) |
+| Ordem de construção e critérios de avanço | [Roadmap](vigentes/autoritativos/roadmap.md) |
+| Organização e classificação da documentação em `docs/` | Este índice |
+| Condição do produto instalado e conduta segura | [Situação operacional](vigentes/operacional/situacao_operacional.md) |
+| Continuidade da implementação e próxima atividade autorizada | [Estado do trabalho dos agentes](../.agents/planejamento/estado_atual.md) |
+
+Não existe uma hierarquia genérica entre fontes autoritativas de assuntos
+diferentes. Prevalece a fonte responsável pelo assunto discutido. Se duas
+fontes autoritativas forem realmente incompatíveis, então é preciso expôr a divergência para solicitar decisão. Portanto, não combine premissas nem
+escolha uma silenciosamente.
+
+## 4. Estrutura canônica
+
+```text
+docs/
+├── README.md                 # índice e governança da documentação
+├── vigentes/                 # conhecimento atual do sistema
+│   ├── autoritativos/        # regras, modelo, decisões, fluxo e roadmap
+│   ├── apoio/                # arquitetura, explicações, glossário e catálogos
+│   │   └── diagramas/        # representações visuais vigentes de apoio
+│   └── operacional/          # situação do produto e procedimentos aplicáveis
+├── historico/                # material substituído ou encerrado, ainda útil
+│   ├── didatico/             # explicações e exercícios de etapas anteriores
+│   ├── investigacoes/        # investigações encerradas com valor permanente
+│   └── operacional/          # gates, migrações e procedimentos concluídos
+└── investigacoes/            # trabalho local temporário, ignorado pelo Git
+```
+
+## 5. Registro da documentação vigente
 
 ### 5.1 Autoritativos
 
-| Documento | Status | Autoridade |
-| --- | --- | --- |
-| [Este índice](README.md) | Vigente | Governança documental |
-| [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md) | Vigente | Redação normativa das regras de negócio |
-| [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md) | Vigente — V2 | Conceitos, identidades, relações e invariantes do modelo-alvo |
-| [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) | Vigente | DI-001 a DI-010 e seus gates |
-| [Especificação de logs estruturados](vigentes/autoritativos/especificacao_de_logs_estruturados.md) | Vigente | Envelope institucional, dicionário de campos e proteção de dados dos eventos técnicos |
-| [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md) | Vigente | Colaboração entre camadas e portas |
-| [Roadmap de implementação](vigentes/autoritativos/roadmap.md) | Vigente — V2 | Ordem de implementação |
+| Documento | Autoridade |
+| --- | --- |
+| [Este índice](README.md) | Governança da documentação mantida em `docs/` |
+| [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md) | Redação normativa das regras de negócio |
+| [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md) | Conceitos, identidades, relações e invariantes |
+| [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) | Decisões `DI-*`, contratos externos e gates associados |
+| [Especificação de logs estruturados](vigentes/autoritativos/especificacao_de_logs_estruturados.md) | Envelope institucional, campos e proteção de dados dos eventos |
+| [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md) | Colaboração dinâmica entre camadas, componentes e Ports |
+| [Roadmap](vigentes/autoritativos/roadmap.md) | Ordem de construção e critérios de avanço |
 
 ### 5.2 Apoio
 
-| Documento | Status | Papel |
-| --- | --- | --- |
-| [Arquitetura](vigentes/apoio/arquitetura.md) | Vigente | Limites, direção de dependências e separação entre configuração, segredos e detalhes físicos |
-| [Glossário integrado](vigentes/apoio/glossario.md) | Vigente | Índice semântico da linguagem do projeto |
-| [Contexto funcional do sistema PCA](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Vigente | Usuários, etapas e contexto funcional |
-| [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) | Vigente | Mapas, fluxo, transações e roteiro de estudo |
-| [Guia de configuração de produção](vigentes/apoio/guia_de_configuracao_de_producao.md) | Vigente | Preparação e provisionamento seguro do registro, perfil e CA bundle de produção |
-| [Guia de implantação e rollback](vigentes/apoio/guia_de_implantacao_e_rollback.md) | Vigente | Construção, transferência SFTP, instalação, atualização e rollback da release |
-| [Guia de execução das probes](vigentes/apoio/guia_de_execucao_das_probes.md) | Vigente | Preparação e execução segura das probes e gates 5.1, 5.9, 8.2, 8.3 e corretivo 8.4.7-C |
-| [Guia de migração assistida e recuperação](vigentes/apoio/guia_de_migracao_assistida_e_recuperacao.md) | Vigente | Inventário, vínculo e reconciliação protegidos da Sprint 9.4 |
-| [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md) | Vigente | Finalidade, classificação, dependências e efeitos externos dos scripts ativos |
-| [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md) | Vigente | Finalidade das pastas e orientação para localizar ou criar artefatos |
-| [Catálogo navegável de arquivos](vigentes/apoio/catalogo_de_arquivos.md) | Vigente | Função dos arquivos ativos de código e teste |
-| [DER da publicação](diagramas/DER_PUBLICACAO_PCA.png) | Vigente como apoio visual | Diagrama visual |
-| [Fluxograma do PCA](diagramas/fluxograma_PCA.png) | Vigente como apoio visual | Diagrama visual |
-| [Visão executiva do projeto PCA/PNCP](diagramas/visao_executiva_projeto_pca_pncp.md) | Vigente como apoio visual | Complexidade, progresso e gates até produção |
-
-### 5.3 Operacional
-
-| Documento | Status | Autoridade limitada |
-| --- | --- | --- |
-| [Estado operacional do projeto](vigentes/operacional/estado_atual.md) | Vigente | Progresso, última sprint concluída, próxima sprint na ordem, gates, pendências e restrições; não altera RN, DI, modelo, fluxo, arquitetura ou Roadmap |
-
-### 5.4 Investigações
-
-Estes arquivos são evidências preservadas e não especificações:
-
-| Documento | Status |
+| Documento | Papel |
 | --- | --- |
-| [Código-fonte investigado](investigacoes/codigo-fonte_PCA_PUBLICAR_B.php) | Investigação |
-| [Cópia de entry point HTTP](investigacoes/copia_entryPointHTTP.txt) | Investigação |
-| [Estrutura observada de ADORecordSet](investigacoes/object_ADORecordSet_array.txt) | Investigação |
-| [Auditoria da Fase 4 — Application](investigacoes/auditoria_fase_4_application_2026-08-10.md) | Investigação concluída |
-| [Guia de compreensão do backend](investigacoes/guia_de_compreensao_do_backend.md) | Investigação |
-| [Evidências da Sprint 5.1 — gates Oracle e PNCP](investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md) | Investigação concluída |
-| [Evidências da Sprint 5.9 — contratos dos adapters](investigacoes/evidencias_parciais_sprint_5_9_contratos_adapters_2026-08-26.md) | Investigação concluída — gates Oracle e PNCP aprovados |
-| [Investigação para encerramento da Fase 5 — Sprint 5.10](investigacoes/investigacao_encerramento_fase_5_sprint_5_10_2026-08-28.md) | Encerrada sem execução Oracle real — superada pela revisão normativa de `RN-PUB-003` |
+| [Arquitetura](vigentes/apoio/arquitetura.md) | Limites, responsabilidades e direção das dependências |
+| [Glossário](vigentes/apoio/glossario.md) | Índice semântico da linguagem do projeto |
+| [Contexto funcional](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Contexto do sistema PCA, usuários e etapas |
+| [Guia de preparação inicial de projetos](vigentes/apoio/guia_de_preparacao_inicial_de_projetos.md) | Roteiro adaptável da estação de trabalho até a primeira entrega local observável |
+| [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) | Roteiro de estudo com explicação do fluxo da aplicação pelas classes reais, transações. |
+| [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md) | Finalidade, dependências e efeitos dos comandos ativos |
+| [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md) | Finalidade das pastas e orientação para organização de novos artefatos |
+| [Catálogo de arquivos](vigentes/apoio/catalogo_de_arquivos.md) | Função dos arquivos ativos de código, teste e documentação |
+| [DER da publicação](vigentes/apoio/diagramas/DER_PUBLICACAO_PCA.png) | Representação visual das estruturas de dados |
+| [Fluxograma do PCA](vigentes/apoio/diagramas/fluxograma_PCA.png) | Representação visual do processo de negócio |
+| [Visão executiva](vigentes/apoio/diagramas/visao_executiva_projeto_pca_pncp.md) | Diagramas para explicar o problema, a solução, a convergência e os principais controles do sistema |
 
-### 5.5 Históricos
+### 5.3 Operacionais
 
-Os documentos abaixo têm status `Histórico`, não possuem autoridade atual e
-devem ser consultados apenas para auditoria, evolução e estudo:
+| Documento | Papel |
+| --- | --- |
+| [Situação operacional](vigentes/operacional/situacao_operacional.md) | Condição do produto instalado, restrições correntes e ações seguras |
+| [Guia operacional de diagnóstico](vigentes/operacional/guia_operacional_de_diagnostico_da_publicacao_pca.md) | Interpretação das respostas do sistema, evidências e conduta de suporte |
+| [Guia de configuração de produção](vigentes/operacional/guia_de_configuracao_de_producao.md) | Provisionamento dos arquivos de configuração: registro, perfil, CA bundle e permissões |
+| [Guia de implantação e rollback](vigentes/operacional/guia_de_implantacao_e_rollback.md) | Construção, instalação, atualização e reversão da release |
 
-- [Índice histórico](historico/README.md);
-- [Modelo de domínio V1 legado](historico/modelo_de_dominio_v1_legado.md);
-- [Fluxo de implementação V1 legado](historico/fluxo_de_implementacao_v1_legado.md);
-- [Contexto histórico do planejamento](historico/contexto_do_planejamento_do_projeto_backend.md);
-- [Roadmap V1 legado](historico/roadmap_v1_legado.md).
-- [Exemplos didáticos iniciais](historico/didatico/README.md).
+### 5.4 Históricos
 
-## 6. Mapa de nomes antigos
+A documentação substituída ou encerrada é preservada no
+[índice histórico](historico/README.md) para auditoria e aprendizado. Ela não
+possui autoridade vigente e não integra as trilhas normais de leitura.
 
-| Nome antigo ou concorrente | Caminho canônico |
+## 6. Investigações, referências e preservação
+
+### 6.1 Ciclo de vida de uma investigação
+
+- `docs/investigacoes/` é uma área de trabalho local e temporária. Contém
+  investigações abertas, ensaios, evidências brutas e hipóteses. Seu conteúdo
+  é ignorado pelo Git e não possui autoridade documental.
+- `docs/historico/investigacoes/` é o acervo versionado de investigações
+  encerradas que ainda possuem valor para auditoria, rastreabilidade ou
+  aprendizado. Esses documentos não possuem autoridade vigente, mas são
+  preservados no repositório.
+
+O fluxo esperado é:
+
+```text
+investigação aberta
+docs/investigacoes/
+        │
+        ├── conclusão estável
+        │       └── incorporar à fonte vigente responsável pelo assunto
+        │
+        └── encerramento da investigação
+                ├── possui valor permanente
+                │       └── preservar em docs/historico/investigacoes/
+                │
+                └── possui apenas valor temporário
+                        └── manter local enquanto útil e depois descartar
+```
+
+### 6.2 Referências, preservação e autoridade
+
+- Documentos históricos não prevalecem sobre fontes vigentes. Seu corpo pode
+  preservar nomes e premissas da época; cabeçalhos e avisos de navegação podem
+  ser atualizados para evitar uso indevido.
+- Documentos vigentes devem usar caminhos canônicos. Movimentações devem
+  atualizar este índice, os catálogos e as referências vigentes na mesma
+  alteração.
+- Conteúdo normativo deve referenciar IDs `RN-*`; decisões de integração e
+  operação externa devem referenciar IDs `DI-*` quando aplicável.
+- Código existente, investigações, históricos, prompts e planos antigos não se
+  tornam fontes normativas por descreverem uma implementação.
+
+## 7. Evolução do glossário e distribuição das explicações
+
+O glossário deve evoluir junto com a documentação vigente. Durante a criação
+ou revisão de regras, modelo, decisões de integração, fluxo, roadmap e guias,
+avalie a inclusão de conceitos que sejam:
+
+- específicos do projeto;
+- reutilizados por múltiplos documentos;
+- relevantes para compreender domínio, arquitetura, integração ou operação;
+- candidatos a gerar dúvidas recorrentes.
+
+Essa avaliação não implica inclusão automática. O glossário não deve funcionar
+como catálogo de código, dicionário de termos técnicos genéricos, inventário de
+tabelas, campos, APIs ou classes, nem duplicação de fontes autoritativas.
+
+Cada verbete deve apontar para suas fontes vigentes e não pode criar regras,
+decisões, valores padrão ou significados ainda não consolidados. Quando faltar
+uma definição necessária, corrija primeiro a fonte responsável pelo assunto.
+
+Um documento autoritativo deve permanecer compreensível sem exigir consulta
+obrigatória ao glossário.
+
+Ao introduzir um termo:
+
+1. explique localmente aquilo que altera comportamento, responsabilidade,
+   ordem de execução ou validade da operação;
+2. use o glossário para a definição semântica estável de conceitos transversais;
+3. apenas referencie termos já conhecidos quando sua definição não for
+   necessária para interpretar o comportamento;
+4. mantenha campos, códigos, métodos HTTP, classes e parâmetros como detalhes
+   técnicos, salvo quando representarem um conceito reutilizável;
+5. revise o glossário na mesma alteração quando uma fonte modificar um conceito
+   estável já registrado.
+
+## 8. Mapa de caminhos antigos
+
+Como alguns caminhos foram atualizados, eles agora servem apenas para migração de referências e não devem ser usados em novos documentos.
+
+| Caminho antigo ou concorrente | Caminho canônico |
 | --- | --- |
 | `docs/1_arquitetura.md`, `docs/arquitetura.md`, `arquitetura.md` | `docs/vigentes/apoio/arquitetura.md` |
 | `docs/2_modelo_dominio.md`, `docs/modelo_dominio.md`, `docs/modelo_de_dominio_v2.md` | `docs/vigentes/autoritativos/modelo_de_dominio.md` |
 | `docs/3_fluxo_implementacao.md`, `docs/fluxo_implementacao.md` | `docs/vigentes/autoritativos/fluxo_de_implementacao.md` |
 | `docs/4_roadmap.md`, `docs/roadmap.md`, `docs/roadmap_v2.md` | `docs/vigentes/autoritativos/roadmap.md` |
 | `docs/4_roadmap_v1.md` | `docs/historico/roadmap_v1_legado.md` |
-| `docs/5_contexto_planejamento.md`, `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md` | `docs/historico/contexto_do_planejamento_do_projeto_backend.md` — histórico |
+| `docs/5_contexto_planejamento.md`, `docs/vigentes/apoio/contexto_do_planejamento_do_projeto_backend.md` | `docs/historico/contexto_do_planejamento_do_projeto_backend.md` |
 | `docs/6_explicacao_sistema_PCA.md`, `docs/vigentes/apoio/contexto_explicando_o_sistema_PCA.md` | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` |
 | `docs/7_decisoes_integracao.md` | `docs/vigentes/autoritativos/decisoes_de_integracao.md` |
 | `docs/regras_negocio.md` | `docs/vigentes/autoritativos/regras_de_negocio.md` |
-| `docs/glossario.md`, `docs/glossario_tecnico.md`, `docs/vigentes/apoio/glossario_tecnico.md` | `docs/vigentes/apoio/glossario.md` |
-| `docs/img/DER_PUBLICACAO_PCA.png` | `docs/diagramas/DER_PUBLICACAO_PCA.png` |
-| `docs/img/fluxograma_PCA.png` | `docs/diagramas/fluxograma_PCA.png` |
-
-Os aliases desta tabela servem para migração e não devem ser usados em novas
-referências.
-
-## 7. Política de referências e preservação
-
-- Documentos vigentes devem usar os caminhos canônicos.
-- Documentos planejados devem ser citados como texto, com seu status, sem link.
-- Conteúdo normativo deve referenciar IDs `RN-*`; escolhas externas ou
-  operacionais devem referenciar IDs `DI-*`.
-- Documentos de apoio, investigações e históricos não prevalecem sobre fontes
-  autoritativas.
-- O corpo de um documento histórico permanece como evidência de sua época,
-  inclusive quando contém nomes antigos. Apenas seu cabeçalho de navegação
-  pode ser atualizado.
-- Movimentações futuras devem atualizar este índice e todas as referências
-  vigentes na mesma alteração.
-- Agentes e colaboradores automatizados devem utilizar preferencialmente os documentos classificados como Autoritativos e considerar documentos de Apoio apenas para contextualização.
-
-## 8. Evolução do glossário e distribuição das explicações
-
-### 8.1 Evolução contínua do glossário
-
-O glossário deve evoluir junto com a documentação vigente. Durante a criação
-ou revisão de RN, modelo de domínio, DI, fluxo, roadmap e demais documentos,
-deve-se avaliar a inclusão de conceitos que sejam:
-
-- específicos do projeto;
-- reutilizados por múltiplos documentos;
-- relevantes para a compreensão do domínio, arquitetura, integração ou
-  operação;
-- candidatos a gerar dúvidas recorrentes entre leitores.
-
-Essa avaliação não implica inclusão automática. O glossário não deve funcionar
-como:
-
-- catálogo de código;
-- dicionário de termos técnicos genéricos;
-- inventário de tabelas, campos, APIs ou classes;
-- catálogo de códigos, números ou parâmetros operacionais;
-- duplicação de RN, DI ou outros documentos autoritativos.
-
-O glossário deve concentrar definições semânticas estáveis e transversais. Cada
-verbete deve indicar suas fontes vigentes e não pode criar regras, decisões,
-valores padrão (`defaults`) ou significados ainda não consolidados. Quando
-faltar uma definição autoritativa necessária, a lacuna deve ser tratada na
-fonte responsável antes de ser resumida no glossário.
-
-### 8.2 Critério de distribuição das explicações
-
-Um documento autoritativo deve permanecer suficientemente compreensível para
-que seu comportamento seja interpretado sem consulta obrigatória ao glossário.
-
-Ao introduzir um termo:
-
-1. Se sua compreensão alterar comportamento, responsabilidade, ordem de
-   execução ou validade da operação, o documento autoritativo deve explicá-lo
-   localmente e indicar as fontes aplicáveis.
-
-2. Se o conceito for transversal e reutilizado em diferentes documentos, o
-   documento deve apresentar a explicação necessária ao contexto, enquanto o
-   glossário concentra sua definição semântica mais estável.
-
-3. Se o conceito já estiver adequadamente definido no glossário e não for
-   essencial para interpretar o comportamento descrito, o documento pode
-   apenas utilizá-lo ou referenciá-lo.
-
-4. Representações técnicas, nomes de campos, códigos, números, protocolos,
-   métodos HTTP, classes concretas, parâmetros operacionais e detalhes de
-   implementação podem aparecer como complemento pedagógico quando agregarem
-   compreensão, preferencialmente depois do conceito correspondente, mas não
-   devem ser promovidos automaticamente a verbetes.
-
-5. Quando uma alteração documental modificar um conceito estável e transversal
-   já registrado, o glossário deve ser revisado na mesma mudança para
-   permanecer coerente com suas fontes.
+| `docs/glossario.md`, `docs/glossario_tecnico.md` | `docs/vigentes/apoio/glossario.md` |
+| `docs/vigentes/operacional/estado_atual.md` | `.agents/planejamento/estado_atual.md` |
+| `docs/vigentes/operacional/catalogo_codigos_publicos.md` | `docs/vigentes/operacional/guia_operacional_de_diagnostico_da_publicacao_pca.md` |
+| `docs/vigentes/apoio/guia_de_configuracao_de_producao.md` | `docs/vigentes/operacional/guia_de_configuracao_de_producao.md` |
+| `docs/vigentes/apoio/guia_de_implantacao_e_rollback.md` | `docs/vigentes/operacional/guia_de_implantacao_e_rollback.md` |
+| `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | `docs/historico/operacional/guia_de_execucao_das_probes.md` |
+| `docs/vigentes/apoio/guia_de_migracao_assistida_e_recuperacao.md` | `docs/historico/operacional/guia_de_migracao_assistida_e_recuperacao.md` |
+| `docs/investigacoes/guia_de_compreensao_do_backend.md` | `docs/historico/didatico/guia_de_compreensao_do_backend.md` |
+| `docs/img/DER_PUBLICACAO_PCA.png` | `docs/vigentes/apoio/diagramas/DER_PUBLICACAO_PCA.png` |
+| `docs/img/fluxograma_PCA.png` | `docs/vigentes/apoio/diagramas/fluxograma_PCA.png` |
+| `docs/diagramas/DER_PUBLICACAO_PCA.png` | `docs/vigentes/apoio/diagramas/DER_PUBLICACAO_PCA.png` |
+| `docs/diagramas/fluxograma_PCA.png` | `docs/vigentes/apoio/diagramas/fluxograma_PCA.png` |
+| `docs/diagramas/visao_executiva_projeto_pca_pncp.md` | `docs/vigentes/apoio/diagramas/visao_executiva_projeto_pca_pncp.md` |

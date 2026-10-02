@@ -1,6 +1,6 @@
 {
     "name": "semae/pca",
-    "description": "Backend em PHP para publicação e sincronização do Plano de Contratações Anual (PCA) com o Portal Nacional de Contratações Públicas (PNCP).",
+    "description": "Solução para publicar e manter o Plano de Contratações Anual (PCA) do SGI alinhado ao PNCP, com segurança e rastreabilidade.",
     "type": "project",
     "require": {
         "php": "^8.1",

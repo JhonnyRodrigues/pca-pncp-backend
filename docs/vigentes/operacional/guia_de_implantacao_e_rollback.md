@@ -1,10 +1,8 @@
 # Guia de implantação e rollback
 
-**Classificação documental:** Apoio
+**Classificação documental:** Operacional
 
-**Status:** Vigente
-
-**Escopo:** construção da release, transferência SFTP/SSH, implantação inicial,
+**Autoridade/Escopo:** construção da release, transferência SFTP/SSH, implantação inicial,
 atualização e rollback do backend PCA/PNCP
 
 ## 1. Limites e topologia
@@ -24,9 +22,9 @@ A Blank `PCA_PUBLICAR_B` carrega:
 O arquivo registro, o arquivo perfil de produção e o arquivo `ca-bundle.crt` permanecem externos em
 `/var/www/configuracoes/pca-pncp/`. Nunca os inclua no pacote de release.
 
-Esta sprint não autoriza publicação, acesso Oracle ou chamada ao PNCP. Abrir a
-interface sem clicar em **Publicar** é apenas uma conferência visual; não é o
-smoke test funcional da Sprint 9.5.
+Este guia não autoriza publicação, acesso Oracle ou chamada ao PNCP. Abrir a
+interface sem clicar em **Publicar** é apenas uma conferência visual; não é um
+smoke test funcional.
 
 ## 2. Preparar a release na máquina de desenvolvimento
 
@@ -268,7 +266,8 @@ Oracle nem efeitos já produzidos no PNCP.
 
 O Gitea institucional associa `develop` à homologação e `main` à produção, mas
 sua integração com este repositório foi adiada por decisão do mantenedor. A
-entrega manual por SFTP é temporária e não bloqueia esta sprint.
+entrega manual por SFTP permanece como o procedimento disponível enquanto essa
+automação não for adotada.
 
 Quando a automação for retomada, o pipeline de CI/CD deverá reproduzir as
 mesmas etapas deste guia: testar, construir, verificar, identificar a release,

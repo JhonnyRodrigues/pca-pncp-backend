@@ -121,7 +121,7 @@ seu diretório completo e uma cópia do evento `onExecute` da Blank. O arquivo
 novo só pode ser transferido após `package:archive` passar com commit limpo;
 conferir seu SHA-256 no destino. Extrair em diretório candidato separado,
 validar topologia, hashes e autoload como `www-data`, e só então trocar os
-diretórios conforme o [guia de implantação e rollback](../../../docs/vigentes/apoio/guia_de_implantacao_e_rollback.md).
+diretórios conforme o [guia de implantação e rollback](../../../docs/vigentes/operacional/guia_de_implantacao_e_rollback.md).
 Atualizar e compilar a Blank, abrir somente a interface e não acionar
 **Publicar** neste microciclo.
 

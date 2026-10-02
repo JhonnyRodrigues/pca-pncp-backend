@@ -25,8 +25,11 @@ Leia somente o necessário para a tarefa. Use como pontos de entrada:
 - `README.md`: visão e finalidade do projeto;
 - `AGENTS.md`: estas instruções operacionais;
 - `.agents/README.md`: interpretação dos artefatos de agentes;
+- `.agents/planejamento/estado_atual.md`: progresso, gates, pendências e próxima
+  atividade autorizada;
 - `docs/README.md`: taxonomia e autoridade documental;
-- `docs/vigentes/operacional/estado_atual.md`: progresso, gates, pendências e próxima sprint autorizada;
+- `docs/vigentes/operacional/situacao_operacional.md`: condição do produto
+  instalado, restrições correntes e ações seguras;
 - roadmap vigente e documentos autoritativos relacionados à tarefa.
 
 O pedido atual do mantenedor define o objetivo e o escopo. Os documentos

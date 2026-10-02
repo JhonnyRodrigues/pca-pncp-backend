@@ -4,12 +4,9 @@
 *.deb
 
 /vendor/
-/build/
+/build/*
+!/build/README.md
 .phpunit.result.cache
 
+# Investigações são artefatos locais temporários. Conclusões devem ser promovidas à documentação vigente ou preservadas em docs/historico/.
 /docs/investigacoes/*
-!/docs/investigacoes/auditoria_fase_4_application_2026-08-10.md
-!/docs/investigacoes/guia_de_compreensao_do_backend.md
-!/docs/investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md
-!/docs/investigacoes/evidencias_parciais_sprint_5_9_contratos_adapters_2026-08-26.md
-!/docs/investigacoes/investigacao_encerramento_fase_5_sprint_5_10_2026-08-28.md

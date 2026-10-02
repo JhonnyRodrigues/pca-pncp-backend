@@ -644,8 +644,11 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 
 | Arquivo | Função |
 | --- | --- |
+| `.editorconfig` | Orienta editores compatíveis a usar o charset UTF-8, finais de linha LF e quebra final nos arquivos do repositório. |
+| `.gitattributes` | Ajusta a verificação de whitespace ao acervo legado com CRLF e identifica formatos binários para impedir conversão de conteúdo e diffs textuais inadequados. |
 | `composer.json` | Dependências, PSR-4 e comandos ativos. |
 | `composer.lock` | Versões resolvidas das dependências. |
+| `build/README.md` | Explica a finalidade da pasta de artefatos gerados, seu conteúdo comum e os limites da limpeza local. |
 | `tools/README.md` | Distingue ferramentas versionadas de resultados gerados, documenta o fluxo normal de release e limita a repetição de gates encerrados. |
 | `tests/README.md` | Orienta a suíte padrão, contratos opt-in e cuidados antes de executar qualquer gate com recurso real. |
 | `tools/package/build.php` | Constrói em `build/` o pacote isolado com código, dependências de produção e manifesto de integridade. |
@@ -662,7 +665,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `phpunit.pncp83.contract.xml` | Suíte separada dos contratos locais e gates PNCP da Sprint 8.3. |
 | `phpunit.sprint84.contract.xml` | Suíte separada dos contratos e do runner da Sprint 8.4. |
 | `phpunit.sprint85.contract.xml` | Suíte separada dos contratos locais e futuros gates opt-in da Sprint 8.5. |
-| `README.md` | Entrada cognitiva e comandos de preparação. |
+| `README.md` | Entrada cognitiva que explica o que o projeto faz, por que ele é útil, como começar e onde obter ajuda. |
 
 ### Migrações do banco de dados
 
@@ -691,7 +694,7 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 
 | Arquivo | Função |
 | --- | --- |
-| `docs/README.md` | Governa classificação, status, precedência, navegação e caminhos canônicos da documentação. |
+| `docs/README.md` | Governa classificação, autoridade, navegação e caminhos canônicos da documentação mantida em `docs/`. |
 | `docs/vigentes/autoritativos/regras_de_negocio.md` | Define as regras de negócio vigentes identificadas por `RN-*`. |
 | `docs/vigentes/autoritativos/modelo_de_dominio.md` | Define conceitos, identidades, relações e invariantes do modelo de domínio. |
 | `docs/vigentes/autoritativos/decisoes_de_integracao.md` | Registra as decisões de integração vigentes e seus gates. |
@@ -702,15 +705,17 @@ consulte o [catálogo de diretórios](catalogo_de_diretorios.md).
 | `docs/vigentes/apoio/glossario.md` | Mantém o índice semântico da linguagem de negócio, integração e arquitetura. |
 | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
 | `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |
-| `docs/vigentes/apoio/guia_de_configuracao_de_producao.md` | Orienta o provisionamento externo do registro, perfil e CA bundle de produção, inclusive permissões e configuração persistente no Apache/PHP. |
-| `docs/vigentes/apoio/guia_de_implantacao_e_rollback.md` | Orienta construção, transferência SFTP, implantação inicial, atualização e rollback da release autocontida. |
 | `docs/vigentes/apoio/catalogo_de_diretorios.md` | Explica a finalidade das pastas e orienta onde localizar ou criar cada tipo de artefato. |
-| `docs/vigentes/apoio/guia_de_execucao_das_probes.md` | Ensina a preparar, executar, diagnosticar e encerrar as probes e gates 5.1, 5.9, 8.2, 8.3 e 8.4. |
 | `docs/vigentes/apoio/catalogo_de_comandos_composer.md` | Classifica os scripts Composer e informa finalidade, dependências, efeitos externos e autorização necessária. |
 | `docs/vigentes/apoio/catalogo_de_arquivos.md` | Cataloga a função dos arquivos ativos de código, testes, configuração e documentação vigente. |
-| `docs/diagramas/DER_PUBLICACAO_PCA.png` | Apoia visualmente a compreensão do modelo de dados da publicação do PCA. |
-| `docs/diagramas/fluxograma_PCA.png` | Apoia visualmente a compreensão do fluxo funcional do PCA. |
-| `docs/vigentes/operacional/estado_atual.md` | Centraliza progresso, última sprint concluída, próxima sprint na ordem, gates, pendências e restrições, sem criar regra ou decisão. |
+| `docs/vigentes/operacional/situacao_operacional.md` | Resume a condição do produto instalado, a restrição corrente e as ações seguras para manutenção e suporte. |
+| `docs/vigentes/operacional/guia_operacional_de_diagnostico_da_publicacao_pca.md` | Orienta a interpretação das respostas, a correlação dos eventos e a conduta segura de suporte. |
+| `docs/vigentes/operacional/guia_de_configuracao_de_producao.md` | Orienta o provisionamento externo do registro, perfil e CA bundle de produção, inclusive permissões e configuração persistente no Apache/PHP. |
+| `docs/vigentes/operacional/guia_de_implantacao_e_rollback.md` | Orienta construção, transferência SFTP, implantação inicial, atualização e rollback da release autocontida. |
+| `docs/vigentes/apoio/diagramas/DER_PUBLICACAO_PCA.png` | Apoia visualmente a compreensão do modelo de dados da publicação do PCA. |
+| `docs/vigentes/apoio/diagramas/fluxograma_PCA.png` | Apoia visualmente a compreensão do fluxo funcional do PCA. |
+| `docs/vigentes/apoio/diagramas/visao_executiva_projeto_pca_pncp.md` | Explica visualmente o problema, a convergência e os principais controles do sistema. |
+| `.agents/planejamento/estado_atual.md` | Centraliza progresso da implementação, gates, pendências e continuidade do trabalho para agentes. |
 
 Para entender o caminho entre esses arquivos, volte ao
 [guia de leitura](guia_de_leitura_do_codigo.md).

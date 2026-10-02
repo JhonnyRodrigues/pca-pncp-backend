@@ -13,7 +13,7 @@ Fontes: [roadmap 8.5](../../../docs/vigentes/autoritativos/roadmap.md),
 [especificação de logs](../../../docs/vigentes/autoritativos/especificacao_de_logs_estruturados.md),
 [fluxo vigente](../../../docs/vigentes/autoritativos/fluxo_de_implementacao.md)
 e [regras de negócio](../../../docs/vigentes/autoritativos/regras_de_negocio.md).
-O progresso pertence ao [estado operacional](../../../docs/vigentes/operacional/estado_atual.md).
+O progresso pertence ao [estado do trabalho](../../planejamento/estado_atual.md).
 
 Cada microciclo exige autorização independente e pausa obrigatória ao
 terminar. A aprovação de um incremento não autoriza o seguinte. O pedido de

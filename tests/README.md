@@ -33,16 +33,9 @@ teste:
 3. nunca reutilize configuração real em um teste local comum;
 4. não repita um gate real já encerrado apenas para obter nova evidência.
 
-O comando local específico da Sprint 9.4 é:
-
-```bash
-composer contract:sprint94:tests
-```
-
 ## Convenções
 
-- teste comportamento observável, regra ou contrato, não detalhes internos
-  triviais;
+- teste comportamento observável, regra ou contrato, não detalhes internos triviais;
 - use `Red -> Green -> Refactor` em passos pequenos;
 - mantenha credenciais, tokens, perfis reais e respostas brutas fora do Git;
 - declare somente validações efetivamente executadas;

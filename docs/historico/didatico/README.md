@@ -1,12 +1,16 @@
 # Exemplos didáticos iniciais
 
 **Classificação documental:** Histórico  
-**Status:** Histórico  
 **Autoridade/Escopo:** material de aprendizado sem participação na aplicação ativa
 
 Esta pasta preserva exercícios usados no início do projeto para compreender
 autoload, classes simples e execução local de testes. Eles foram úteis durante a
 aprendizagem, mas não integram o backend PCA/PNCP.
+
+- O [guia histórico de compreensão do backend](guia_de_compreensao_do_backend.md)
+preserva a investigação didática realizada quando a camada Application havia
+acabado de ser construída. Ele pode conter caminhos e explicações superados e
+deve ser confrontado com a documentação vigente.
 
 - `autoload_manual.php` demonstra `spl_autoload_register()` e delegava primeiro
   ao autoloader do Composer.

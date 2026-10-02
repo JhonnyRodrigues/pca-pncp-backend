@@ -1,9 +1,8 @@
 # Investigação para encerramento da Fase 5 — Sprint 5.10
 
-**Classificação documental:** Investigação  
-**Status:** Encerrada sem execução Oracle real — superada por revisão normativa em 31/08/2026
+**Classificação documental:** Histórico  
 **Data de referência:** 28/08/2026  
-**Autoridade/Escopo:** inventário e procedimento investigativo; não cria regra,
+**Autoridade/Escopo:** inventário histórico e procedimento investigativo; não cria regra,
 decisão física ou contrato
 
 ## Nota de encerramento

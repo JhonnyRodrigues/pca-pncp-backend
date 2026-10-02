@@ -1,11 +1,12 @@
 # Guia de execução das probes e gates 5.1, 5.9, 8.2, 8.3 e corretivo 8.4.7-C
 
-**Classificação documental:** Apoio
+**Classificação documental:** Histórico
 
-**Status:** Vigente
+**Autoridade/Escopo:** procedimento encerrado dos gates 5.1, 5.9, 8.2, 8.3 e
+8.4.7-C; preservado como evidência, sem autorizar repetição
 
-**Autoridade/Escopo:** roteiro operacional didático; não cria autorização,
-regra de negócio ou configuração nova
+> Este guia registra procedimentos de etapas já concluídas. Não o execute como
+> instrução operacional vigente.
 
 ## 1. Antes de começar
 
@@ -509,7 +510,7 @@ volte o campo para `null` e repita o preflight antes de qualquer novo gate.
 Nunca altere candidatos preexistentes desconhecidos.
 
 As classificações resumidas e os riscos de todos os scripts estão no
-[catálogo de comandos Composer](catalogo_de_comandos_composer.md).
+[catálogo de comandos Composer](../../vigentes/apoio/catalogo_de_comandos_composer.md).
 
 ## 8. Como interpretar e compartilhar o resultado
 

@@ -1,15 +1,70 @@
 # Glossário Integrado do Projeto PCA/PNCP
 
 **Classificação documental:** Apoio
-**Status:** Vigente
+
 **Autoridade/Escopo:** índice semântico da linguagem de negócio, domínio, integração, arquitetura e documentação
 
-## 1. Finalidade, autoridade e uso
+## 1. Finalidade, importância, autoridade e uso
 
-Este glossário oferece definições curtas e caminhos de consulta. Ele não cria
-regras de negócio, decisões de integração, comportamento ou arquitetura.
+Este glossário reúne definições e caminhos de consulta para o vocabulário usado
+no projeto. Sua finalidade é ajudar pessoas do negócio e da tecnologia a
+atribuir o mesmo significado aos mesmos termos, tanto na conversa quanto na
+documentação, no modelo e no código.
 
-As fontes usadas nas referências são:
+### 1.1 Por que este glossário existe
+
+Em DDD, **linguagem ubíqua** é o vocabulário compartilhado por pessoas do
+negócio e da tecnologia dentro de um contexto definido. Sem esse vocabulário,
+duas pessoas podem usar a mesma palavra com sentidos diferentes e acreditar que
+concordam. Essa falsa concordância pode se transformar em regra, modelo, teste,
+log ou procedimento incorreto.
+
+O glossário ajuda especialmente a evitar confusões entre:
+
+- identidades, como Plano, versão e publicação;
+- responsabilidades, como UO, Lotação e UASG;
+- estados, como estado desejado e estado externo observado;
+- operações, como consolidar, homologar e publicar;
+- conceitos do domínio e mecanismos técnicos empregados para implementá-los.
+
+Os termos de negócio e de modelagem compõem a linguagem ubíqua do domínio. Os
+termos de integração, arquitetura, operação, implantação e documentação formam
+um vocabulário técnico compartilhado: são necessários para compreender e manter
+o sistema, mas não se tornam conceitos do negócio apenas por constarem aqui.
+
+Alguns termos do negócio são repetidos intencionalmente neste glossário para
+facilitar sua descoberta. Essa repetição não cria uma fonte concorrente: o
+modelo, as regras de negócio e as decisões de integração continuam responsáveis
+por seus respectivos assuntos.
+
+### 1.2 Como usar este glossário
+
+1. No primeiro contato, conheça as categorias e leia as
+   [distinções essenciais](#10-distinções-essenciais) para reconhecer conceitos
+   parecidos que não devem ser confundidos.
+2. Durante a leitura ou a manutenção do projeto, use o atalho `Ctrl+F` para localizar
+   diretamente o termo procurado.
+3. Quando precisar de contexto, regra ou justificativa, siga a fonte indicada
+   no verbete. A definição curta orienta a leitura, mas não substitui a fonte.
+
+O mapa abaixo oferece rotas de consulta sem duplicar um índice de todos os
+termos:
+
+| Objetivo da consulta | Seções recomendadas |
+| --- | --- |
+| Evitar confundir conceitos próximos | **[Distinções essenciais](#10-distinções-essenciais)** |
+| Compreender o negócio e o planejamento | [Termos de negócio e planejamento](#2-termos-de-negócio-e-planejamento) |
+| Entender o modelo de domínio | [Termos de modelagem de domínio](#3-termos-de-modelagem-de-domínio) |
+| Acompanhar publicação, integração e auditoria | [Termos de publicação e integração](#4-termos-de-publicação-e-integração) e [Termos de auditoria](#5-termos-de-auditoria) |
+| Compreender arquitetura, validação e execução | [Termos arquiteturais](#6-termos-arquiteturais), [Validação da Infrastructure](#61-termos-de-validação-da-infrastructure) e [Execução e integração](#62-termos-técnicos-de-execução-e-integração) |
+| Operar e dar suporte ao sistema | [Termos de operação e observabilidade](#7-termos-de-operação-e-observabilidade) |
+| Preparar entrega e implantação | [Termos de entrega e implantação](#8-termos-de-entrega-e-implantação) |
+| Entender documentação e planejamento do trabalho | [Termos de documentação e planejamento](#9-termos-de-documentação-e-planejamento) |
+
+### 1.3 Autoridade e fontes
+
+Este glossário não cria regras de negócio, decisões de integração, comportamento
+ou arquitetura. As fontes usadas nas referências são:
 
 - [Regras de negócio](../autoritativos/regras_de_negocio.md) — `RN-*`;
 - [Modelo de domínio](../autoritativos/modelo_de_dominio.md) — Modelo;
@@ -17,8 +72,13 @@ As fontes usadas nas referências são:
 - [Fluxo de implementação](../autoritativos/fluxo_de_implementacao.md) — Fluxo;
 - [Roadmap de implementação](../autoritativos/roadmap.md) — Roadmap;
 - [Arquitetura](arquitetura.md) — Arquitetura;
+- [Contexto funcional](contexto_funcional_do_sistema_pca.md) — Contexto funcional;
+- [Catálogo de diretórios](catalogo_de_diretorios.md) — Catálogo de diretórios;
+- [Catálogo de arquivos](catalogo_de_arquivos.md) — Catálogo de arquivos;
 - [Especificação de logs estruturados](../autoritativos/especificacao_de_logs_estruturados.md) — Logs;
-- [Estado operacional](../operacional/estado_atual.md) — Estado;
+- [Situação operacional](../operacional/situacao_operacional.md) — Operação;
+- [Guia de implantação e rollback](../operacional/guia_de_implantacao_e_rollback.md) — Guia de implantação;
+- [Estado do trabalho dos agentes](../../../.agents/planejamento/estado_atual.md) — Estado do trabalho;
 - [Governança documental](../../README.md) — Docs;
 - [Governança dos agentes](../../../.agents/README.md) — Agentes;
 - [Instruções operacionais do repositório](../../../AGENTS.md) — `AGENTS.md`.
@@ -27,17 +87,13 @@ Para os termos gerais de engenharia de software, a coluna `Fonte` indica onde
 o conceito aparece ou é aplicado neste projeto. A definição curta preserva o
 sentido consolidado no mercado, sem transformar o glossário em fonte normativa.
 
-Quando houver divergência, prevalecem:
+Quando houver divergência, prevalece a fonte responsável pelo assunto. Se duas
+fontes autoritativas forem realmente incompatíveis, a divergência deve ser
+exposta e decidida, não resolvida por uma hierarquia genérica.
 
-1. regras de negócio;
-2. modelo de domínio;
-3. decisões de integração;
-4. fluxo de implementação;
-5. arquitetura;
-6. glossário.
-
-A divergência deve ser corrigida neste glossário. Código existente, documentos
-históricos, investigações e prompts antigos não definem o significado vigente.
+O glossário deve ser corrigido quando divergir dessas fontes. Código existente,
+documentos históricos, investigações e prompts antigos não definem o
+significado vigente.
 
 ## 2. Termos de negócio e planejamento
 
@@ -58,6 +114,7 @@ históricos, investigações e prompts antigos não definem o significado vigent
 | PCA | Plano de Contratações Anual representado internamente e publicado no PNCP conforme a unidade externa aplicável. | Modelo §§2.2 e 4 |
 | Plano | Planejamento lógico de uma UO para um Ano de Execução, representado por sua fotografia vigente. | `RN-PLA-001`, `RN-PLA-004`; Modelo §7 |
 | Representante | Pessoa responsável pela ação de negócio registrada. | `RN-CAD-003`, `RN-AUD-004`; Modelo §5.5 |
+| SGI | Sistema de Gestão Integrado que abriga o módulo PCA e governa os Planos homologados e o conjunto desejado de Demandas. | Contexto funcional; `DI-002` |
 | Unidade Orçamentária — UO | Unidade responsável pelo Plano no sistema de planejamento. | `RN-CAD-005`, `RN-PLA-001`; Modelo §6.1 |
 | UASG | Identificação da unidade compradora utilizada na publicação externa. | `RN-CAD-005`, `RN-PUB-011`; Modelo §5.3 |
 | Versão do Plano | Marco positivo e incremental de uma evolução homologada do mesmo Plano lógico. | `RN-PLA-002`, `RN-PLA-003`; Modelo §7.2 |
@@ -68,12 +125,14 @@ históricos, investigações e prompts antigos não definem o significado vigent
 | --- | --- | --- |
 | Aggregate | Fronteira de consistência que protege invariantes relacionadas. | Modelo §7; Arquitetura §8 |
 | Aggregate Root | Entity que controla o acesso e a consistência de um Aggregate; neste projeto, `Plano`. | Modelo §7; Arquitetura §8 |
+| Contexto delimitado — Bounded Context | Fronteira conceitual dentro da qual os termos e o modelo possuem significado coerente; a passagem para outro contexto exige tornar diferenças e traduções explícitas. | Modelo §3 |
 | Entity | Conceito reconhecido por identidade contínua, como `Demanda`. | Modelo §6; Arquitetura §8 |
 | Estado desejado | Fotografia homologada que o SGI pretende manter publicada para uma unidade externa. | Modelo §8; `DI-002` |
 | Exceção de domínio | Representação de violação de uma invariante do Domain. | Modelo §§7 e 11; Arquitetura §4.1 |
 | Fato imutável | Registro conceitual de algo concluído, sem adquirir identidade de negócio por possuir chave técnica. | Modelo §10; `DI-006` |
 | Identidade lógica | Valores pelos quais o negócio reconhece a continuidade de um conceito. | `RN-PLA-001`; Modelo §7.1 |
 | Invariante | Condição que deve permanecer verdadeira dentro da fronteira que a protege. | Modelo §11; Arquitetura §4.1 |
+| Linguagem ubíqua | Vocabulário compartilhado por pessoas do negócio e da tecnologia, empregado nas conversas, na documentação, no modelo e no código dentro de um contexto definido. | Modelo §2.2; Arquitetura §2 |
 | Objeto de Valor — Value Object | Valor imutável com igualdade por conteúdo, como `Cnpj`, `AnoExecucao` ou `Uasg`. | Modelo §5; Arquitetura §8 |
 | Política de Domain | Decisão pura que relaciona conceitos e fatos sem acessar mecanismos externos. | Modelo §8; `DI-007` |
 
@@ -85,8 +144,8 @@ históricos, investigações e prompts antigos não definem o significado vigent
 | Baseline de conteúdo | Representação local detalhada do último conteúdo externo cuja convergência foi confirmada; não é mantida pela V1 da integração. | `DI-002` |
 | Convergência | Compatibilidade comprovada entre o conjunto desejado e o estado publicado observado. | `RN-PUB-004`; `DI-002`, `DI-004` |
 | Escrita incerta | Escrita externa cujo efeito não pôde ser confirmado nem descartado. | `DI-004`, `DI-009` |
-| Estado externo observado | Fato obtido do PNCP sobre o que está efetivamente publicado. | `DI-002`; Modelo §8.3 |
-| Estado operacional da publicação | Referência local cross-Plan sobre a situação conhecida da publicação externa. | `RN-PUB-008`; `DI-005`, `DI-007` |
+| Estado externo observado | Fato obtido do PNCP sobre o que está efetivamente publicado. **Estado observado** é o sinônimo usado pelas fontes autoritativas. | `DI-002`; Modelo §8.3 |
+| Estado operacional da publicação | Referência local compartilhada entre diferentes Planos sobre a situação conhecida da publicação externa. | `RN-PUB-008`; `DI-005`, `DI-007` |
 | Estados operacionais | `NAO_PUBLICADO`, `PUBLICADO` e `EXCLUIDO`. | `RN-PUB-008`; `DI-005` |
 | Exclusão integral | Encerramento do PCA externo quando a unidade de publicação fica sem Demandas vigentes. | `RN-PUB-003`; `DI-001` |
 | Justificativa institucional da exclusão integral | Texto fixo enviado pela Application ao excluir um PCA por ausência de Demandas vigentes, sem depender da causa histórica de uma Demanda específica. | `RN-PUB-003`; `DI-007`, `DI-009` |
@@ -97,6 +156,7 @@ históricos, investigações e prompts antigos não definem o significado vigent
 | PCA externo sem vínculo local | Publicação encontrada no PNCP sem associação operacional previamente conhecida pelo SGI. | `DI-002` |
 | PCA vinculado | Publicação externa associada ao estado operacional local conhecido. | `DI-002`, `DI-005` |
 | Perfil de implantação | Configuração autorizada para uma instalação, selecionada por critério explícito e usada para determinar ambiente, identidade institucional, credenciais e parâmetros de integração. | `DI-010` |
+| PNCP | Portal Nacional de Contratações Públicas, sistema externo no qual o PCA é publicado e cujo estado efetivamente publicado é observado pelo backend. | Contexto funcional; `DI-002`, `DI-009` |
 | `PUBLICAR` | Decisão de criar um PCA quando há conjunto vigente e não existe publicação ativa conhecida. | `RN-PUB-001` |
 | Publicação inicial | Criação da representação externa do PCA com seu conjunto inicial de itens. | `RN-PUB-001`; `DI-001` |
 | Reconciliação | Processo consciente de observar fatos e buscar convergência após diferença ou resultado incerto. | `DI-002`, `DI-004` |
@@ -134,6 +194,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Application | Camada de casos de uso, orquestração e contratos necessários ao fluxo. | Arquitetura §4.2; `DI-007` |
 | Aplicação hospedeira | Sistema que inicia e sustenta a execução do backend; neste projeto, a Blank do Scriptcase fornece conexão, login e dados HTTP. | Fluxo §2; `DI-010` |
 | Autoload | Mecanismo que localiza e carrega classes PHP quando elas são usadas, evitando arquivos `require` espalhados pelo código. | Arquitetura §7; `DI-010` |
+| Blank do Scriptcase | Tipo de aplicação do Scriptcase usado como hospedeiro do backend. A Blank `PCA_PUBLICAR_B` inicia a execução e fornece ao entrypoint recursos do ambiente, sem conhecer a composição interna do sistema. | `DI-010`; [Integração](../../../integracao/README.md) |
 | Bootstrap | Passos iniciais necessários para tornar a aplicação executável, como carregar o autoload e preparar o entrypoint. | Arquitetura §7; `DI-010` |
 | Classe `final` | Classe que não pode ser herdada. É usada quando sua responsabilidade deve permanecer fechada, sem variações por subclasses. | Arquitetura §§3 e 8 |
 | Clean Architecture | Organização em camadas na qual as regras internas não dependem dos mecanismos externos; as dependências apontam para o núcleo. | Arquitetura §§3 e 4 |
@@ -163,7 +224,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Mock | Double de teste configurado principalmente para verificar se uma interação esperada ocorreu, por exemplo se uma Port recebeu determinada chamada. | Arquitetura §9 |
 | Namespace | Nome hierárquico que organiza classes PHP e evita colisões entre nomes iguais; o PSR-4 o relaciona aos diretórios. | Arquitetura §3 |
 | Port | Contrato interno pertencente à camada que necessita da capacidade. | Arquitetura §5; `DI-007` |
-| PSR-4 | Convenção que relaciona namespace e caminho de arquivo para o autoload localizar classes PHP. | Arquitetura §3; catálogo de arquivos |
+| PSR-4 | Convenção que relaciona namespace e caminho de arquivo para o autoload localizar classes PHP. | Arquitetura §3; Catálogo de arquivos |
 | Presentation | Camada que protege a entrada pública e apresenta o resultado. | Arquitetura §4.4; `DI-010` |
 | Presenter | Componente que transforma a Response do UseCase em ViewModel estruturado. | Arquitetura §§4.4 e 8; `DI-010` |
 | Repository | Port especializada em reconstrução e persistência de um Aggregate; sua implementação concreta também é um Adapter. | Arquitetura §§5 e 8; `DI-007` |
@@ -187,7 +248,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
-| Controle de concorrência (antes “âncora”) | Linha técnica da tabela PAC_CONTROLES_CONCORRENCIA, sem identidade de negócio, utilizada para serializar execuções por ESCOPO + ANO_EXECUCAO + IDENTIFICADOR_ALVO. Ela funciona como um "ponto de cadeado" persistente: se duas execuções disputarem a mesma publicação, ambas encontrarão essa mesma linha e uma delas será bloqueada via FOR UPDATE NOWAIT. A alteração do termo "âncora" para "controle de concorrência" é apenas semântica e não altera o comportamento do adapter. | `DI-008`; Sprint 5.9 |
+| Controle de concorrência | Linha técnica da tabela PAC_CONTROLES_CONCORRENCIA, sem identidade de negócio, utilizada para serializar execuções por ESCOPO + ANO_EXECUCAO + IDENTIFICADOR_ALVO. Ela funciona como um "ponto de cadeado" persistente: se duas execuções disputarem a mesma publicação, ambas encontrarão essa mesma linha e uma delas será bloqueada via FOR UPDATE NOWAIT. **Âncora** é um sinônimo usado internamente neste projeto para esse controle; não é terminologia comum de mercado. | `DI-008`; Roadmap Sprint 5.9 |
 | Ambiente de treinamento | Ambiente oficial protegido, distinto da produção, no qual integrações externas autorizadas podem ser exercitadas com massa dedicada. | `DI-009` |
 | Cardinalidade esperada | Quantidade exata ou mínima de linhas que uma consulta deve retornar para satisfazer um checkpoint. Divergência interrompe o gate. | Fluxo §11; Roadmap Sprint 8.4 |
 | Checkpoint Oracle | Fotografia verificável do estado Oracle, formada por consultas, colunas e cardinalidades conhecidas e identificada por hash canônico. | Roadmap Sprints 8.4 e 8.5 |
@@ -200,7 +261,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Limpeza best-effort | Tentativa de remover os artefatos criados pelo teste sem presumir que a remoção sempre será possível; qualquer resíduo possível deve permanecer diagnosticado. | `DI-009` |
 | Massa dedicada | Conjunto de registros expressamente reservado à execução contratual, usado para evitar escritas sobre dados operacionais arbitrários e permitir rastreamento e limpeza. | `DI-009` |
 | Preflight | Verificação anterior à interação externa que confirma configuração, destino, autorização de escrita e demais pré-condições exigidas; sua falha impede a execução. | `DI-009`, `DI-010` |
-| Probe | Ponto de execução restrito usado para investigar ou comprovar um contrato no ambiente real. Não é a API normal da aplicação. | Fluxo §11; guia de execução das probes |
+| Probe | Ponto de execução restrito usado para investigar ou comprovar um contrato no ambiente real. Não é a API normal da aplicação. | `DI-009`; Fluxo §11 |
 | Regressão | Reexecução de testes já existentes para verificar que uma mudança nova não quebrou comportamentos anteriormente aprovados. | Arquitetura §9 |
 | Relatório sanitizado | Evidência de execução limitada a estados, códigos, mensagens seguras e identificadores não sensíveis, sem credenciais, sessões, headers, corpos ou payloads integrais. | Logs; `DI-006`, `DI-009` |
 | Resíduo | Artefato externo que pode ter permanecido após uma execução interrompida, incerta ou cuja limpeza não foi comprovada. | `DI-009` |
@@ -217,7 +278,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | ADOdb | Biblioteca usada pelo Scriptcase para oferecer a conexão Oracle ao backend. O backend a recebe pronta e não administra seu ciclo de vida. | `DI-008`, `DI-010` |
 | API | Contrato pelo qual um software oferece operações para outro componente ou sistema. Neste projeto, a fachada pública é a API consumida pela Blank, e o PNCP possui uma API HTTP externa. | Arquitetura §7; `DI-009`, `DI-010` |
 | Bind ou parâmetro vinculado | Valor enviado separadamente do texto SQL por um placeholder. Evita concatenar dados na consulta e preserva tipagem e tratamento pelo driver. | `DI-008`; Fluxo §9 |
-| CA bundle | Arquivo com uma coleção de certificados públicos confiáveis. O cURL/OpenSSL usa essa coleção para verificar se o certificado HTTPS apresentado pelo PNCP pertence a uma cadeia confiável. Ele não contém senha, token ou chave privada. Neste projeto, ele foi copiado integralmente do bundle já usado em DEV, sem gerar certificados novos. | `DI-009`, `DI-010` |
+| CA bundle | Arquivo com uma coleção de certificados públicos confiáveis. O cURL/OpenSSL usa essa coleção para verificar se o certificado HTTPS apresentado pelo PNCP pertence a uma cadeia confiável. Ele não contém senha, token ou chave privada. | `DI-009`, `DI-010` |
 | CLOB | Tipo Oracle para texto grande. `SEGURANCA_LOG.DESCRIPTION` usa CLOB para armazenar o JSON integral dos eventos técnicos. | `DI-006`, `DI-010` |
 | Commit | Confirmação de uma transação, tornando permanentes suas alterações locais. | `DI-004`, `DI-008` |
 | Configuração externa | Valores carregados de uma fonte fora da release e do webroot. A localização externa reduz o acoplamento à implantação, mas não transforma todo valor em segredo. | `DI-010`; Arquitetura §§7.2 e 7.3 |
@@ -252,10 +313,10 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
 | Alerta | Notificação gerada quando uma condição relevante é atendida, como uma taxa de erros acima de um limite. Um alerta pede avaliação humana, mas não prova sozinho que existe um incidente. | Roadmap Sprint 9.2 |
-| Dashboard | Painel visual que organiza gráficos, números e outros indicadores para facilitar o acompanhamento de um sistema. Ele apresenta dados obtidos de uma fonte de dados. | Roadmap Sprint 9.2; Estado |
+| Dashboard | Painel visual que organiza gráficos, números e outros indicadores para facilitar o acompanhamento de um sistema. Ele apresenta dados obtidos de uma fonte de dados. | Roadmap Sprint 9.2; Estado do trabalho |
 | Disponibilidade | Capacidade de um serviço permanecer acessível e apto a cumprir sua função durante o período observado. | Roadmap Fase 9 |
-| Fonte de dados | Sistema ou serviço do qual uma ferramenta consulta informações, como um banco Oracle ou uma plataforma de logs. A fonte armazena ou fornece os dados; o dashboard apenas os apresenta. | Estado |
-| Grafana | Plataforma de visualização e alertas que consulta fontes de dados e organiza informações em dashboards. Ela não é, necessariamente, o local onde os dados ficam armazenados. | Estado |
+| Fonte de dados | Sistema ou serviço do qual uma ferramenta consulta informações, como um banco Oracle ou uma plataforma de logs. A fonte armazena ou fornece os dados; o dashboard apenas os apresenta. | Estado do trabalho |
+| Grafana | Plataforma de visualização e alertas que consulta fontes de dados e organiza informações em dashboards. Ela não é, necessariamente, o local onde os dados ficam armazenados. | Estado do trabalho |
 | Incidente | Evento não planejado que interrompe ou degrada um serviço e exige análise, resposta ou recuperação. | Roadmap Fase 9 |
 | Latência | Tempo decorrido entre iniciar uma operação e receber seu resultado; em uma requisição, corresponde ao tempo percebido até a resposta. | Logs; `DI-009` |
 | Log | Registro datado de um evento ocorrido durante a execução de um sistema. Pode conter nível, mensagem, contexto e identificador de correlação. | Logs |
@@ -286,7 +347,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Deploy ou implantação | Ato de colocar uma release em um ambiente e torná-la disponível para execução. Copiar arquivos é uma parte possível da implantação. | Roadmap Fase 9 |
 | Deploy atômico | Estratégia em que a versão ativa muda de uma release completa para outra sem expor mistura ou estado intermediário aos consumidores. | Guia de implantação |
 | DocumentRoot ou webroot | Diretório cujos arquivos podem ser publicados pelo servidor HTTP. Configurações sensíveis ou específicas do ambiente devem permanecer fora dele. | `DI-010`; Roadmap Fase 9 |
-| FileZilla | Programa cliente (roda na máquina local e pede serviços a outro computador, chamado servidor). Essa ferramenta permite transferir arquivos por diferentes protocolos. Neste projeto, será usado como cliente SFTP; ele não é o protocolo. | Guia de implantação |
+| FileZilla | Programa cliente (roda na máquina local e pede serviços a outro computador, chamado servidor). Essa ferramenta permite transferir arquivos por diferentes protocolos. Neste projeto, é uma opção de cliente SFTP utilizada nas instruções de implantação; ele não é o protocolo. | Guia de implantação |
 | Gitea | Plataforma de hospedagem de repositórios Git que também pode integrar automações de CI/CD. Seu uso institucional não torna o deploy automático sem configuração específica do repositório. | Guia de implantação |
 | Implantação inicial | Primeira instalação da aplicação em um ambiente, quando ainda não existe uma release ativa para substituir. | Guia de implantação |
 | Implantação manual | Implantação cujas etapas são iniciadas e conferidas por uma pessoa, como enviar o pacote por SFTP e executar os comandos do runbook. | Guia de implantação |
@@ -312,18 +373,22 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
 | ADR-lite | Registro conciso que documenta o contexto, a decisão tomada, as alternativas avaliadas, suas consequências e os critérios de aprovação (gates). | `DI`; Docs |
+| Alias | Nome alternativo mantido para localização ou compatibilidade. Ele deve declarar o contexto em que se aplica e não precisa ter significado semanticamente idêntico ao termo preferencial. | Docs |
 | Apoio | Documento que explica e contextualiza sem criar norma concorrente. | Docs |
 | Autoritativo | Documento que constitui fonte oficial para seu escopo declarado. | Docs |
 | Checkpoint de planejamento | Registro incremental que preserva continuidade e precedência do planejamento entre sessões. Não é o checkpoint Oracle. | Agentes |
 | DI — Decisão de Integração | Registro formal da escolha técnica sobre contratos de dados externos, padrões de arquitetura e modelos operacionais para a comunicação entre sistemas. | `DI`; Docs |
-| Fluxo de implementação | Documento vigente que descreve colaboração dinâmica entre camadas e portas. | Docs; seção 17 dos checkpoints |
-| Gate | Condição de validação baseada em evidências que libera um avanço específico do projeto. Um gate existe quando uma decisão depende de hipóteses ainda não comprovadas. Enquanto permanecer aberto, os avanços que dependem dessa evidência permanecem bloqueados. | `DI`; Roadmap; checkpoints |
-| Histórico | Documento substituído preservado para auditoria e aprendizado. | Docs |
-| Investigação | Evidência de pesquisa ou experimentação sem autoridade normativa. | Docs |
+| Fluxo de implementação | Documento vigente que descreve colaboração dinâmica entre camadas e portas. | Docs; Fluxo |
+| Gate | Condição de validação baseada em evidências que libera um avanço específico do projeto. Um gate existe quando uma decisão depende de hipóteses ainda não comprovadas. Enquanto permanecer aberto, os avanços que dependem dessa evidência permanecem bloqueados. | `DI`; Roadmap |
+| Histórico | Documento ou outro material substituído ou encerrado, preservado para auditoria, rastreabilidade ou aprendizado, sem autoridade vigente. | Docs |
+| Investigação | Pesquisa local temporária e sem autoridade; conclusões estáveis devem ser promovidas e evidências relevantes, arquivadas. | Docs |
+| Operacional | Documento que registra situação corrente ou orienta procedimento ainda aplicável à operação e ao suporte. | Docs |
 | Regra de Negócio — RN | Enunciado normativo estável do comportamento exigido pelo negócio. | `RN`; Docs |
-| Roadmap | Documento que organiza a ordem de implementação sem descobrir regras. | Docs; checkpoints |
+| Roadmap | Documento que organiza a ordem de implementação sem descobrir regras. | Docs; Roadmap |
+| Sinônimo | Termo alternativo que preserva o mesmo significado do termo preferencial no contexto declarado. | Docs |
 | Síntese | Fonte independente de conferência que não substitui o checkpoint correspondente. | Agentes |
-| Status documental | Situação atual de um documento, distinta de sua classificação. | Docs |
+| Termo preferencial | Nome adotado como forma principal para representar um conceito neste glossário e na comunicação vigente do projeto. | Docs |
+| Termo substituído | Nome anteriormente utilizado que deixou de ser preferencial; pode ser preservado para reconhecer registros históricos, sem recuperar autoridade vigente. | Docs |
 
 ## 10. Distinções essenciais
 
@@ -333,7 +398,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Fotografia vigente × versão de origem | Conjunto atual versus momento em que a Demanda entrou no planejamento. | `RN-PLA-004` |
 | UO × Lotação × UASG | Responsabilidade pelo Plano, autoria organizacional e unidade compradora. | `RN-CAD-004`, `RN-CAD-005` |
 | Publicação ativa × confirmação | Existência do recurso externo versus convergência da versão. | `RN-PLA-007`; `DI-005` |
-| Estado desejado × observado × operacional | Planejamento homologado, fato externo e referência local cross-Plan. | `DI-002`, `DI-005` |
+| Estado desejado × observado × operacional | Planejamento homologado, fato externo e referência local compartilhada entre diferentes Planos. | `DI-002`, `DI-005` |
 | Sequencial PCA × identidade do Plano | Referência externa versus UO e Ano de Execução. | `RN-PLA-001`; `DI-005` |
 | Port × Adapter | Port é o contrato interno de uma capacidade; Adapter é a implementação concreta que liga esse contrato a um mecanismo externo. Um Repository concreto também pode exercer o papel de Adapter. | Arquitetura §§5, 7.4 e 8; `DI-007` |
 | Inversão de dependência × injeção de dependências | Inversão define que detalhes concretos dependem das abstrações do núcleo; injeção é o mecanismo que entrega uma implementação concreta a quem usa o contrato. | Arquitetura §7.4 |
@@ -353,7 +418,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Auditoria × observabilidade | Fato de negócio confirmado versus diagnóstico técnico. | `DI-006` |
 | Observabilidade × monitoramento | Observabilidade fornece sinais para compreender inclusive situações ainda desconhecidas; monitoramento acompanha condições previamente escolhidas. | Logs; Roadmap Sprint 9.2 |
 | Log × métrica | Log registra um evento com contexto; métrica representa uma medida numérica que pode ser agregada e acompanhada ao longo do tempo. | Logs; Roadmap Sprint 9.2 |
-| Dashboard × fonte de dados | Dashboard apresenta informações; fonte de dados armazena ou fornece as informações consultadas. | Estado |
+| Dashboard × fonte de dados | Dashboard apresenta informações; fonte de dados armazena ou fornece as informações consultadas. | Estado do trabalho |
 | Alerta × incidente | Alerta é uma notificação baseada em uma condição; incidente é uma degradação ou interrupção real que exige resposta. | Roadmap Fase 9 |
 | Commit do Git × commit de transação | O primeiro registra uma fotografia no histórico do código; o segundo confirma alterações de uma transação no banco de dados. | `AGENTS.md` §3; `DI-004`, `DI-008` |
 | FileZilla × SFTP | FileZilla é um programa cliente; SFTP é o protocolo de transferência segura que o programa utiliza neste projeto. | Guia de implantação |

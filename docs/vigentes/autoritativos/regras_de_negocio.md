@@ -274,7 +274,7 @@ registrada explicitamente e não autoriza inferir comportamento.
   homologação.
 - **Evidências de teste:** ausentes.
 - **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
-  `docs/diagramas/fluxograma_PCA.png`.
+  `docs/vigentes/apoio/diagramas/fluxograma_PCA.png`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
 ### RN-FLX-002 — Demanda extraordinária
@@ -302,7 +302,7 @@ registrada explicitamente e não autoriza inferir comportamento.
   desconsolidação PODE reabrir as Demandas, que DEVEM percorrer novamente as
   etapas aplicáveis de avaliação e consolidação.
 - **Origem ou autoridade:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
-  `docs/diagramas/fluxograma_PCA.png`.
+  `docs/vigentes/apoio/diagramas/fluxograma_PCA.png`.
 - **Contexto e justificativa:** consolidação representa o fechamento da análise
   pela UO antes da aprovação presidencial.
 - **Exemplo:** uma Demanda revisada após desconsolidação retorna ao fluxo antes
@@ -312,7 +312,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Elementos afetados:** Demanda, consolidação, desconsolidação e avaliação.
 - **Evidências de teste:** ausentes.
 - **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
-  `docs/diagramas/fluxograma_PCA.png`.
+  `docs/vigentes/apoio/diagramas/fluxograma_PCA.png`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
 ### RN-FLX-004 — Revisão de Demanda avaliada
@@ -322,7 +322,7 @@ registrada explicitamente e não autoriza inferir comportamento.
   revisão, ela DEVE retornar ao operador para correção e DEVE voltar ao fluxo
   de avaliação.
 - **Origem ou autoridade:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
-  `docs/diagramas/fluxograma_PCA.png`.
+  `docs/vigentes/apoio/diagramas/fluxograma_PCA.png`.
 - **Contexto e justificativa:** a revisão não equivale a autorização ou
   homologação e preserva o controle do workflow.
 - **Exemplo:** a gerência solicita revisão, o operador corrige e submete
@@ -332,7 +332,7 @@ registrada explicitamente e não autoriza inferir comportamento.
 - **Elementos afetados:** Demanda, operador e avaliação.
 - **Evidências de teste:** ausentes.
 - **Decisões e documentos relacionados:** `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` e
-  `docs/diagramas/fluxograma_PCA.png`.
+  `docs/vigentes/apoio/diagramas/fluxograma_PCA.png`.
 - **Histórico:** criada em 30/07/2026 na consolidação do catálogo.
 
 ## 4.3 Demandas
@@ -1084,8 +1084,8 @@ sobre o estado ou a pendência que ele efetivamente revisa.
 - `docs/vigentes/autoritativos/modelo_de_dominio.md`;
 - `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md`;
 - `docs/vigentes/apoio/glossario.md`;
-- `docs/diagramas/DER_PUBLICACAO_PCA.png`;
-- `docs/diagramas/fluxograma_PCA.png`.
+- `docs/vigentes/apoio/diagramas/DER_PUBLICACAO_PCA.png`;
+- `docs/vigentes/apoio/diagramas/fluxograma_PCA.png`.
 
 - `docs/vigentes/autoritativos/fluxo_de_implementacao.md`;
 - [Roadmap de implementação](roadmap.md).

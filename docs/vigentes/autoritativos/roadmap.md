@@ -51,7 +51,7 @@ exclusivamente histórica e didática.
 
 O progresso corrente, a última sprint concluída, a próxima sprint na ordem,
 os gates, as pendências e as restrições são mantidos no
-[estado operacional do projeto](../operacional/estado_atual.md).
+[estado do trabalho dos agentes](../../../.agents/planejamento/estado_atual.md).
 
 As fases e sprints abaixo permanecem a sequência prescritiva vigente. O estado
 operacional não altera essa ordem nem seus critérios de avanço.
@@ -611,7 +611,7 @@ Referências: DI-008 e DI-009.
 recebem valores depois do respectivo teste contratual.
 
 Relatório não autoritativo de suporte:
-[`Evidências da Sprint 5.1 — gates Oracle e PNCP`](../../investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md).
+[`Evidências da Sprint 5.1 — gates Oracle e PNCP`](../../historico/investigacoes/evidencias_sprint_5_1_gates_oracle_pncp_2026-08-17.md).
 
 #### Sprint 5.2 — Sessão Oracle, unidade de trabalho, estratégia e locks
 
@@ -920,7 +920,7 @@ Referência principal: DI-010 e gates das DI-008 e DI-009.
 O [plano aprovado da Sprint 8.5](../../../.agents/sprints/planos/plano_sprint_8.5.md)
 organiza dez microciclos, com autorização independente e pausa ao final de
 cada um. O progresso e a liberação de gates permanecem no
-[estado operacional](../operacional/estado_atual.md).
+[estado do trabalho dos agentes](../../../.agents/planejamento/estado_atual.md).
 
 **Estado do PCA:** concluída em 21/09/2026 após os dez microciclos autorizados.
 Foram comprovados o tratamento seguro de falhas, a exportação e persistência
@@ -963,7 +963,7 @@ da auditoria de negócio já implementados permanecem inalterados.
 O [plano aprovado da Sprint 9.1](../../../.agents/sprints/planos/plano_sprint_9.1.md)
 separa a preparação documental local do provisionamento externo. A etapa local
 não acessa produção; o avanço exige pausa e autorização específica, conforme o
-[estado operacional](../operacional/estado_atual.md).
+[estado do trabalho dos agentes](../../../.agents/planejamento/estado_atual.md).
 
 **Estado do PCA:** concluída em 22/09/2026. Registro, perfil e CA bundle foram
 provisionados fora do webroot e da release, com leitura mínima pelo Apache/PHP.
@@ -1047,7 +1047,7 @@ postchecks conformes e sem nova chamada ao PNCP.
 - executar checklist operacional e smoke test autorizado;
 - validar responsáveis, contatos, monitoramento e rotina de suporte;
 - registrar limitações aceitas e critérios de reabertura;
-- criar catálogo operacional dos códigos públicos, com significado, efeito,
+- criar guia operacional de diagnóstico da publicação PCA, com significado, efeito,
   evidência necessária e ação segura do suporte;
 - completar o diagnóstico sanitizado de transporte com `curl_errno`, categoria
   estável de falha e duração da tentativa, mantendo `status_http` somente quando

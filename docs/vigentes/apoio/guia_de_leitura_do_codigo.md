@@ -206,34 +206,25 @@ está e evita procurar pelo repositório inteiro.
 > commit. Falhas conhecidas viram resultados seguros; falhas sistêmicas
 > interrompem sem fabricar resultados para unidades não visitadas.
 
-## 9. O que ainda não existe
+## 9. Estado da implementação
 
-A Sprint 8.1 concluiu `PublicadorPcaScriptcase`, o registro externo, o perfil
-validado e `CompositionRootPublicacaoPca`. A Sprint 8.2 comprovou a montagem
-desse Root sem I/O e exercitou sua subcomposição Oracle real em transações,
-rollback e contenção. O roteiro de reprodução está no
-[guia de execução das probes](guia_de_execucao_das_probes.md).
+O fluxo descrito neste guia está implementado. A fronteira pública
+`PublicadorPcaScriptcase`, a Presentation, a Application, o Domain, o
+Composition Root e os adapters concretos de Oracle, PNCP e observabilidade
+integram o mesmo caminho de execução.
 
-O provisionamento de produção de `PCA_PNCP_PROFILE_REGISTRY_FILE`, registro,
-perfil e CA bundle foi concluído na Sprint 9.1, sem executar a aplicação. Ainda
-não foram executados a Blank de produção, o fluxo público integral até o UseCase
-sobre Oracle e PNCP nem o smoke test do pacote autocontido. Os entrypoints das
-probes continuam pertencendo somente às suítes contratuais e não substituem
-`PublicadorPcaScriptcase`.
+A aplicação Blank chama somente as fachadas públicas, entrega ao navegador um
+resultado seguro e registra os eventos técnicos depois do encerramento da
+transação de negócio. O `RegistradorEventosTecnicosScriptcase` persiste o JSON
+integral em CLOB usando a conexão ADOdb emprestada e uma transação técnica
+separada por evento.
 
-A exposição do lote de eventos pela fronteira pública e a adaptação da Blank
-têm contrato aprovado na Sprint 8.5. O Microciclo 2 implementou
-`executarComEventos(...)` e a guarda
-transacional, preservando o ViewModel seguro entregue pela Sprint 8.1. O
-Microciclo 3 comprovou contenção, reconciliação limitada e interrupção
-sistêmica com adapters concretos sobre ADOdb e cURL controlados. O Microciclo 4
-versionou a adaptação da Blank: ela chama somente fachadas públicas, registra
-os eventos depois do resultado do backend e envia ao navegador apenas o
-resultado seguro e o aviso técnico. O corretivo 6A substituiu a macro
-incompatível com CLOB pelo `RegistradorEventosTecnicosScriptcase`, que usa a
-mesma conexão ADOdb emprestada e uma nova transação técnica por evento. O
-Microciclo 5 acrescentou a construção verificável do pacote
-autocontido e o PRECHECK opt-in que reutiliza o checkpoint canônico da Sprint
-8.4 e inclui a leitura integral dos logs. A instalação e os gates reais
-permanecem pendentes; o progresso está no
-[estado operacional](../operacional/estado_atual.md).
+O backend é distribuído em pacote autocontido, com manifesto de integridade, e
+foi instalado junto à aplicação hospedeira. Probes e gates históricos continuam
+separados do fluxo de produção e não substituem suas fachadas públicas.
+
+O progresso da implementação e suas evidências pertencem ao
+[estado do trabalho dos agentes](../../../.agents/planejamento/estado_atual.md).
+A condição do produto instalado e as restrições correntes pertencem à
+[situação operacional](../operacional/situacao_operacional.md), não a este guia
+de leitura.

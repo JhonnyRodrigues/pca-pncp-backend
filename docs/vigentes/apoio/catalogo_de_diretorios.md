@@ -12,9 +12,9 @@ existe. Para descobrir a função de um arquivo específico, consulte o
 scripts do projeto, consulte o
 [catálogo de comandos Composer](catalogo_de_comandos_composer.md).
 
-Diretórios gerados, como `build/` e `vendor/`, podem não existir logo após o
-clone. Eles aparecem aqui porque fazem parte do fluxo de desenvolvimento e
-entrega, embora não sejam versionados.
+O conteúdo gerado de `build/` e o diretório `vendor/` podem não existir logo
+após o clone. Eles aparecem aqui porque fazem parte do fluxo de desenvolvimento
+e entrega. Em `build/`, apenas o README que explica a pasta é versionado.
 
 ## 1. Visão geral
 
@@ -35,9 +35,9 @@ flowchart TD
 | Diretório | Finalidade | Versionado? |
 | --- | --- | --- |
 | `.agents/` | Guarda planos, checkpoints e registros usados para conduzir sprints e microciclos. | Sim |
-| `build/` | Recebe artefatos gerados localmente, incluindo o pacote autocontido. Seu conteúdo pode ser recriado. | Não |
+| `build/` | Recebe artefatos gerados localmente, incluindo o pacote autocontido. Seu conteúdo gerado pode ser recriado. | Parcial: apenas `README.md` |
 | `database/` | Guarda migrations Oracle versionadas, verificações de implantação, consultas operacionais somente leitura e seeds descartáveis separados por ambiente. | Sim |
-| `docs/` | Reúne documentação vigente, histórica, investigativa e diagramas. | Sim |
+| `docs/` | Reúne documentação vigente, histórica e diagramas; investigações locais permanecem ignoradas até serem promovidas ou arquivadas. | Parcial |
 | `integracao/` | Guarda código pertencente ao sistema que hospeda o backend, atualmente a aplicação Blank do Scriptcase. | Sim |
 | `src/` | Contém o código de produção do backend, organizado pelas responsabilidades arquiteturais. | Sim |
 | `tests/` | Contém testes locais, integrações controladas e contratos opt-in para fronteiras reais. | Sim |
@@ -184,19 +184,24 @@ deve ser limpa antes dela.
 | `build/composer-cache/` | Cache local usado durante a construção para evitar downloads desnecessários. |
 | `vendor/` | Dependências da cópia de desenvolvimento; não deve ser confundido com o `vendor/` que vai dentro do pacote. |
 
-`tools/` contém código-ferramenta. `build/` contém o resultado descartável dessas ferramentas. Essa diferença é a mesma existente entre uma forma e o objeto produzido por ela: a ferramenta é mantida; o pacote pode ser apagado e
-reconstruído.
+`tools/` contém código-ferramenta. Com exceção de seu README, `build/` contém o
+resultado descartável dessas ferramentas. Essa diferença é a mesma existente
+entre uma forma e o objeto produzido por ela: a ferramenta é mantida; o pacote
+pode ser apagado e reconstruído.
 
 ## 6. Documentação — `docs/`
 
 | Diretório | Finalidade |
 | --- | --- |
 | `docs/vigentes/autoritativos/` | Fontes oficiais de regras, modelo, decisões de integração, fluxo e roadmap. |
-| `docs/vigentes/operacional/` | Estado corrente, evidências, gates e próxima etapa. |
-| `docs/vigentes/apoio/` | Guias, glossário e catálogos que explicam as fontes oficiais sem criar novas regras. |
-| `docs/investigacoes/` | Pesquisas e evidências que não definem o comportamento vigente. |
-| `docs/historico/` | Versões substituídas preservadas para auditoria e aprendizado. |
-| `docs/diagramas/` | Diagramas e visões visuais do projeto. |
+| `docs/vigentes/operacional/` | Situação do produto e procedimentos ainda aplicáveis à operação, implantação e suporte. |
+| `docs/vigentes/apoio/` | Arquitetura, guias de compreensão, glossário, catálogos e representações visuais que não criam novas regras. |
+| `docs/vigentes/apoio/diagramas/` | Diagramas e visões visuais vigentes que apoiam a compreensão do projeto. |
+| `docs/investigacoes/` | Área local temporária, ignorada pelo Git; conclusões devem ser promovidas e evidências relevantes, arquivadas. |
+| `docs/historico/` | Versões substituídas e procedimentos encerrados preservados para auditoria e aprendizado. |
+| `docs/historico/didatico/` | Exercícios e explicações vinculados a etapas anteriores da construção. |
+| `docs/historico/investigacoes/` | Auditorias e evidências encerradas preservadas como memória do projeto. |
+| `docs/historico/operacional/` | Gates, migrações e runbooks concluídos que não autorizam repetição. |
 
 A classificação e a precedência completas estão em
 [`docs/README.md`](../../README.md).
@@ -208,6 +213,7 @@ A classificação e a precedência completas estão em
 | `.agents/sprints/planos/` | Planos aprovados e registros associados às sprints. |
 | `.agents/sprints/prompts/` | Prompts preservados para continuidade do trabalho. |
 | `.agents/planejamento/` | Material de planejamento transversal. |
+| `.agents/planejamento/estado_atual.md` | Continuidade da implementação, gates, pendências e próxima atividade autorizada. |
 | `.agents/planejamento/checkpoints/` | Pontos de continuidade registrados durante trabalhos extensos. |
 | `.agents/planejamento/sinteses/` | Sínteses de contexto para retomada. |
 | `.agents/arquivado/` | Materiais de agentes que deixaram de ser correntes. |
@@ -229,6 +235,9 @@ A classificação e a precedência completas estão em
 | consulta estado operacional recorrente sem alterar o Oracle | `database/queries/` |
 | é resultado gerado por uma ferramenta | `build/` |
 | explica sem criar uma regra | `docs/vigentes/apoio/` |
+| orienta uma operação ainda aplicável | `docs/vigentes/operacional/` |
+| registra uma investigação local ainda aberta | `docs/investigacoes/` |
+| preserva procedimento ou evidência encerrada | `docs/historico/` |
 
 Este quadro orienta a primeira busca. A responsabilidade real do artefato deve
 confirmar a escolha; um nome técnico isolado não determina sua camada.

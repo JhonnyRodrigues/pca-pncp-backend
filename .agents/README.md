@@ -9,26 +9,57 @@ Este índice explica como interpretar os arquivos destinados a agentes. Ele não
 substitui as instruções operacionais, os checkpoints nem a documentação do
 sistema.
 
-## 1. Ordem inicial de leitura
+## 1. Mapa rápido da documentação
+
+```text
+raiz do repositório/
+├── README.md                     # visão e entrada cognitiva do projeto
+├── AGENTS.md                     # instruções permanentes para agentes
+├── docs/                         # documentação canônica do sistema
+│   ├── README.md                 # índice e autoridade documental
+│   ├── vigentes/                 # conhecimento atual
+│   │   ├── autoritativos/        # regras e decisões oficiais
+│   │   ├── apoio/                # explicações, referências e catálogos
+│   │   │   └── diagramas/        # representações visuais vigentes
+│   │   └── operacional/          # situação e procedimentos aplicáveis
+│   ├── historico/                # material substituído ou encerrado
+│   │   ├── didatico/             # explicações de etapas anteriores
+│   │   ├── investigacoes/        # investigações encerradas preservadas
+│   │   └── operacional/          # procedimentos concluídos
+│   └── investigacoes/            # trabalho local ignorado pelo Git
+└── .agents/                      # planejamento e continuidade dos agentes
+    ├── README.md                 # governança destes artefatos
+    ├── planejamento/             # estado, checkpoints e sínteses
+    │   ├── checkpoints/          # registros incrementais de continuidade
+    │   └── sinteses/             # fontes históricas de conferência
+    ├── sprints/
+    │   ├── planos/               # planos aprovados de implementação
+    │   └── prompts/              # prompts preservados como histórico
+    └── arquivado/                # artefatos de agentes substituídos
+```
+
+## 2. Ordem inicial de leitura
 
 Um agente deve iniciar pelo contexto geral e avançar para o estado específico
 da tarefa:
 
-1. [`README.md`](../README.md) — visão, finalidade e estado geral do projeto;
-2. [`AGENTS.md`](AGENTS.md) — única instrução operacional permanente;
+1. [`README.md`](../README.md) — visão e finalidade do projeto;
+2. [`AGENTS.md`](../AGENTS.md) — única instrução operacional permanente;
 3. este índice — governança dos artefatos de agentes;
-4. [`docs/README.md`](../docs/README.md) — taxonomia e ordem da documentação;
-5. checkpoints aplicáveis à tarefa, respeitando sua precedência;
-6. documentos vigentes indicados pelo índice documental.
+4. [estado atual do trabalho](planejamento/estado_atual.md) — progresso, gates,
+   pendências e próxima atividade autorizada;
+5. [`docs/README.md`](../docs/README.md) — taxonomia e rotas da documentação;
+6. checkpoints aplicáveis à tarefa, respeitando sua precedência;
+7. documentos vigentes indicados pelo índice documental.
 
 Documentos históricos, investigações, sínteses e prompts antigos não
 representam o estado atual por si mesmos.
 
-## 2. Classificação
+## 3. Classificação
 
 | Artefato | Classificação e autoridade |
 | --- | --- |
-| [`AGENTS.md`](AGENTS.md) | Instrução operacional vigente e permanente para agentes neste repositório |
+| [`AGENTS.md`](../AGENTS.md) | Instrução operacional vigente e permanente para agentes neste repositório |
 | [`planejamento/checkpoints/`](planejamento/checkpoints/) | Registros históricos incrementais com autoridade de precedência e continuidade sobre o planejamento |
 | [`planejamento/sinteses/`](planejamento/sinteses/) | Fontes históricas independentes de conferência; não substituem os checkpoints |
 | [`sprints/planos/`](sprints/planos/) | Planos explicitamente aprovados para implementação; valem somente para a sprint e o escopo registrados |
@@ -40,7 +71,7 @@ Não existe prompt inicial estático vigente. Cada novo chat deve receber um
 prompt específico, derivado da tarefa, dos checkpoints aplicáveis e da
 documentação vigente naquele momento.
 
-## 3. Precedência dos checkpoints
+## 4. Precedência dos checkpoints
 
 Os checkpoints do Roadmap V2 devem ser lidos nesta ordem:
 
@@ -51,7 +82,7 @@ Os checkpoints do Roadmap V2 devem ser lidos nesta ordem:
 Um checkpoint posterior prevalece somente sobre o ponto que revisou. A
 cronologia e o conteúdo histórico devem ser preservados.
 
-## 4. Uso seguro e manutenção
+## 5. Uso seguro e manutenção
 
 - Prompts históricos não devem ser executados novamente nem promovidos
   implicitamente a instruções atuais.

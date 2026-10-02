@@ -1,8 +1,10 @@
 # Ferramentas do projeto
 
-Esta pasta contém programas versionados que constroem ou verificam
-entregáveis. Ela guarda as ferramentas; os resultados descartáveis ficam em
-`build/`, que é ignorado pelo Git e pode ser removido e reconstruído.
+Esta pasta contém programas versionados que constroem ou verificam entregáveis.
+
+Ela guarda as ferramentas; os resultados descartáveis ficam em `build/`, cujo
+conteúdo gerado é ignorado pelo Git e pode ser removido e reconstruído. Apenas
+o [`build/README.md`](../build/README.md) é versionado nessa pasta.
 
 ## Fluxo normal de release
 
@@ -19,7 +21,7 @@ composer package:archive
 - `verify.php` confere hashes, topologia, conteúdo permitido e autoload;
 - `archive.php` exige o estado Git esperado e produz o arquivo de transferência.
 
-O atalho `composer package:release` executa as três etapas na ordem. Nenhuma
+O **atalho** `composer package:release` executa as três etapas na ordem. Nenhuma
 delas implanta arquivos ou acessa Oracle, PNCP ou Scriptcase.
 
 ## Ferramentas temporárias preservadas
@@ -36,7 +38,7 @@ seus efeitos, use o
 
 ## Limpeza local
 
-Todo o conteúdo de `build/` é gerado e não versionado. Ele pode ser apagado
-quando nenhum pacote ainda precisar ser transferido ou comparado. A limpeza de
-`build/` não substitui a remoção controlada de artefatos já enviados a um
-servidor.
+Com exceção de `build/README.md`, todo o conteúdo de `build/` é gerado e não
+versionado. Ele pode ser apagado quando nenhum pacote ainda precisar ser
+transferido ou comparado. A limpeza de `build/` não substitui a remoção
+controlada de artefatos já enviados a um servidor.

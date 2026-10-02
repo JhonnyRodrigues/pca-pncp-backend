@@ -1,7 +1,9 @@
 # Registro de Decisões de Integração
 
 **Classificação documental:** Autoritativo
+
 **Status:** Vigente
+
 **Autoridade/Escopo:** decisões DI-001 a DI-010, contratos externos, persistência técnica e operação
 
 ## 1. Finalidade e autoridade
@@ -1210,9 +1212,9 @@ e da execução dos gates de ambiente e contrato.
 ##### DI-010 — Eventos técnicos na fronteira hospedeira
 
 Contrato aprovado no Microciclo 1 da Sprint 8.5. A exportação local foi
-implementada no Microciclo 2 e a adaptação versionada da Blank no Microciclo 4;
-os gates reais permanecem pendentes, conforme o
-[estado operacional](../operacional/estado_atual.md).
+implementada no Microciclo 2 e a adaptação versionada da Blank no Microciclo 4.
+Os gates reais foram concluídos; suas evidências pertencem ao
+[estado do trabalho dos agentes](../../../.agents/planejamento/estado_atual.md).
 
 1. O backend acumula eventos técnicos estruturados somente em memória pelo
    logger PSR-3; eles não integram `PublicarPcaResponse`.

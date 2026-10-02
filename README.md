@@ -1,217 +1,158 @@
-# Backend PCA/PNCP
+# PCA/PNCP
 
-Backend em PHP para publicação e sincronização do Plano de Contratações Anual
-(PCA) com o Portal Nacional de Contratações Públicas (PNCP).
+**Classificação documental:** Autoritativo
 
-## Papel deste documento
+**Status:** Vigente
 
-Este README é a entrada cognitiva do repositório. Ele apresenta:
+**Autoridade/Escopo:** visão geral, finalidade do produto, primeiros passos e
+rota inicial de leitura; não substitui as fontes especializadas.
 
-- o que é o projeto;
-- seus objetivos técnicos e didáticos;
-- o estado geral do trabalho;
-- como localizar as fontes especializadas.
+Este projeto é uma solução para publicar e manter o Plano de Contratações Anual (PCA) do SGI
+alinhado ao PNCP, com segurança e rastreabilidade.
 
-Ele é autoritativo sobre a visão geral e a finalidade de aprendizado, mas não
-substitui as fontes específicas:
+O sistema transforma os Planos homologados no SGI na fotografia que deve existir
+no Portal Nacional de Contratações Públicas (PNCP), compara esse estado desejado
+com o que está efetivamente publicado e conduz as alterações necessárias. Uma
+operação só é considerada concluída depois que o resultado externo é novamente
+observado e a convergência é comprovada.
 
-- [`docs/README.md`](docs/README.md) governa classificação, vigência e
-  navegação documental;
-- [`docs/vigentes/autoritativos/regras_de_negocio.md`](docs/vigentes/autoritativos/regras_de_negocio.md)
-  contém as regras de negócio;
-- [`docs/vigentes/autoritativos/modelo_de_dominio.md`](docs/vigentes/autoritativos/modelo_de_dominio.md)
-  contém o modelo conceitual vigente;
-- [`docs/vigentes/autoritativos/decisoes_de_integracao.md`](docs/vigentes/autoritativos/decisoes_de_integracao.md)
-  contém as decisões de integração;
-- [`docs/vigentes/autoritativos/fluxo_de_implementacao.md`](docs/vigentes/autoritativos/fluxo_de_implementacao.md)
-  contém a colaboração dinâmica entre as camadas e portas;
-- [`docs/vigentes/autoritativos/roadmap.md`](docs/vigentes/autoritativos/roadmap.md)
-  contém a ordem de construção vigente;
-- [`docs/vigentes/operacional/estado_atual.md`](docs/vigentes/operacional/estado_atual.md)
-  concentra o progresso corrente, os gates, as pendências e as restrições;
-- [`AGENTS.md`](AGENTS.md) define como agentes devem trabalhar
-  no repositório.
+## Por que este projeto existe
 
-## Objetivo do produto
+Publicar um PCA não se resume a enviar dados para uma API. O SGI e o PNCP são
+sistemas independentes: uma alteração confirmada em um deles não é desfeita
+automaticamente no outro, e falhas de rede podem tornar incerto o resultado de
+uma escrita.
 
-O backend coordena a publicação, a retificação e a exclusão integral de PCA,
-preservando as regras do planejamento interno e a consistência observável com
-o PNCP.
+O projeto concentra esse processo em um fluxo explícito e testável, capaz de:
 
-O produto é desenvolvido como backend independente e será consumido
-inicialmente, em processo, por uma aplicação Scriptcase.
+- reconstruir a fotografia vigente a partir dos Planos e Demandas do SGI;
+- operar por Unidade Orçamentária ou de forma consolidada;
+- decidir entre `PUBLICAR`, `RETIFICAR`, `EXCLUIR_PCA` e `NENHUMA_ACAO`;
+- executar alterações no PNCP sem repetir escritas incertas às cegas;
+- observar novamente o estado externo antes de confirmar a operação no SGI;
+- preservar confirmações, auditoria de negócio, eventos técnicos e correlação;
+- conter falhas por unidade e apresentar resultados seguros ao operador.
 
-## Estado atual
+## Como funciona
 
-O progresso, a última sprint concluída, a próxima sprint na ordem, os gates,
-as pendências e as restrições estão centralizados no
-[estado operacional vigente](docs/vigentes/operacional/estado_atual.md).
+```mermaid
+flowchart LR
+    SGI["SGI<br/>estado desejado"] --> DECISAO["Comparar e decidir"]
+    PNCP["PNCP<br/>estado observado"] --> DECISAO
+    DECISAO --> ACAO["Publicar, retificar,<br/>excluir ou não alterar"]
+    ACAO --> OBSERVAR["Observar novamente"]
+    OBSERVAR --> CONFIRMAR["Confirmar no SGI<br/>e registrar auditoria"]
+```
 
-Para começar pelo fluxo em vez de abrir classes isoladas, consulte o
-[guia de leitura do código](docs/vigentes/apoio/guia_de_leitura_do_codigo.md) e
-o [catálogo navegável](docs/vigentes/apoio/catalogo_de_arquivos.md). O registro
-atualizado dos documentos vigentes e planejados está em
-[`docs/README.md`](docs/README.md).
+O SGI determina o que deveria estar publicado. O PNCP fornece o estado externo
+observado. O backend coordena a convergência entre esses dois estados e trata
+explicitamente conflitos, concorrência, rejeições e resultados incertos.
 
-## Objetivos de aprendizado
+## Estado do produto
 
-Além do desenvolvimento do sistema, este projeto serve como estudo de:
+O sistema está construído, integrado à aplicação Blank do Scriptcase, empacotado
+como release autocontida e instalado em produção. A condição do produto, as
+restrições externas e as ações seguras para manutenção e suporte ficam
+centralizadas na
+[situação operacional](docs/vigentes/operacional/situacao_operacional.md).
 
-- Domain-Driven Design (DDD);
-- Clean Architecture;
-- Design Patterns;
-- SOLID;
-- Test-Driven Development (TDD);
-- testes unitários;
-- boas práticas de programação em PHP;
-- SDD (Spec-Driven Development - Desenvolvimento Orientado por
-  Especificações).
-
-O objetivo não é apenas entregar funcionalidades, mas compreender como regras
-de negócio, modelagem, decisões arquiteturais, testes e integração evoluem em
-conjunto.
+Esse documento operacional deve ser consultado antes de qualquer execução real.
+Uma pendência externa não autoriza repetir uma escrita, avançar uma etapa ou
+inferir que uma operação anterior não produziu efeito.
 
 ## Arquitetura
 
-O projeto adota DDD, Clean Architecture, SOLID, injeção de dependências e TDD.
+O projeto adota:
+
+- PHP 8.1,
+- Domain-Driven Design,
+- Clean Architecture,
+- SOLID,
+- injeção de dependências,
+- PSR-4, PSR-12, PSR-3 e
+- desenvolvimento orientado por testes (TDD).
 
 ```text
-Blank
-  ↓ conhece somente
-API (PublicadorPcaScriptcase)
-  ↓
-Composition Root
-  ↓
-Presentation → Application → Domain
-                  ↑
-            Infrastructure
+Scriptcase -> fachada pública -> Presentation -> Application -> Domain
+
+Infrastructure --implementa--> Ports definidas nas camadas internas
 ```
 
-Responsabilidades conceituais:
+- **Domain** representa conceitos, invariantes e decisões do negócio;
+- **Application** coordena o caso de uso e as fronteiras transacionais;
+- **Infrastructure** se comunica com o mundo físico: implementa Oracle, PNCP, configuração e observabilidade;
+- **Presentation** adapta a entrada e produz uma saída segura;
+- **Composition Root** monta um grafo novo de dependências para cada execução;
+- **Scriptcase** conhece apenas o autoloader e as fachadas públicas.
 
-- **Domain:** modelo de negócio, invariantes e políticas puras;
-- **Application:** casos de uso, orquestração e contratos necessários ao fluxo;
-- **Infrastructure:** adapters de persistência, transporte e recursos externos;
-- **Presentation:** fronteira de entrada e apresentação do resultado.
-
-As setas contínuas mostram o fluxo principal, em direção ao núcleo. As setas
-tracejadas mostram a montagem das dependências, a implementação de contratos e
-o retorno específico da integração com o Scriptcase:
-
-```mermaid
-flowchart TD
-    blank["Scriptcase (Blank)"] --> publicador["Fronteira pública<br/>PublicadorPcaScriptcase"]
-    publicador --> executor["Executor e Composition Root"]
-    executor --> presentation["Presentation<br/>entrada, fachada e ViewModel"]
-    presentation --> application["Application<br/>casos de uso e portas"]
-    application --> domain["Domain<br/>regras e invariantes"]
-
-    executor -. "monta e injeta" .-> infrastructure["Infrastructure<br/>Oracle, PNCP e recursos externos"]
-    infrastructure -. "implementa portas definidas em" .-> application
-
-    publicador -. "executarComEventos retorna" .-> resultado["ResultadoPublicacaoPcaScriptcase<br/>resultado, eventos e aviso técnico"]
-    resultado -. "é entregue à" .-> blank
-```
-
-Essa é a arquitetura-alvo. O grau de implementação de cada camada permanece
-registrado no [estado operacional vigente](docs/vigentes/operacional/estado_atual.md).
-
-## Estrutura principal
-
-```text
-src/
-├── Domain/
-├── Application/
-├── Infrastructure/
-└── Presentation/
-
-tests/
-docs/
-.agents/
-```
+O desenho completo está no
+[guia de arquitetura](docs/vigentes/apoio/arquitetura.md). Para acompanhar uma
+execução pelas classes reais, use o
+[guia de leitura do código](docs/vigentes/apoio/guia_de_leitura_do_codigo.md).
 
 ## Tecnologias e integrações
 
-### Utilizadas no desenvolvimento
-
-- PHP `^8.1`;
-- Composer;
-- autoload PSR-4;
+- PHP `^8.1` e Composer;
 - PHPUnit `^10`;
-- Git.
+- Oracle 19c por conexão ADOdb emprestada pelo Scriptcase;
+- API do PNCP por HTTPS/cURL;
+- aplicação Blank do Scriptcase como sistema hospedeiro;
+- pacote autocontido com manifesto de integridade.
 
-### Integrações-alvo
+## Como começar
 
-- Oracle 19c;
-- API do PNCP;
-- aplicação hospedeira Scriptcase.
+Pré-requisitos para desenvolvimento:
 
-O estado dos gates e dos adapters está no
-[estado operacional vigente](docs/vigentes/operacional/estado_atual.md). A
-presença de uma integração nesta lista não constitui autorização irrestrita
-para avançar no Roadmap.
+- PHP 8.1 ou versão compatível com a restrição do projeto;
+- Composer;
+- extensões requeridas pelas dependências instaladas.
 
-## Preparação e testes
-
-Instale as dependências de desenvolvimento:
+Instale as dependências:
 
 ```bash
 composer install
 ```
 
-Execute a suíte configurada:
+Execute a suíte padrão:
 
 ```bash
 composer tests
 ```
 
-A suíte padrão combina testes de unidade, componentes e integrações
-controladas, sempre sem recursos externos reais. Contratos locais, preflights,
-gates opt-in e comandos de limpeza ficam separados porque possuem dependências
-e efeitos operacionais diferentes.
-
-Consulte o
+A suíte padrão não acessa Oracle, PNCP ou Scriptcase reais. Contratos, probes,
+preflights e operações de pacote possuem comandos separados e podem exigir
+configuração, ambiente e autorização específicos. Consulte o
 [catálogo de comandos Composer](docs/vigentes/apoio/catalogo_de_comandos_composer.md)
-antes de escolher outro comando. Ele informa finalidade, classificação,
-configuração, acesso externo, possibilidade de escrita ou exclusão e
-autorização necessária. A preparação passo a passo das configurações, Blanks
-do Scriptcase, gates e recuperações está no
-[guia didático de execução das probes](docs/vigentes/apoio/guia_de_execucao_das_probes.md).
+antes de executar qualquer outro comando.
 
-O Composer usa `vendor/autoload.php` como autoloader. O antigo exemplo manual e
-os exercícios iniciais foram preservados apenas no
-[histórico didático](docs/historico/didatico/README.md).
+## Documentação e ajuda
 
-## Como trabalhar neste projeto
+| Necessidade | Ponto de entrada |
+| --- | --- |
+| Entender a organização, a autoridade e a ordem da documentação | [Índice documental](docs/README.md) |
+| Consultar a condição do produto e as restrições correntes | [Situação operacional](docs/vigentes/operacional/situacao_operacional.md) |
+| Localizar conceitos e classes no fluxo | [Guia de leitura do código](docs/vigentes/apoio/guia_de_leitura_do_codigo.md) |
+| Identificar a função de um arquivo | [Catálogo de arquivos](docs/vigentes/apoio/catalogo_de_arquivos.md) |
+| Interpretar uma resposta ou diagnosticar uma falha | [Guia operacional de diagnóstico](docs/vigentes/operacional/guia_operacional_de_diagnostico_da_publicacao_pca.md) |
+| Implantar, atualizar ou reverter uma release | [Guia de implantação e rollback](docs/vigentes/operacional/guia_de_implantacao_e_rollback.md) |
+| Contribuir ou atuar como agente | [`AGENTS.md`](AGENTS.md) e [governança de agentes](.agents/README.md) |
 
-Antes de implementar:
+As regras de negócio, o modelo de domínio e as decisões de integração pertencem
+às fontes autoritativas indicadas no índice documental. Investigações,
+documentos históricos e artefatos de agentes não substituem essas fontes.
 
-1. leia este README para compreender o projeto e sua finalidade;
-2. se estiver atuando como agente, leia [`AGENTS.md`](AGENTS.md)
-   e [`.agents/README.md`](.agents/README.md);
-3. consulte [`docs/README.md`](docs/README.md) e siga sua ordem de leitura,
-   classificação e precedência;
-4. inspecione o estado atual do Git e preserve alterações locais;
-5. use o Roadmap V2 para a ordem de construção e os checkpoints aplicáveis
-   para a continuidade do planejamento;
-6. aplique TDD quando a tarefa envolver código;
-7. implemente somente o escopo autorizado;
-8. não trate documentos históricos, investigações ou prompts antigos como
-   especificações vigentes.
+## Finalidade didática
 
-O Roadmap V2 organiza a sequência de implementação sem redefinir regras,
-domínio, decisões de integração ou fluxo.
+Além de entregar a integração PCA/PNCP, o projeto registra a aplicação prática
+de DDD, Clean Architecture, SOLID, Design Patterns, TDD e desenvolvimento
+orientado por especificações (SDD). Esses recursos são empregados para tornar regras,
+fronteiras e riscos compreensíveis, testáveis e reversíveis — não como objetivos
+isolados.
 
-## Processo de aprendizado
+As explicações destinadas a contribuidores devem apresentar o problema, a
+solução, o conceito aplicado e o motivo de cada responsabilidade pertencer à
+camada escolhida. Separadas em:
 
-Ao propor implementações ou refatorações relevantes, explique:
-
-- qual problema de negócio está sendo resolvido;
-- quais regras e decisões sustentam a solução;
-- por que a modelagem representa o domínio;
-- por que cada responsabilidade pertence à camada escolhida;
-- quais testes demonstram o comportamento;
-- quais alternativas foram descartadas e por quê.
-
-As explicações devem favorecer o aprendizado sem transformar documentos de
-apoio, histórico ou código existente em fontes normativas concorrentes.
+- docs/README.md: ponto de entrada para compreender o sistema e localizar suas fontes;
+- AGENTS.md: instruções permanentes para implementar, validar e comunicar alterações;
+- .agents/: planejamento e continuidade do trabalho dos agentes.

@@ -1,0 +1,14 @@
+# O acervo legado ainda combina LF e CRLF. O CR que integra um final CRLF não
+# deve ser relatado pelo Git como espaço em branco no fim da linha.
+* whitespace=cr-at-eol
+
+*.gif binary
+*.gz binary
+*.ico binary
+*.jpeg binary
+*.jpg binary
+*.pdf binary
+*.phar binary
+*.png binary
+*.webp binary
+*.zip binary

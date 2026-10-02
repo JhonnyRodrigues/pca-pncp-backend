@@ -29,9 +29,10 @@ Quando uma explicação deste documento divergir de uma fonte autoritativa,
 prevalece a fonte responsável pelo assunto e a divergência deve ser corrigida
 aqui.
 
-O documento descreve a **arquitetura-alvo aprovada**. O código existente pode
-conter estruturas anteriores e será reconciliado posteriormente por
-refatoração com TDD. A implementação atual não redefine o alvo documental.
+O documento descreve a **arquitetura vigente do sistema construído**. Código e
+documentação devem permanecer coerentes com essas fronteiras; divergências não
+alteram silenciosamente o desenho e precisam ser reconciliadas na fonte
+responsável pelo assunto.
 
 ## 2. Princípios arquiteturais
 
