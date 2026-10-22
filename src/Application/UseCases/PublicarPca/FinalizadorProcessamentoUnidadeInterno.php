@@ -282,7 +282,7 @@ final class FinalizadorProcessamentoUnidadeInterno implements FinalizadorProcess
             SituacaoObservacaoPca::FALHA_SISTEMICA => $this->interromperEDesfazer($falha),
             SituacaoObservacaoPca::ENCONTRADO,
             SituacaoObservacaoPca::AUSENCIA_DEFINITIVA =>
-            $this->interromperEDesfazer($falha),
+                $this->interromperEDesfazer($falha),
         };
     }
 

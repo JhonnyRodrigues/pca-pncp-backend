@@ -17,6 +17,9 @@ use Semae\Pca\Presentation\Controllers\PublicarPcaController;
 use Semae\Pca\Presentation\Facades\FachadaPublicarPca;
 use Semae\Pca\Presentation\Presenters\PublicarPcaPresenter;
 
+/**
+ * Coordena a montagem completa da publicação. Ele monta o grafo, mas não o executa; a execução é chamada pelo executor.
+ */
 final class CompositionRootPublicacaoPca
 {
     private const MODULO_OBSERVABILIDADE = 'publicacao-pca';
@@ -47,22 +50,29 @@ final class CompositionRootPublicacaoPca
         array $perfil,
         CorrelacaoExecucao $correlacao
     ): ComposicaoExecucaoPublicacaoPca {
+        # materializa o perfil tipado
         $perfilTipado = new PerfilPublicacaoPca($perfil);
 
         if (trim($loginAutenticado) === '') {
             throw new InvalidArgumentException('O login autenticado é obrigatório.');
         }
 
+        # adapta a conexão ADOdb emprestada
         $conexao = new ConexaoAdodbEmprestada(
             $conexaoAdodb,
             $perfilTipado->getCharsetAdodb()
         );
+
+        # monta os adapters Oracle
         $oracle = new ComposicaoOraclePublicacaoPca(
             $conexao,
             $perfilTipado,
             $loginAutenticado
         );
+
         $configuracaoTransporte = $perfilTipado->getConfiguracaoTransporte();
+
+        # cria o acumulador de eventos técnicos
         $logger = new AcumuladorEventosTecnicos(
             $correlacao->getValor(),
             $perfilTipado->getAmbiente()->value,
@@ -70,6 +80,8 @@ final class CompositionRootPublicacaoPca
             null,
             new RelogioSistemaEventosTecnicos()
         );
+
+        # monta os adapters PNCP
         $transporte = $this->transportePncp ?? new TransporteCurlPncp(
             $configuracaoTransporte,
             new ExecutorCurlNativoPncp(),
@@ -83,6 +95,7 @@ final class CompositionRootPublicacaoPca
             new TemporizadorSistemaPncp()
         );
 
+        # conecta o núcleo da Application
         $montadorNucleo = new MontadorNucleoPublicacaoPca(
             $oracle->getContextoUsuario(),
             $oracle->getPlanoRepository(),
@@ -95,6 +108,8 @@ final class CompositionRootPublicacaoPca
             $oracle->getRegistroAuditoria(),
             $logger
         );
+
+        # cria Presenter, Controller e fachada da Presentation
         $presenter = new PublicarPcaPresenter();
 
         return new ComposicaoExecucaoPublicacaoPca(

@@ -33,6 +33,7 @@ final class ProcessadorUnidadeInterno implements ProcessadorUnidade
 
         $decisao = $this->decisor->decidir($sessao, $cnpj, $preparacao);
 
+        # Os dois retornos antecipados existem porque o processador não precisa conhecer se o desfecho significa bloqueio, falha reconciliável ou falha sistêmica; ele apenas respeita o resultado produzido pelo colaborador.
         if ($decisao instanceof DesfechoProcessamentoUnidade) {
             return $decisao;
         }

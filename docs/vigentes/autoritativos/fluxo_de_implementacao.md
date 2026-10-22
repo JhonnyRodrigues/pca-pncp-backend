@@ -59,8 +59,12 @@ concorrente de negócio, domínio ou integração.
 
 | Participante | Responsabilidade no fluxo |
 | --- | --- |
-| Aplicação hospedeira | Extrair conexão, login, `SERVER_NAME`, ano e `X-Request-ID` e invocar somente o entrypoint público |
-| `PublicadorPcaScriptcase` | Validar a correlação, selecionar e carregar o perfil externo, construir a entrada e acionar o grafo sem expor o bootstrap à Blank |
+| Aplicação hospedeira | Extrair os recursos do Scriptcase e invocar somente as fachadas públicas do backend |
+| `PublicadorPcaScriptcase` | Expor as operações públicas de publicação e delegar sua execução sem revelar a composição interna à Blank |
+| `ExecutorPublicacaoPcaScriptcase` | Validar a correlação, solicitar o carregamento do perfil externo, construir a entrada, acionar o grafo e adaptar a saída pública |
+| `CarregadorPerfilPublicacaoPca` | Localizar o registro externo, validar os caminhos, selecionar literalmente o perfil pelo `SERVER_NAME` e exigir que os arquivos PHP retornem arrays |
+| `RegistradorEventosTecnicosScriptcase` | Expor a operação pública de registro técnico e delegar o lote já exportado sem revelar SQL ou detalhes Oracle à Blank |
+| `ExecutorRegistroEventosTecnicosScriptcase` | Carregar a configuração necessária e coordenar o registro técnico na conexão emprestada, convertendo falhas em aviso seguro |
 | Fachada interna | Proteger a fronteira da Presentation e impedir que exceções ou detalhes internos atravessem para o consumidor |
 | Controller | Adaptar a entrada tipada, construir o Request e acionar o UseCase já composto |
 | UseCase da Application | Validar, coordenar Ports, formar unidades externas, solicitar decisões ao Domain e compor resultados |
@@ -80,7 +84,9 @@ operacional e estado observado seguem `DI-005`, `DI-006`, `DI-007` e
 ```text
 contexto externo aprovado
         ↓
-PublicadorPcaScriptcase → Composition Root → Fachada → Controller → Request
+PublicadorPcaScriptcase → ExecutorPublicacaoPcaScriptcase
+        ↓
+Carregador de perfil + Composition Root → Fachada interna → Controller → Request
         ↓
 validar solicitação e contexto
         ↓
@@ -126,12 +132,14 @@ intermediário de escrita não substitui a comprovação da convergência.
 ### 4.1 Entrada pública e composição
 
 A aplicação hospedeira extrai somente conexão ADOdb emprestada, login
-autenticado, `SERVER_NAME`, ano e `X-Request-ID` e invoca
-`PublicadorPcaScriptcase`. Antes de qualquer outro passo, o entrypoint exige que
-a correlação recebida seja um UUID v4 completo e preserva literalmente o texto
-fornecido pelo servidor HTTP (`DI-010`).
+autenticado, `SERVER_NAME`, ano e `X-Request-ID` e invoca uma operação pública
+de `PublicadorPcaScriptcase`. Essa fachada delega ao
+`ExecutorPublicacaoPcaScriptcase`. Antes de qualquer outro passo, o executor
+exige que a correlação recebida seja um UUID v4 completo e preserva literalmente
+o texto fornecido pelo servidor HTTP (`DI-010`).
 
-Com correlação válida, o entrypoint lê exclusivamente de
+Com correlação válida, o executor solicita a
+`CarregadorPerfilPublicacaoPca` que leia exclusivamente de
 `PCA_PNCP_PROFILE_REGISTRY_FILE` o caminho absoluto do registro externo. O
 registro funciona somente como índice allowlisted de `SERVER_NAME` exato para
 caminho absoluto de perfil; não contém configuração e não deriva caminhos ou
@@ -139,8 +147,8 @@ ambiente do hostname. Registro, chave, caminho ou perfil inválido falham
 fechado.
 
 O perfil PHP externo é tratado como entrada não confiável. Dele vêm ambiente,
-CNPJ institucional, credenciais e parâmetros. O entrypoint materializa o CNPJ
-e constrói `EntradaPublicarPca` com o ano recebido; a Blank não fornece CNPJ,
+CNPJ institucional, credenciais e parâmetros. O executor materializa o CNPJ e
+constrói `EntradaPublicarPca` com o ano recebido; a Blank não fornece CNPJ,
 perfil, allowlist ou caminhos.
 
 O `CompositionRootPublicacaoPca` recebe os recursos já extraídos, o perfil
@@ -588,12 +596,13 @@ transação Oracle está confirmado. Sem essa confirmação, impede a gravação
 e devolve aviso separado; não confirma uma transação de negócio pendente nem
 tenta compensação ou nova publicação para registrar eventos.
 
-Depois do retorno seguro, a Blank entrega o lote ordenado a
-`RegistradorEventosTecnicosScriptcase`. Para cada evento, o registrador abre
-uma transação técnica curta na mesma conexão emprestada, insere uma linha com
-marcador provisório, obtém o ID preenchido pelo trigger e grava o envelope
-integral no CLOB `DESCRIPTION` por `UpdateClob`. Depois confirma somente essa
-transação. A ação detalhada permanece no JSON, e
+Depois do retorno seguro, a Blank entrega o lote ordenado à fachada pública
+`RegistradorEventosTecnicosScriptcase`, que delega ao
+`ExecutorRegistroEventosTecnicosScriptcase`. Para cada evento, o adapter
+coordenado pelo executor abre uma transação técnica curta na mesma conexão
+emprestada, insere uma linha com marcador provisório, obtém o ID preenchido pelo
+trigger e grava o envelope integral no CLOB `DESCRIPTION` por `UpdateClob`.
+Depois confirma somente essa transação. A ação detalhada permanece no JSON, e
 `SEGURANCA_LOG.ACTION` recebe `execute`. A serialização usa escapes Unicode,
 preserva mapas vazios como objetos JSON e não trunca, fragmenta ou converte o
 texto para ISO-8859-1.

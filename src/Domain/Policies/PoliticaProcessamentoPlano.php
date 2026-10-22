@@ -42,6 +42,7 @@ final class PoliticaProcessamentoPlano
         $exclusoes = array_values(array_diff($idsObservados, $idsDesejados));
 
         if ($inclusoes === [] && $exclusoes === []) {
+            # Depois das operações já executadas, nenhuma nova escrita é necessária.
             return ResultadoDecisaoProcessamentoPlano::nenhumaAcao();
         }
 

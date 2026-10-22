@@ -1,6 +1,6 @@
 <?php
 /*
-* Essa aplicação Blank é uma aplicação hospedeira e ponto de entrada da execução. Ela carrega o autoloader, chama a fachada pública do backend e apresenta o ViewModel, no mesmo processo PHP.
+* Essa aplicação Blank é uma aplicação hospedeira e ponto de entrada da execução. Ela carrega o autoloader, chama as fachadas públicas do backend e apresenta o ViewModel, no mesmo processo PHP.
 *
 * Regras de publicação e configuração permanecem no backend e nos perfis externos provisionados pelo servidor.
 */
@@ -107,6 +107,7 @@ function pca_publicar_responder_json(int $statusHttp, array $conteudo): void
 
 $anoAtual = (int) date('Y');
 $proximoAno = $anoAtual + 1;
+
 $cnpjConsultaPublica = '50853555000154';
 $urlConsultaPublicaAnoAtual = 'https://pncp.gov.br/app/pca/' . $cnpjConsultaPublica . '/' . $anoAtual;
 $urlConsultaPublicaProximoAno = 'https://pncp.gov.br/app/pca/' . $cnpjConsultaPublica . '/' . $proximoAno;
@@ -133,8 +134,7 @@ if ($requisicaoPublicacao) {
             throw new \InvalidArgumentException('Entrada HTTP inválida.');
         }
 
-        $autoload = $this->Ini->path_aplicacao
-            . '/pca-pncp-backend/vendor/autoload.php';
+        $autoload = $this->Ini->path_aplicacao . '/pca-pncp-backend/vendor/autoload.php';
 
         if (!is_file($autoload)) {
             throw new \RuntimeException('Bootstrap indisponível.');
@@ -143,24 +143,18 @@ if ($requisicaoPublicacao) {
         require_once $autoload;
 
         $loginAutenticado = trim((string) [usr_login]);
-        $serverName = isset($_SERVER['SERVER_NAME']) && is_string($_SERVER['SERVER_NAME'])
-			? $_SERVER['SERVER_NAME']
-			: '';
-        $requestId = isset($_SERVER['HTTP_X_REQUEST_ID']) && is_string($_SERVER['HTTP_X_REQUEST_ID'])
-			? $_SERVER['HTTP_X_REQUEST_ID']
-			: null;
+        $serverName = isset($_SERVER['SERVER_NAME']) && is_string($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
+        $correlationId = isset($_SERVER['HTTP_X_REQUEST_ID']) && is_string($_SERVER['HTTP_X_REQUEST_ID']) ? $_SERVER['HTTP_X_REQUEST_ID'] : null;
 
         $saida = (new \Semae\Pca\PublicadorPcaScriptcase())->executarComEventos(
             $this->Db,
             $loginAutenticado,
             $serverName,
             $entrada['ano'],
-            $requestId
+            $correlationId
         );
 
-        $resultadoSerializado = pca_publicar_serializar_resultado(
-            $saida->getResultado()
-        );
+        $resultadoSerializado = pca_publicar_serializar_resultado($saida->getResultado());
         $avisoRegistroTecnico = $saida->getAvisoRegistroTecnico();
 
         if ($avisoRegistroTecnico === null) {
@@ -175,10 +169,7 @@ if ($requisicaoPublicacao) {
                     $saida->getEventos()
                 );
             } catch (\Throwable) {
-                $avisoRegistroTecnico = pca_publicar_texto_utf8(
-                    'O resultado foi preservado, mas os eventos t&eacute;cnicos '
-                        . 'n&atilde;o puderam ser registrados.'
-                );
+                $avisoRegistroTecnico = pca_publicar_texto_utf8('O resultado foi preservado, mas os eventos t&eacute;cnicos n&atilde;o puderam ser registrados.');
             }
         }
 
@@ -193,9 +184,7 @@ if ($requisicaoPublicacao) {
             'resultado' => pca_publicar_resultado_seguro(
                 'SOLICITACAO_INVALIDA',
                 'ENTRADA_HTTP_INVALIDA',
-                pca_publicar_texto_utf8(
-                    'A solicita&ccedil;&atilde;o enviada &eacute; inv&aacute;lida.'
-                )
+                pca_publicar_texto_utf8('A solicita&ccedil;&atilde;o enviada &eacute; inv&aacute;lida.')
             ),
             'avisoRegistroTecnico' => null,
         ];
@@ -209,7 +198,7 @@ if ($requisicaoPublicacao) {
                 pca_publicar_texto_utf8(
                     'N&atilde;o foi poss&iacute;vel concluir a solicita&ccedil;&atilde;o.'
                 ),
-                pca_publicar_correlacao_segura($requestId ?? null)
+                pca_publicar_correlacao_segura($correlationId ?? null)
             ),
             'avisoRegistroTecnico' => null,
         ];
@@ -727,4 +716,3 @@ botaoPublicar.addEventListener('click', () => {
 </script>
 </body>
 </html>
-<?php

@@ -13,6 +13,9 @@ use Semae\Pca\Presentation\ViewModels\PublicarPcaViewModel;
 use Semae\Pca\ResultadoPublicacaoPcaScriptcase;
 use Throwable;
 
+/**
+ * É o coordenador da fronteira Scriptcase.
+ */
 final class ExecutorPublicacaoPcaScriptcase
 {
     private const UUID_V4 = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/Di';
@@ -74,6 +77,7 @@ final class ExecutorPublicacaoPcaScriptcase
         ?string $requestId,
         bool $exportarEventos
     ): ResultadoPublicacaoPcaScriptcase {
+        # valida o request ID
         if ($requestId === null || preg_match(self::UUID_V4, $requestId) !== 1) {
             return new ResultadoPublicacaoPcaScriptcase(
                 FachadaPublicarPca::interrompidaPorRequestIdInvalido(),
@@ -82,9 +86,11 @@ final class ExecutorPublicacaoPcaScriptcase
             );
         }
 
+        # materializa a correlação
         $correlacao = new CorrelacaoExecucao($requestId);
 
         try {
+            # carrega o perfil externo
             $perfil = (new CarregadorPerfilPublicacaoPca())->carregar($serverName);
             $cnpjBruto = $perfil['cnpj'] ?? null;
 
@@ -92,20 +98,29 @@ final class ExecutorPublicacaoPcaScriptcase
                 throw new InvalidArgumentException('CNPJ do perfil é inválido.');
             }
 
+            # materializa o CNPJ
             $cnpj = new Cnpj($cnpjBruto);
+
             $entrada = new EntradaPublicarPca($cnpj->getValor(), $anoExecucao);
+
+            # pede ao Composition Root um grafo preparado para a execução da publicação
             $composicao = $this->compositionRoot->montarExecucao(
                 $conexaoAdodb,
                 $loginAutenticado,
                 $perfil,
                 $correlacao
             );
-            $resultado = $composicao->getFachada()->executar($entrada, $correlacao);
 
+            # chama o View Model produzido pela execução
+            $resultado = $composicao->getFachada()
+                ->executar($entrada, $correlacao);
+
+            # envolve o ViewModel e os eventos técnicos
             return $exportarEventos
                 ? $composicao->exportar($resultado)
                 : new ResultadoPublicacaoPcaScriptcase($resultado, [], null);
         } catch (Throwable) {
+            # impede que detalhes internos de inicialização atravessem a API pública.
             return new ResultadoPublicacaoPcaScriptcase(
                 FachadaPublicarPca::interrompidaPorFalhaInesperada($correlacao),
                 [],

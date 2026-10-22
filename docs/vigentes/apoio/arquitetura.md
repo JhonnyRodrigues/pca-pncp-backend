@@ -67,31 +67,32 @@ Aplicação Blank (Scriptcase)
             │
             │ invoca
             ▼
-    Entrypoint Scriptcase
+    Fachadas públicas
             │
             ▼
-      Composition Root
-            │
-            ▼
-      Presentation ───────► Application ───────► Domain
-                                  ▲                 ▲
-                                  │                 │
-                                  └── Infrastructure┘
-                                      implementa portas
+    Executores internos
+       ├── publicação ──► Composition Root ──► Presentation
+       │                                           │
+       │                                           ▼
+       │                                      Application ──► Domain
+       │                                           ▲            ▲
+       └── registro técnico ──► Infrastructure ────┴────────────┘
+                                  implementa portas e mecanismos externos
 ```
 
 O diagrama representa dependências de código, não a ordem temporal completa de
 uma execução.
 
-- A aplicação Blank consome somente o entrypoint Scriptcase do backend.
+- A aplicação Blank consome somente os entrypoints expostos pelas fachadas
+  públicas do backend.
 - Presentation depende dos contratos e casos de uso da Application.
 - Application depende do modelo e das políticas do Domain.
 - Infrastructure depende das abstrações internas que ela implementa.
 - Domain não depende de Presentation, Infrastructure ou do ambiente
   hospedeiro.
-- O Composition Root pertence ao backend e é o único ponto autorizado a
-  conhecer o conjunto de implementações concretas necessário ao wiring
-  (`DI-010`).
+- O Composition Root pertence ao backend e concentra o wiring do grafo completo
+  da publicação. A operação menor de registro técnico mantém sua composição
+  local no respectivo executor, também dentro de `src/Composition/` (`DI-010`).
 
 A sequência dinâmica de validação, observação, decisão, escrita, confirmação e
 auditoria pertence ao fluxo de implementação, não a este documento.
@@ -216,28 +217,48 @@ Blank:
 
 ```text
 Scriptcase
-    └── autoloader + PublicadorPcaScriptcase
-                            │
-                            ▼
-                  Composition Root interno
-                            │
-                            ▼
-                Fachada + grafo encapsulados
+    ├── autoloader + PublicadorPcaScriptcase
+    │                         │
+    │                         ▼
+    │              Executor de publicação
+    │                         │
+    │                         ▼
+    │                Composition Root interno
+    │                         │
+    │                         ▼
+    │        Fachada da Presentation + grafo encapsulados
+    │
+    └── RegistradorEventosTecnicosScriptcase
+                              │
+                              ▼
+                   Executor de registro técnico
+                              │
+                              ▼
+                    Adapter Oracle de CLOB
 ```
 
 Conforme a `DI-010`:
 
-- Scriptcase fornece somente conexão emprestada ($this->db), login, `SERVER_NAME`, ano e
-  `X-Request-ID` ao entrypoint público;
+- Scriptcase fornece somente os recursos previstos nos contratos das fachadas
+  públicas: conexão emprestada (`$this->Db`), login e `SERVER_NAME`; a publicação
+  também recebe ano e `X-Request-ID`, e o registro técnico recebe aplicação e
+  lote de eventos já exportado;
 - Scriptcase não fornece CNPJ, perfil, allowlist ou caminho e não conhece
-  Controller, UseCase, Repository concreto, cliente PNCP ou política
-  transacional;
-- o Composition Root pertence ao backend;
-- o entrypoint seleciona o perfil (arquivo `perfil.php`) através do arquivo de registro externo (`registro.php`) e o Composition Root recebe perfil já carregado e correlação validada;
+  executores internos, Controller, UseCase, Repository concreto, cliente PNCP
+  ou política transacional;
+- o Composition Root da publicação pertence ao backend; a composição menor do
+  registro técnico permanece em seu executor, sem ser transferida à Blank;
+- `PublicadorPcaScriptcase` delega ao executor de publicação, que valida a
+  correlação, solicita ao carregador a seleção do perfil (`perfil.php`) por meio
+  do registro externo (`registro.php`) e entrega ao Composition Root o perfil
+  já carregado e a correlação validada;
 - o wiring é manual por construtores, ou seja, as dependências das classes são montadas explicitamente pelo código, chamando os construtores com `new`, em vez de usar um container de injeção de dependência ou Service Locator;
 - o Controller não usa macros e não faz wiring, ficando responsável apenas por receber a entrada já preparada, acionar o caso de uso e encaminhar a saída. Ele não conhece detalhes do Scriptcase nem sabe como as dependências são construídas;
 - o Presenter produz o ViewModel (um objeto de saída já preparado para ser consumido pela camada externa). Sem renderizar HTML, JSON ou macros;
-- nenhuma exceção atravessa a fachada: toda falha interna é capturada e convertida em uma resposta controlada antes de sair do backend. Exceções de banco, HTTP, configuração ou regra interna permanecem encapsuladas, evitando a exposição de detalhes internos e credenciais ao consumidor.
+- nenhuma exceção interna atravessa as fachadas públicas: falhas são convertidas
+  em resultado ou aviso seguro antes de sair do backend. Exceções de banco,
+  HTTP, configuração ou regra interna permanecem encapsuladas, evitando a
+  exposição de detalhes internos e credenciais ao consumidor.
 
 O registro externo é somente o índice literal `SERVER_NAME => caminho absoluto
 do perfil`. Seu próprio caminho vem da variável de processo provisionada
@@ -283,8 +304,9 @@ como `config`, `settings` ou `environment`. Já **registro** descreve o papel de
 
 Nesse contexto, **externo** significa fora do repositório, da release e do
 webroot; o arquivo ainda pode estar no mesmo servidor. Registro e perfil não
-são APIs da Blank: `PublicadorPcaScriptcase` os localiza internamente e a Blank
-não escolhe schema, tabela nem caminho de arquivo.
+integram a API da Blank: os executores internos os carregam por meio de
+`CarregadorPerfilPublicacaoPca`, e a Blank não escolhe schema, tabela nem caminho
+de arquivo.
 
 ### 7.3 Segredo vs configuração da implantação vs mapeamento físico
 
@@ -466,9 +488,11 @@ perfil continuam obrigatórios.
 | Request/Response | Contratos de entrada e saída do caso de uso |
 | Controller | Adapta a entrada pública para o caso de uso |
 | Presenter | Transforma a Response em ViewModel estruturado |
-| Entrypoint Scriptcase | Único ponto público consumido pela aplicação hospedeira |
-| Fachada | Fronteira interna da Presentation que converte a execução em ViewModel seguro |
-| Composition Root | Ponto do backend que cria o grafo e injeta dependências concretas |
+| API pública | Conjunto de contratos expostos pelas fachadas públicas à aplicação hospedeira |
+| Entrypoint | Operação pública concreta pela qual a aplicação hospedeira inicia um comportamento do backend |
+| Fachada pública | Componente do backend que expõe entrypoints e esconde executores, composição e camadas internas |
+| Fachada da Presentation | Fronteira interna que converte a execução em ViewModel seguro |
+| Composition Root | Local de composição que cria um grafo e injeta dependências concretas |
 
 Repository não é sinônimo de acesso físico a banco. A interface pertence à
 camada que define sua semântica; o adapter de persistência pertence à

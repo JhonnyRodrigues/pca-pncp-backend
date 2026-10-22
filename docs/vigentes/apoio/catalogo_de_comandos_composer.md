@@ -2,15 +2,17 @@
 
 **Classificação documental:** Apoio  
 **Status:** Vigente  
-**Autoridade/Escopo:** referência didática e operacional dos scripts ativos do
-`composer.json`; não cria autorização, regra de negócio ou configuração
+**Autoridade/Escopo:** referência didática e operacional dos comandos Composer
+usados pelo projeto, incluindo os scripts ativos do `composer.json`; não cria
+autorização, regra de negócio ou configuração
 
 ## 1. Como usar este catálogo
 
-O `composer.json` é a fonte executável dos nomes e comandos. Este catálogo
-explica o que cada script faz e, principalmente, se ele pode alcançar ou
-alterar um recurso real. A presença de um comando nesta página não autoriza sua
-execução.
+O `composer.json` declara as dependências e é a fonte executável dos scripts
+específicos do projeto. Este catálogo explica tanto os comandos básicos do
+Composer usados no fluxo quanto o que cada script faz e, principalmente, se
+ele pode alcançar ou alterar um recurso real. A presença de um comando nesta
+página não autoriza sua execução.
 
 As classificações usadas são:
 
@@ -27,9 +29,24 @@ As classificações usadas são:
 
 ## 2. Desenvolvimento e qualidade
 
+### 2.1 Preparação do ambiente
+
 | Comando | Natureza e finalidade | I/O externo e efeitos | Dependências, autorização e resultado esperado |
 | --- | --- | --- | --- |
-| `composer check-psr4` | Ferramenta local. Gera o autoload otimizado e verifica PSR-4 estrito. | Não acessa Oracle, PNCP ou Scriptcase; atualiza arquivos gerados em `vendor/`. | Exige dependências instaladas; não exige configuração externa nem autorização de gate. Espera término sem classe incompatível com PSR-4. |
+| `composer install` | Comando padrão do Composer. Lê `composer.json` e `composer.lock`, instala em `vendor/` as versões registradas no lock e gera o autoload. | Pode consultar os repositórios configurados e baixar dependências; escreve em `vendor/`. Não acessa Oracle, PNCP ou Scriptcase. | Exige PHP e Composer compatíveis. Execute após clonar o projeto, quando `vendor/` estiver ausente ou após receber alterações em `composer.json` ou `composer.lock`. Com o lock versionado, seu propósito é reproduzir as versões já resolvidas, não escolher versões novas como `composer update`. |
+
+O `composer install` prepara o checkout de desenvolvimento. Ele não precisa ser
+repetido automaticamente antes de toda release quando as dependências locais já
+estão coerentes. Também não deve ser executado no servidor de produção: o
+`package:build` realiza uma instalação isolada, sem dependências de
+desenvolvimento, dentro do pacote autocontido.
+
+### 2.2 Verificações e ferramentas locais
+
+| Comando | Natureza e finalidade | I/O externo e efeitos | Dependências, autorização e resultado esperado |
+| --- | --- | --- | --- |
+| `composer validate` | Comando padrão do Composer. Valida a estrutura de `composer.json` e a coerência com `composer.lock`. | Lê os arquivos do checkout; não acessa Oracle, PNCP ou Scriptcase e não altera dados externos. | Exige Composer. Espera um arquivo válido; avisos devem ser lidos e avaliados. A opção `--strict` também transforma avisos em código de saída de erro e só deve ser adotada como gate obrigatório quando o projeto estiver preparado para tratar todos eles. |
+| `composer check-psr4` | Ferramenta local. Gera o autoload otimizado e verifica se as classes respeitam o mapeamento PSR-4. | Não acessa Oracle, PNCP ou Scriptcase; atualiza arquivos gerados em `vendor/`. | Exige dependências instaladas; não exige configuração externa nem autorização de gate. Espera término sem classe incompatível com PSR-4. Este é o comando preferencial do projeto para validar o autoload. Ele já executa `composer dump-autoload --optimize --strict-psr`; portanto, não é necessário executar antes um `composer dump-autoload` separado. |
 | `composer run-script "start server"` | Ferramenta local. Inicia o servidor PHP embutido em `localhost:8080`, servindo `public/`. | Abre uma porta local e permanece em execução; não acessa integrações por si só. | Exige PHP e dependências da aplicação. Interrompa com `Ctrl+C`. Não substitui o ambiente Scriptcase. |
 
 ## 3. Suítes locais
@@ -38,6 +55,78 @@ As classificações usadas são:
 | --- | --- | --- | --- |
 | `composer tests` | Suíte local padrão. Executa Domain, Application, Infrastructure, Composition, Presentation e Integration, excluindo `tests/Contract`. | Não deve acessar recursos reais nem alterar dados externos. | Exige `composer install`; não exige variáveis externas ou autorização. É a regressão local principal. |
 | `composer adapters:tests` | Teste local focado em `tests/Infrastructure`. Exercita adapters com doubles e recursos controlados. | Não acessa Oracle, PNCP ou Scriptcase reais. | Não integra a suíte contratual opt-in. Espera todos os testes de Infrastructure verdes. |
+
+### 3.1 Cobertura da suíte local
+
+Cobertura de código identifica quais partes de `src/` foram executadas durante
+a suíte de testes. Ela ajuda a localizar comportamentos ainda sem evidência de teste, mas
+não demonstra, sozinha, que as asserções estão corretas nem que o sistema está
+livre de defeitos. A análise deve priorizar regras, decisões, casos-limite e
+tratamento de falhas, sem criar testes triviais apenas para elevar um percentual.
+
+A colaboração funciona assim:
+
+```text
+PHP + Xdebug
+    │ coleta quais linhas e caminhos foram executados
+    ▼
+php-code-coverage
+    │ organiza os dados e calcula as métricas
+    ▼
+PHPUnit
+    │ executa os testes e solicita o relatório
+    ▼
+HTML em build/coverage/
+```
+
+Cada componente possui uma responsabilidade:
+
+- **PHPUnit** encontra e executa os testes;
+- **php-code-coverage**, instalado como dependência do PHPUnit, calcula as
+  métricas e produz os relatórios;
+- **Xdebug** é uma extensão opcional do runtime PHP que coleta os dados de
+  execução usados na cobertura;
+- **PCOV** pode substituir o Xdebug quando somente a cobertura de linhas for
+  suficiente, mas não oferece cobertura de caminhos.
+
+Xdebug complementa o PHPUnit; ele não é um pacote do projeto instalado em
+`vendor/` nem uma dependência necessária para executar a suíte sem cobertura.
+Sua instalação pertence à estação de desenvolvimento e não altera o pacote ou
+os requisitos do ambiente de produção. Antes de gerar o relatório, confirme
+que o mesmo PHP usado pela suíte carregou a extensão:
+
+```text
+php -v
+php --ri xdebug
+```
+
+No Git Bash, Linux ou WSL, execute:
+
+```bash
+XDEBUG_MODE=coverage php vendor/bin/phpunit \
+  --testsuite PCA \
+  --coverage-filter src \
+  --coverage-html build/coverage
+```
+
+O comando executa somente a suíte local `PCA`, que exclui `tests/Contract` por
+configuração do `phpunit.xml`. Ele não deve acessar Oracle, PNCP ou Scriptcase
+reais. O relatório gerado fica em `build/coverage/index.html`; como todo
+conteúdo gerado em `build/`, ele não é versionado.
+
+Na leitura do resultado:
+
+- **linhas** indicam instruções executadas ao menos uma vez;
+- **métodos e classes** só atingem cobertura integral quando todas as suas
+  linhas executáveis estão cobertas;
+- **CRAP** combina complexidade e cobertura para destacar código mais arriscado
+  de alterar;
+- percentuais devem orientar investigação, não funcionar como meta isolada.
+
+Quando for necessário examinar também desvios e combinações de caminhos, o
+Xdebug permite acrescentar `--path-coverage`. Essa medição é mais detalhada e
+mais lenta; use-a de forma deliberada, principalmente em fluxos condicionais
+complexos.
 
 ## 4. Contratos locais
 

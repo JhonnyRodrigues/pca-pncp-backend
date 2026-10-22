@@ -29,3 +29,5 @@
 # Conclusões devem ser promovidas à documentação vigente ou preservadas
 # em docs/historico/.
 /docs/investigacoes/*
+
+.vscode/

@@ -25,7 +25,7 @@ final class ExecutorComandosUnidade
 {
     private const LIMITE_ITENS_PUBLICACAO = 1000;
     private const JUSTIFICATIVA_EXCLUSAO_PCA =
-        'Exclusão integral do PCA por ausência de demandas vigentes no SGI.';
+    'Exclusão integral do PCA por ausência de demandas vigentes no SGI.';
 
     private readonly DesfazedorUnidadeProcessamento $desfazedor;
 
@@ -84,10 +84,8 @@ final class ExecutorComandosUnidade
     private function retificar(
         ContextoUnidadeComDecisao $contexto
     ): array|DesfechoProcessamentoUnidade {
-        if (
-            count($this->obterDemandasVigentes($contexto))
-            > self::LIMITE_ITENS_PUBLICACAO
-        ) {
+        # verifica se a fotografia desejada não ultrapassa mil itens
+        if (count($this->obterDemandasVigentes($contexto)) > self::LIMITE_ITENS_PUBLICACAO) {
             return $this->bloquearEDesfazer(
                 $contexto,
                 new FalhaSegura(
@@ -97,11 +95,9 @@ final class ExecutorComandosUnidade
             );
         }
 
+        # localiza os objetos Demanda correspondentes às inclusões
         $decisao = $contexto->getResultadoDecisao();
-        $demandasAInserir = $this->obterDemandasPorIds(
-            $contexto,
-            $decisao->getDemandasAIncluir()
-        );
+        $demandasAInserir = $this->obterDemandasPorIds($contexto, $decisao->getDemandasAIncluir());
 
         if ($demandasAInserir === null) {
             return $this->bloquearEDesfazer(
@@ -114,7 +110,8 @@ final class ExecutorComandosUnidade
         }
 
         $sequencial = $this->obterSequencialExistente($contexto);
-
+        
+        # exige o sequencial do PCA existente
         if ($sequencial === null) {
             return $this->bloquearSemDecisaoEDesfazer(
                 $contexto,
@@ -125,6 +122,7 @@ final class ExecutorComandosUnidade
             );
         }
 
+        # executa exclusões antes das inclusões
         $resultados = [];
         $idsAExcluir = $decisao->getDemandasAExcluir();
 
@@ -148,10 +146,12 @@ final class ExecutorComandosUnidade
             $resultados[] = $resultadoExclusao;
 
             if ($resultadoExclusao->getSituacao() !== SituacaoEscritaPncp::ACEITA) {
+                # Uma exclusão não aceita interrompe a sequência: a inclusão não é tentada, e o resultado segue ao finalizador para observação.
                 return $resultados;
             }
         }
 
+        # somente insere se a exclusão anterior foi aceita
         if ($demandasAInserir !== []) {
             $resultadoInclusao = $this->escritorPncp->inserirItens(
                 $contexto->getSessaoPncp(),
@@ -171,6 +171,7 @@ final class ExecutorComandosUnidade
             $resultados[] = $resultadoInclusao;
         }
 
+        # Entrega ao finalizador os resultados das escritas realizadas para nova observação do PCA.
         return $resultados;
     }
 
@@ -261,6 +262,7 @@ final class ExecutorComandosUnidade
             return null;
         }
 
+        # A falha sistêmica encerra o processamento da unidade e solicita imediatamente o rollback das alterações realizadas no banco local.
         return $this->interromperEDesfazer($this->falhaOuDiagnostico(
             $resultado->getFalha(),
             'ESCRITA_PNCP_FALHOU',

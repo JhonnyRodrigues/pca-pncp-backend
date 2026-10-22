@@ -48,7 +48,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    PUB[fachada pública em src/] --> COM[src/Composition]
+    PUB[fachadas públicas em src/] --> COM[src/Composition]
     COM --> PRE[src/Presentation]
     PRE --> APP[src/Application]
     APP --> DOM[src/Domain]
@@ -65,9 +65,10 @@ flowchart LR
 | `src/Composition/` | Monta os objetos concretos e conecta as implementações externas aos contratos internos. |
 
 Os arquivos PHP colocados diretamente em `src/`, como
-`PublicadorPcaScriptcase.php`, formam a fachada pública consumida pela Blank.
-Eles ficam na raiz do namespace para oferecer um ponto de entrada estável sem
-expor a organização interna ao Scriptcase.
+`PublicadorPcaScriptcase.php` e `RegistradorEventosTecnicosScriptcase.php`,
+formam a fronteira pública consumida pela Blank. Eles ficam na raiz do namespace
+para oferecer entrypoints estáveis sem expor a organização interna ao
+Scriptcase.
 
 ### 2.1 Subdiretórios do Domain
 
@@ -89,7 +90,7 @@ expor a organização interna ao Scriptcase.
 | `src/Application/Ports/` | Capacidades externas de que o caso de uso precisa. |
 | `src/Application/Contracts/` | Contratos entre colaboradores da própria Application. |
 | `src/Application/Commands/` | Ordens tipadas destinadas aos executores externos. |
-| `src/Application/Results/` | Resultados tipados das etapas e do caso de uso. |
+| `src/Application/Results/` | Resultados tipados de uma operação interna, como o caso de uso. |
 | `src/Application/ValueObjects/` | Valores usados para transportar contexto com significado. |
 | `src/Application/Enums/` | Estados e ações possíveis na orquestração. |
 
@@ -100,7 +101,7 @@ expor a organização interna ao Scriptcase.
 | `src/Presentation/Inputs/` | Entrada validada na fronteira de apresentação. |
 | `src/Presentation/Controllers/` | Aciona o caso de uso e trata a fronteira de entrada. |
 | `src/Presentation/Presenters/` | Converte a resposta em representação pública. |
-| `src/Presentation/ViewModels/` | Dados seguros devolvidos ao consumidor. |
+| `src/Presentation/ViewModels/` | Dados seguros e escalares preparados para o consumidor. |
 | `src/Presentation/Facades/` | Fachada interna que reúne Controller e Presenter. |
 | `src/Presentation/Exceptions/` | Falhas de validação próprias dessa fronteira. |
 | `src/Composition/` | Composition Root, composição de execução e executor adaptado ao Scriptcase. |

@@ -56,7 +56,7 @@ termos:
 | Compreender o negócio e o planejamento | [Termos de negócio e planejamento](#2-termos-de-negócio-e-planejamento) |
 | Entender o modelo de domínio | [Termos de modelagem de domínio](#3-termos-de-modelagem-de-domínio) |
 | Acompanhar publicação, integração e auditoria | [Termos de publicação e integração](#4-termos-de-publicação-e-integração) e [Termos de auditoria](#5-termos-de-auditoria) |
-| Compreender arquitetura, validação e execução | [Termos arquiteturais](#6-termos-arquiteturais), [Validação da Infrastructure](#61-termos-de-validação-da-infrastructure) e [Execução e integração](#62-termos-técnicos-de-execução-e-integração) |
+| Compreender arquitetura, testes, validação e execução | [Termos arquiteturais](#6-termos-arquiteturais), [Testes e validação](#61-termos-de-testes-e-validação) e [Execução e integração](#62-termos-técnicos-de-execução-e-integração) |
 | Operar e dar suporte ao sistema | [Termos de operação e observabilidade](#7-termos-de-operação-e-observabilidade) |
 | Preparar entrega e implantação | [Termos de entrega e implantação](#8-termos-de-entrega-e-implantação) |
 | Entender documentação e planejamento do trabalho | [Termos de documentação e planejamento](#9-termos-de-documentação-e-planejamento) |
@@ -73,6 +73,7 @@ ou arquitetura. As fontes usadas nas referências são:
 - [Roadmap de implementação](../autoritativos/roadmap.md) — Roadmap;
 - [Arquitetura](arquitetura.md) — Arquitetura;
 - [Contexto funcional](contexto_funcional_do_sistema_pca.md) — Contexto funcional;
+- [Catálogo de comandos Composer](catalogo_de_comandos_composer.md) — Catálogo de comandos;
 - [Catálogo de diretórios](catalogo_de_diretorios.md) — Catálogo de diretórios;
 - [Catálogo de arquivos](catalogo_de_arquivos.md) — Catálogo de arquivos;
 - [Especificação de logs estruturados](../autoritativos/especificacao_de_logs_estruturados.md) — Logs;
@@ -123,9 +124,8 @@ significado vigente.
 
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
-| Aggregate | Fronteira de consistência que protege invariantes relacionadas. | Modelo §7; Arquitetura §8 |
-| Aggregate Root | Entity que controla o acesso e a consistência de um Aggregate; neste projeto, `Plano`. | Modelo §7; Arquitetura §8 |
-| Contexto delimitado — Bounded Context | Fronteira conceitual dentro da qual os termos e o modelo possuem significado coerente; a passagem para outro contexto exige tornar diferenças e traduções explícitas. | Modelo §3 |
+| Aggregate | Conjunto de objetos de negócio que precisa permanecer coerente como uma única unidade. Essa fronteira de consistência protege invariantes relacionadas. Suas alterações passam pelo objeto principal, chamado `Aggregate Root`. Neste projeto, o agregado do `Plano` reúne a fotografia homologada da UO e suas Demandas. | Modelo §7; Arquitetura §8 |
+| Aggregate Root | Objeto principal pelo qual o restante do sistema consulta ou altera um Agregado. Ele protege as regras que mantêm o conjunto coerente. Neste projeto, esse papel pertence a `Plano`. | Modelo §7; Arquitetura §8 |
 | Entity | Conceito reconhecido por identidade contínua, como `Demanda`. | Modelo §6; Arquitetura §8 |
 | Estado desejado | Fotografia homologada que o SGI pretende manter publicada para uma unidade externa. | Modelo §8; `DI-002` |
 | Exceção de domínio | Representação de violação de uma invariante do Domain. | Modelo §§7 e 11; Arquitetura §4.1 |
@@ -144,8 +144,10 @@ significado vigente.
 | Baseline de conteúdo | Representação local detalhada do último conteúdo externo cuja convergência foi confirmada; não é mantida pela V1 da integração. | `DI-002` |
 | Convergência | Compatibilidade comprovada entre o conjunto desejado e o estado publicado observado. | `RN-PUB-004`; `DI-002`, `DI-004` |
 | Escrita incerta | Escrita externa cujo efeito não pôde ser confirmado nem descartado. | `DI-004`, `DI-009` |
+| Escrita aceita | Resultado pelo qual o PNCP informa ter aceitado uma operação. Não comprova sozinho que o estado externo final convergiu com a fotografia desejada. | `DI-004`, `DI-009` |
 | Estado externo observado | Fato obtido do PNCP sobre o que está efetivamente publicado. **Estado observado** é o sinônimo usado pelas fontes autoritativas. | `DI-002`; Modelo §8.3 |
-| Estado operacional da publicação | Referência local compartilhada entre diferentes Planos sobre a situação conhecida da publicação externa. | `RN-PUB-008`; `DI-005`, `DI-007` |
+| PCA observado | Representação tipada do fato externo usado na decisão: ausência definitiva ou PCA ativo com seu sequencial e as identidades dos itens observados. Não se confunde com o estado operacional mantido localmente. | `DI-002`; Modelo §8.3 |
+| Estado operacional da publicação | Referência local compartilhada entre diferentes Planos que registra a situação e, quando aplicável, o sequencial da publicação externa conhecida para a unidade de processamento. Indica qual publicação do PNCP representa a unidade, mas não substitui a observação atual do PNCP. | `RN-PUB-008`; `DI-005`, `DI-007` |
 | Estados operacionais | `NAO_PUBLICADO`, `PUBLICADO` e `EXCLUIDO`. | `RN-PUB-008`; `DI-005` |
 | Exclusão integral | Encerramento do PCA externo quando a unidade de publicação fica sem Demandas vigentes. | `RN-PUB-003`; `DI-001` |
 | Justificativa institucional da exclusão integral | Texto fixo enviado pela Application ao excluir um PCA por ausência de Demandas vigentes, sem depender da causa histórica de uma Demanda específica. | `RN-PUB-003`; `DI-007`, `DI-009` |
@@ -176,7 +178,7 @@ significado vigente.
 
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
-| Auditoria de negócio | Registro de uma operação concluída e confirmada, distinto de diagnóstico técnico. | `RN-AUD-001`; `DI-006` |
+| Auditoria de negócio | Registro histórico de uma operação concluída e confirmada, distinto do diagnóstico técnico, que permite verificar qual operação foi realizada, por quem e com qual resultado. | `RN-AUD-001`; `DI-006` |
 | Confirmação de sincronização | Registro versionado de que a convergência daquela versão foi comprovada. | `RN-PLA-007`; `DI-005` |
 | Histórico de procedimento | Fato imutável que registra uma ação auditável concluída e confirmada. | `RN-AUD-001`, `RN-AUD-003`; Modelo §10 |
 | Observabilidade técnica | Registros de tentativas, falhas, conflitos e diagnóstico que não integram o histórico de negócio. | `DI-006` |
@@ -193,12 +195,15 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Adapter | Implementação concreta de uma Port para um mecanismo externo; a implementação concreta de um Repository também exerce esse papel, mesmo quando conserva o sufixo `Repository`. | Arquitetura §§5 e 8 |
 | Application | Camada de casos de uso, orquestração e contratos necessários ao fluxo. | Arquitetura §4.2; `DI-007` |
 | Aplicação hospedeira | Sistema que inicia e sustenta a execução do backend; neste projeto, a Blank do Scriptcase fornece conexão, login e dados HTTP. | Fluxo §2; `DI-010` |
-| Autoload | Mecanismo que localiza e carrega classes PHP quando elas são usadas, evitando arquivos `require` espalhados pelo código. | Arquitetura §7; `DI-010` |
-| Blank do Scriptcase | Tipo de aplicação do Scriptcase usado como hospedeiro do backend. A Blank `PCA_PUBLICAR_B` inicia a execução e fornece ao entrypoint recursos do ambiente, sem conhecer a composição interna do sistema. | `DI-010`; [Integração](../../../integracao/README.md) |
-| Bootstrap | Passos iniciais necessários para tornar a aplicação executável, como carregar o autoload e preparar o entrypoint. | Arquitetura §7; `DI-010` |
+| Autoload | Mecanismo utilizado durante o bootstrap que localiza e carrega classes PHP quando elas são usadas, evitando arquivos `require` espalhados pelo código. | Arquitetura §7; `DI-010` |
+| Blank do Scriptcase | Tipo de aplicação do Scriptcase usado como hospedeiro do backend. A Blank `PCA_PUBLICAR_B` fornece recursos do ambiente e chama as fachadas públicas sem conhecer a composição interna. Seu evento `onExecute` centraliza a navegação e a requisição de publicação dessa aplicação, exercendo nesse limite o papel de Front Controller. | `DI-010`; [Integração](../../../integracao/README.md) |
+| Bootstrap | Sequência de passos iniciais necessários para preparar o ambiente antes da execução normal do sistema. No contexto da Blank, inclui carregar o autoload; na preparação global do backend, engloba carregar a configuração externa validada e compor o grafo de objetos. Não é uma classe nem um entrypoint, mas sim o processo de infraestrutura que os antecede. | Fluxo §4.1; Arquitetura §7; `DI-010` |
 | Classe `final` | Classe que não pode ser herdada. É usada quando sua responsabilidade deve permanecer fechada, sem variações por subclasses. | Arquitetura §§3 e 8 |
 | Clean Architecture | Organização em camadas na qual as regras internas não dependem dos mecanismos externos; as dependências apontam para o núcleo. | Arquitetura §§3 e 4 |
-| Composition Root | Ponto do backend que cria o grafo e injeta dependências concretas. | Arquitetura §7; `DI-010` |
+| Command | Objeto imutável que representa uma instrução já estruturada e reúne os dados necessários para executá-la. Neste projeto, os Commands de escrita não executam HTTP nem constituem o payload: eles atravessam uma Port e são traduzidos pela Infrastructure. | Arquitetura §§4.2 e 5; `DI-009` |
+| Composição | Atividade de instanciar e conectar objetos para formar um grafo de dependências executável. Pode abranger todo o fluxo ou apenas um subgrafo especializado. | Arquitetura §7; `DI-010` |
+| Subcomposição | Montagem parcial coordenada pelo Composition Root, como o conjunto de adapters Oracle ou PNCP. | Arquitetura §7; `DI-010` |
+| Composition Root | Ponto superior de composição de um fluxo executável. Local centralizado responsável pela montagem (wiring) do sistema. É o componente que instancia os objetos concretos, injeta suas dependências e constrói o grafo de objetos da aplicação, localizando-se o mais próximo possível do entrypoint. O `CompositionRootPublicacaoPca`, por exemplo, monta o grafo completo do fluxo de publicação. | Arquitetura §7; `DI-010` |
 | Montador do núcleo | Componente intermediário que recebe Ports e logger já construídos e compõe a topologia da Application, sem selecionar perfil ou administrar recursos externos. | Roadmap Sprint 6.1 |
 | Conexão emprestada | Conexão criada e administrada pela aplicação hospedeira, reutilizada pelo backend sem transferência de seu ciclo de vida; o backend não a fecha. | `DI-008`; Roadmap Sprint 5.2 |
 | Construtor de objeto — `__construct` | Método chamado ao criar um objeto. Recebe dependências e dados necessários para deixar a instância válida; não é o construtor do pacote de implantação. | Arquitetura §§3 e 7 |
@@ -213,23 +218,27 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Inversão de dependência | Princípio pelo qual regras de alto nível dependem de abstrações internas, enquanto detalhes concretos, como Oracle ou HTTP, dependem desses contratos. | Arquitetura §7.4 |
 | Domain | Camada que representa o negócio, protege invariantes e decide por políticas puras. | Modelo; Arquitetura §4.1 |
 | Double de teste | Substituto controlado usado para demonstrar como um consumidor utiliza um contrato. | Arquitetura §9; `DI-007` |
-| Entrypoint Scriptcase | Única API do backend conhecida pela Blank; recebe recursos naturais do host, seleciona o perfil externo e aciona o grafo interno. | Arquitetura §7; `DI-010` |
+| Entrypoint | Operação pública concreta por onde um consumidor inicia um comportamento no backend. No contexto da aplicação, métodos como `executar()`, `executarComEventos()` ou `registrar()` funcionam como essas portas de entrada expostas por fachadas públicas. Cada método é apenas um ponto de acesso e não constitui, isoladamente, uma API independente. Termos como "ponto de entrada" ou "ponto público" são equivalentes. | Arquitetura §7; `DI-010` |
 | Fake | Double de teste com implementação simplificada, mas funcional, como um repositório em memória usado sem acessar o Oracle. | Arquitetura §9 |
-| Fachada pública do backend | Papel exercido por `PublicadorPcaScriptcase`: oferece ao hospedeiro uma API pequena e segura, escondendo configuração, Composition Root e camadas internas. | Arquitetura §7; `DI-010` |
-| Fachada da Presentation | Fronteira interna que converte a execução em ViewModel seguro e impede a passagem de exceções ao consumidor. | Arquitetura §7; `DI-010` |
+| Fachada pública | Componente que oferece ao hospedeiro uma porta de entrada simples e segura para a API. Seu papel é expor operações limpas enquanto esconde toda a complexidade interna, como configurações, executores, o Composition Root e as camadas de negócio. No sistema, esse papel é exercido por `PublicadorPcaScriptcase` e `RegistradorEventosTecnicosScriptcase`, e não pela Blank. | Arquitetura §7; `DI-006`, `DI-010` |
+| Fachada da Presentation | Delimita a fronteira, delega ao Controller/Presenter e contém exceções. | Arquitetura §7; `DI-010` |
+| Front Controller | Padrão arquitetural que centraliza o recebimento de todas as requisições de uma aplicação para gerenciar tarefas comuns (como roteamento, segurança, logs e contexto) antes de delegar o trabalho aos componentes apropriados. Neste projeto, esse papel é exercido pelo evento `onExecute` da Blank, que extrai o contexto do Scriptcase, distingue entre navegação e publicação, e aciona as fachadas públicas. Ele pertence ao hospedeiro, embora sua adaptação esteja versionada neste repositório. `pca-pncp-backend`. | [Integração](../../../integracao/README.md); `DI-010` |
 | Infrastructure | Camada dos adapters concretos de persistência, transporte e recursos externos. | Arquitetura §4.3 |
 | Integração controlada do núcleo | Prova interna que monta adapters concretos sobre fronteiras programáveis e sem I/O real para verificar composição, compartilhamento de sessão e encerramento transacional. Não substitui gate real nem constitui o Composition Root final. | Roadmap Sprint 6.2; Arquitetura §9 |
 | Mapeamento físico explícito | Descrição validada de como conceitos do código correspondem a schemas, tabelas, colunas ou literais do banco. É injetada no adapter e não passa a integrar o Domain ou a Application. | `DI-008`; Arquitetura §§4.3 e 7.3 |
 | Mapeador de dados | Tradutor dos valores retornados por um mecanismo externo para tipos internos, sem definir nomes físicos nem decidir regras de negócio. | Arquitetura §4.3 |
 | Mock | Double de teste configurado principalmente para verificar se uma interação esperada ocorreu, por exemplo se uma Port recebeu determinada chamada. | Arquitetura §9 |
 | Namespace | Nome hierárquico que organiza classes PHP e evita colisões entre nomes iguais; o PSR-4 o relaciona aos diretórios. | Arquitetura §3 |
-| Port | Contrato interno pertencente à camada que necessita da capacidade. | Arquitetura §5; `DI-007` |
+| Port | Contrato interno pertencente à camada que necessita da capacidade. Pode ser de entrada, quando expõe um caso de uso aos consumidores, ou de saída, quando permite ao núcleo solicitar uma capacidade externa. Neste projeto, `PublicadorPca` funciona como contrato de entrada, enquanto as interfaces de `Application/Ports` são Ports de saída implementadas pela Infrastructure. | Arquitetura §§5 e 7.4; `DI-007` |
 | PSR-4 | Convenção que relaciona namespace e caminho de arquivo para o autoload localizar classes PHP. | Arquitetura §3; Catálogo de arquivos |
 | Presentation | Camada que protege a entrada pública e apresenta o resultado. | Arquitetura §4.4; `DI-010` |
 | Presenter | Componente que transforma a Response do UseCase em ViewModel estruturado. | Arquitetura §§4.4 e 8; `DI-010` |
 | Repository | Port especializada em reconstrução e persistência de um Aggregate; sua implementação concreta também é um Adapter. | Arquitetura §§5 e 8; `DI-007` |
 | Request | Contrato de entrada de um caso de uso. | Arquitetura §8; `DI-010` |
-| Response | Contrato de saída de um caso de uso. | Arquitetura §8; `DI-010` |
+| Desfecho | Resultado intermediário que representa alternativas mutuamente exclusivas. `DesfechoProcessamentoUnidade`, por exemplo, contém um resultado unitário conhecido ou uma falha sistêmica, nunca ambos. | Arquitetura §4.2; Fluxo §7 |
+| DTO — Data Transfer Object | Objeto simples usado para transportar dados entre componentes ou fronteiras, sem decidir regras de negócio. `ResultadoPublicacaoPcaScriptcase` transporta o ViewModel, os eventos técnicos e um eventual aviso para a Blank. | Arquitetura §7; `DI-010` |
+| Result — resultado tipado | Objeto que representa de forma explícita o desfecho de uma operação interna, incluindo os dados compatíveis com sua situação. Não é necessariamente a saída global de um UseCase. | Arquitetura §§4.2 e 8 |
+| Response | Contrato global de saída de um caso de uso. Neste projeto, `PublicarPcaResponse` reúne a situação da solicitação, resultados por unidade, contagens, eventual falha global e correlação. | Arquitetura §8; `DI-010` |
 | SOLID | Conjunto de princípios para manter responsabilidades claras, dependências direcionadas e componentes substituíveis. É um meio de reduzir acoplamento, não uma exigência de criar mais classes. | Arquitetura §§3 e 5 |
 | Stub | Double de teste que fornece respostas previamente definidas para conduzir um cenário, sem ter como finalidade principal verificar chamadas. | Arquitetura §9 |
 | Sessão compartilhada | Mesma sessão Oracle e sua transação reutilizadas pelos adapters que participam da unidade, preservando contenção, visibilidade e atomicidade locais. | `DI-004`, `DI-008` |
@@ -239,12 +248,13 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Teste contratual | Teste que demonstra compatibilidade com um contrato interno ou externo. | Arquitetura §9; `DI-007`, `DI-009` |
 | TDD | Ciclo de desenvolvimento no qual primeiro se demonstra a falta do comportamento com um teste, depois se implementa o mínimo e por fim se melhora o código: Red, Green e Refactor. | Arquitetura §9 |
 | Tradução de erro externo | Conversão de falhas do mecanismo externo em resultados internos tipados e seguros, sem fazer sua representação física atravessar a Port. | `DI-008`, `DI-009`; Arquitetura §4.3 |
+| Exclusividade da unidade | Período iniciado pela Unidade de Trabalho no qual uma unidade externa é relida e processada sob controle de concorrência, até sua confirmação ou rollback. Impede que duas execuções locais decidam simultaneamente sobre a mesma unidade. | `DI-004`, `DI-007`, `DI-008` |
 | Unidade de trabalho | Abstração usada para coordenar atomicidade local e conclusão de uma unidade. | `DI-004`, `DI-007` |
 | UseCase | Componente da Application que orquestra uma intenção usando Domain e Ports. | Arquitetura §§4.2 e 8 |
-| ViewModel | Objeto de dados preparado pelo Presenter para apresentação ao consumidor externo, sem regra de negócio nem responsabilidade de renderização. | Arquitetura §7; `DI-010` |
+| ViewModel | Objeto de dados preparado pelo Presenter para apresentação ao consumidor externo, sem regra de negócio nem responsabilidade de renderização. Ele é considerado seguro para apresentação quando atravessa a fronteira contendo apenas dados, sem expor exceções ao consumidor. | Arquitetura §7; `DI-010` |
 | Wiring | Composição das implementações concretas no grafo de dependências. | Arquitetura §§3 e 7; `DI-010` |
 
-### 6.1 Termos de validação da Infrastructure
+### 6.1 Termos de testes e validação da Infrastructure
 
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
@@ -270,13 +280,14 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Suíte opt-in | Conjunto de testes excluído da execução padrão e iniciado apenas por comando e configuração explícitos. Pode realizar interação externa autorizada em ambiente protegido e nunca deve ser acionado implicitamente. | `DI-009`; Fluxo §11; Roadmap Sprint 5.9 |
 | Teste de integração | Teste que verifica a colaboração entre componentes reais, mantendo fronteiras externas controladas quando não se deseja I/O real. | Arquitetura §9 |
 | Teste unitário | Teste focado no comportamento de uma unidade pequena, usando colaboradores simples ou doubles quando necessário. | Arquitetura §9 |
+| Cobertura de código — Code Coverage | Medição das partes executáveis de `src/` percorridas pela suíte de testes. Ajuda a revelar linhas, métodos, desvios e caminhos ainda não exercitados, mas não prova que as asserções estão corretas nem que o sistema está livre de defeitos. | Catálogo de comandos §3.1 |
 
 ### 6.2 Termos técnicos de execução e integração
 
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
 | ADOdb | Biblioteca usada pelo Scriptcase para oferecer a conexão Oracle ao backend. O backend a recebe pronta e não administra seu ciclo de vida. | `DI-008`, `DI-010` |
-| API | Contrato pelo qual um software oferece operações para outro componente ou sistema. Neste projeto, a fachada pública é a API consumida pela Blank, e o PNCP possui uma API HTTP externa. | Arquitetura §7; `DI-009`, `DI-010` |
+| API | Conjunto de contratos pelos quais um software oferece operações a um consumidor, incluindo entradas, saídas e comportamentos observáveis. Um método público é uma operação da API, não uma API independente. Neste projeto, os contratos expostos pelas fachadas públicas formam a API consumida pela Blank, e o PNCP oferece uma API HTTP externa. | Arquitetura §7; `DI-009`, `DI-010` |
 | Bind ou parâmetro vinculado | Valor enviado separadamente do texto SQL por um placeholder. Evita concatenar dados na consulta e preserva tipagem e tratamento pelo driver. | `DI-008`; Fluxo §9 |
 | CA bundle | Arquivo com uma coleção de certificados públicos confiáveis. O cURL/OpenSSL usa essa coleção para verificar se o certificado HTTPS apresentado pelo PNCP pertence a uma cadeia confiável. Ele não contém senha, token ou chave privada. | `DI-009`, `DI-010` |
 | CLOB | Tipo Oracle para texto grande. `SEGURANCA_LOG.DESCRIPTION` usa CLOB para armazenar o JSON integral dos eventos técnicos. | `DI-006`, `DI-010` |
@@ -287,6 +298,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Envelope de evento | Estrutura completa de um evento técnico, com campos institucionais, contexto sanitizado e metadados. | Logs; `DI-006` |
 | Endpoint | Endereço ou operação específica oferecida por uma API. Em uma API HTTP, normalmente combina um caminho e um método, como `POST /recurso`. | `DI-009` |
 | HTTP | Protocolo de comunicação baseado em requisições e respostas, usado pelo backend para acessar a API do PNCP. | `DI-009` |
+| Callback | Função entregue a outro componente para ser chamada durante ou depois de determinada operação. Em `TransporteCurlPncp`, callbacks recebem os headers e os trechos do corpo à medida que o cURL processa a resposta. | `DI-009`; Catálogo de arquivos |
 | I/O | Entrada ou saída que interage com algo fora do cálculo em memória, como banco, rede, arquivo ou resposta HTTP. | Arquitetura §§4 e 9 |
 | Idempotência | Propriedade de uma operação que pode ser repetida sem produzir efeito adicional depois da primeira aplicação bem-sucedida. Não significa que toda requisição possa ser repetida com segurança. | `DI-004`, `DI-009` |
 | JSON | Formato textual usado para transportar estruturas de dados. Na Blank, o resultado HTTP e cada evento técnico são serializados em JSON. | `DI-006`, `DI-010` |
@@ -353,7 +365,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Implantação manual | Implantação cujas etapas são iniciadas e conferidas por uma pessoa, como enviar o pacote por SFTP e executar os comandos do runbook. | Guia de implantação |
 | Manifesto de integridade | Arquivo que descreve o pacote e registra hashes de seu conteúdo para permitir conferência posterior. Detecção de Corrupção de Dados: Arquivos podem sofrer perdas de pacotes ou corrupção durante downloads ou transferências de rede. O manifesto identifica imediatamente qual arquivo foi corrompido. Segurança contra Ataques de Substituição: Em repositórios de software, invasores podem tentar interceptar e trocar um arquivo legítimo por uma versão maliciosa (malware). Se o manifesto original estiver protegido, o sistema receptor rejeitará o arquivo alterado porque os hashes não vão coincidir. | Roadmap Sprint 8.5 |
 | Pacote autocontido | (artefato final de uma build) É a pasta de entrega com o código e todas as dependências necessárias em `vendor/`, executável sem checkout e sem Composer no servidor. Configurações e segredos continuam externos. O processo de build pega o código-fonte bruto do repositório, baixa e resolve as dependências (como a pasta vendor/ via Composer), compila ou minifica arquivos (se houver frontend) e gera esse pacote autocontido e pronto para ser executado. | `DI-010`; Roadmap Sprint 8.5 |
-| Pipeline | Sequência automatizada de etapas, como testar, construir, verificar e implantar uma release. | Guia de implantação |
+| Pipeline | Sequência automatizada de etapas como, por exemplo: testar, construir, verificar e implantar uma release. | Guia de implantação |
 | Princípio do menor privilégio | Prática de conceder a cada usuário ou processo somente os acessos necessários. Na configuração do PCA, o administrador escreve, o PHP apenas lê e os demais usuários não acessam os arquivos. | Roadmap Sprint 9.1 |
 | Promoção entre ambientes | Avanço controlado da mesma release entre ambientes, por exemplo de homologação para produção, após as validações exigidas. | Guia de implantação |
 | Push | Envio de commits de um repositório Git local para um repositório remoto. Não equivale, por si só, a um deploy. | Guia de implantação |
@@ -372,7 +384,7 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 
 | Termo | Definição curta | Fonte |
 | --- | --- | --- |
-| ADR-lite | Registro conciso que documenta o contexto, a decisão tomada, as alternativas avaliadas, suas consequências e os critérios de aprovação (gates). | `DI`; Docs |
+| ADR-lite | Registro conciso que documenta o contexto, a decisão tomada, as alternativas avaliadas, suas consequências e os critérios de aprovação (gates). Ele registra o motivo de uma decisão que seria difícil compreender apenas olhando o código. | `DI`; Docs |
 | Alias | Nome alternativo mantido para localização ou compatibilidade. Ele deve declarar o contexto em que se aplica e não precisa ter significado semanticamente idêntico ao termo preferencial. | Docs |
 | Apoio | Documento que explica e contextualiza sem criar norma concorrente. | Docs |
 | Autoritativo | Documento que constitui fonte oficial para seu escopo declarado. | Docs |
@@ -398,9 +410,11 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Fotografia vigente × versão de origem | Conjunto atual versus momento em que a Demanda entrou no planejamento. | `RN-PLA-004` |
 | UO × Lotação × UASG | Responsabilidade pelo Plano, autoria organizacional e unidade compradora. | `RN-CAD-004`, `RN-CAD-005` |
 | Publicação ativa × confirmação | Existência do recurso externo versus convergência da versão. | `RN-PLA-007`; `DI-005` |
-| Estado desejado × observado × operacional | Planejamento homologado, fato externo e referência local compartilhada entre diferentes Planos. | `DI-002`, `DI-005` |
+| Estado desejado × PCA observado × estado operacional | Fotografia homologada que se deseja publicar, fato atual obtido do PNCP e referência local do vínculo conhecido com a publicação externa. | `DI-002`, `DI-005`; Modelo §8 |
+| Observação inicial × observação final | A observação inicial fornece fatos para decidir o que precisa ser escrito; a observação final ocorre depois da escrita e comprova se o efeito produzido levou à convergência. | `DI-002`, `DI-004`; Fluxo §§6 e 7 |
 | Sequencial PCA × identidade do Plano | Referência externa versus UO e Ano de Execução. | `RN-PLA-001`; `DI-005` |
 | Port × Adapter | Port é o contrato interno de uma capacidade; Adapter é a implementação concreta que liga esse contrato a um mecanismo externo. Um Repository concreto também pode exercer o papel de Adapter. | Arquitetura §§5, 7.4 e 8; `DI-007` |
+| Result × Response × ViewModel × DTO × JSON | Result representa um desfecho interno tipado; Response é o contrato global de saída do UseCase; ViewModel prepara dados para apresentação; DTO transporta dados entre fronteiras; JSON é uma representação textual serializada. | Arquitetura §§4.2, 4.4, 7 e 8; `DI-010` |
 | Inversão de dependência × injeção de dependências | Inversão define que detalhes concretos dependem das abstrações do núcleo; injeção é o mecanismo que entrega uma implementação concreta a quem usa o contrato. | Arquitetura §7.4 |
 | Configuração × segredo | Configuração ajusta o comportamento ou a implantação; segredo é o subconjunto cujo valor precisa de acesso restrito. Nem toda configuração é secreta. | Arquitetura §7.3 |
 | Registro de perfis × perfil de configuração | O registro localiza o perfil autorizado para um `SERVER_NAME`; o perfil contém os valores validados daquela implantação. | `DI-010`; Arquitetura §7.2 |
@@ -408,9 +422,13 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Suíte padrão × suíte opt-in | Execução ordinária, sem interação externa real implícita, versus execução deliberadamente ativada e protegida por configuração e preflight. | `DI-009`; Fluxo §11 |
 | Contrato controlado × gate real | Evidência determinística em condições controladas versus comprovação com os adapters concretos no ambiente externo efetivo. | `DI-008`, `DI-009`; Roadmap Sprint 5.9 |
 | Conexão emprestada × conexão própria | Recurso cujo ciclo de vida pertence à aplicação hospedeira versus recurso criado e administrado pelo próprio backend. | `DI-008` |
-| Entrypoint × Fachada × Controller × Composition Root | Bootstrap público do host, proteção da Presentation, adaptação da chamada e wiring. | Arquitetura §§7 e 8; `DI-010` |
-| Fachada pública do backend × fachada da Presentation | `PublicadorPcaScriptcase` é a API consumida pela Blank e prepara a execução; `FachadaPublicarPca` é interna à Presentation e protege o resultado contra falhas e exceções. | Arquitetura §7; `DI-010` |
+| Bootstrap × entrypoint × API × fachada pública | Bootstrap prepara o ambiente e os recursos iniciais; entrypoint é uma operação concreta pela qual o consumidor inicia um comportamento; API é o conjunto dos contratos oferecidos ao consumidor; fachada pública é o componente que oferece esses contratos/operações dessa API escondendo a implementação interna. | Arquitetura §7; `DI-010` |
+| Front Controller × fachada pública | O `onExecute` da Blank recebe e adapta as requisições da aplicação hospedeira; as fachadas públicas pertencem ao `pca-pncp-backend` e recebem somente as chamadas que a Blank lhes delega. | [Integração](../../../integracao/README.md); `DI-010` |
+| Fachada pública × executor × Composition Root | A fachada pública recebe a chamada da Blank e delega; o executor interno coordena a preparação da operação; o Composition Root constrói e conecta o grafo concreto da publicação. | Fluxo §§2 e 4; Arquitetura §7; `DI-010` |
+| Fachada da Presentation × Controller | A fachada interna protege o resultado e contém falhas; o Controller adapta a entrada e aciona o caso de uso já composto. | Arquitetura §§4.4 e 8; `DI-010` |
+| Fachadas públicas do backend × fachada da Presentation | `PublicadorPcaScriptcase` inicia a publicação e `RegistradorEventosTecnicosScriptcase` solicita o registro posterior dos eventos; ambas são chamadas pela Blank. `FachadaPublicarPca` é interna à camada Presentation e protege o resultado, convertendo exceções, falhas e respostas em um ViewModel seguro. | Arquitetura §7; `DI-006`; `DI-010` |
 | Construtor de objeto × construtor de pacote | `__construct` deixa uma instância válida em memória; o construtor de pacote prepara arquivos para entrega. | Arquitetura §7; `DI-010` |
+| Resultado cURL × resposta HTTP × resultado da Application | `ResultadoExecucaoCurlPncp` contém fatos técnicos da execução nativa; `RespostaHttpPncp` representa uma resposta válida do protocolo; `ResultadoEscritaPncp` traduz essa resposta para o significado interno da operação. | Arquitetura §4.3; `DI-009` |
 | Artefato × pacote × release × deploy | Artefato é qualquer resultado concreto; pacote é a pasta executável; release é o conjunto preparado para entrega; deploy instala a release em um ambiente. | `DI-010`; Roadmap Fase 9 |
 | Manifesto × pacote | O manifesto descreve e protege a integridade; o pacote contém o código que será executado. | Roadmap Sprint 8.5 |
 | Checkpoint de planejamento × checkpoint Oracle | O primeiro preserva decisões e continuidade documental; o segundo fotografa dados Oracle para bloquear execução sobre estado divergente. | Agentes; Roadmap Sprints 8.4 e 8.5 |

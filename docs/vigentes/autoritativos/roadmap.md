@@ -803,7 +803,7 @@ ou wiring.
 
 #### Sprint 7.3 — Fachada e fronteira de exceções
 
-- expor um único ponto público;
+- expor, naquele incremento, um único ponto público da Presentation;
 - converter falhas inesperadas em resultado seguro;
 - preservar correlação sem expor stack, SQL, payload ou segredos.
 
@@ -847,8 +847,9 @@ ou tratar integração real como autorização automática de implantação.
 
 #### Sprint 8.1 — Composition Root e perfil Scriptcase
 
-- expor `PublicadorPcaScriptcase` como única API conhecida pela Blank, recebendo
-  conexão emprestada, login, `SERVER_NAME`, ano e `X-Request-ID`;
+- expor, naquele incremento, `PublicadorPcaScriptcase` como única fachada
+  pública conhecida pela Blank, recebendo conexão emprestada, login,
+  `SERVER_NAME`, ano e `X-Request-ID`;
 - localizar por `PCA_PNCP_PROFILE_REGISTRY_FILE` o registro externo que contém
   somente a allowlist exata `SERVER_NAME => caminho absoluto do perfil`;
 - carregar CNPJ, ambiente, credenciais e parâmetros exclusivamente do perfil
@@ -859,6 +860,10 @@ ou tratar integração real como autorização automática de implantação.
   logger e correlação sem fechar a conexão emprestada;
 - manter registro, perfis e segredos fora do repositório e do webroot e provar
   o fluxo transversal sem Oracle, PNCP ou Scriptcase reais.
+
+A exclusividade acima descreve o recorte concluído pela Sprint 8.1. A Sprint
+8.5 ampliou a fronteira pública com `RegistradorEventosTecnicosScriptcase`, sem
+expor executores ou detalhes Oracle à Blank.
 
 #### Sprint 8.2 — Integração Oracle real
 

@@ -46,6 +46,7 @@ final class PreparadorUnidadeSobExclusividade
             ));
         }
 
+        # obtém exclusividade
         if ($inicio->getSituacao() === SituacaoInicioUnidadeTrabalho::BLOQUEADA) {
             return $this->bloquearEDesfazer(
                 $unidade,
@@ -68,6 +69,7 @@ final class PreparadorUnidadeSobExclusividade
         }
 
         try {
+            # relê e reconstrói a fotografia vigente
             $identidadesRelidas = $this->planoRepository->listarIdentidades(
                 $unidade->getAnoExecucao()
             );
@@ -87,6 +89,7 @@ final class PreparadorUnidadeSobExclusividade
         }
 
         try {
+            # Reconstrói os Planos e suas fotografias vigentes
             $planosOuFalha = $this->reconstruirPlanos($identidadesOuFalha);
         } catch (Throwable) {
             return $this->interromperEDesfazer(new FalhaSegura(
@@ -100,6 +103,7 @@ final class PreparadorUnidadeSobExclusividade
         }
 
         try {
+            # consulta o estado operacional local
             $resultadoEstado = $this->estadoOperacional->consultar($unidade);
         } catch (Throwable) {
             return $this->interromperEDesfazer(new FalhaSegura(
@@ -108,10 +112,7 @@ final class PreparadorUnidadeSobExclusividade
             ));
         }
 
-        if (
-            $resultadoEstado->getSituacao()
-            === SituacaoConsultaEstadoOperacional::CONFLITO
-        ) {
+        if ($resultadoEstado->getSituacao() === SituacaoConsultaEstadoOperacional::CONFLITO) {
             return $this->bloquearEDesfazer(
                 $unidade,
                 $this->falhaOuDiagnostico(
@@ -122,10 +123,7 @@ final class PreparadorUnidadeSobExclusividade
             );
         }
 
-        if (
-            $resultadoEstado->getSituacao()
-            === SituacaoConsultaEstadoOperacional::FALHA_SISTEMICA
-        ) {
+        if ($resultadoEstado->getSituacao() === SituacaoConsultaEstadoOperacional::FALHA_SISTEMICA) {
             return $this->interromperEDesfazer(
                 $this->falhaOuDiagnostico(
                     $resultadoEstado->getFalha(),

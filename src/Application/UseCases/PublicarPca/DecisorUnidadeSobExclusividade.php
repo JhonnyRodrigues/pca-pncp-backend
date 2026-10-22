@@ -42,6 +42,7 @@ final class DecisorUnidadeSobExclusividade
         Cnpj $cnpj,
         ContextoUnidadeSobExclusividade $contexto
     ): ContextoUnidadeComDecisao|DesfechoProcessamentoUnidade {
+        # observa o PNCP
         $observacao = $this->observar($sessao, $cnpj, $contexto);
 
         if ($observacao instanceof DesfechoProcessamentoUnidade) {

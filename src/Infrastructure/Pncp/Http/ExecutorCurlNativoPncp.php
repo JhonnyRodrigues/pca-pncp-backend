@@ -21,6 +21,7 @@ final class ExecutorCurlNativoPncp implements ExecutorCurlPncp
             throw FalhaTransportePncpException::inicializacaoCurlFalhou();
         }
 
+        // PHP 8+ libera automaticamente o CurlHandle ao fim do escopo.
         try {
             if (!curl_setopt_array($handle, $opcoes)) {
                 throw FalhaTransportePncpException::configuracaoCurlFalhou();
@@ -51,8 +52,6 @@ final class ExecutorCurlNativoPncp implements ExecutorCurlPncp
             throw $exception;
         } catch (Throwable) {
             throw FalhaTransportePncpException::configuracaoCurlFalhou();
-        } finally {
-            curl_close($handle);
         }
     }
 }

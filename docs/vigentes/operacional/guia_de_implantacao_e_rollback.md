@@ -28,9 +28,75 @@ smoke test funcional.
 
 ## 2. Preparar a release na máquina de desenvolvimento
 
-Depois de criar o commit que identificará a release, execute:
+O preparo separa dois controles:
 
-```powershell
+- **gate de qualidade:** conjunto de verificações que procura problemas no
+  checkout antes da release;
+- **empacotamento:** transformação de um commit aprovado em um artefato
+  autocontido, verificado e pronto para transferência.
+
+Executar esses controles manualmente não constitui, por si só, um pipeline de
+CI/CD. Eles passam a integrar um pipeline quando uma ferramenta de integração
+ou entrega contínua os automatiza.
+
+### 2.1 Preparar o ambiente quando necessário
+
+Em uma máquina nova, depois de clonar o projeto, quando `vendor/` estiver
+ausente ou depois de receber alterações em `composer.json` ou `composer.lock`,
+execute:
+
+```bash
+composer install
+```
+
+Esse comando instala no checkout as versões registradas no `composer.lock`,
+inclui as ferramentas de desenvolvimento e gera o autoload local. Não é
+necessário repeti-lo antes de toda release quando as dependências já estiverem
+coerentes. Não o execute no servidor de produção; a release é autocontida.
+
+### 2.2 Executar os gates locais de qualidade
+
+Antes de criar o commit da release, execute:
+
+```bash
+composer validate
+composer check-psr4
+composer tests
+```
+
+Esses comandos, respectivamente, conferem os arquivos do Composer, validam o
+carregamento PSR-4 das classes e executam a regressão local principal. Prossiga
+somente se todos terminarem sem erro e avalie os avisos exibidos pelo Composer.
+A variante `composer validate --strict` transforma também os avisos em código
+de saída de erro; ela só deve se tornar obrigatória depois que o projeto tiver
+uma decisão explícita para todos eles, inclusive a licença declarada no
+`composer.json`.
+
+Execute também as suítes contratuais locais afetadas pela mudança. Identifique
+os comandos aplicáveis e confirme que não possuem I/O real no
+[catálogo de comandos Composer](../apoio/catalogo_de_comandos_composer.md).
+Gates reais, preflights e comandos de limpeza não fazem parte dessa regressão
+de rotina e exigem contexto e autorização próprios.
+
+### 2.3 Identificar a release por um commit limpo
+
+Depois que os gates aplicáveis passarem, conclua as alterações e crie o commit
+que identificará a release. Em seguida, execute:
+
+```bash
+git status --short
+```
+
+Prossiga somente se o comando não exibir saída. Isso significa que o
+**worktree** — os arquivos da cópia de trabalho do Git — não possui alterações
+ou arquivos novos pendentes. O arquivamento recusa uma release cujo conteúdo
+não possa ser associado integralmente ao commit.
+
+### 2.4 Construir, verificar e arquivar
+
+Com o commit criado e o worktree limpo, execute:
+
+```bash
 composer package:build
 ```
 
@@ -42,7 +108,7 @@ Intenção: gerar a pasta do pacote em `build/pca-pncp-backend`, com:
 
 Execute a verificação:
 
-```powershell
+```bash
 composer package:verify
 ```
 
@@ -51,7 +117,7 @@ públicas. Prossiga somente com o retorno `PACOTE_VALIDADO`.
 
 Transforme o pacote validado em um único arquivo pronto para transferência:
 
-```powershell
+```bash
 composer package:archive
 ```
 
@@ -64,7 +130,7 @@ a hora e o fuso da geração.
 
 Para executar as três etapas anteriores em sequência, use:
 
-```powershell
+```bash
 composer package:release
 ```
 
@@ -84,20 +150,20 @@ Antes da primeira transferência, conceda ao usuário de implantação acesso
 direto ao diretório, sem alterar seu proprietário e grupo:
 
 ```bash
-sudo setfacl -m u:administrator:rwx /var/www/html/PCA_PUBLICAR_B
+sudo setfacl -m u:devteam:rwx /var/www/html/PCA_PUBLICAR_B
 ```
 
-Intenção: autorizar especificamente o usuário `administrator` a criar, renomear e
+Intenção: autorizar especificamente o usuário `devteam` a criar, renomear e
 remover entradas nesse diretório, mantendo o proprietário e grupo atual. Não conceda escrita irrestrita com `chmod 777` ou
 `chmod o+w`.
 
-Confira a permissão na sessão do usuário `administrator`:
+Confira a permissão na sessão do usuário `devteam`:
 
 ```bash
 if test -w /var/www/html/PCA_PUBLICAR_B; then
-  echo "administrator pode escrever"
+  echo "devteam pode escrever"
 else
-  echo "ERRO: administrator sem permissão de escrita"
+  echo "ERRO: devteam sem permissão de escrita"
 fi
 ```
 
@@ -160,7 +226,7 @@ Prossiga somente quando o comando informar `Destino livre`.
 Extraia o pacote:
 
 ```bash
-sudo tar -xzf pca-pncp-backend_DATA_COMMIT.tar.gz -C /var/www/html/PCA_PUBLICAR_B
+tar -xzf pca-pncp-backend_DATA_COMMIT.tar.gz -C /var/www/html/PCA_PUBLICAR_B
 ```
 
 Intenção: criar a pasta final diretamente a partir do artefato verificado, sem
@@ -169,12 +235,12 @@ executar Composer em produção.
 Aplique propriedade e permissões:
 
 ```bash
-sudo chown -R administrator:www-data /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend
+sudo chown -R devteam:www-data /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend
 find /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend -type d -exec chmod 2750 {} +
 find /var/www/html/PCA_PUBLICAR_B/pca-pncp-backend -type f -exec chmod 0640 {} +
 ```
 
-Intenção: permitir administração somente pelo usuário `administrator`, leitura do grupo `www-data` pelo Apache/PHP, sem conceder escrita, e nenhum acesso aos demais usuários. O `2` de `2750` preserva o grupo nos novos diretórios.
+Intenção: permitir administração somente pelo usuário `devteam`, leitura do grupo `www-data` pelo Apache/PHP, sem conceder escrita, e nenhum acesso aos demais usuários. O `2` de `2750` preserva o grupo nos novos diretórios.
 
 Confira a topologia do nível principal do diretório:
 

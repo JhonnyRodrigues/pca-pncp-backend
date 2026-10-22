@@ -34,7 +34,7 @@ final class PcaPublicarBlankTest extends TestCase
         $this->assertStringContainsString("\$_SERVER['HTTP_X_REQUEST_ID']", $this->codigo);
         $this->assertMatchesRegularExpression(
             '/->executarComEventos\(\s*\$this->Db,\s*\$loginAutenticado,\s*'
-                . '\$serverName,\s*\$entrada\[\'ano\'\],\s*\$requestId\s*\)/s',
+                . '\$serverName,\s*\$entrada\[\'ano\'\],\s*\$correlationId\s*\)/s',
             $this->codigo
         );
         $this->assertSame(3, substr_count($this->codigo, '$cnpjConsultaPublica'));
@@ -82,7 +82,7 @@ final class PcaPublicarBlankTest extends TestCase
             $this->codigo
         );
         $this->assertStringContainsString(
-            'pca_publicar_correlacao_segura($requestId ?? null)',
+            'pca_publicar_correlacao_segura($correlationId ?? null)',
             $this->codigo
         );
     }

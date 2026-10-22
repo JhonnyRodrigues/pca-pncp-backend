@@ -14,7 +14,7 @@ final class PublicadorPcaScriptcase
      *
      * devolve somente o resultado funcional da publicação
      *
-     * Os testes, probes e consumidores criados antes da Sprint 8.5 continuam funcionando sem alteração
+     * Método mantido para que os testes, probes e consumidores criados antes da Sprint 8.5 continuem funcionando sem alteração
      */
     public function executar(
         object $conexaoAdodb,
@@ -33,7 +33,7 @@ final class PublicadorPcaScriptcase
     }
 
     /**
-     * Blank que também precisa registrar os eventos
+     * Método variante que também devolve os eventos técnicos acumulados para registro posterior pela Blank.
      *
      * devolve três informações: resultado, eventos e avisoRegistroTecnico
      *

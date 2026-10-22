@@ -12,6 +12,11 @@ preserva a investigação didática realizada quando a camada Application havia
 acabado de ser construída. Ele pode conter caminhos e explicações superados e
 deve ser confrontado com a documentação vigente.
 
+- O [mapa sequencial do fluxo feliz RETIFICAR](fluxo_feliz_retificar_de_ponta_a_ponta.md)
+acompanha uma execução individual desde a Blank do Scriptcase até a resposta
+JSON, distinguindo chamadas, implementações concretas, objetos criados e
+retornos.
+
 - `autoload_manual.php` demonstra `spl_autoload_register()` e delegava primeiro
   ao autoloader do Composer.
 - `utilities/` contém uma classe elementar, um pequeno script de execução, uma

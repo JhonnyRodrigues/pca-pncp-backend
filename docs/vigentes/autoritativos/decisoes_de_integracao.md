@@ -471,10 +471,11 @@ completar o UseCase.
     para a Sprint 8.5 os devolve separadamente ao hospedeiro por
     `PublicadorPcaScriptcase::executarComEventos(...)`, conforme a DI-010.
 16. A Blank entrega os envelopes a `RegistradorEventosTecnicosScriptcase`
-    somente depois do encerramento confirmado da transação do backend. O
-    registrador persiste cada JSON integral em `SEGURANCA_LOG.DESCRIPTION` por
-    mecanismo próprio de CLOB do ADOdb e define `execute` em `ACTION`; a
-    operação detalhada permanece no campo `action` do JSON.
+    somente depois do encerramento confirmado da transação do backend. O fluxo
+    interno coordenado pelo executor de registro persiste cada JSON integral em
+    `SEGURANCA_LOG.DESCRIPTION` por mecanismo próprio de CLOB do ADOdb e define
+    `execute` em `ACTION`; a operação detalhada permanece no campo `action` do
+    JSON.
 17. `SEGURANCA_LOG` permanece separada de `PAC_HISTORICOS`: a primeira recebe observabilidade técnica; a segunda, somente fatos de negócio confirmados.
 18. O logging técnico não cria nem utiliza uma segunda conexão Oracle.
 
@@ -1084,26 +1085,33 @@ e da execução dos gates de ambiente e contrato.
 2. O Composition Root pertence ao backend.
 3. Wiring é manual por construtores.
 4. Não há container ou Service Locator.
-5. Scriptcase carrega o autoloader e chama somente
-   `PublicadorPcaScriptcase`, entrypoint público do backend.
-6. O entrypoint recebe exclusivamente:
+5. O Scriptcase carrega o autoloader e chama somente as fachadas públicas do
+   backend: `PublicadorPcaScriptcase`, para a publicação, e
+   `RegistradorEventosTecnicosScriptcase`, para o registro técnico posterior.
+6. `PublicadorPcaScriptcase` expõe os entrypoints de publicação. Eles recebem
+   exclusivamente:
    - conexão `$this->Db` emprestada;
    - login autenticado confiável;
    - `SERVER_NAME`;
    - ano selecionado;
    - `X-Request-ID` já extraído de `$_SERVER['HTTP_X_REQUEST_ID']` pela Blank.
 7. A Blank não fornece CNPJ, perfil, registro, allowlist ou caminho de arquivo.
-8. O entrypoint seleciona e carrega o perfil, constrói a entrada, delega a
-   montagem ao Composition Root e aciona a `FachadaPublicarPca` interna.
-9. O Scriptcase não conhece Controller, Repository concreto, cliente PNCP,
-   token ou política transacional.
-10. `PublicadorPcaScriptcase::executar(...)` preserva seus argumentos e o
+8. `PublicadorPcaScriptcase` delega ao `ExecutorPublicacaoPcaScriptcase`. Esse
+   executor valida a correlação, seleciona e carrega o perfil, constrói a
+   entrada, delega a montagem ao Composition Root e aciona a
+   `FachadaPublicarPca` interna.
+9. `RegistradorEventosTecnicosScriptcase` expõe o entrypoint de registro e
+   delega ao `ExecutorRegistroEventosTecnicosScriptcase`; seu contrato detalhado
+   pertence à seção “Eventos técnicos na fronteira hospedeira”.
+10. O Scriptcase não conhece os executores internos, Controller, Repository
+    concreto, cliente PNCP, token ou política transacional.
+11. `PublicadorPcaScriptcase::executar(...)` preserva seus argumentos e o
     retorno `PublicarPcaViewModel`. A extensão `executarComEventos(...)`
     recebe os mesmos argumentos e devolve um objeto com `resultado`
     (o ViewModel existente), `eventos` (envelopes sanitizados) e
     `avisoRegistroTecnico` (aviso público seguro ou `null`). Não expõe objetos
     de Infrastructure ao hospedeiro.
-11. Ambos os métodos compartilham o caminho de execução. Obter eventos não
+12. Ambos os métodos compartilham o caminho de execução. Obter eventos não
     executa novamente a publicação. A composição mantém disponíveis a
     fachada, o acumulador e o estado transacional da mesma chamada, sem
     compartilhar estado entre execuções ou alterar o contrato de
@@ -1236,9 +1244,10 @@ Os gates reais foram concluídos; suas evidências pertencem ao
    confirmado, o registrador pode abrir e encerrar uma transação técnica nova
    e curta na mesma conexão emprestada.
 5. A Blank chama `RegistradorEventosTecnicosScriptcase` uma vez com o lote
-   ordenado. O registrador trata um evento por transação, insere uma linha
-   provisória curta, localiza de forma unívoca o ID gerado pelo trigger
-   `TR_SEGURANCA_LOG` e usa `UpdateClob` para gravar o JSON integral em
+   ordenado. O executor interno acionado pela fachada trata um evento por
+   transação, usando o adapter que insere uma linha provisória curta, localiza
+   de forma unívoca o ID gerado pelo trigger `TR_SEGURANCA_LOG` e usa
+   `UpdateClob` para gravar o JSON integral em
    `SGI.SEGURANCA_LOG.DESCRIPTION`. `ACTION` recebe `execute`; a operação
    detalhada permanece em `action` no JSON. Depois da decisão, os eventos que
    possuem contexto da unidade incluem `context.decisao`; o campo não substitui
@@ -1276,7 +1285,10 @@ Os gates reais foram concluídos; suas evidências pertencem ao
 1. A release é autocontida com código e `vendor/`.
 2. Composer não executa em produção.
 3. Perfis e segredos permanecem externos ao artefato.
-4. Scriptcase conhece somente autoloader e `PublicadorPcaScriptcase`.
+4. O Scriptcase conhece somente o autoloader e os contratos da fronteira
+   pública expostos por `PublicadorPcaScriptcase` e
+   `RegistradorEventosTecnicosScriptcase`; não conhece executores, Composition
+   Root ou implementações das camadas internas.
 
 O Microciclo 5 da Sprint 8.5 implementou localmente a construção isolada pelo
 `composer.lock`, com `src/`, `vendor/` sem dependências de desenvolvimento e
@@ -1315,7 +1327,7 @@ homologação.
 
 #### DI-010 — Gates e critérios de reabertura
 
-- testar o entrypoint e a fachada no Scriptcase real;
+- testar os entrypoints e as fachadas públicas no Scriptcase real;
 - a conexão emprestada já foi comprovada no gate Oracle/Scriptcase; validar sua
   reutilização pelo pacote final no ambiente hospedeiro;
 - validar login, Representante e Lotação;
@@ -1345,8 +1357,8 @@ distribuição, sem antecipar essas etapas durante a criação deste documento.
 - Confirma o Composition Root no backend e remove ambiente, credenciais e usuário do Request.
 - Revisada em 01/09/2026 pela Sprint 8.1 para definir o registro externo como
   índice, `PCA_PNCP_PROFILE_REGISTRY_FILE` como localizador provisionado, CNPJ
-  no perfil, `PublicadorPcaScriptcase` como API da Blank e preservação do
-  `X-Request-ID` fornecido pelo servidor HTTP.
+  no perfil, `PublicadorPcaScriptcase` como a fachada pública então conhecida
+  pela Blank e preservação do `X-Request-ID` fornecido pelo servidor HTTP.
 - Revisada em 17/09/2026 pelo Microciclo 1 da Sprint 8.5 para aprovar
   `executarComEventos(...)`, preservando a API existente, a separação entre
   resultado e eventos, a persistência pela Blank e os gates de logs. A
@@ -1357,6 +1369,9 @@ distribuição, sem antecipar essas etapas durante a criação deste documento.
   antecipar a compilação no Scriptcase nem os gates reais de logs e pacote.
 - Construção e verificação local do pacote concluídas em 18/09/2026 no
   Microciclo 5; instalação e smoke no hospedeiro continuam pendentes.
+- Revisada em 20/09/2026 pelo Microciclo corretivo 6A da Sprint 8.5 para
+  substituir `sc_log_add` pela segunda fachada pública,
+  `RegistradorEventosTecnicosScriptcase`, sem expor o adapter Oracle à Blank.
 - Revisada em 23/09/2026 pelo Microciclo corretivo 3A da Sprint 9.4 para
   preservar o resultado conhecido na Blank e identificar explicitamente a
   decisão no contexto dos eventos técnicos, sem reabrir a observabilidade

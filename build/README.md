@@ -40,6 +40,6 @@ foi realizada em um servidor.
 ## Limpeza local
 
 Com exceção deste README, todo o conteúdo de `build/` é gerado e não
-versionado. Ele pode ser apagado quando nenhum pacote ainda precisar ser
-transferido ou comparado. A limpeza de `build/` não substitui a remoção
+versionado. **Ele pode ser apagado quando nenhum pacote ainda precisar ser
+transferido ou comparado**. A limpeza de `build/` não substitui a remoção
 controlada de artefatos já enviados a um servidor.

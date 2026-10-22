@@ -93,7 +93,7 @@ class PncpHttpClient
         $curlError = curl_errno($handle);
         $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
         $sslVerifyResult = (int) curl_getinfo($handle, CURLINFO_SSL_VERIFYRESULT);
-        curl_close($handle);
+        // curl_close($handle); PHP 8+ libera automaticamente o CurlHandle ao fim do escopo.
 
         if ($executed === false || $curlError !== 0) {
             throw new RuntimeException("Falha cURL sanitizada (errno {$curlError}).");

@@ -15,9 +15,12 @@ desfazer; a Infrastructure concreta executa **como** falar com Oracle e PNCP.
 
 ```mermaid
 flowchart LR
-    S[PublicadorPcaScriptcase] --> CR[CompositionRootPublicacaoPca]
+    B[Blank do Scriptcase] --> S[PublicadorPcaScriptcase]
+    S --> X[ExecutorPublicacaoPcaScriptcase]
+    X --> L[CarregadorPerfilPublicacaoPca]
+    X --> CR[CompositionRootPublicacaoPca]
     CR --> F[FachadaPublicarPca]
-    S --> E[EntradaPublicarPca]
+    X --> E[EntradaPublicarPca]
     E --> F
     E --> C[PublicarPcaController]
     C --> R[PublicarPcaRequest]
@@ -165,31 +168,33 @@ mapeamento físico permanece na Infrastructure, leia a explicação sobre
 
 ## 7. Ordem prática de leitura
 
-1. `PublicadorPcaScriptcase`, que mostra o contrato mínimo da Blank, a
-   correlação externa, o registro allowlisted e a entrada construída com CNPJ
-   do perfil.
-2. `CompositionRootPublicacaoPca` e `PerfilPublicacaoPca`, que validam a
+1. `PublicadorPcaScriptcase`, que mostra as operações públicas de publicação e
+   a delegação para a Composition.
+2. `ExecutorPublicacaoPcaScriptcase` e `CarregadorPerfilPublicacaoPca`, que
+   validam a correlação, selecionam o registro allowlisted e constroem a entrada
+   com o CNPJ do perfil.
+3. `CompositionRootPublicacaoPca` e `PerfilPublicacaoPca`, que validam a
    configuração e montam os recursos concretos sem conhecer `SERVER_NAME` ou
    arquivos.
-3. `FachadaPublicarPca`, `EntradaPublicarPca` e `PublicarPcaController`, que
+4. `FachadaPublicarPca`, `EntradaPublicarPca` e `PublicarPcaController`, que
    protegem a fronteira e adaptam a entrada.
-4. `PublicarPcaPresenter`, `PublicarPcaViewModel` e
+5. `PublicarPcaPresenter`, `PublicarPcaViewModel` e
    `ResultadoUnidadeViewModel`, que projetam a saída segura sem renderizá-la.
-5. `MontadorNucleoPublicacaoPca`, que explicita a topologia do núcleo.
-6. `PublicarPcaUseCase` e este diagrama.
-7. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
-8. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
-9. `PreparadorUnidadeSobExclusividade`.
-10. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
-11. `ExecutorComandosUnidade`.
-12. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
+6. `MontadorNucleoPublicacaoPca`, que explicita a topologia do núcleo.
+7. `PublicarPcaUseCase` e este diagrama.
+8. `PreparadorExecucaoPublicacaoPca` e `CoordenadorVarreduraUnidades`.
+9. `ProcessadorUnidadeInterno`, que mostra a cadeia de três estágios.
+10. `PreparadorUnidadeSobExclusividade`.
+11. `DecisorUnidadeSobExclusividade` e `PoliticaProcessamentoPlano`.
+12. `ExecutorComandosUnidade`.
+13. `FinalizadorProcessamentoUnidadeInterno`, lido como quatro blocos: observar,
     recalcular, persistir e concluir.
-13. Results e Enums somente quando aparecerem no caminho estudado.
-14. `FluxoConcretoApplicationTest`, que executa o grafo montado sem Infrastructure.
-15. `MontadorNucleoPublicacaoPcaIntegrationTest`, que executa o mesmo ponto de
+14. Results e Enums somente quando aparecerem no caminho estudado.
+15. `FluxoConcretoApplicationTest`, que executa o grafo montado sem Infrastructure.
+16. `MontadorNucleoPublicacaoPcaIntegrationTest`, que executa o mesmo ponto de
     montagem com os nove adapters concretos sobre ADOdb, cURL e tempo
     controlados.
-16. `PublicadorPcaScriptcaseIntegrationTest`, que atravessa a fronteira pública
+17. `PublicadorPcaScriptcaseIntegrationTest`, que atravessa a fronteira pública
     até a Application e encerra localmente antes de qualquer rede real.
 
 O [catálogo de arquivos](catalogo_de_arquivos.md) responde onde cada conceito
@@ -208,10 +213,10 @@ está e evita procurar pelo repositório inteiro.
 
 ## 9. Estado da implementação
 
-O fluxo descrito neste guia está implementado. A fronteira pública
-`PublicadorPcaScriptcase`, a Presentation, a Application, o Domain, o
-Composition Root e os adapters concretos de Oracle, PNCP e observabilidade
-integram o mesmo caminho de execução.
+O fluxo descrito neste guia está implementado. O caminho de publicação começa
+em `PublicadorPcaScriptcase`, passa pelo executor, pelo Composition Root, pela
+Presentation, Application e Domain e alcança os adapters concretos de Oracle,
+PNCP e observabilidade.
 
 A aplicação Blank chama somente as fachadas públicas, entrega ao navegador um
 resultado seguro e registra os eventos técnicos depois do encerramento da
