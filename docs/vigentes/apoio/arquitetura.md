@@ -308,6 +308,12 @@ integram a API da Blank: os executores internos os carregam por meio de
 `CarregadorPerfilPublicacaoPca`, e a Blank não escolhe schema, tabela nem caminho
 de arquivo.
 
+Os modelos sem credenciais em `config/perfil.example.php` e
+`config/registro.example.php` são referências versionadas para reconstrução;
+não são carregados automaticamente nem integram o pacote autocontido. A cópia
+preenchida continua externa. O procedimento e os limites dessa recuperação
+estão no [guia de configuração de produção](../operacional/guia_de_configuracao_de_producao.md#10-recuperar-a-configuração-externa).
+
 ### 7.3 Segredo vs configuração da implantação vs mapeamento físico
 
 Essas três categorias podem coexistir no mesmo perfil atual, mas não significam

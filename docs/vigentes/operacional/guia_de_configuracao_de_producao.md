@@ -2,7 +2,7 @@
 
 **Classificação documental:** Operacional
 
-**Autoridade/Escopo:** preparação do registro, do perfil, do CA bundle e dos
+**Autoridade/Escopo:** preparação e recuperação do registro, do perfil, do CA bundle e dos
 pré-requisitos de configuração necessários à implantação em produção
 
 ## 1. Finalidade e limites
@@ -32,6 +32,11 @@ Git, em chat, relatório ou saída de comando:
 - tokens, headers de autenticação ou strings de conexão;
 - valores físicos que não sejam necessários como evidência sanitizada.
 
+Os modelos sem credenciais podem versionar os parâmetros operacionais e
+mapeamentos físicos aprovados. Isso não autoriza versionar ou exibir o perfil
+real completo. A [seção 10](#10-recuperar-a-configuração-externa) descreve a
+recuperação e o conteúdo do backup protegido.
+
 ## 2. Topologia externa aprovada
 
 Produção usa a seguinte estrutura, externa à release e ao webroot:
@@ -55,6 +60,11 @@ return [
 ```
 
 Substitua `SERVER_NAME_EXATO_DE_PRODUCAO` pelo valor efetivamente recebido em produção, sem mudar caixa, remover espaços, criar apelidos ou inferir o ambiente.
+
+O mesmo formato está em
+[`config/registro.example.php`](../../../config/registro.example.php). Em
+homologação, substitua também o nome do arquivo por `perfil-homologacao.php`,
+usando somente o hostname literal daquele ambiente.
 
 ## 3. Referência autorizada de homologação
 
@@ -85,18 +95,28 @@ resumo criptográfico usado para identificar exatamente o conteúdo do arquivo �
 Esse hash identifica o arquivo aprovado; ele não revela chaves privadas porque
 o bundle contém certificados públicos.
 
+O modelo [`config/perfil.example.php`](../../../config/perfil.example.php)
+preserva esses parâmetros e os onze grupos de mapeamento. O mantenedor
+confirmou os mapeamentos em HML e PROD em 28/10/2026; essa confirmação não é uma
+inspeção independente dos bancos pelos testes locais. O modelo permite
+reconstrução sem depender de outro perfil de homologação, mas exige conferência
+antes da ativação. Ele não contém DDL e não recria objetos nem dados do Oracle.
+
 ## 4. Preparar o perfil de produção
 
-Use o perfil validado de homologação apenas como referência estrutural. Prepare
-o arquivo de produção no local protegido e confira campo a campo:
+Copie o modelo `config/perfil.example.php` compatível com a versão instalada
+para `perfil-producao.php` no local protegido. O modelo conserva `HOMOLOGACAO`
+e deixa CNPJ, login e senha vazios: não é uma configuração pronta para execução.
+Confira campo a campo:
 
 1. `ambiente` deve ser exatamente `PRODUCAO`;
 2. o CNPJ institucional deve ser confirmado pela fonte responsável;
 3. login e senha devem ser credenciais próprias do PNCP de produção;
 4. `ca_bundle` deve apontar por caminho absoluto, ou por `__DIR__`, para
    `/var/www/configuracoes/pca-pncp/ca-bundle.crt`;
-5. limites, timeouts, charset, timezone e mapeamentos partem do perfil já
-   validado e só mudam mediante decisão explícita da fonte responsável;
+5. limites, timeouts, charset, timezone e mapeamentos partem do modelo
+   versionado conferido; diferenças em relação ao ambiente devem ser
+   esclarecidas com a fonte responsável, sem inferir valores;
 6. o arquivo não recebe campos de massa, consentimento ou etapa pertencentes às
    antigas suítes contratuais.
 
@@ -236,32 +256,59 @@ com o conteúdo da variável para testar a configuração.
 
 ### 7.3 Validação sanitizada no servidor
 
-Ela carrega registro e perfil como www-data, mas não exibe credenciais nem acessa Oracle/PNCP:
+O comando usa o autoload da release e os mesmos validadores do backend, como
+`www-data`, sem exibir credenciais ou acessar Oracle/PNCP. Substitua o hostname
+pelo valor literal de produção. O localizador é informado explicitamente ao
+processo CLI; isso não configura nem comprova a variável no Apache/PHP.
 
 ```bash
-sudo -u www-data php -r '
-$registro = require "/var/www/configuracoes/pca-pncp/registro.php";
-$caminho = $registro["SERVER_NAME_EXATO_DE_PRODUCAO"] ?? null;
-$perfil = is_string($caminho) && is_file($caminho)
-    ? require $caminho
-    : null;
+sudo -u www-data env \
+  PCA_PNCP_PROFILE_REGISTRY_FILE=/var/www/configuracoes/pca-pncp/registro.php \
+  php -d display_errors=0 -d log_errors=0 -r '
+ob_start();
+set_error_handler(static function (int $nivel, string $mensagem): void {
+    throw new ErrorException("Falha na validação local.", 0, $nivel);
+});
 
-$valido =
-    count($registro) === 1
-    && is_array($perfil)
-    && ($perfil["ambiente"] ?? null) === "PRODUCAO"
-    && trim((string) ($perfil["cnpj"] ?? "")) !== ""
-    && trim((string) ($perfil["pncp"]["login"] ?? "")) !== ""
-    && trim((string) ($perfil["pncp"]["senha"] ?? "")) !== ""
-    && is_readable((string) ($perfil["pncp"]["ca_bundle"] ?? ""));
+try {
+    if ($argc !== 4 || !in_array($argv[3], ["HOMOLOGACAO", "PRODUCAO"], true)) {
+        throw new RuntimeException("Argumentos inválidos.");
+    }
+    require $argv[1];
+    $perfil = (new Semae\Pca\Composition\CarregadorPerfilPublicacaoPca())->carregar($argv[2]);
+    $tipado = new Semae\Pca\Composition\PerfilPublicacaoPca($perfil);
+    new Semae\Pca\Domain\ValueObjects\Cnpj($perfil["cnpj"]);
+    $valido = $tipado->getAmbiente()->value === $argv[3]
+        && is_string($perfil["pncp"]["ca_bundle"])
+        && is_readable($perfil["pncp"]["ca_bundle"]);
+} catch (Throwable) {
+    $valido = false;
+} finally {
+    restore_error_handler();
+    ob_end_clean();
+}
 
 echo $valido
-    ? "Configuração de produção válida e legível\n"
-    : "ERRO: configuração inválida\n";
+    ? "Configuração local válida para o ambiente informado.\n"
+    : "ERRO: validação local da configuração falhou.\n";
 
 exit($valido ? 0 : 1);
-'
+' -- "/var/www/html/PCA_PUBLICAR_B/pca-pncp-backend/vendor/autoload.php" \
+  "SERVER_NAME_EXATO_DE_PRODUCAO" "PRODUCAO"
 ```
+
+O código de saída é `0` no sucesso e `1` na falha. Em homologação, use o
+autoload da release daquele ambiente, seu registro, hostname e `HOMOLOGACAO` no
+último argumento. Não passe credenciais pela linha de comando. Em caso de
+falha, confira os arquivos em sessão administrativa protegida, sem imprimir o
+perfil ou a cadeia de exceções.
+
+Essa validação cobre carregamento, formato, tipos, CNPJ e legibilidade do
+bundle, não sua autenticidade. Complete a seção 6 e o checklist operacional.
+Ela não comprova existência dos objetos Oracle, permissões ou acesso pelo DB
+link, autenticação no PNCP, comunicação TLS ou visibilidade da variável no
+runtime web. O registro de produção deve continuar contendo somente uma
+entrada, conforme a seção 2.
 
 ### 7.4 Diagnóstico persistente de erros HTTP do PNCP
 
@@ -383,3 +430,72 @@ A implantação e o rollback da release seguem o
 [guia de implantação e rollback](guia_de_implantacao_e_rollback.md).
 Consulte a [situação operacional](situacao_operacional.md) antes de qualquer
 smoke ou intervenção real.
+
+## 10. Recuperar a configuração externa
+
+### 10.1 O que preservar no backup protegido
+
+Mantenha cópias recuperáveis do registro, dos perfis reais de cada ambiente e
+do CA bundle aprovado, além dos trechos efetivos do `VirtualHost` ou pool
+PHP-FPM que definem `PCA_PNCP_PROFILE_REGISTRY_FILE`. Registre também caminhos,
+proprietário, grupo, permissões, versão da aplicação e identificação do bundle
+aprovado. Configurações de servidor podem conter outras informações sensíveis;
+trate o conjunto como material restrito.
+
+O Git preserva os modelos, não as credenciais nem a cópia exata instalada.
+Mantenha o backup criptografado fora do servidor de aplicação, com acesso
+restrito, atualização após mudanças e teste periódico de restauração. A
+definição institucional de ferramenta, destino e retenção não faz parte deste
+guia. Não armazene o backup no repositório ou no webroot.
+
+### 10.2 Sequência de recuperação
+
+1. **Identifique a versão instalada.** Consulte a identificação e as evidências
+   da release no processo de implantação. Obtenha os dois modelos da revisão
+   Git correspondente, a partir de uma estação de manutenção; não presuma que
+   os modelos da revisão mais recente sejam compatíveis. Se a versão não puder
+   ser identificada, interrompa a reconstrução.
+2. **Escolha a fonte.** Priorize um backup válido e compatível. Sem ele,
+   transfira apenas os modelos para o local protegido e reconstrua conforme as
+   seções 2 a 4. Prepare o diretório conforme a seção 5; copie os modelos para
+   `registro.php` e `perfil-producao.php`, preenchendo hostname literal,
+   `PRODUCAO`, CNPJ e credenciais próprias do ambiente obtidas da fonte
+   institucional protegida. Em HML, use `perfil-homologacao.php` e
+   `HOMOLOGACAO`. Não sobrescreva uma configuração válida apenas para copiar o
+   modelo e não mantenha os perfis preenchidos na pasta `config/` do projeto.
+3. **Confira mapeamentos e parâmetros.** Preserve os onze grupos, tipos e
+   literais; confirme sua correspondência com o ambiente antes da ativação.
+   Os testes locais não consultam o banco. Resolva diferenças com o responsável,
+   sem usar valores dos testes como configuração operacional.
+4. **Recupere o bundle.** Restaure o arquivo aprovado do backup ou obtenha-o da
+   fonte institucional responsável. Confira integridade e certificados pela
+   seção 6. O SHA-256 documentado identifica o conteúdo, mas não permite
+   reconstruí-lo. Não elimine a verificação TLS para contornar sua ausência.
+5. **Restabeleça o acesso.** Aplique e confira proprietário, grupo e permissões
+   da seção 5. Reponha a configuração persistente do localizador no Apache/PHP
+   pela seção 7, com validação da sintaxe e recarga controlada. Um resultado no
+   terminal não comprova o runtime web.
+6. **Valide sem publicar.** Execute o lint e as verificações da seção 6, depois
+   o comando sanitizado da seção 7.3 com a release escolhida. Exija código de
+   saída `0`; qualquer falha mantém a recuperação pendente. Complete o
+   checklist da seção 8 sem reaplicar migrations já conformes.
+7. **Registre e encaminhe a reativação.** Anote ambiente, versão/revisão dos
+   modelos, fonte utilizada (backup ou reconstrução), data, responsável,
+   identificação do bundle e verificações com seus resultados, sem valores
+   secretos. A reativação segue a situação operacional e o processo de mudança
+   vigente; recuperar arquivos não autoriza publicar PCA nem executar smoke
+   real automaticamente.
+
+Esse procedimento recupera a configuração da aplicação. Ele não restaura
+objetos ou dados do Oracle: `database/` contém migrations específicas e ainda
+não possui a baseline completa do DDL legado, conforme seu
+[README](../../../database/README.md).
+
+### 10.3 Manter a referência recuperável
+
+Ao alterar o contrato do perfil, atualize o modelo e execute seus testes de
+composição na mesma mudança. Quando mudar um mapeamento ou parâmetro
+operacional aprovado, atualize a referência e sua origem; quando mudar a
+configuração real, atualize também o backup protegido. Preserve a referência
+Git utilizada por cada implantação. Os modelos não entram no pacote
+autocontido e não substituem a configuração externa selecionada em execução.

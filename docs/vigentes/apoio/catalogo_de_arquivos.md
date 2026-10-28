@@ -415,6 +415,7 @@ descrição específica da coluna **Função** ou **Demonstração principal**.
 | `Composition/MontadorNucleoPublicacaoPcaTest.php` | Teste — Unidade | Contrato de montagem do UseCase a partir das nove Ports vigentes e do logger PSR-3. |
 | `Composition/ComposicaoExecucaoPublicacaoPcaTest.php` | Teste — Unidade | Exportação sanitizada e imutável, bloqueio por transação ativa e preservação do resultado diante de falha de exportação. |
 | `Composition/CompositionRootPublicacaoPcaTest.php` | Teste — Unidade | Validação integral do perfil, grafo novo, recursos compartilhados, montagem exportável sem I/O e preservação da conexão emprestada. |
+| `Composition/ModelosConfiguracaoPublicacaoPcaTest.php` | Teste — Contrato local | Compatibilidade do modelo preenchido com os validadores em HML e PROD, rejeição sem preenchimento e recuperação pelo registro externo com hostname literal, sem Oracle ou PNCP. |
 
 ### Integration — Composition
 
@@ -654,6 +655,8 @@ descrição específica da coluna **Função** ou **Demonstração principal**.
 | `.gitignore` | Configuração — Projeto | Exclui do versionamento dependências, configurações locais, segredos, caches, relatórios e artefatos gerados, preservando somente as exceções intencionalmente rastreadas. |
 | `composer.json` | Configuração — Dependências e automação | Dependências, PSR-4 e comandos ativos. |
 | `composer.lock` | Configuração — Lock de dependências | Versões resolvidas das dependências. |
+| `config/perfil.example.php` | Configuração — Modelo sem credenciais | Referência completa dos parâmetros e onze grupos de mapeamento, confirmados pelo mantenedor em HML e PROD. Exige cópia externa, seleção do ambiente, CNPJ e credenciais antes do uso. |
+| `config/registro.example.php` | Configuração — Modelo sem credenciais | Referência do índice de hostname literal para perfil externo. Não é carregado automaticamente nem distribuído no pacote autocontido. |
 | `build/README.md` | Documentação — Guia técnico | Explica a finalidade da pasta de artefatos gerados, seu conteúdo comum e os limites da limpeza local. |
 | `tools/README.md` | Documentação — Guia técnico | Distingue ferramentas versionadas de resultados gerados, documenta o fluxo normal de release e limita a repetição de gates encerrados. |
 | `tests/README.md` | Documentação — Guia técnico | Orienta a suíte padrão, contratos opt-in e cuidados antes de executar qualquer gate com recurso real. |

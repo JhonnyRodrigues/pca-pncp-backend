@@ -102,9 +102,9 @@ composer package:build
 
 Intenção: gerar a pasta do pacote em `build/pca-pncp-backend`, com:
 
-* código-fonte em `src/`,
-* dependências de produção em `vendor/`
-* e o manifesto de integridade em `PACKAGE-MANIFEST.json`.
+- código-fonte em `src/`,
+- dependências de produção em `vendor/`
+- e o manifesto de integridade em `PACKAGE-MANIFEST.json`.
 
 Execute a verificação:
 

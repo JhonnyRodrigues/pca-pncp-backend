@@ -36,6 +36,7 @@ flowchart TD
 | --- | --- | --- |
 | `.agents/` | Guarda planos, checkpoints e registros usados para conduzir sprints e microciclos. | Sim |
 | `build/` | Recebe artefatos gerados localmente, incluindo o pacote autocontido. Seu conteúdo gerado pode ser recriado. | Parcial: apenas `README.md` |
+| `config/` | Guarda modelos sem credenciais para reconstruir registro e perfil externos. Não integra o pacote autocontido e não é fonte de configuração em execução. | Parcial: apenas `perfil.example.php` e `registro.example.php`; arquivos locais reais continuam ignorados |
 | `database/` | Guarda migrations Oracle versionadas, verificações de implantação, consultas operacionais somente leitura e seeds descartáveis separados por ambiente. | Sim |
 | `docs/` | Reúne documentação vigente, histórica e diagramas; investigações locais permanecem ignoradas até serem promovidas ou arquivadas. | Parcial |
 | `integracao/` | Guarda código pertencente ao sistema que hospeda o backend, atualmente a aplicação Blank do Scriptcase. | Sim |

@@ -1,0 +1,167 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Referência completa do formato; CNPJ e credenciais vazios impedem seu uso direto.
+ * Copie para um perfil fora do repositório, da release e do webroot e preencha-o
+ * conforme o guia de configuração de produção. Na cópia de produção, selecione
+ * explicitamente PRODUCAO e use as credenciais próprias desse ambiente.
+ *
+ * O mantenedor confirmou os mapeamentos em HML e PROD em 28/10/2026. Essa origem
+ * não representa uma inspeção independente dos bancos pelos testes locais.
+ * Confira-os antes da ativação; preserve tipos e literais ao atualizar o modelo.
+ * Atualize este exemplo e seus testes quando o contrato do perfil mudar.
+ */
+return [
+    'ambiente' => 'HOMOLOGACAO',
+    'cnpj' => '[PREENCHER]',
+    'pncp' => [
+        'login' => '[PREENCHER]',
+        'senha' => '[PREENCHER]',
+        'ca_bundle' => __DIR__ . '/ca-bundle.crt',
+        'limite_payload_bytes' => 8388608,
+        'limite_resposta_bytes' => 8388608,
+        'timeout_conexao_segundos' => 5,
+        'timeout_login_segundos' => 30,
+        'timeout_leitura_segundos' => 30,
+        'timeout_escrita_segundos' => 60,
+        'tamanho_pagina' => 100,
+        'profundidade_maxima_json' => 64,
+        'limite_maximo_paginas' => 100,
+        'espera_retry_padrao_ms' => 250,
+        'teto_retry_after_ms' => 5000,
+    ],
+    'oracle' => [
+        'charset_adodb' => 'Windows-1252',
+        'timezone' => 'America/Sao_Paulo',
+        'mapeamentos' => [
+            'controles_concorrencia' => [
+                'schema' => 'SGI',
+                'tabela' => 'PAC_CONTROLES_CONCORRENCIA',
+                'colunaEscopo' => 'ESCOPO',
+                'colunaAnoExecucao' => 'ANO_EXECUCAO',
+                'colunaIdentificadorAlvo' => 'IDENTIFICADOR_ALVO',
+                'identificadorAlvoEstrategiaAnual' => 'ESTRATEGIA_ANUAL',
+            ],
+            'configuracao_estrategia' => [
+                'schema' => 'SGI',
+                'tabela' => 'PAC_CONFIGURACOES',
+                'colunaChave' => 'CHAVE',
+                'colunaValor' => 'VALOR',
+                'colunaDescricao' => 'DESCRICAO',
+                'chaveEstrategia' => 'ESTRATEGIA_PUBLICACAO_PLANOS',
+                'chaveUasgConsolidadora' => 'UASG_CONSOLIDADORA',
+                'literalEstrategiaIndividual' => 'INDIVIDUAL',
+                'literalEstrategiaConsolidada' => 'CONSOLIDADO',
+            ],
+            'planos_estrategia' => [
+                'schema' => 'SGI',
+                'tabela' => 'PAC_PLANOS',
+                'colunaAnoExecucao' => 'ANO_EXERCICIO',
+                'colunaUnidadeOrcamentaria' => 'FK_UNIDADE_ORCAMENTARIA',
+                'colunaEstrategiaAdotada' => 'ESTRATEGIA_ADOTADA_PUBLICACAO',
+                'colunaUasgAdotada' => 'UASG_ADOTADA',
+                'literalEstrategiaIndividual' => 'INDIVIDUAL',
+                'literalEstrategiaConsolidada' => 'CONSOLIDADO',
+            ],
+            'planos' => [
+                'schema' => 'SGI',
+                'tabela' => 'PAC_PLANOS',
+                'colunaId' => 'ID_PLANO',
+                'colunaUnidadeOrcamentaria' => 'FK_UNIDADE_ORCAMENTARIA',
+                'colunaAnoExecucao' => 'ANO_EXERCICIO',
+                'colunaVersao' => 'VERSAO',
+                'colunaDataHomologacao' => 'DATA_HOMOLOGACAO',
+                'colunaDataConfirmacao' => 'DATA_PUBLICACAO',
+            ],
+            'demandas' => [
+                'schema' => 'SGI',
+                'tabela' => 'PAC_DEMANDA',
+                'colunaId' => 'ID_DEMANDA',
+                'colunaPlanoOrigem' => 'FK_PLANO',
+                'colunaSituacao' => 'SITUACAO',
+                'colunaUnidadeRequisitante' => 'FK_LOTACAO_AVALIADORA',
+                'colunaDataDesejada' => 'DATA_COMPRA_CONTRATACAO',
+                'colunaCategoria' => 'FK_CATEGORIA',
+                'colunaDescricao' => 'DESCRICAO_POPULAR_MATERIAL',
+                'colunaUnidadeMedida' => 'UNIDADE_MEDIDA',
+                'colunaQuantidade' => 'QUANTIDADE',
+                'colunaValorTotal' => 'VALOR_TOTAL',
+                'colunaValorOrcamentoExercicio' => 'VALOR_RESIDUAL_ANO',
+                'colunaClassificacaoCatalogo' => 'CLASSIFICACAO_CATALOGO',
+                'colunaCodigoItem' => 'CODIGO_COMPLETO_MATERIAL',
+                'colunaGrupo' => 'GRUPO_CODIGO',
+                'grupoRemoto' => [
+                    'schema' => 'CEBISIS',
+                    'tabela' => 'MT_GRUPOS_MATERIAIS',
+                    'dblink' => 'READ_ORCL',
+                    'colunaCodigo' => 'CODIGO',
+                    'colunaDescricao' => 'DESCRICAO',
+                ],
+                'colunaOrigem' => 'ORIGEM',
+            ],
+            'unidades_orcamentarias' => [
+                'schema' => 'SGI',
+                'tabela' => 'PAC_UNIDADES_ORCAMENTARIAS',
+                'colunaRelacaoPlano' => 'ID_UNIDADE_ORCAMENTARIA',
+                'colunaIdentidade' => 'ID_UNIDADE_ORCAMENTARIA',
+                'colunaCodigoUasg' => 'CODIGO_UASG',
+                'colunaDescricaoUasg' => 'DESCRICAO_UASG',
+                'colunaAtivo' => 'ATIVA',
+                'valorAtivo' => 'S',
+            ],
+            'lotacoes' => [
+                'schema' => 'SGI',
+                'tabela' => 'RH_LOTACOES',
+                'colunaId' => 'COD_LOTACAO',
+                'colunaDescricao' => 'NOME_LOTACAO',
+            ],
+            'estado_operacional' => [
+                'schema' => 'SGI',
+                'tabela' => 'PAC_PLANOS',
+                'colunaUnidadeOrcamentaria' => 'FK_UNIDADE_ORCAMENTARIA',
+                'colunaAnoExecucao' => 'ANO_EXERCICIO',
+                'colunaEstrategia' => 'ESTRATEGIA_ADOTADA_PUBLICACAO',
+                'colunaUasg' => 'UASG_ADOTADA',
+                'colunaEstadoPublicacao' => 'ESTADO_PUBLICACAO',
+                'colunaSequencialPublicacaoPncp' => 'SEQUENCIAL_PUBLICACAO_PNCP',
+                'literalEstrategiaIndividual' => 'INDIVIDUAL',
+                'literalEstrategiaConsolidada' => 'CONSOLIDADO',
+                'literalNaoPublicado' => 'NAO_PUBLICADO',
+                'literalPublicado' => 'PUBLICADO',
+                'literalExcluido' => 'EXCLUIDO',
+            ],
+            'representantes' => [
+                'schema' => 'SGI',
+                'tabela' => 'RH_FUNCIONARIOS',
+                'colunaLogin' => 'NOME_USUARIO',
+                'colunaId' => 'COD_FUNCIONARIO',
+                'colunaNome' => 'NOME_CIVIL',
+                'colunaAtivo' => 'ATIVO',
+                'valorAtivo' => 1,
+            ],
+            'lotacoes_usuario' => [
+                'schema' => 'SGI',
+                'tabelaVinculos' => 'RH_FUNCIONARIOS_LOTACOES',
+                'tabelaLotacoes' => 'RH_LOTACOES',
+                'colunaFuncionarioVinculo' => 'COD_FUNCIONARIO',
+                'colunaLotacaoVinculo' => 'COD_LOTACAO',
+                'colunaFimVinculo' => 'DT_FIM_LOTACAO',
+                'colunaIdLotacao' => 'COD_LOTACAO',
+                'colunaNomeLotacao' => 'NOME_LOTACAO',
+                'colunaAtivoLotacao' => 'ATIVO',
+                'valorAtivo' => 1,
+            ],
+            'historicos' => [
+                'schema' => 'SGI',
+                'tabela' => 'PAC_HISTORICOS',
+                'colunaInstante' => 'DATA_INSERCAO',
+                'colunaProcedimento' => 'FK_PROCEDIMENTO',
+                'colunaMensagem' => 'MENSAGEM',
+                'colunaRepresentante' => 'FK_REPRESENTANTE',
+                'colunaLotacao' => 'FK_LOTACAO',
+            ],
+        ],
+    ],
+];

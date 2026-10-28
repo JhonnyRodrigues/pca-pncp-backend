@@ -6,7 +6,9 @@
 *.env
 .env.*
 /auth.json
-/config/
+/config/*
+!/config/perfil.example.php
+!/config/registro.example.php
 
 # Chaves, certificados e material criptográfico externo
 *.key

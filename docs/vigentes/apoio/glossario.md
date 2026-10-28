@@ -391,13 +391,12 @@ recurso externo; a segunda pertence à versão homologada (`DI-005`).
 | Checkpoint de planejamento | Registro incremental que preserva continuidade e precedência do planejamento entre sessões. Não é o checkpoint Oracle. | Agentes |
 | DI — Decisão de Integração | Registro formal da escolha técnica sobre contratos de dados externos, padrões de arquitetura e modelos operacionais para a comunicação entre sistemas. | `DI`; Docs |
 | Fluxo de implementação | Documento vigente que descreve colaboração dinâmica entre camadas e portas. | Docs; Fluxo |
-| Gate | Condição de validação baseada em evidências que libera um avanço específico do projeto. Um gate existe quando uma decisão depende de hipóteses ainda não comprovadas. Enquanto permanecer aberto, os avanços que dependem dessa evidência permanecem bloqueados. | `DI`; Roadmap |
+| Gate | Pendência. Condição de validação baseada em evidências que libera um avanço específico do projeto. Um gate existe quando uma decisão depende de hipóteses ainda não comprovadas. Enquanto permanecer aberto, os avanços que dependem dessa evidência permanecem bloqueados. | `DI`; Roadmap |
 | Histórico | Documento ou outro material substituído ou encerrado, preservado para auditoria, rastreabilidade ou aprendizado, sem autoridade vigente. | Docs |
 | Investigação | Pesquisa local temporária e sem autoridade; conclusões estáveis devem ser promovidas e evidências relevantes, arquivadas. | Docs |
 | Operacional | Documento que registra situação corrente ou orienta procedimento ainda aplicável à operação e ao suporte. | Docs |
 | Regra de Negócio — RN | Enunciado normativo estável do comportamento exigido pelo negócio. | `RN`; Docs |
 | Roadmap | Documento que organiza a ordem de implementação sem descobrir regras. | Docs; Roadmap |
-| Sinônimo | Termo alternativo que preserva o mesmo significado do termo preferencial no contexto declarado. | Docs |
 | Síntese | Fonte independente de conferência que não substitui o checkpoint correspondente. | Agentes |
 | Termo preferencial | Nome adotado como forma principal para representar um conceito neste glossário e na comunicação vigente do projeto. | Docs |
 | Termo substituído | Nome anteriormente utilizado que deixou de ser preferencial; pode ser preservado para reconhecer registros históricos, sem recuperar autoridade vigente. | Docs |
