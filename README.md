@@ -51,7 +51,9 @@ explicitamente conflitos, concorrência, rejeições e resultados incertos.
 ## Estado do produto
 
 O sistema está construído, integrado à aplicação Blank do Scriptcase, empacotado
-como release autocontida e instalado em produção. A condição do produto, as
+como release autocontida e instalado em produção. A sequência de implementação
+das Fases 0 a 9 foi concluída em 29/10/2026; o projeto está em manutenção e
+operação. A condição do produto, as
 restrições externas e as ações seguras para manutenção e suporte ficam
 centralizadas na
 [situação operacional](docs/vigentes/operacional/situacao_operacional.md).

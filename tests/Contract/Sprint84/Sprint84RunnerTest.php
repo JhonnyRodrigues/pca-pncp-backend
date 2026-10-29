@@ -77,7 +77,9 @@ final class Sprint84RunnerTest extends TestCase
                             1,
                             0,
                             null,
-                            null
+                            null,
+                            [],
+                            []
                         ),
                         new ResultadoUnidadeViewModel(
                             'UO-202',
@@ -91,7 +93,9 @@ final class Sprint84RunnerTest extends TestCase
                             1,
                             0,
                             null,
-                            null
+                            null,
+                            [],
+                            []
                         ),
                     ],
                     null,
@@ -545,11 +549,11 @@ final class Sprint84RunnerTest extends TestCase
             [
                 new ResultadoUnidadeViewModel(
                     'UO-101', 'INDIVIDUAL', 2027, '928341', 'UASG 101',
-                    $situacao, 'NENHUMA_ACAO', 71, 0, 0, null, null
+                    $situacao, 'NENHUMA_ACAO', 71, 0, 0, null, null, [], []
                 ),
                 new ResultadoUnidadeViewModel(
                     'UO-202', 'INDIVIDUAL', 2027, '928342', 'UASG 202',
-                    $situacao, 'NENHUMA_ACAO', 72, 0, 0, null, null
+                    $situacao, 'NENHUMA_ACAO', 72, 0, 0, null, null, [], []
                 ),
             ],
             null,

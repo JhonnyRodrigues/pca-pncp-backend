@@ -201,7 +201,9 @@ final class Sprint85ContainmentGateTest extends TestCase
             0,
             0,
             'PUBLICACAO_EM_ANDAMENTO',
-            'Publicacao em andamento.'
+            'Publicacao em andamento.',
+            [],
+            []
         );
 
         return new ResultadoPublicacaoPcaScriptcase(

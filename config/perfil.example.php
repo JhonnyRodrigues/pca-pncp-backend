@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Referência completa do formato; CNPJ e credenciais vazios impedem seu uso direto.
+ * Referência completa do formato; marcadores explícitos impedem seu uso direto.
  * Copie para um perfil fora do repositório, da release e do webroot e preencha-o
  * conforme o guia de configuração de produção. Na cópia de produção, selecione
  * explicitamente PRODUCAO e use as credenciais próprias desse ambiente.

@@ -232,11 +232,11 @@ final class Sprint84PncpVerifierTest extends TestCase
             [
                 new ResultadoUnidadeViewModel(
                     'UO-101', 'INDIVIDUAL', 2027, '928341', 'UASG 101',
-                    'CONCLUIDO', 'PUBLICAR', 71, 2, 0, null, null
+                    'CONCLUIDO', 'PUBLICAR', 71, 2, 0, null, null, [], []
                 ),
                 new ResultadoUnidadeViewModel(
                     'UO-202', 'INDIVIDUAL', 2027, '928342', 'UASG 202',
-                    'CONCLUIDO', 'PUBLICAR', 72, 1, 0, null, null
+                    'CONCLUIDO', 'PUBLICAR', 72, 1, 0, null, null, [], []
                 ),
             ],
             null,

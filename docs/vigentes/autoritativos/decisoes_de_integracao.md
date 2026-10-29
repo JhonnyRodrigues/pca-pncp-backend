@@ -47,7 +47,7 @@ As principais revisões incrementais consolidadas aqui são:
 - PCA conhecido e definitivamente ausente pode ser recriado;
 - a estratégia anual é congelada na primeira execução válida;
 - a DI-008 foi aceita depois do gate Oracle real da Sprint 5.9 e da auditoria
-  final da Fase 5; a DI-010 permanece aceita condicionalmente;
+  final da Fase 5; a DI-010 foi aceita depois dos gates reais até a Sprint 9.5;
 - a DI-009 foi aceita depois dos gates reais das Sprints 5.1 e 5.9.
 
 ## 3. Convenção de status
@@ -79,7 +79,7 @@ sem serem apresentadas como decisões confirmadas.
 | `DI-007` | Portas necessárias na Application | Aceita | UseCase completo demonstrado com mocks |
 | `DI-008` | Mecanismo Oracle | Aceita | Reabrir somente diante de incompatibilidade Oracle concreta |
 | `DI-009` | Transporte HTTP | Aceita | Reabrir somente diante de incompatibilidade externa concreta |
-| `DI-010` | Composition Root e Scriptcase | Aceita condicionalmente | Fachada, identidade, conexão e pacote em homologação |
+| `DI-010` | Composition Root e Scriptcase | Aceita | Comprovada no Scriptcase real e em produção; reabrir somente diante de incompatibilidade concreta |
 
 ## 5. Decisões detalhadas
 
@@ -1073,9 +1073,9 @@ e da execução dos gates de ambiente e contrato.
 
 ### DI-010 — Composition Root e Scriptcase
 
-- **Status:** Aceita condicionalmente.
+- **Status:** Aceita.
 - **Contexto e problema:** o backend deve ser consumido pelo Scriptcase sem transferir wiring, credenciais, conexão ou estrutura interna para a aplicação Blank.
-- **Fontes:** continuação 03, seção 4; planos aprovados das Sprints 8.1 e 8.5.
+- **Fontes:** continuação 03, seção 4; planos aprovados das Sprints 8.1, 8.5 e 9.5.
 
 #### DI-010 — Decisão vigente
 
@@ -1293,8 +1293,8 @@ Os gates reais foram concluídos; suas evidências pertencem ao
 O Microciclo 5 da Sprint 8.5 implementou localmente a construção isolada pelo
 `composer.lock`, com `src/`, `vendor/` sem dependências de desenvolvimento e
 manifesto de integridade. Testes, probes, perfis, configurações e segredos não
-integram o pacote. A instalação e o smoke em PHP 8.1 permanecem gates de
-homologação.
+integram o pacote. A instalação, o consumo pelo Scriptcase e o fluxo real foram
+comprovados até a Sprint 9.5.
 
 #### DI-010 — Alternativas rejeitadas
 
@@ -1376,6 +1376,9 @@ distribuição, sem antecipar essas etapas durante a criação deste documento.
   preservar o resultado conhecido na Blank e identificar explicitamente a
   decisão no contexto dos eventos técnicos, sem reabrir a observabilidade
   operacional completa da Sprint 9.2.
+- Aceita em 29/10/2026 após a Sprint 9.5 comprovar em produção a fronteira
+  pública, a correlação, o registro técnico, o fluxo completo de retificação e
+  a convergência nas três unidades.
 
 ## 6. Matriz de decisões substituídas
 

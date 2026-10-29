@@ -5,7 +5,7 @@
 **Autoridade/Escopo:** progresso da implementação, última sprint concluída,
 próxima sprint na ordem, gates, pendências e continuidade do trabalho
 
-**Atualizado em:** 01/10/2026
+**Atualizado em:** 29/10/2026
 
 ## Limites de autoridade
 
@@ -35,17 +35,19 @@ definida pelo [Roadmap](../../docs/vigentes/autoritativos/roadmap.md).
 - A Sprint 5.6 — Serialização e payloads exatos está concluída.
 - A Sprint 5.7 — Observação, paginação e ausência definitiva está concluída.
 - A Sprint 5.8 — Escritas e resultados incertos está concluída.
-- A última sprint concluída é a Sprint 9.4.
+- A última sprint concluída é a Sprint 9.5.
+- A Fase 9 e a sequência de implementação prevista no roadmap estão
+  concluídas. O projeto entra em manutenção e operação; não há próxima sprint
+  autorizada.
 - A Sprint 9.2 permanece no roadmap como guia, mas não será executada neste
   ciclo por decisão de escopo do mantenedor. Ela não é pendência nem bloqueio.
 - A Sprint 9.3 — Empacotamento e implantação está concluída.
 - A Sprint 9.4 — Migração assistida e recuperação está concluída, com o
   bloqueio nominal aceito de 2026 e o corretivo de pré-requisitos Oracle
   registrados abaixo.
-- A Sprint 9.5 — Prontidão de produção e suporte está em execução conforme o
+- A Sprint 9.5 — Prontidão de produção e suporte está concluída conforme o
   [plano aprovado](../sprints/planos/plano_sprint_9.5.md).
-  Microciclos 1 a 7 concluídos; o Microciclo 8 continua interrompido durante
-  a investigação do HTTP 403 na inclusão de itens de 2026.
+  Os oito microciclos estão encerrados.
   Oracle e PNCP de 2027 coincidiram por IDs;
   após corrigir a publicação da Blank, uma leitura PNCP expirou duas vezes e
   a execução seguinte concluiu as três unidades em `NENHUMA_ACAO`. Não houve
@@ -55,22 +57,32 @@ definida pelo [Roadmap](../../docs/vigentes/autoritativos/roadmap.md).
   71/3/38 inclusões e zero exclusões. O mantenedor informou três acionamentos
   da Blank; todos pararam no primeiro `POST` com mensagem de inclusão não
   autorizada. Na correlação fornecida, seis chamadas tiveram HTTP 200, o
-  `POST` recebeu 403 e não houve `DELETE`. O diagnóstico protegido confirmou a
-  mesma identidade do usuário corrente e preservou a mensagem do PNCP de que
-  somente o publicador poderia editar o PCA. A renovação experimental não
-  resolveu o bloqueio e foi removida; o fluxo voltou a autenticar uma vez por
-  execução. O esclarecimento da autoria permanece pendente de chamado ao PNCP,
-  sem autorização implícita para repetir a Blank.
-- Permanece uma pendência técnica local para o encerramento da Sprint 9.5. A
-  unificação das configurações do PHPUnit revelou sete fixtures contratuais das
-  Sprints 8.4 e 8.5 que ainda constroem `ResultadoUnidadeViewModel` sem os
-  campos `numerosItensIncluidos` e `numerosItensExcluidos`, acrescentados na
-  Sprint 9.5. A suíte padrão permanece verde com 984 testes e 4.753 asserções,
-  sem evidência de impacto no produto instalado. Na retomada, antes de encerrar
-  a sprint, atualizar as fixtures com listas coerentes com cada cenário e
-  reexecutar `contract:sprint84:tests`, `contract:sprint85:tests` e a suíte
-  padrão. A correção é exclusivamente local, não requer acesso ao Oracle ou ao
-  PNCP e permanece adiada até o planejamento posterior à resposta do chamado.
+  `POST` recebeu 403 e não houve `DELETE`. O diagnóstico preservou a mensagem
+  do PNCP de que somente o publicador poderia editar o PCA. Os chamados
+  60352388 e 62224923 identificaram essa limitação entre plataformas e
+  comunicaram sua correção em produção. Na correlação
+  `d00fc51e-fdce-4d3d-a7c7-e05b1b61a5af`, de 26/10/2026, a Blank concluiu as
+  três retificações: 73, 3 e 38 inclusões para as UASGs 205, 207 e 210, sem
+  exclusões. Os três `POST` receberam HTTP 201; não houve `DELETE`; as listas
+  planejadas e confirmadas coincidiram; e os estados finais observados tiveram
+  281, 8 e 191 itens. Não repetir a Blank para reconfirmar esse resultado.
+- O post-check Oracle final fornecido contém as auditorias 284, 285 e 286 do
+  procedimento 8 para 2026, com `RETIFICAR`, inclusões 73/3/38 e zero
+  exclusões. A amostra de `PAC_PLANOS` confirma a versão vigente 242/v73 em
+  `INDIVIDUAL/PUBLICADO/205/4`, com data de confirmação coerente com a
+  correlação, e preserva 241/v72 sem confirmação. O export não contém as 112
+  versões nem as linhas de planos das UASGs 207 e 210. O mantenedor aceitou
+  explicitamente essa cobertura reduzida, combinada aos eventos de
+  convergência das três unidades, como suficiente para o encerramento. O
+  arquivo local possui SHA-256
+  `80CE928A4E789FA5EF6BAC2ABD41524437E47E4F94812E3AB3AF0DC8C4E4F9EF`.
+- A pendência técnica local das fixtures contratuais das Sprints 8.4 e 8.5 foi
+  corrigida em 29/10/2026 com listas vazias nos cenários que não expõem itens
+  retificados. `contract:sprint84:tests` aprovou 73 testes/705 asserções e
+  `contract:sprint85:tests`, 53/500. A suíte padrão alcançou os 988 testes, mas
+  revelou uma inconsistência independente entre os marcadores `[PREENCHER]` do
+  modelo de perfil e seu teste; a referência e o teste foram alinhados. A nova
+  execução da suíte padrão aprovou 988 testes/4.765 asserções.
 - A Sprint 8.4 comprovou a matriz real 4×2 nos modos individual e consolidado.
   O Microciclo 7 foi concluído após o corretivo 8.4.7-C uniformizar a projeção
   operacional Oracle.

@@ -404,8 +404,10 @@ Referências: RN-PUB-001 a RN-PUB-008, DI-001, DI-002 e DI-005.
 - criar ou atualizar o fluxo de implementação;
 - bloquear código afetado enquanto houver conflito documental.
 
-**Decisão do PCA:** DI-001 a DI-007 e DI-009 estão aceitas; DI-008 e DI-010
-estão aceitas condicionalmente e preservam seus gates.
+**Decisão do PCA naquele checkpoint:** DI-001 a DI-007 e DI-009 estavam
+aceitas; DI-008 e DI-010 estavam aceitas condicionalmente. Ambas foram
+posteriormente aceitas após seus gates reais, conforme o índice vigente das
+decisões.
 
 #### Sprint 4.7 — Refatoração de convergência arquitetural com TDD
 
@@ -1067,6 +1069,16 @@ implementar novamente esse corretivo. Os incrementos de suporte acima nasceram
 de evidências novas de produção e não reabrem dashboard, métricas, alertas ou a
 política de retenção dispensados com a Sprint 9.2.
 
+**Estado do PCA:** Sprint 9.5 e Fase 9 concluídas em 29/10/2026. A retificação
+de 2026 convergiu nas três UASGs depois da correção de autorização entre
+plataformas implantada pelo PNCP. O mantenedor aceitou como evidência final a
+resposta da Blank, os eventos planejados e confirmados, a observação externa,
+as três auditorias Oracle e uma amostra de projeção e confirmação. A ausência
+do export integral das 112 versões ficou registrada como limitação aceita, sem
+autorizar repetição da operação. A sequência prescritiva deste roadmap está
+encerrada; trabalhos futuros pertencem à manutenção e exigem novo objetivo e
+autorização próprios.
+
 ## 6. Gates das decisões de integração
 
 O contexto, as alternativas e as consequências completas permanecem no
@@ -1083,7 +1095,7 @@ O contexto, as alternativas e as consequências completas permanecem no
 | DI-007 | Portas necessárias na Application | Define capacidades internas sem vazamento tecnológico | Aceita | UseCase completo demonstrado com mocks |
 | DI-008 | Mecanismo Oracle | Define conexão, transação, lock, reconstrução e projeção | Aceita | Reabrir somente diante de incompatibilidade Oracle concreta |
 | DI-009 | Transporte HTTP | Define cURL, TLS, autenticação, leitura e escrita segura | Aceita | Reabrir somente diante de incompatibilidade externa concreta |
-| DI-010 | Composition Root e Scriptcase | Define fachada, composição, perfil e ciclo da execução | Aceita condicionalmente | Fachada, identidade, conexão e pacote em homologação |
+| DI-010 | Composition Root e Scriptcase | Define fachada, composição, perfil e ciclo da execução | Aceita | Comprovada no Scriptcase real e em produção; reabrir somente diante de incompatibilidade concreta |
 
 ## 7. Rastreabilidade por grupos de regras
 

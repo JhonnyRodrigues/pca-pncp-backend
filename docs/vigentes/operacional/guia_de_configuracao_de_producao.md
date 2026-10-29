@@ -106,7 +106,8 @@ antes da ativação. Ele não contém DDL e não recria objetos nem dados do Ora
 
 Copie o modelo `config/perfil.example.php` compatível com a versão instalada
 para `perfil-producao.php` no local protegido. O modelo conserva `HOMOLOGACAO`
-e deixa CNPJ, login e senha vazios: não é uma configuração pronta para execução.
+e marca CNPJ, login e senha com `[PREENCHER]`: não é uma configuração pronta
+para execução.
 Confira campo a campo:
 
 1. `ambiente` deve ser exatamente `PRODUCAO`;

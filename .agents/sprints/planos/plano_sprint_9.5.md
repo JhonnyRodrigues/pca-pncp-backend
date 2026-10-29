@@ -1,12 +1,10 @@
 # Sprint 9.5 — Prontidão de produção e suporte
 
-**Status:** plano aprovado; as 366 demandas normais legadas de 2026 foram
-vinculadas e o precheck pós-migration aprovou 478 pares desejados, com somente
-71/3/38 inclusões. O Microciclo 8 continua interrompido: três acionamentos
-informados pelo mantenedor terminaram com HTTP 403 no primeiro `POST` de itens.
-Não repetir a escrita antes de implantar e preparar a captura diagnóstica
-autorizada.
-Cada microciclo termina com pausa e o próximo exige autorização explícita.
+**Status:** concluído em 29/10/2026; a limitação entre plataformas foi corrigida pelo
+PNCP e a execução funcional do Microciclo 8 concluiu três retificações em
+produção, com 73/3/38 inclusões, zero exclusões e convergência confirmada nos
+eventos. O post-check Oracle de cobertura reduzida foi aceito explicitamente
+pelo mantenedor como evidência final suficiente. Não repetir a Blank.
 
 ## Objetivo e fontes
 
@@ -374,3 +372,57 @@ conexão e cURL reproduzível em `metadata.diagnosticoHttp`; Bearer, cookies e
 Blank acrescenta `O PNCP informou: ...` quando o corpo JSON traz `message` ou
 `mensagem`. Esta implementação não autoriza nova execução. O Microciclo 8 não
 está concluído.
+
+## Microciclo 8 — execução aceita após correção externa
+
+Os chamados 60352388 e 62224923 esclareceram que o bloqueio era a restrição do
+PNCP à plataforma autora da publicação. Em 27/10/2026, o suporte informou que a
+atualização para permitir manutenção por outra plataforma autorizada do mesmo
+órgão foi implantada em produção, ressalvadas as origens federais protegidas.
+
+Antes da comunicação formal, a execução de produção de 26/10/2026 já havia
+comprovado o novo comportamento. A resposta da correlação
+`d00fc51e-fdce-4d3d-a7c7-e05b1b61a5af` ficou `CONCLUIDA`, com três unidades
+visitadas, nenhuma não processada e decisões `CONCLUIDO/RETIFICAR`:
+
+| UASG / sequencial | Inclusões | Exclusões | Estado PNCP observado |
+| --- | ---: | ---: | ---: |
+| 205 / 4 | 73 | 0 | 281 itens |
+| 207 / 2 | 3 | 0 | 8 itens |
+| 210 / 3 | 38 | 0 | 191 itens |
+
+Os itens `919` e `937` explicam a passagem de 71 para 73 inclusões na UASG 205
+em relação ao precheck de setembro. Os 62 eventos da correlação são `INFO` e
+registram três inclusões aceitas com HTTP 201. Não houve `DELETE`, ação
+`EXCLUIR_ITENS_PCA_PNCP`, exclusão planejada ou exclusão confirmada. Para cada
+UASG, os arrays planejados e confirmados são idênticos e existe um evento
+`PERSISTIR_CONVERGENCIA`.
+
+A resposta e os eventos foram preservados em
+`build/resposta_blank_2026_producao_20261026.json` e
+`build/seguranca_log_d00fc51e-fdce-4d3d-a7c7-e05b1b61a5af_20261026.txt`, com
+SHA-256 `253197E4DF8A17FCD671FEC8CCBDF296722C0192BB40B8952E74A1FFED59CAA8`
+e `6FC4D74BDA7E98798F308B147072E3F5EA2148668C69CC5944A3BDEC1B19FA7F`.
+
+A correção externa e o fluxo funcional estão comprovados.
+
+O mantenedor forneceu como post-check final duas linhas de `PAC_PLANOS` da UO
+149 e sete linhas recentes de `PAC_HISTORICOS`. A versão vigente 242/v73 está
+confirmada em `26/10/2026 20:23:46Z` e projetada como
+`INDIVIDUAL/PUBLICADO/205/4`; a versão anterior 241/v72 preserva a mesma
+projeção sem confirmação. As auditorias 284, 285 e 286 são exatamente três
+fatos do procedimento 8 para 2026, nas UASGs 205, 207 e 210, com decisão
+`RETIFICAR`, inclusões 73/3/38 e zero exclusões.
+
+Esse material não reproduz o post-check integral originalmente previsto: não
+exporta as 112 versões e não apresenta as linhas de `PAC_PLANOS` das UASGs 207
+e 210. Em 29/10/2026, o mantenedor julgou e aceitou explicitamente o conjunto
+formado por essa amostra Oracle, as três auditorias e os eventos de convergência
+como evidência suficiente para encerrar. A decisão não fabrica as linhas
+ausentes e fica registrada como limitação aceita.
+
+O export foi preservado em `build/postcheck_oracle_2026_20261029.json`, com
+SHA-256 `80CE928A4E789FA5EF6BAC2ABD41524437E47E4F94812E3AB3AF0DC8C4E4F9EF`.
+O Microciclo 8, a Sprint 9.5 e a Fase 9 estão concluídos. A sequência de
+implementação do projeto está encerrada e a Blank não deve ser repetida para
+ampliar a evidência.

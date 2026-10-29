@@ -69,9 +69,9 @@ final class ModelosConfiguracaoPublicacaoPcaTest extends TestCase
     {
         $perfil = require dirname(__DIR__, 2) . '/config/perfil.example.php';
 
-        $this->assertTrue($perfil['cnpj'] === '', 'O modelo deve manter CNPJ vazio.');
-        $this->assertTrue($perfil['pncp']['login'] === '', 'O modelo deve manter login vazio.');
-        $this->assertTrue($perfil['pncp']['senha'] === '', 'O modelo deve manter senha vazia.');
+        $this->assertSame('[PREENCHER]', $perfil['cnpj']);
+        $this->assertSame('[PREENCHER]', $perfil['pncp']['login']);
+        $this->assertSame('[PREENCHER]', $perfil['pncp']['senha']);
         $this->expectException(InvalidArgumentException::class);
 
         new PerfilPublicacaoPca($perfil);
