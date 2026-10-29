@@ -707,7 +707,7 @@ descrição específica da coluna **Função** ou **Demonstração principal**.
 | `docs/vigentes/apoio/arquitetura.md` | Documentação — Apoio | Explica limites, responsabilidades, direção das dependências e fronteiras entre configuração, segredos e mapeamentos físicos. |
 | `docs/vigentes/apoio/glossario.md` | Documentação — Apoio | Mantém o índice semântico da linguagem de negócio, integração e arquitetura. |
 | `docs/vigentes/apoio/contexto_funcional_do_sistema_pca.md` | Documentação — Apoio | Contextualiza usuários, etapas e funcionamento do sistema PCA. |
-| `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | Documentação — Apoio | Orienta a leitura do código, do fluxo e das fronteiras transacionais. |
+| `docs/vigentes/apoio/guia_do_fluxo_da_aplicacao.md` | Documentação — Apoio | Explica o fluxo da aplicação e orienta a leitura do código, das transações e do retorno à Blank. |
 | `docs/vigentes/apoio/catalogo_de_diretorios.md` | Documentação — Apoio | Explica a finalidade das pastas e orienta onde localizar ou criar cada tipo de artefato. |
 | `docs/vigentes/apoio/catalogo_de_comandos_composer.md` | Documentação — Apoio | Classifica os scripts Composer e informa finalidade, dependências, efeitos externos e autorização necessária. |
 | `docs/vigentes/apoio/catalogo_de_arquivos.md` | Documentação — Apoio | Cataloga a função dos arquivos ativos de código, testes, configuração e documentação vigente. |
@@ -721,4 +721,4 @@ descrição específica da coluna **Função** ou **Demonstração principal**.
 | `.agents/planejamento/estado_atual.md` | Documentação — Planejamento | Centraliza progresso da implementação, gates, pendências e continuidade do trabalho para agentes. |
 
 Para entender o caminho entre esses arquivos, volte ao
-[guia de leitura](guia_de_leitura_do_codigo.md).
+[guia do fluxo da aplicação](guia_do_fluxo_da_aplicacao.md).

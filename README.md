@@ -88,7 +88,7 @@ Infrastructure --implementa--> Ports definidas nas camadas internas
 O desenho completo está no
 [guia de arquitetura](docs/vigentes/apoio/arquitetura.md). Para acompanhar uma
 execução pelas classes reais, use o
-[guia de leitura do código](docs/vigentes/apoio/guia_de_leitura_do_codigo.md).
+[guia do fluxo da aplicação](docs/vigentes/apoio/guia_do_fluxo_da_aplicacao.md).
 
 ## Tecnologias e integrações
 
@@ -131,7 +131,7 @@ antes de executar qualquer outro comando.
 | --- | --- |
 | Entender a organização, a autoridade e a ordem da documentação | [Índice documental](docs/README.md) |
 | Consultar a condição do produto e as restrições correntes | [Situação operacional](docs/vigentes/operacional/situacao_operacional.md) |
-| Localizar conceitos e classes no fluxo | [Guia de leitura do código](docs/vigentes/apoio/guia_de_leitura_do_codigo.md) |
+| Localizar conceitos e classes no fluxo | [Guia do fluxo da aplicação](docs/vigentes/apoio/guia_do_fluxo_da_aplicacao.md) |
 | Identificar a função de um arquivo | [Catálogo de arquivos](docs/vigentes/apoio/catalogo_de_arquivos.md) |
 | Interpretar uma resposta ou diagnosticar uma falha | [Guia operacional de diagnóstico](docs/vigentes/operacional/guia_operacional_de_diagnostico_da_publicacao_pca.md) |
 | Implantar, atualizar ou reverter uma release | [Guia de implantação e rollback](docs/vigentes/operacional/guia_de_implantacao_e_rollback.md) |

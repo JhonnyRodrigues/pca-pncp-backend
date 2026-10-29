@@ -502,6 +502,6 @@ continua informando que a operação executada foi `RETIFICAR`.
 
 ## Leituras vigentes relacionadas
 
-- [Guia de leitura do código](../../vigentes/apoio/guia_de_leitura_do_codigo.md)
+- [Guia do fluxo da aplicação](../../vigentes/apoio/guia_do_fluxo_da_aplicacao.md)
 - [Catálogo de arquivos](../../vigentes/apoio/catalogo_de_arquivos.md)
 - [Glossário](../../vigentes/apoio/glossario.md)

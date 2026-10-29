@@ -41,7 +41,7 @@ precisar de definição mais precisa.
 | --- | --- |
 | Compreender o negócio | [Contexto funcional](vigentes/apoio/contexto_funcional_do_sistema_pca.md) → [Regras de negócio](vigentes/autoritativos/regras_de_negocio.md) → [Modelo de domínio](vigentes/autoritativos/modelo_de_dominio.md) |
 | Compreender arquitetura e integração | [Arquitetura](vigentes/apoio/arquitetura.md) → [Decisões de integração](vigentes/autoritativos/decisoes_de_integracao.md) → [Fluxo de implementação](vigentes/autoritativos/fluxo_de_implementacao.md) |
-| Navegar no código | [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) → [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md) → [Catálogo de arquivos](vigentes/apoio/catalogo_de_arquivos.md) |
+| Navegar no código | [Guia do fluxo da aplicação](vigentes/apoio/guia_do_fluxo_da_aplicacao.md) → [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md) → [Catálogo de arquivos](vigentes/apoio/catalogo_de_arquivos.md) |
 | Operar ou prestar suporte | [Situação operacional](vigentes/operacional/situacao_operacional.md) → [Guia de diagnóstico](vigentes/operacional/guia_operacional_de_diagnostico_da_publicacao_pca.md) |
 | Configurar, implantar ou reverter | [Situação operacional](vigentes/operacional/situacao_operacional.md) → [Configuração de produção](vigentes/operacional/guia_de_configuracao_de_producao.md) → [Implantação e rollback](vigentes/operacional/guia_de_implantacao_e_rollback.md) |
 | Preparar um novo projeto | [Guia de preparação inicial de projetos](vigentes/apoio/guia_de_preparacao_inicial_de_projetos.md) |
@@ -124,7 +124,7 @@ docs/
 | [Glossário](vigentes/apoio/glossario.md) | Índice semântico da linguagem do projeto |
 | [Contexto funcional](vigentes/apoio/contexto_funcional_do_sistema_pca.md) | Contexto do sistema PCA, usuários e etapas |
 | [Guia de preparação inicial de projetos](vigentes/apoio/guia_de_preparacao_inicial_de_projetos.md) | Roteiro adaptável da estação de trabalho até a primeira entrega local observável |
-| [Guia de leitura do código](vigentes/apoio/guia_de_leitura_do_codigo.md) | Roteiro de estudo com explicação do fluxo da aplicação pelas classes reais, transações. |
+| [Guia do fluxo da aplicação](vigentes/apoio/guia_do_fluxo_da_aplicacao.md) | Explica a execução pelas classes reais, as decisões, as transações e o retorno à Blank. |
 | [Catálogo de comandos Composer](vigentes/apoio/catalogo_de_comandos_composer.md) | Finalidade, dependências e efeitos dos comandos ativos |
 | [Catálogo de diretórios](vigentes/apoio/catalogo_de_diretorios.md) | Finalidade das pastas e orientação para organização de novos artefatos |
 | [Catálogo de arquivos](vigentes/apoio/catalogo_de_arquivos.md) | Função dos arquivos ativos de código, teste e documentação |
@@ -239,6 +239,7 @@ Como alguns caminhos foram atualizados, eles agora servem apenas para migração
 | `docs/7_decisoes_integracao.md` | `docs/vigentes/autoritativos/decisoes_de_integracao.md` |
 | `docs/regras_negocio.md` | `docs/vigentes/autoritativos/regras_de_negocio.md` |
 | `docs/glossario.md`, `docs/glossario_tecnico.md` | `docs/vigentes/apoio/glossario.md` |
+| `docs/vigentes/apoio/guia_de_leitura_do_codigo.md` | `docs/vigentes/apoio/guia_do_fluxo_da_aplicacao.md` |
 | `docs/vigentes/operacional/estado_atual.md` | `.agents/planejamento/estado_atual.md` |
 | `docs/vigentes/operacional/catalogo_codigos_publicos.md` | `docs/vigentes/operacional/guia_operacional_de_diagnostico_da_publicacao_pca.md` |
 | `docs/vigentes/apoio/guia_de_configuracao_de_producao.md` | `docs/vigentes/operacional/guia_de_configuracao_de_producao.md` |
